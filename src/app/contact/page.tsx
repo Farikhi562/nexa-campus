@@ -2,7 +2,11 @@ import Link from 'next/link'
 import { ArrowLeft, Mail, MessageCircle, ShieldCheck, Zap } from 'lucide-react'
 
 export default function ContactPage() {
-  const message = encodeURIComponent('Halo admin NEXA, saya ingin tanya paket dan aktivasi DOKU.')
+  const adminWhatsapp = process.env.NEXT_PUBLIC_ADMIN_WHATSAPP?.replace(/\D/g, '')
+  const supportEmail = process.env.NEXT_PUBLIC_SUPPORT_EMAIL
+  const message = encodeURIComponent('Halo admin NEXA, saya ingin tanya paket dan aktivasi Midtrans.')
+  const whatsappHref = adminWhatsapp ? `https://wa.me/${adminWhatsapp}?text=${message}` : ''
+  const mailHref = supportEmail ? `mailto:${supportEmail}` : ''
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-950">
@@ -18,19 +22,23 @@ export default function ContactPage() {
           </div>
           <h1 className="mt-6 text-4xl font-black tracking-tight">Kontak NEXA</h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600">
-            Pakai halaman ini untuk support, aktivasi paket, paket kampus, atau bantuan checkout DOKU.
+            Pakai halaman ini untuk support, aktivasi paket, paket kampus, atau bantuan checkout Midtrans.
           </p>
 
           <div className="mt-8 grid gap-4 sm:grid-cols-2">
-            <a href={`https://wa.me/?text=${message}`} target="_blank" rel="noreferrer" className="rounded-lg border border-slate-200 p-5 hover:border-brand-300 hover:bg-brand-50">
+            <a href={whatsappHref || undefined} target="_blank" rel="noreferrer" className={`rounded-lg border border-slate-200 p-5 ${whatsappHref ? 'hover:border-brand-300 hover:bg-brand-50' : 'pointer-events-none opacity-60'}`}>
               <MessageCircle className="h-6 w-6 text-brand-600" />
               <h2 className="mt-4 font-black">WhatsApp Admin</h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600">Kirim pesan otomatis untuk aktivasi paket dan pembayaran.</p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                {whatsappHref ? 'Kirim pesan otomatis untuk aktivasi paket dan pembayaran.' : 'Nomor admin belum dikonfigurasi.'}
+              </p>
             </a>
-            <a href="mailto:support@nexa-campus.local" className="rounded-lg border border-slate-200 p-5 hover:border-brand-300 hover:bg-brand-50">
+            <a href={mailHref || undefined} className={`rounded-lg border border-slate-200 p-5 ${mailHref ? 'hover:border-brand-300 hover:bg-brand-50' : 'pointer-events-none opacity-60'}`}>
               <Mail className="h-6 w-6 text-brand-600" />
               <h2 className="mt-4 font-black">Email Support</h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600">Ganti alamat email ini dengan email bisnis resmi sebelum launch.</p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                {mailHref ? supportEmail : 'Email support belum dikonfigurasi.'}
+              </p>
             </a>
           </div>
         </section>
@@ -39,7 +47,7 @@ export default function ContactPage() {
           <div className="flex gap-3">
             <ShieldCheck className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-700" />
             <p className="text-sm leading-6 text-emerald-900">
-              Untuk siap jual, pastikan nomor WhatsApp bisnis, email support, akun DOKU merchant, dan policy halaman legal sudah memakai data brand final.
+              Untuk siap jual, isi env kontak admin, email support, akun Midtrans merchant, dan policy halaman legal dengan data brand final.
             </p>
           </div>
         </section>

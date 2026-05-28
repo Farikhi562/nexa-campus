@@ -1,138 +1,192 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
-import type { Profile } from '@/types'
 
 export const dynamic = 'force-dynamic'
 
-/**
- * GET /api/user/profile
- */
-export async function GET(request: NextRequest) {
+function optionalServiceClient() {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return null
+    return createServiceClient()
+  } catch (error) {
+    console.error('[Profile API] Service client unavailable:', error)
+    return null
+  }
+}
 
-    if (!user) {
+function nullableText(value: unknown) {
+  if (value === undefined) return undefined
+  if (value === null) return null
+  const text = String(value).trim()
+  return text.length ? text : null
+}
+
+async function getAuthenticatedUser() {
+  const supabase = await createClient()
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser()
+
+  return { supabase, user, error }
+}
+
+export async function GET() {
+  try {
+    const { supabase, user, error: userError } = await getAuthenticatedUser()
+
+    if (userError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+    const authUser = user
 
-    const { data: profile, error: getError } = await supabase
+    const admin = optionalServiceClient()
+    const db = admin ?? supabase
+
+    const { data: profile, error: getError } = await db
       .from('profiles')
       .select('*')
       .eq('id', user.id)
       .maybeSingle()
 
     if (getError) {
+      console.error('[Profile GET] Fetch error:', getError)
       return NextResponse.json({ error: getError.message }, { status: 500 })
     }
 
-    if (!profile) {
-      // Auto-create profile for new users (fixes new user bug)
-      const { data: newProfile, error: createError } = await supabase
-        .from('profiles')
-        .insert({
-          id: user.id,
-          email: user.email || '',
-          full_name: user.user_metadata?.full_name || user.user_metadata?.name || null,
-          avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture || null,
-          plan: 'free',
-          profile_completed: false,
-        })
-        .select()
-        .single()
+    if (profile) return NextResponse.json(profile)
 
-      if (createError) {
-        // Profile might have been created by another concurrent request
-        const { data: retryProfile } = await supabase
-          .from('profiles').select('*').eq('id', user.id).single()
-        if (retryProfile) return NextResponse.json(retryProfile)
-        return NextResponse.json({ error: createError.message }, { status: 500 })
-      }
+    const { data: newProfile, error: createError } = await db
+      .from('profiles')
+      .insert({
+        id: user.id,
+        email: user.email || '',
+        full_name: user.user_metadata?.full_name || user.user_metadata?.name || null,
+        avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture || null,
+        jurusan: null,
+        universitas: null,
+        provinsi: null,
+        plan: 'free',
+        whatsapp_number: null,
+        profile_completed: false,
+        updated_at: new Date().toISOString(),
+      })
+      .select()
+      .single()
 
-      return NextResponse.json(newProfile)
+    if (createError) {
+      console.error('[Profile GET] Create error:', createError)
+      return NextResponse.json({ error: createError.message }, { status: 500 })
     }
 
-    return NextResponse.json(profile)
-  } catch (err) {
-    console.error('[Profile GET] Error:', err)
+    return NextResponse.json(newProfile)
+  } catch (error) {
+    console.error('[Profile GET] Error:', error)
     return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
   }
 }
 
-/**
- * PUT /api/user/profile
- */
-export async function PUT(request: NextRequest) {
+export async function PUT(request: Request) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { supabase, user, error: userError } = await getAuthenticatedUser()
 
-    if (!user) {
+    if (userError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+    const authUser = user
 
     const body = await request.json().catch(() => ({}))
 
-    const {
-      full_name,
-      whatsapp_number,
-      avatar_url,
-      jurusan,
-      universitas,
-      provinsi,
-      profile_completed,
-    } = body
-
-    // Validate WhatsApp number if provided
-    if (whatsapp_number) {
-      const cleanNumber = whatsapp_number.replace(/\D/g, '')
+    const whatsapp = nullableText(body.whatsapp_number)
+    if (typeof whatsapp === 'string') {
+      const cleanNumber = whatsapp.replace(/\D/g, '')
       if (cleanNumber.length < 10) {
-        return NextResponse.json(
-          { error: 'Nomor WhatsApp tidak valid.' },
-          { status: 400 }
-        )
+        return NextResponse.json({ error: 'Nomor WhatsApp tidak valid.' }, { status: 400 })
       }
     }
 
-    // Validate avatar URL if provided
-    if (avatar_url && typeof avatar_url === 'string') {
-      if (!avatar_url.startsWith('https://')) {
-        return NextResponse.json(
-          { error: 'URL avatar tidak valid.' },
-          { status: 400 }
-        )
-      }
+    const avatarUrl = nullableText(body.avatar_url)
+    if (typeof avatarUrl === 'string' && !avatarUrl.startsWith('https://')) {
+      return NextResponse.json({ error: 'URL avatar tidak valid.' }, { status: 400 })
     }
 
-    const updates: Record<string, unknown> = {}
-    if (full_name !== undefined) updates.full_name = full_name
-    if (whatsapp_number !== undefined) updates.whatsapp_number = whatsapp_number
-    if (avatar_url !== undefined) updates.avatar_url = avatar_url
+    const updates: Record<string, unknown> = {
+      updated_at: new Date().toISOString(),
+    }
+
+    const fullName = nullableText(body.full_name)
+    const jurusan = nullableText(body.jurusan)
+    const universitas = nullableText(body.universitas)
+    const provinsi = nullableText(body.provinsi)
+
+    if (fullName !== undefined) updates.full_name = fullName
+    if (whatsapp !== undefined) updates.whatsapp_number = whatsapp
+    if (avatarUrl !== undefined) updates.avatar_url = avatarUrl
     if (jurusan !== undefined) updates.jurusan = jurusan
     if (universitas !== undefined) updates.universitas = universitas
     if (provinsi !== undefined) updates.provinsi = provinsi
-    if (profile_completed !== undefined) updates.profile_completed = profile_completed
-    updates.updated_at = new Date().toISOString()
+    if (body.profile_completed !== undefined) updates.profile_completed = Boolean(body.profile_completed)
 
-    const serviceClient = createServiceClient()
-    const { data: profile, error } = await serviceClient
-      .from('profiles')
-      .upsert({
-        id: user.id,
-        email: user.email || '',
-        plan: 'free',
-        ...updates,
-      }, { onConflict: 'id' })
-      .select()
-      .single()
+    const admin = optionalServiceClient()
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+    const saveWith = async (db: typeof supabase) => {
+      const { data: existing, error: existingError } = await db
+        .from('profiles')
+        .select('id, plan')
+        .eq('id', authUser.id)
+        .maybeSingle()
+
+      if (existingError) return { data: null, error: existingError }
+
+      if (existing) {
+        return db
+          .from('profiles')
+          .update(updates)
+          .eq('id', authUser.id)
+          .select()
+          .single()
+      }
+
+      return db
+        .from('profiles')
+        .insert({
+          id: authUser.id,
+          email: authUser.email || '',
+          full_name: authUser.user_metadata?.full_name || authUser.user_metadata?.name || null,
+          avatar_url: authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture || null,
+          jurusan: null,
+          universitas: null,
+          provinsi: null,
+          plan: 'free',
+          whatsapp_number: null,
+          profile_completed: false,
+          ...updates,
+        })
+        .select()
+        .single()
     }
 
-    return NextResponse.json(profile)
-  } catch (err) {
-    console.error('[Profile PUT] Error:', err)
-    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+    let result = await saveWith(supabase)
+
+    if (result.error && admin) {
+      console.error('[Profile PUT] User client save failed, retrying admin:', result.error)
+      result = await saveWith(admin)
+    }
+
+    if (result.error) {
+      console.error('[Profile PUT] Save error:', result.error)
+      return NextResponse.json(
+        {
+          error: result.error.message,
+          hint: 'Pastikan SUPABASE_SERVICE_ROLE_KEY terisi di production, atau RLS profiles mengizinkan user update baris miliknya sendiri.',
+        },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json(result.data)
+  } catch (error) {
+    console.error('[Profile PUT] Error:', error)
+    const message = error instanceof Error ? error.message : 'Terjadi kesalahan server.'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

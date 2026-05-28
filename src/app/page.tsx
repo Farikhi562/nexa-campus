@@ -9,7 +9,6 @@ import {
   LineChart,
   MessageCircle,
   Rocket,
-  Star,
   Store,
   Users,
 } from 'lucide-react'
@@ -77,24 +76,6 @@ const PLANS = [
   },
 ]
 
-const TESTIMONIALS = [
-  {
-    name: 'Fauzan',
-    role: 'Teknik Informatika',
-    quote: 'Mock exam dan reminder bikin persiapan UTS jauh lebih rapi. NEXA berasa kayak cockpit kuliah.',
-  },
-  {
-    name: 'Nadia',
-    role: 'Manajemen',
-    quote: 'Marketplace-nya masuk akal banget buat jual jasa desain slide dan beli buku bekas dari teman kampus.',
-  },
-  {
-    name: 'Raka',
-    role: 'Akuntansi',
-    quote: 'Harga Basic lebih murah dari sekali nongkrong, tapi bantu ngatur tugas, ujian, dan jualan jasa.',
-  },
-]
-
 const ROADMAP = [
   ['Hari 1', 'Upload materi, buat akun, lengkapi profil'],
   ['Minggu 1', 'Pakai mock exam dan smart reminder untuk UTS/tugas'],
@@ -118,7 +99,7 @@ export default function LandingPage() {
           <nav className="hidden items-center gap-6 text-sm font-semibold text-slate-600 md:flex">
             <a href="#fitur" className="hover:text-brand-700">Fitur</a>
             <a href="#harga" className="hover:text-brand-700">Harga</a>
-            <a href="#faq" className="hover:text-brand-700">FAQ</a>
+            <Link href="/faq" className="hover:text-brand-700">FAQ</Link>
           </nav>
 
           <div className="flex items-center gap-3">
@@ -186,15 +167,15 @@ export default function LandingPage() {
                 <div className="mb-5 flex items-center justify-between">
                   <div>
                     <p className="text-sm font-black text-slate-950">Semester Command Center</p>
-                    <p className="text-xs text-slate-500">Demo nilai jual NEXA</p>
+                    <p className="text-xs text-slate-500">Modul aktif NEXA</p>
                   </div>
                   <BadgeCheck className="h-5 w-5 text-emerald-600" />
                 </div>
                 <div className="space-y-3">
                   {[
-                    ['AI Exam', '28 soal dari PDF Manajemen Keuangan', 'Siap latihan'],
-                    ['Reminder', 'Praktikum Kimia Dasar', 'H-1 otomatis'],
-                    ['Marketplace', 'Jasa desain slide presentasi', 'Basic seller'],
+                    ['AI Exam', 'Upload PDF jadi soal latihan', 'Siap dipakai'],
+                    ['Reminder', 'Agenda dan deadline user', 'WhatsApp Pro'],
+                    ['Marketplace', 'Listing asli dari user', 'Basic seller'],
                     ['Campus Tools', 'IPK, sitasi, beasiswa, career assistant', '15 tools'],
                   ].map(([type, title, status]) => (
                     <div key={title} className="flex items-center gap-3 rounded-lg border border-slate-200 p-3">
@@ -271,27 +252,6 @@ export default function LandingPage() {
                 </div>
               ))}
             </div>
-          </div>
-        </section>
-
-        <section className="mx-auto max-w-7xl px-4 py-16">
-          <div className="mb-10 text-center">
-            <p className="text-sm font-bold uppercase tracking-wide text-brand-700">Testimoni awal</p>
-            <h2 className="mt-2 text-3xl font-black text-slate-950">Copywriting yang siap dipakai untuk landing dan pitch.</h2>
-          </div>
-          <div className="grid gap-4 md:grid-cols-3">
-            {TESTIMONIALS.map((item) => (
-              <div key={item.name} className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-                <div className="mb-4 flex gap-1 text-amber-400">
-                  {[1, 2, 3, 4, 5].map((star) => <Star key={star} className="h-4 w-4 fill-current" />)}
-                </div>
-                <p className="text-sm leading-6 text-slate-700">&quot;{item.quote}&quot;</p>
-                <div className="mt-5 border-t border-slate-100 pt-4">
-                  <p className="font-black text-slate-950">{item.name}</p>
-                  <p className="text-xs font-semibold text-slate-500">{item.role}</p>
-                </div>
-              </div>
-            ))}
           </div>
         </section>
 

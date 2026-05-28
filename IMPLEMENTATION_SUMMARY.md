@@ -136,7 +136,7 @@ curl http://localhost:3001/api/documents \
 ## 🎯 Next Phases
 
 ### Phase 2 (Recommended)
-- [ ] Implement payment gateway (DOKU)
+- [ ] Implement payment gateway (Midtrans Snap)
 - [ ] Add user analytics
 - [ ] Create admin dashboard
 - [ ] Setup monitoring (Sentry)

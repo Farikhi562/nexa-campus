@@ -176,7 +176,7 @@ export const CAMPUS_TOOLS: CampusTool[] = [
     category: 'Produktivitas',
     icon: Users,
     output: 'Board kerja kelompok dan akuntabilitas anggota.',
-    prompt: 'Fauzan outline, Nadia cari jurnal, Raka rapikan slide.',
+    prompt: 'Anggota A membuat outline, anggota B mencari jurnal, anggota C merapikan slide.',
     fomo: 'Saat kerja kelompok mulai berantakan, board ini bikin PIC dan deadline kelihatan jelas.',
   },
   {
@@ -242,85 +242,4 @@ export function statusClass(status: ToolStatus) {
 export function accessClass(access: ToolAccess) {
   if (access === 'paid') return 'bg-slate-950 text-white border-slate-950'
   return 'bg-emerald-50 text-emerald-700 border-emerald-200'
-}
-
-export function buildToolResult(tool: CampusTool, input: string) {
-  const cleanInput = input.trim() || tool.prompt
-  const shortInput = cleanInput.length > 92 ? `${cleanInput.slice(0, 92)}...` : cleanInput
-  const words = cleanInput.split(/\s+/).filter(Boolean)
-  const topic = words.slice(0, 8).join(' ') || tool.title
-  const today = new Intl.DateTimeFormat('id-ID', {
-    day: '2-digit',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date())
-
-  switch (tool.id) {
-    case 'summary':
-      return [
-        `Ringkasan: ${topic} berfokus pada konsep inti, contoh penerapan, dan langkah latihan.`,
-        `Keyword: ${words.slice(0, 5).join(', ') || 'materi, konsep, latihan'}.`,
-        'Potensi soal: jelaskan konsep utama, beri contoh kasus, lalu analisis solusi.',
-        `Diproses: ${today}.`,
-      ]
-    case 'flashcard':
-      return [
-        `Q: Apa inti dari "${topic}"?`,
-        `A: ${shortInput}`,
-        'Q: Kapan perlu direview? A: Hari ini 10 menit, besok 10 menit, lalu H-2 ujian.',
-        `Deck dibuat: ${today}.`,
-      ]
-    case 'risk':
-      return [
-        cleanInput.match(/[0-2]\s*hari|0 hari|1 hari|2 hari/i) ? 'Risk: Kritis' : 'Risk: Waspada',
-        'Langkah cepat: pecah tugas jadi 3 checkpoint kecil dan mulai dari bagian tersulit.',
-        `Catatan: ${shortInput}`,
-        `Dihitung: ${today}.`,
-      ]
-    case 'citation':
-      return [
-        `APA: ${shortInput}`,
-        'Tambahkan DOI, URL, atau tanggal akses kalau sumber berasal dari web.',
-        'Simpan hasil ini ke daftar pustaka tugas.',
-        `Dibuat: ${today}.`,
-      ]
-    case 'gpa':
-      return [
-        `Input nilai: ${shortInput}`,
-        'Prediksi IP: 3.51',
-        'Target naik: tambah 7 poin pada mata kuliah dengan SKS terbesar.',
-        `Disimulasikan: ${today}.`,
-      ]
-    case 'habit':
-      return [
-        'Burnout risk: 42%',
-        'Saran: tidur +45 menit dan jadwalkan satu blok istirahat tanpa layar.',
-        `Data: ${shortInput}`,
-        `Dicek: ${today}.`,
-      ]
-    case 'planner':
-      return [
-        `Prioritas dari input: ${shortInput}`,
-        'Senin-Rabu: fokus deadline terdekat dengan blok 45 menit.',
-        'Kamis: latihan soal dan review ringkasan.',
-        'Minggu: evaluasi progress dan geser prioritas.',
-      ]
-    case 'doc-chat':
-      return ['Jawaban singkat: 3NF mengurangi redundansi data.', 'Contoh: pisahkan tabel mahasiswa, mata kuliah, dan KRS.', 'Lanjutkan dengan contoh query jika diperlukan.']
-    case 'adaptive':
-      return ['Topik lemah: probabilitas bersyarat dan SQL join.', 'Latihan berikutnya: 6 soal bertingkat dari mudah ke sedang.', 'Review ulang setelah dua jawaban salah beruntun.']
-    case 'project':
-      return ['Board dibuat: To do, Doing, Review, Done.', 'PIC jelas untuk tiap task.', 'Reminder H-2 untuk slide dan finalisasi dokumen.']
-    case 'tutor':
-      return ['Match utama: Tutor Statistika SI, rating 4.8.', 'Estimasi biaya sesuai budget.', 'Slot rekomendasi: Selasa 19.00 atau Sabtu 10.00.']
-    case 'plagiarism':
-      return ['Risiko ringan: perlu sitasi pada klaim utama.', 'Saran: parafrase kalimat terlalu generik.', 'Tambahkan sumber jurnal pada bagian teori.']
-    case 'scholarship':
-      return ['Prioritas 1: Beasiswa Prestasi, due 12 hari.', 'Dokumen kurang: transkrip dan surat rekomendasi.', 'Buat reminder follow-up H-7 dan H-2.']
-    case 'career':
-      return ['Positioning CV: Product Analyst intern dengan kekuatan riset dan dashboard.', 'Skill gap: SQL, metrik produk, storytelling data.', 'Latihan interview: ceritakan project paling berdampak.']
-    default:
-      return [tool.output, `Input: ${shortInput}`, 'Tool siap dipakai.']
-  }
 }

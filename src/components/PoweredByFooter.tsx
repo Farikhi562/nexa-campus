@@ -1,4 +1,5 @@
 import NexaLogo from './NexaLogo'
+import Link from 'next/link'
 
 export default function PoweredByFooter({ className = '' }: { className?: string }) {
   return (
@@ -8,7 +9,12 @@ export default function PoweredByFooter({ className = '' }: { className?: string
           <NexaLogo className="h-7 w-7 rounded-md bg-slate-50" />
           <span className="font-black text-slate-950">NEXA Campus Ecosystem</span>
         </div>
-        <p className="font-semibold text-slate-600">Powered by NEXA Tech Labs</p>
+        <div className="flex flex-wrap items-center gap-4 font-semibold text-slate-600">
+          <Link href="/faq" className="hover:text-brand-700">FAQ v1.0</Link>
+          <Link href="/legal/privacy" className="hover:text-brand-700">Privacy</Link>
+          <Link href="/legal/terms" className="hover:text-brand-700">Terms</Link>
+          <p>Powered by NEXA Tech Labs</p>
+        </div>
       </div>
     </footer>
   )

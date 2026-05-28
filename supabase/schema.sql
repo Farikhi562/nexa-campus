@@ -128,6 +128,36 @@ create table public.schedules (
   created_at          timestamptz default now()
 );
 
+-- ──────────────────────────────────────────────
+-- MARKETPLACE LISTINGS
+-- ──────────────────────────────────────────────
+create table if not exists public.marketplace_listings (
+  id uuid default uuid_generate_v4() primary key,
+  seller_id uuid references public.profiles(id) on delete cascade not null,
+  type text not null check (type in ('barang', 'jasa')),
+  title text not null,
+  description text not null,
+  category text not null,
+  price_amount integer,
+  price_label text,
+  campus text,
+  location text,
+  contact_whatsapp text,
+  image_url text,
+  status text not null default 'active'
+    check (status in ('draft', 'pending', 'active', 'sold', 'archived', 'rejected')),
+  is_verified boolean not null default false,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+create index if not exists marketplace_listings_status_created_idx
+  on public.marketplace_listings (status, created_at desc);
+create index if not exists marketplace_listings_seller_idx
+  on public.marketplace_listings (seller_id);
+create index if not exists marketplace_listings_type_idx
+  on public.marketplace_listings (type);
+
 -- ══════════════════════════════════════════════
 -- ROW LEVEL SECURITY
 -- ══════════════════════════════════════════════
@@ -139,6 +169,7 @@ alter table public.session_answers   enable row level security;
 alter table public.study_rooms       enable row level security;
 alter table public.room_participants enable row level security;
 alter table public.schedules         enable row level security;
+alter table public.marketplace_listings enable row level security;
 
 -- profiles
 create policy "own profile select" on public.profiles for select using (auth.uid() = id);
@@ -214,6 +245,60 @@ create policy "participants update" on public.room_participants for update using
 
 -- schedules
 create policy "own schedules" on public.schedules for all using (auth.uid() = user_id);
+
+-- marketplace_listings
+create policy "active listings readable by auth users"
+on public.marketplace_listings for select
+using (auth.role() = 'authenticated' and status = 'active');
+
+create policy "seller can read own listings"
+on public.marketplace_listings for select
+using (auth.uid() = seller_id);
+
+create policy "paid users can create listings"
+on public.marketplace_listings for insert
+with check (
+  auth.uid() = seller_id
+  and exists (
+    select 1
+    from public.profiles p
+    where p.id = auth.uid()
+      and p.plan in ('basic', 'pro')
+  )
+);
+
+create policy "paid sellers can update own listings"
+on public.marketplace_listings for update
+using (
+  auth.uid() = seller_id
+  and exists (
+    select 1
+    from public.profiles p
+    where p.id = auth.uid()
+      and p.plan in ('basic', 'pro')
+  )
+)
+with check (
+  auth.uid() = seller_id
+  and exists (
+    select 1
+    from public.profiles p
+    where p.id = auth.uid()
+      and p.plan in ('basic', 'pro')
+  )
+);
+
+create policy "paid sellers can delete own listings"
+on public.marketplace_listings for delete
+using (
+  auth.uid() = seller_id
+  and exists (
+    select 1
+    from public.profiles p
+    where p.id = auth.uid()
+      and p.plan in ('basic', 'pro')
+  )
+);
 
 -- ══════════════════════════════════════════════
 -- TRIGGER: auto-create profile on signup

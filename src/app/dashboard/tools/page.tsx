@@ -36,6 +36,9 @@ type ToolId =
   | 'presentation-coach'
   | 'habit-tracker'
   | 'research-helper'
+  | 'deadline-risk'
+  | 'scholarship-radar'
+  | 'marketplace-copy'
 
 interface Tool {
   id: ToolId
@@ -248,6 +251,42 @@ Bisa juga bantu interpretasi hasil, menulis abstrak, atau menjelaskan konsep sta
 Berikan penjelasan yang mudah dipahami mahasiswa. Balas dalam Bahasa Indonesia.`,
     placeholder: 'Contoh: Saya mau meneliti pengaruh penggunaan TikTok terhadap IPK mahasiswa, bantu rumuskan...',
   },
+  {
+    id: 'deadline-risk',
+    name: 'Deadline Risk Planner',
+    desc: 'Analisis risiko telat dan buat rencana penyelesaian tugas.',
+    icon: Target,
+    category: 'Produktivitas',
+    color: 'text-red-600',
+    bgColor: 'bg-red-50 border-red-100',
+    available: true,
+    systemPrompt: '',
+    placeholder: 'Contoh: Deadline laporan praktikum 3 hari lagi, progres 30%, masih harus analisis data dan bikin pembahasan...',
+  },
+  {
+    id: 'scholarship-radar',
+    name: 'Scholarship Radar',
+    desc: 'Checklist beasiswa, timeline dokumen, dan strategi essay.',
+    icon: GraduationCap,
+    category: 'Karier',
+    color: 'text-yellow-700',
+    bgColor: 'bg-yellow-50 border-yellow-100',
+    available: true,
+    systemPrompt: '',
+    placeholder: 'Contoh: Saya semester 4 Teknik Informatika IPK 3.65, ingin apply beasiswa dan belum punya essay...',
+  },
+  {
+    id: 'marketplace-copy',
+    name: 'Copywriter Marketplace',
+    desc: 'Buat judul dan deskripsi jualan barang/jasa kampus.',
+    icon: FileText,
+    category: 'Karier',
+    color: 'text-fuchsia-600',
+    bgColor: 'bg-fuchsia-50 border-fuchsia-100',
+    available: true,
+    systemPrompt: '',
+    placeholder: 'Contoh: Saya mau jual jasa desain PPT presentasi kuliah, target mahasiswa, harga mulai 25 ribu...',
+  },
 ]
 
 const CATEGORIES = ['Semua', 'Akademik', 'Belajar', 'Menulis', 'Produktivitas', 'Karier']
@@ -279,25 +318,23 @@ function ToolChat({ tool, onBack }: { tool: Tool; onBack: () => void }) {
     setLoading(true)
 
     try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
+      const response = await fetch('/api/tools', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1000,
-          system: tool.systemPrompt,
-          messages: newMessages.map((m) => ({ role: m.role, content: m.content })),
+          toolId: tool.id,
+          messages: newMessages,
         }),
       })
 
       const data = await response.json()
-      const reply = data.content?.[0]?.text || 'Maaf, terjadi kesalahan. Coba lagi.'
+      const reply = data.reply || data.error || 'Maaf, terjadi kesalahan. Coba lagi.'
 
       setMessages([...newMessages, { role: 'assistant', content: reply }])
     } catch {
       setMessages([
         ...newMessages,
-        { role: 'assistant', content: 'Koneksi bermasalah. Coba beberapa saat lagi.' },
+        { role: 'assistant', content: 'Koneksi bermasalah atau server AI belum siap. Pastikan OPENAI_API_KEY sudah terpasang di environment deploy.' },
       ])
     }
 
@@ -403,7 +440,7 @@ function ToolChat({ tool, onBack }: { tool: Tool; onBack: () => void }) {
 
 // ─── Main page ────────────────────────────────────────────────────
 export default function ToolsPage() {
-  const [selectedCategory, setSelectedCategory] = useState('Semua')
+  const [selectedCategory, setSelectedCategory] = useState('Akademik')
   const [activeTool, setActiveTool] = useState<Tool | null>(null)
 
   const filtered = TOOLS.filter(
@@ -428,9 +465,9 @@ export default function ToolsPage() {
           </div>
           <div>
             <p className="text-xs font-bold uppercase tracking-widest text-brand-100 mb-1">Campus Tools</p>
-            <h1 className="text-2xl font-black mb-2 sm:text-3xl">12 Tool AI untuk Mahasiswa</h1>
+            <h1 className="text-2xl font-black mb-2 sm:text-3xl">15 Tool AI untuk Mahasiswa</h1>
             <p className="text-brand-100 text-sm leading-6 max-w-xl">
-              Semua tool bisa langsung digunakan — pilih tool, ketik pertanyaanmu, dan dapatkan bantuan AI seketika. Tidak perlu setup apapun.
+              Semua tool aktif lewat OpenAI server-side. Pilih kategori, buka satu tool, lalu pakai seperti chat assistant khusus kebutuhan kampus.
             </p>
           </div>
         </div>
@@ -500,7 +537,7 @@ export default function ToolsPage() {
 
       {/* Footer note */}
       <p className="text-center text-xs text-slate-400">
-        Semua tool menggunakan Claude AI · Jawaban bersifat informatif, bukan pengganti profesional
+        Semua tool menggunakan OpenAI via server NEXA. Jawaban bersifat informatif, bukan pengganti profesional.
       </p>
     </div>
   )

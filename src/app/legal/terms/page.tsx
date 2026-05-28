@@ -11,7 +11,7 @@ export default function TermsPage() {
           <p>NEXA adalah platform belajar, reminder, study room, dan marketplace kampus. Pengguna bertanggung jawab atas konten yang diunggah dan listing yang dibuat.</p>
           <p>Akun Free dapat mencoba fitur dasar. Akun Basic dan Pro membuka fitur berbayar seperti seller marketplace, tool lanjutan, dan reminder otomatis sesuai paket.</p>
           <p>Transaksi marketplace dilakukan antar pengguna. NEXA menyediakan sarana listing dan kontak, tetapi pengguna tetap wajib bertransaksi secara aman dan jujur.</p>
-          <p>Pembayaran paket dilakukan melalui DOKU atau alur admin resmi. Paket dapat diaktifkan setelah pembayaran terkonfirmasi.</p>
+          <p>Pembayaran paket dilakukan melalui Midtrans atau alur admin resmi. Paket dapat diaktifkan setelah pembayaran terkonfirmasi.</p>
         </div>
       </article>
     </main>

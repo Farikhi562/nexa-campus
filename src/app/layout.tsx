@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import NexaChatbot from '@/components/NexaChatbot'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -18,6 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="id">
       <body className="font-body bg-slate-50 text-slate-900 antialiased">
         {children}
+        <NexaChatbot />
       </body>
     </html>
   )

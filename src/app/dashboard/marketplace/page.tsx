@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import {
   AlertCircle,
@@ -14,8 +14,6 @@ import {
   Package,
   Plus,
   Search,
-  ShieldCheck,
-  Sparkles,
   Store,
   Tag,
 } from 'lucide-react'
@@ -28,95 +26,19 @@ type ListingType = 'barang' | 'jasa'
 
 interface MarketplaceListing {
   id: string
+  seller_id: string
   type: ListingType
   title: string
-  price: string
-  seller: string
-  campus: string
-  location: string
-  category: string
   description: string
-  badge?: string
-  verifiedSeller: boolean
+  category: string
+  price_label: string | null
+  campus: string | null
+  location: string | null
+  contact_whatsapp: string | null
+  status: 'draft' | 'pending' | 'active' | 'sold' | 'archived' | 'rejected'
+  is_verified: boolean
+  created_at: string
 }
-
-const LISTINGS: MarketplaceListing[] = [
-  {
-    id: '1',
-    type: 'jasa',
-    title: 'Tutor Kalkulus 1 menjelang UTS',
-    price: 'Rp35.000/jam',
-    seller: 'Raka Pratama',
-    campus: 'Universitas Indonesia',
-    location: 'Depok',
-    category: 'Tutor',
-    description: 'Review konsep limit, turunan, integral dasar, plus latihan soal tahun lalu.',
-    badge: 'Bisa online',
-    verifiedSeller: true,
-  },
-  {
-    id: '2',
-    type: 'barang',
-    title: 'Buku Statistika Bisnis edisi terbaru',
-    price: 'Rp78.000',
-    seller: 'Nadia Putri',
-    campus: 'Universitas Brawijaya',
-    location: 'Malang',
-    category: 'Buku',
-    description: 'Kondisi 90%, ada highlight rapi di beberapa bab penting.',
-    verifiedSeller: true,
-  },
-  {
-    id: '3',
-    type: 'jasa',
-    title: 'Desain slide presentasi seminar',
-    price: 'Mulai Rp50.000',
-    seller: 'Dimas Arya',
-    campus: 'ITB',
-    location: 'Bandung',
-    category: 'Desain',
-    description: 'Deck 10-20 slide, layout akademik, grafik rapi, revisi ringan termasuk.',
-    badge: 'Fast response',
-    verifiedSeller: true,
-  },
-  {
-    id: '4',
-    type: 'barang',
-    title: 'Kalkulator scientific Casio fx-991',
-    price: 'Rp145.000',
-    seller: 'Maya Sari',
-    campus: 'Universitas Gadjah Mada',
-    location: 'Yogyakarta',
-    category: 'Alat Kuliah',
-    description: 'Normal, tombol masih empuk, cocok untuk statistik dan teknik.',
-    verifiedSeller: false,
-  },
-  {
-    id: '5',
-    type: 'jasa',
-    title: 'Proofread laporan praktikum',
-    price: 'Rp20.000/10 halaman',
-    seller: 'Salsa Kirana',
-    campus: 'Universitas Diponegoro',
-    location: 'Semarang',
-    category: 'Akademik',
-    description: 'Cek typo, struktur kalimat, format sitasi, dan konsistensi tabel.',
-    verifiedSeller: true,
-  },
-  {
-    id: '6',
-    type: 'barang',
-    title: 'Jaket lab putih ukuran L',
-    price: 'Rp55.000',
-    seller: 'Fajar Nugroho',
-    campus: 'Universitas Airlangga',
-    location: 'Surabaya',
-    category: 'Perlengkapan',
-    description: 'Jarang dipakai, bersih, cocok untuk praktikum biologi atau kimia.',
-    badge: 'COD kampus',
-    verifiedSeller: false,
-  },
-]
 
 const TYPE_OPTIONS: Array<{ id: 'semua' | ListingType; label: string }> = [
   { id: 'semua', label: 'Semua' },
@@ -125,12 +47,14 @@ const TYPE_OPTIONS: Array<{ id: 'semua' | ListingType; label: string }> = [
 ]
 
 export default function MarketplacePage() {
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const [profile, setProfile] = useState<Profile | null>(null)
-  const [listings, setListings] = useState<MarketplaceListing[]>(LISTINGS)
+  const [listings, setListings] = useState<MarketplaceListing[]>([])
+  const [loading, setLoading] = useState(true)
   const [activeType, setActiveType] = useState<'semua' | ListingType>('semua')
   const [query, setQuery] = useState('')
   const [showComposer, setShowComposer] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [draftType, setDraftType] = useState<ListingType>('barang')
   const [draft, setDraft] = useState({
     title: '',
@@ -140,23 +64,40 @@ export default function MarketplacePage() {
     description: '',
   })
   const [notice, setNotice] = useState('')
+  const [error, setError] = useState('')
 
-  useEffect(() => {
-    async function loadProfile() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+  const loadMarketplace = useCallback(async () => {
+    setLoading(true)
+    setError('')
 
-      const { data } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single()
-
-      if (data) setProfile(data as Profile)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      setLoading(false)
+      return
     }
 
-    loadProfile()
+    const [profileRes, listingsRes] = await Promise.all([
+      supabase.from('profiles').select('*').eq('id', user.id).single(),
+      supabase
+        .from('marketplace_listings')
+        .select('*')
+        .order('created_at', { ascending: false }),
+    ])
+
+    if (profileRes.data) setProfile(profileRes.data as Profile)
+    if (listingsRes.error) {
+      setError('Marketplace belum siap. Jalankan migration marketplace di Supabase terlebih dahulu.')
+      setListings([])
+    } else {
+      setListings((listingsRes.data || []) as MarketplaceListing[])
+    }
+
+    setLoading(false)
   }, [supabase])
+
+  useEffect(() => {
+    loadMarketplace()
+  }, [loadMarketplace])
 
   const plan = (profile?.plan ?? 'free') as Plan
   const canSell = plan !== 'free'
@@ -164,7 +105,13 @@ export default function MarketplacePage() {
   const filteredListings = useMemo(() => {
     return listings.filter((listing) => {
       const matchesType = activeType === 'semua' || listing.type === activeType
-      const searchable = `${listing.title} ${listing.category} ${listing.campus} ${listing.location}`.toLowerCase()
+      const searchable = [
+        listing.title,
+        listing.category,
+        listing.campus,
+        listing.location,
+        listing.description,
+      ].filter(Boolean).join(' ').toLowerCase()
       const matchesQuery = searchable.includes(query.toLowerCase().trim())
       return matchesType && matchesQuery
     })
@@ -174,37 +121,65 @@ export default function MarketplacePage() {
     setDraft((current) => ({ ...current, [field]: value }))
   }
 
-  function publishListing() {
-    if (!draft.title.trim() || !draft.price.trim() || !draft.category.trim()) {
-      setNotice('Nama, harga, dan kategori wajib diisi.')
+  async function publishListing() {
+    if (!canSell || saving) return
+    if (!draft.title.trim() || !draft.price.trim() || !draft.category.trim() || !draft.description.trim()) {
+      setNotice('Nama, harga, kategori, dan deskripsi wajib diisi.')
+      return
+    }
+    if (!profile?.whatsapp_number) {
+      setNotice('Isi nomor WhatsApp di profil dulu supaya pembeli bisa menghubungi seller.')
       return
     }
 
-    const newListing: MarketplaceListing = {
-      id: `local-${Date.now()}`,
-      type: draftType,
-      title: draft.title.trim(),
-      price: draft.price.trim(),
-      seller: profile?.full_name || 'Seller NEXA',
-      campus: profile?.universitas || 'Kampus belum diisi',
-      location: draft.location.trim() || profile?.provinsi || 'Lokasi belum diisi',
-      category: draft.category.trim(),
-      description: draft.description.trim() || 'Seller belum menambahkan deskripsi detail.',
-      badge: 'Listing baru',
-      verifiedSeller: true,
+    setSaving(true)
+    setNotice('')
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      setSaving(false)
+      setNotice('Sesi login habis. Silakan login ulang.')
+      return
     }
 
-    setListings((current) => [newListing, ...current])
+    const { error: insertError } = await supabase.from('marketplace_listings').insert({
+      seller_id: user.id,
+      type: draftType,
+      title: draft.title.trim(),
+      price_label: draft.price.trim(),
+      category: draft.category.trim(),
+      location: draft.location.trim() || profile.provinsi,
+      campus: profile.universitas,
+      description: draft.description.trim(),
+      contact_whatsapp: profile.whatsapp_number,
+      status: 'active',
+    })
+
+    if (insertError) {
+      setNotice(insertError.message)
+      setSaving(false)
+      return
+    }
+
     setDraft({ title: '', price: '', category: '', location: '', description: '' })
     setShowComposer(false)
-    setNotice('Listing berhasil diterbitkan di sesi ini. Setelah backend marketplace aktif, listing akan tersimpan permanen.')
+    setNotice('Listing berhasil diterbitkan.')
+    setSaving(false)
+    await loadMarketplace()
   }
 
   function contactSeller(listing: MarketplaceListing) {
+    if (!listing.contact_whatsapp) {
+      setNotice('Seller belum memasang nomor WhatsApp.')
+      return
+    }
+
+    const digits = listing.contact_whatsapp.replace(/\D/g, '')
+    const normalized = digits.startsWith('0') ? `62${digits.slice(1)}` : digits
     const text = encodeURIComponent(
-      `Halo ${listing.seller}, saya tertarik dengan ${listing.type} "${listing.title}" di NEXA Marketplace. Apakah masih tersedia?`
+      `Halo, saya tertarik dengan ${listing.type} "${listing.title}" di NEXA Marketplace. Apakah masih tersedia?`
     )
-    window.open(`https://wa.me/?text=${text}`, '_blank')
+    window.open(`https://wa.me/${normalized}?text=${text}`, '_blank', 'noopener,noreferrer')
   }
 
   return (
@@ -217,10 +192,10 @@ export default function MarketplacePage() {
               Marketplace Mahasiswa
             </div>
             <h1 className="max-w-2xl text-3xl font-black tracking-tight text-slate-950 md:text-4xl">
-              Jual beli barang kampus dan jasa mahasiswa dalam ekosistem NEXA.
+              Jual beli barang kampus dan jasa mahasiswa.
             </h1>
             <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-600 md:text-base">
-              Cari buku bekas, perlengkapan praktikum, tutor, desain slide, proofreading, sampai bantuan akademik ringan dari mahasiswa terverifikasi.
+              Listing yang tampil di sini berasal dari user NEXA sungguhan. Kalau belum ada seller, marketplace akan tampil kosong.
             </p>
           </div>
 
@@ -260,11 +235,7 @@ export default function MarketplacePage() {
             )}
 
             <div className="mt-4 flex gap-2">
-              <Button
-                onClick={() => setShowComposer(true)}
-                disabled={!canSell}
-                fullWidth
-              >
+              <Button onClick={() => setShowComposer(true)} disabled={!canSell} fullWidth>
                 <Plus className="h-4 w-4" />
                 Jual Barang/Jasa
               </Button>
@@ -284,7 +255,7 @@ export default function MarketplacePage() {
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Cari buku, tutor, kalkulator, desain slide..."
+            placeholder="Cari barang, jasa, kategori, atau lokasi"
             className="w-full rounded-lg border border-slate-300 bg-white py-3 pl-11 pr-4 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
           />
         </div>
@@ -308,84 +279,71 @@ export default function MarketplacePage() {
         </div>
       </section>
 
-      {notice && (
-        <div className="flex items-start gap-3 rounded-lg border border-brand-200 bg-brand-50 p-4">
-          <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-brand-700" />
-          <div className="flex-1">
-            <p className="text-sm font-bold text-brand-950">{notice}</p>
-          </div>
-          <button onClick={() => setNotice('')} className="text-sm font-bold text-brand-700">Tutup</button>
+      {(notice || error) && (
+        <div className={`flex items-start gap-3 rounded-lg border p-4 ${error ? 'border-red-200 bg-red-50' : 'border-brand-200 bg-brand-50'}`}>
+          {error ? (
+            <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-700" />
+          ) : (
+            <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-brand-700" />
+          )}
+          <p className={`flex-1 text-sm font-bold ${error ? 'text-red-900' : 'text-brand-950'}`}>{error || notice}</p>
+          <button onClick={() => { setNotice(''); setError('') }} className="text-sm font-bold text-slate-600">Tutup</button>
         </div>
       )}
 
       {showComposer && (
-        <section className={`rounded-lg border p-5 ${canSell ? 'border-brand-200 bg-white' : 'border-amber-200 bg-amber-50'}`}>
-          {canSell ? (
-            <>
-              <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h2 className="text-lg font-black text-slate-950">Buat listing baru</h2>
-                  <p className="mt-1 text-sm text-slate-500">Listing langsung tampil di marketplace. Data permanen aktif setelah backend marketplace disambungkan.</p>
-                </div>
-                <div className="grid grid-cols-2 rounded-lg bg-slate-100 p-1 text-sm font-bold">
-                  {(['barang', 'jasa'] as ListingType[]).map((type) => (
-                    <button
-                      key={type}
-                      type="button"
-                      onClick={() => setDraftType(type)}
-                      className={`rounded-md px-4 py-2 capitalize ${
-                        draftType === type ? 'bg-white text-brand-700 shadow-sm' : 'text-slate-500'
-                      }`}
-                    >
-                      {type}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-2">
-                <input value={draft.title} onChange={(e) => updateDraft('title', e.target.value)} className="rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100" placeholder={draftType === 'barang' ? 'Nama barang' : 'Nama jasa'} />
-                <input value={draft.price} onChange={(e) => updateDraft('price', e.target.value)} className="rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100" placeholder="Harga" />
-                <input value={draft.category} onChange={(e) => updateDraft('category', e.target.value)} className="rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100" placeholder="Kategori" />
-                <input value={draft.location} onChange={(e) => updateDraft('location', e.target.value)} className="rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100" placeholder="Lokasi / kampus" />
-                <textarea value={draft.description} onChange={(e) => updateDraft('description', e.target.value)} className="min-h-24 rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 md:col-span-2" placeholder="Deskripsi singkat, kondisi barang, metode ketemu, atau detail jasa" />
-              </div>
-
-              <div className="mt-4 flex items-center justify-between gap-3">
-                <p className="flex items-center gap-2 text-xs text-slate-500">
-                  <ShieldCheck className="h-4 w-4 text-emerald-600" />
-                  Listing lokal bisa langsung dilihat user selama sesi berjalan.
-                </p>
-                <Button type="button" onClick={publishListing}>
-                  Terbitkan Listing
-                </Button>
-              </div>
-            </>
-          ) : (
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-start gap-3">
-                <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600" />
-                <div>
-                  <h2 className="text-base font-black text-amber-950">Fitur jualan terkunci</h2>
-                  <p className="mt-1 text-sm leading-6 text-amber-800">
-                    Akun gratis hanya bisa melihat dan menghubungi seller. Upgrade ke paket berbayar untuk membuka lapak.
-                  </p>
-                </div>
-              </div>
-              <Link href="/pricing">
-                <Button type="button">Lihat Paket</Button>
-              </Link>
+        <section className="rounded-lg border border-brand-200 bg-white p-5">
+          <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-lg font-black text-slate-950">Buat listing baru</h2>
+              <p className="mt-1 text-sm text-slate-500">Listing aktif akan tersimpan di Supabase dan tampil untuk user login.</p>
             </div>
-          )}
+            <div className="grid grid-cols-2 rounded-lg bg-slate-100 p-1 text-sm font-bold">
+              {(['barang', 'jasa'] as ListingType[]).map((type) => (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => setDraftType(type)}
+                  className={`rounded-md px-4 py-2 capitalize ${
+                    draftType === type ? 'bg-white text-brand-700 shadow-sm' : 'text-slate-500'
+                  }`}
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <input value={draft.title} onChange={(e) => updateDraft('title', e.target.value)} className="rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100" placeholder={draftType === 'barang' ? 'Nama barang' : 'Nama jasa'} />
+            <input value={draft.price} onChange={(e) => updateDraft('price', e.target.value)} className="rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100" placeholder="Harga" />
+            <input value={draft.category} onChange={(e) => updateDraft('category', e.target.value)} className="rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100" placeholder="Kategori" />
+            <input value={draft.location} onChange={(e) => updateDraft('location', e.target.value)} className="rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100" placeholder="Lokasi / kampus" />
+            <textarea value={draft.description} onChange={(e) => updateDraft('description', e.target.value)} className="min-h-24 rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 md:col-span-2" placeholder="Deskripsi singkat, kondisi barang, metode ketemu, atau detail jasa" />
+          </div>
+
+          <div className="mt-4 flex items-center justify-end gap-3">
+            <Button type="button" variant="outline" onClick={() => setShowComposer(false)}>
+              Batal
+            </Button>
+            <Button type="button" onClick={publishListing} loading={saving}>
+              Terbitkan Listing
+            </Button>
+          </div>
         </section>
       )}
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {filteredListings.length === 0 ? (
+        {loading ? (
+          <div className="rounded-lg border border-slate-200 bg-white p-10 text-center md:col-span-2 xl:col-span-3">
+            <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-brand-100 border-t-brand-600" />
+            <p className="mt-3 text-sm font-semibold text-slate-500">Memuat listing...</p>
+          </div>
+        ) : filteredListings.length === 0 ? (
           <div className="rounded-lg border border-dashed border-slate-300 bg-white p-10 text-center md:col-span-2 xl:col-span-3">
             <Store className="mx-auto mb-3 h-10 w-10 text-slate-300" />
-            <p className="font-bold text-slate-700">Listing tidak ditemukan</p>
-            <p className="mt-1 text-sm text-slate-500">Coba kata kunci lain atau ubah filter barang/jasa.</p>
+            <p className="font-bold text-slate-700">Belum ada listing aktif</p>
+            <p className="mt-1 text-sm text-slate-500">Marketplace akan terisi setelah user Basic/Pro menerbitkan listing.</p>
           </div>
         ) : filteredListings.map((listing) => (
           <article key={listing.id} className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition hover:border-brand-200 hover:shadow-md">
@@ -399,59 +357,36 @@ export default function MarketplacePage() {
             </div>
 
             <h3 className="min-h-12 text-base font-black leading-6 text-slate-950">{listing.title}</h3>
-            <p className="mt-2 text-xl font-black text-brand-700">{listing.price}</p>
+            <p className="mt-2 text-xl font-black text-brand-700">{listing.price_label || 'Hubungi seller'}</p>
             <p className="mt-3 line-clamp-2 text-sm leading-6 text-slate-600">{listing.description}</p>
 
             <div className="mt-4 space-y-2 border-t border-slate-100 pt-4 text-xs text-slate-500">
               <p className="flex items-center gap-2">
                 <BookOpen className="h-3.5 w-3.5" />
-                {listing.campus}
+                {listing.campus || 'Kampus belum diisi'}
               </p>
               <p className="flex items-center gap-2">
                 <MapPin className="h-3.5 w-3.5" />
-                {listing.location}
+                {listing.location || 'Lokasi belum diisi'}
               </p>
               <p className="flex items-center gap-2">
                 <Tag className="h-3.5 w-3.5" />
                 {listing.category}
-                {listing.badge && <span className="rounded-full bg-brand-50 px-2 py-0.5 font-bold text-brand-700">{listing.badge}</span>}
               </p>
             </div>
 
             <div className="mt-5 flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <p className="truncate text-sm font-bold text-slate-900">{listing.seller}</p>
-                <p className="flex items-center gap-1 text-xs text-slate-500">
-                  {listing.verifiedSeller && <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />}
-                  {listing.verifiedSeller ? 'Seller berbayar' : 'Seller kampus'}
-                </p>
+                <p className="truncate text-sm font-bold text-slate-900">Seller NEXA</p>
+                <p className="text-xs text-slate-500">{listing.is_verified ? 'Terverifikasi' : 'Akun seller aktif'}</p>
               </div>
-              <Button size="sm" type="button" onClick={() => contactSeller(listing)}>
+              <Button size="sm" type="button" onClick={() => contactSeller(listing)} disabled={!listing.contact_whatsapp}>
                 <MessageCircle className="h-3.5 w-3.5" />
                 Hubungi
               </Button>
             </div>
           </article>
         ))}
-      </section>
-
-      <section className="rounded-lg border border-slate-200 bg-white p-5">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-start gap-3">
-            <Sparkles className="mt-1 h-5 w-5 flex-shrink-0 text-brand-600" />
-            <div>
-              <h2 className="text-base font-black text-slate-950">Aturan singkat marketplace</h2>
-              <p className="mt-1 text-sm leading-6 text-slate-600">
-                Barang dan jasa harus relevan untuk kebutuhan mahasiswa. Untuk MVP, kontak seller memakai WhatsApp share dan listing baru tampil lokal. Penyimpanan permanen memakai tabel marketplace Supabase saat backend diaktifkan.
-              </p>
-            </div>
-          </div>
-          <Link href="/pricing">
-            <Button variant="outline" type="button">
-              Bandingkan Paket
-            </Button>
-          </Link>
-        </div>
       </section>
     </div>
   )

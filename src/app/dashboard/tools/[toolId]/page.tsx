@@ -11,7 +11,6 @@ import {
   CAMPUS_TOOLS,
   FREE_DAILY_LIMIT,
   accessClass,
-  buildToolResult,
   getCampusTool,
   statusClass,
 } from '@/lib/campus-tools'
@@ -26,12 +25,14 @@ export default function CampusToolDetailPage() {
   const [loading, setLoading] = useState(true)
   const [running, setRunning] = useState(false)
   const [freeUses, setFreeUses] = useState(0)
-  const [input, setInput] = useState(tool.prompt)
+  const [input, setInput] = useState('')
   const [result, setResult] = useState<string[]>([])
+  const [error, setError] = useState('')
 
   useEffect(() => {
-    setInput(tool.prompt)
+    setInput('')
     setResult([])
+    setError('')
     setFreeUses(0)
   }, [tool])
 
@@ -63,14 +64,36 @@ export default function CampusToolDetailPage() {
   const canRun = !isLocked && !freeLimitReached
   const Icon = tool.icon
 
-  function runTool() {
-    if (!canRun) return
+  async function runTool() {
+    if (!canRun || !input.trim()) return
     setRunning(true)
-    window.setTimeout(() => {
+    setError('')
+
+    try {
+      const response = await fetch('/api/tools', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          toolId: tool.id,
+          messages: [{ role: 'user', content: input.trim() }],
+        }),
+      })
+      const data = await response.json()
+
+      if (!response.ok || data.error) {
+        setError(data.error || 'Tool gagal memproses input.')
+        setResult([])
+        return
+      }
+
       if (!isPaid && tool.access === 'free') setFreeUses((current) => current + 1)
-      setResult(buildToolResult(tool, input))
+      setResult([data.reply || 'AI belum mengembalikan jawaban.'])
+    } catch {
+      setError('Koneksi bermasalah atau server AI belum siap.')
+      setResult([])
+    } finally {
       setRunning(false)
-    }, 450)
+    }
   }
 
   if (loading) {
@@ -114,7 +137,7 @@ export default function CampusToolDetailPage() {
               <p className="font-black text-red-950">
                 {isLocked ? 'Premium terkunci' : `${Math.max(0, FREE_DAILY_LIMIT - freeUses)} demo gratis tersisa`}
               </p>
-              <p className="mt-1 text-xs leading-5 text-red-800">Upgrade via DOKU untuk buka semua tools tanpa limit demo.</p>
+              <p className="mt-1 text-xs leading-5 text-red-800">Upgrade via Midtrans untuk buka semua tools tanpa limit demo.</p>
             </div>
           )}
         </div>
@@ -136,7 +159,7 @@ export default function CampusToolDetailPage() {
             <Link href="/pricing">
               <Button type="button" className="bg-red-600 hover:bg-red-700">
                 <Zap className="h-4 w-4" />
-                Upgrade via DOKU
+                Upgrade via Midtrans
               </Button>
             </Link>
           </div>
@@ -145,7 +168,7 @@ export default function CampusToolDetailPage() {
 
       {freeLimitReached && (
         <section className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-900">
-          Kuota demo gratis habis. Upgrade via DOKU untuk memakai semua Campus Tools tanpa batas demo.
+          Kuota demo gratis habis. Upgrade via Midtrans untuk memakai semua Campus Tools tanpa batas demo.
         </section>
       )}
 
@@ -157,7 +180,7 @@ export default function CampusToolDetailPage() {
                 <Lock className="h-6 w-6" />
               </div>
               <h3 className="text-lg font-black text-red-950">Workspace premium terkunci</h3>
-              <p className="mt-2 text-sm leading-6 text-red-800">Basic/Pro membuka halaman ini penuh. Pembayaran diarahkan ke DOKU.</p>
+              <p className="mt-2 text-sm leading-6 text-red-800">Basic/Pro membuka halaman ini penuh. Pembayaran diarahkan ke Midtrans.</p>
               <Link href="/pricing" className="mt-4 inline-flex">
                 <Button type="button" className="bg-red-600 hover:bg-red-700">Buka Paket</Button>
               </Link>
@@ -175,11 +198,12 @@ export default function CampusToolDetailPage() {
             value={input}
             onChange={(event) => setInput(event.target.value)}
             disabled={isLocked}
+            placeholder={tool.prompt}
             className="mt-2 min-h-48 w-full rounded-lg border border-slate-300 px-4 py-3 text-sm leading-6 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 disabled:bg-slate-100 disabled:text-slate-400"
           />
           <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-xs leading-5 text-slate-500">{tool.output}</p>
-            <Button type="button" onClick={runTool} disabled={!canRun || running} loading={running}>
+            <Button type="button" onClick={runTool} disabled={!canRun || running || !input.trim()} loading={running}>
               <Sparkles className="h-4 w-4" />
               Jalankan Tool
             </Button>
@@ -192,9 +216,13 @@ export default function CampusToolDetailPage() {
             Output
           </h3>
           <div className="space-y-3">
-            {result.length > 0 ? (
+            {error ? (
+              <div className="rounded-lg border border-red-200 bg-red-50 p-5 text-sm leading-6 text-red-700">
+                {error}
+              </div>
+            ) : result.length > 0 ? (
               result.map((item) => (
-                <p key={item} className="flex gap-2 rounded-md bg-slate-50 p-3 text-sm leading-6 text-slate-700">
+                <p key={item} className="whitespace-pre-wrap rounded-md bg-slate-50 p-3 text-sm leading-6 text-slate-700">
                   <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-600" />
                   {item}
                 </p>

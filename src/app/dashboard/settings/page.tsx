@@ -212,7 +212,7 @@ export default function SettingsPage() {
 
           <Panel title="Bantuan" icon={MessageCircle}>
             <p className="text-sm leading-6 text-slate-600">
-              Butuh aktivasi paket, reset akun, atau bantuan integrasi kampus? Hubungi admin dari halaman pricing agar pesan upgrade otomatis membawa detail akunmu dan request link DOKU.
+              Butuh aktivasi paket, reset akun, atau bantuan integrasi kampus? Hubungi admin dari halaman pricing agar pesan upgrade otomatis membawa detail akunmu dan request link Midtrans.
             </p>
             <Link href="/pricing" className="mt-4 inline-flex">
               <Button type="button" variant="secondary">

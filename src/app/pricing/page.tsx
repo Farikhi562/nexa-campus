@@ -43,7 +43,7 @@ const PLANS = [
     name: 'Basic',
     price: 'Rp15.000',
     note: 'Untuk mahasiswa yang mulai serius.',
-    cta: 'Bayar Basic via DOKU',
+    cta: 'Bayar Basic via Midtrans',
     href: '/checkout?plan=basic',
     featured: true,
     features: [
@@ -60,7 +60,7 @@ const PLANS = [
     name: 'Pro',
     price: 'Rp25.000',
     note: 'Paket lengkap untuk power user.',
-    cta: 'Bayar Pro via DOKU',
+    cta: 'Bayar Pro via Midtrans',
     href: '/checkout?plan=pro',
     featured: false,
     features: [
@@ -77,7 +77,7 @@ const PLANS = [
 const FAQ = [
   {
     q: 'Pembayaran pakai apa?',
-    a: 'NEXA disiapkan untuk DOKU. User diarahkan ke checkout request agar admin bisa mengirim link pembayaran DOKU sesuai paket.',
+    a: 'NEXA disiapkan untuk Midtrans. User diarahkan ke checkout request agar admin bisa mengirim link pembayaran Midtrans sesuai paket.',
   },
   {
     q: 'Siapa yang bisa jual barang dan jasa?',
@@ -85,7 +85,7 @@ const FAQ = [
   },
   {
     q: 'Setelah bayar, paket aktif kapan?',
-    a: 'Untuk mode operasional awal, admin mengaktifkan paket setelah pembayaran DOKU terkonfirmasi. Ini aman untuk MVP dan penjualan awal.',
+    a: 'Untuk mode operasional awal, admin mengaktifkan paket setelah pembayaran Midtrans terkonfirmasi. Ini aman untuk MVP dan penjualan awal.',
   },
 ]
 
@@ -136,7 +136,7 @@ export default function PricingPage() {
         <div className="max-w-3xl">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-black text-brand-700">
             <CreditCard className="h-3.5 w-3.5" />
-            DOKU payment ready
+            Midtrans payment ready
           </div>
           <h1 className="text-4xl font-black tracking-tight md:text-6xl">
             Harga jelas, fitur siap dipakai, upgrade gampang.
@@ -198,7 +198,7 @@ export default function PricingPage() {
           {[
             { icon: ShieldCheck, title: 'RLS-ready', desc: 'Akses data dipisah per user lewat Supabase policy.' },
             { icon: Store, title: 'Monetizable', desc: 'Marketplace seller hanya untuk akun berbayar.' },
-            { icon: MessageCircle, title: 'DOKU flow', desc: 'Checkout diarahkan ke request pembayaran DOKU.' },
+            { icon: MessageCircle, title: 'Midtrans flow', desc: 'Checkout diarahkan ke request pembayaran Midtrans.' },
             { icon: Lock, title: 'Freemium gate', desc: 'Free bisa coba, Basic/Pro membuka fitur bernilai.' },
           ].map(({ icon: Icon, title, desc }) => (
             <div key={title} className="rounded-lg border border-slate-200 bg-slate-50 p-5">
