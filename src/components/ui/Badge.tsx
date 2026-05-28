@@ -5,6 +5,7 @@ const PLAN_CONFIG: Record<Plan, { label: string; className: string }> = {
   free:  { label: 'Gratis',    className: 'bg-slate-100 text-slate-600 border-slate-200' },
   basic: { label: 'Basic',     className: 'bg-blue-50 text-blue-600 border-blue-200' },
   pro:   { label: 'Pro ✦',     className: 'bg-amber-50 text-amber-600 border-amber-300' },
+  admin: { label: 'Admin ∞',   className: 'bg-slate-950 text-white border-slate-950' },
 }
 
 export function PlanBadge({ plan, className }: { plan: Plan; className?: string }) {

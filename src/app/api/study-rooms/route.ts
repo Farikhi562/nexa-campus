@@ -65,14 +65,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'title dan documentId wajib diisi.' }, { status: 400 })
     }
 
-    // Check plan — study room is Pro only
+    // Check plan — study room is Pro/Admin only
     const { data: profile } = await supabase
       .from('profiles')
       .select('plan')
       .eq('id', user.id)
       .single()
 
-    if (profile?.plan !== 'pro') {
+    if (profile?.plan !== 'pro' && profile?.plan !== 'admin') {
       return NextResponse.json({ error: 'Study Room hanya tersedia untuk paket Pro.' }, { status: 403 })
     }
 

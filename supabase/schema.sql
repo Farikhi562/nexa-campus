@@ -17,7 +17,7 @@ create table public.profiles (
   jurusan       text,
   universitas   text,
   provinsi      text,
-  plan          text not null default 'free' check (plan in ('free','basic','pro')),
+  plan          text not null default 'free' check (plan in ('free','basic','pro','admin')),
   whatsapp_number text,
   profile_completed boolean default false,
   created_at    timestamptz default now(),
@@ -263,7 +263,7 @@ with check (
     select 1
     from public.profiles p
     where p.id = auth.uid()
-      and p.plan in ('basic', 'pro')
+      and p.plan in ('basic', 'pro', 'admin')
   )
 );
 
@@ -275,7 +275,7 @@ using (
     select 1
     from public.profiles p
     where p.id = auth.uid()
-      and p.plan in ('basic', 'pro')
+      and p.plan in ('basic', 'pro', 'admin')
   )
 )
 with check (
@@ -284,7 +284,7 @@ with check (
     select 1
     from public.profiles p
     where p.id = auth.uid()
-      and p.plan in ('basic', 'pro')
+      and p.plan in ('basic', 'pro', 'admin')
   )
 );
 
@@ -296,7 +296,7 @@ using (
     select 1
     from public.profiles p
     where p.id = auth.uid()
-      and p.plan in ('basic', 'pro')
+      and p.plan in ('basic', 'pro', 'admin')
   )
 );
 

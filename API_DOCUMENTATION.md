@@ -27,10 +27,10 @@ TWILIO_WHATSAPP_FROM=whatsapp:+14155238886
 # Cron Secret (for reminders)
 CRON_SECRET=your-secret-cron-token
 
-# Midtrans (optional - for payment gateway)
-MIDTRANS_SERVER_KEY=your-midtrans-server-key
-NEXT_PUBLIC_MIDTRANS_CLIENT_KEY=your-midtrans-client-key
-MIDTRANS_IS_PRODUCTION=false
+# DOKU (optional - for payment gateway)
+DOKU_SECRET_KEY=your-doku-server-key
+DOKU_CLIENT_ID=your-doku-client-key
+DOKU_IS_PRODUCTION=false
 ```
 
 ## API Endpoints
@@ -493,8 +493,8 @@ All errors follow this format:
 - Input: ~3,000 tokens per 12,000 chars
 - Output: ~100-200 tokens per response
 
-**Midtrans Payment:**
-- Transaction fee follows the active Midtrans payment method and merchant agreement
+**DOKU Payment:**
+- Transaction fee follows the active DOKU payment method and merchant agreement
 
 ---
 

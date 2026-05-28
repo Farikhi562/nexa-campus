@@ -11,7 +11,7 @@ type Message = {
 
 const STARTERS = [
   'Apa bedanya Free, Basic, dan Pro?',
-  'Gimana cara bayar via Midtrans?',
+  'Gimana cara bayar via DOKU?',
   'Siapa yang bisa jual di marketplace?',
 ]
 
@@ -23,7 +23,7 @@ export default function NexaChatbot() {
     {
       role: 'assistant',
       content:
-        'Halo, aku NEXA Assistant v1.0. Aku bisa bantu jelasin fitur, paket, Midtrans checkout, marketplace, dan alur pakai NEXA.',
+        'Halo, aku NEXA Assistant v1.0. Aku bisa bantu jelasin fitur, paket, DOKU checkout, marketplace, dan alur pakai NEXA.',
     },
   ])
   const bottomRef = useRef<HTMLDivElement>(null)
@@ -82,15 +82,20 @@ export default function NexaChatbot() {
   return (
     <div className="fixed bottom-4 right-4 z-[80] sm:bottom-5 sm:right-5">
       {open && (
-        <div className="mb-3 flex h-[min(620px,calc(100vh-7rem))] w-[calc(100vw-2rem)] max-w-sm flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-2xl sm:w-96">
-          <div className="flex items-center justify-between border-b border-slate-200 bg-slate-950 px-4 py-3 text-white">
+        <div className="mb-3 flex h-[min(640px,calc(100vh-7rem))] w-[calc(100vw-2rem)] max-w-sm flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/20 sm:w-96">
+          <div className="flex items-center justify-between border-b border-slate-800 bg-slate-950 px-4 py-3 text-white">
             <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-500">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-500 ring-4 ring-brand-400/20">
                 <Bot className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-sm font-black">NEXA Assistant</p>
-                <p className="text-xs font-semibold text-slate-300">Campus v1.0 chatbot</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-black">NEXA Assistant</p>
+                  <span className="rounded-full bg-emerald-400/15 px-2 py-0.5 text-[10px] font-black text-emerald-200">
+                    Online
+                  </span>
+                </div>
+                <p className="text-xs font-semibold text-slate-300">Campus v1.0 support</p>
               </div>
             </div>
             <div className="flex items-center gap-1">
@@ -117,11 +122,11 @@ export default function NexaChatbot() {
           </div>
 
           <div className="flex-1 overflow-y-auto bg-slate-50 px-4 py-4">
-            <div className="mb-4 rounded-lg border border-brand-100 bg-brand-50 p-3">
+            <div className="mb-4 rounded-lg border border-brand-100 bg-white p-3 shadow-sm">
               <div className="flex gap-2">
                 <Sparkles className="mt-0.5 h-4 w-4 flex-shrink-0 text-brand-700" />
                 <p className="text-xs leading-5 text-brand-900">
-                  Tanya seputar fitur NEXA, paket, Midtrans, marketplace, reminder, atau kendala akun.
+                  Tanya seputar fitur NEXA, paket, DOKU, marketplace, reminder, atau kendala akun.
                 </p>
               </div>
             </div>
@@ -172,7 +177,7 @@ export default function NexaChatbot() {
                 onChange={(event) => setInput(event.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Tanya NEXA..."
-                className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+                className="min-w-0 flex-1 rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm outline-none transition focus:border-brand-500 focus:bg-white focus:ring-2 focus:ring-brand-100"
               />
               <button
                 type="button"
@@ -197,10 +202,13 @@ export default function NexaChatbot() {
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
-        className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-600 text-white shadow-2xl shadow-brand-300 transition hover:bg-brand-700 focus:outline-none focus:ring-4 focus:ring-brand-200"
+        className="group flex items-center gap-3 rounded-full bg-brand-600 p-2 pr-4 text-white shadow-2xl shadow-brand-300 transition hover:bg-brand-700 focus:outline-none focus:ring-4 focus:ring-brand-200"
         aria-label={open ? 'Tutup chatbot NEXA' : 'Buka chatbot NEXA'}
       >
-        <MessageCircle className="h-6 w-6" />
+        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/15">
+          <MessageCircle className="h-5 w-5" />
+        </span>
+        <span className="hidden text-sm font-black sm:inline">Tanya NEXA</span>
       </button>
     </div>
   )

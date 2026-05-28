@@ -169,7 +169,7 @@ diktat-ai/
 | Supabase | ✅ Gratis (500MB DB) | - |
 | OCR.space | ✅ 500 hal/bulan | $0.006/halaman |
 | OpenAI GPT-4o-mini | ❌ (bayar) | ~Rp750/dokumen |
-| Midtrans | ✅ Gratis setup | Biaya sesuai metode pembayaran aktif |
+| DOKU | ✅ Gratis setup | Biaya sesuai metode pembayaran aktif |
 
 ---
 

@@ -24,6 +24,7 @@ import {
 import Button from '@/components/ui/Button'
 import { PlanBadge } from '@/components/ui/Badge'
 import { createClient } from '@/lib/supabase/client'
+import { PLAN_LIMITS } from '@/types'
 import type { Profile, Schedule } from '@/types'
 
 type ReminderType = 'ujian' | 'tugas' | 'praktikum' | 'kuis' | 'presentasi' | 'organisasi' | 'lainnya'
@@ -114,7 +115,8 @@ export default function JadwalPage() {
 
   useEffect(() => { fetchData() }, [fetchData])
 
-  const isPro = profile?.plan === 'pro'
+  const plan = profile?.plan ?? 'free'
+  const isPro = PLAN_LIMITS[plan].canWhatsApp
   const parsedSchedules = useMemo(() => {
     return schedules.map((schedule) => ({
       ...schedule,

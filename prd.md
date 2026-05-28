@@ -164,7 +164,7 @@ Seluruh infrastruktur Diktat.AI dibangun di atas layanan *cloud* berbasis *free 
 - **Basis Data & Autentikasi:** Supabase (*free tier*) — PostgreSQL terkelola dengan sistem autentikasi bawaan, penyimpanan *file*, dan kemampuan *real-time*.
 - **OCR:** OCR.space API (*free tier*: 500 halaman/bulan) — ekstraksi teks dari dokumen PDF dan gambar.
 - **AI/LLM:** OpenAI GPT-4o-mini API — model yang paling efisien secara biaya dengan akurasi tinggi untuk tugas penguraian teks terstruktur.
-- **Pembayaran:** Midtrans Snap — *payment gateway* Indonesia untuk transfer bank, dompet digital, virtual account, dan kartu sesuai konfigurasi merchant.
+- **Pembayaran:** DOKU payment flow — *payment gateway* Indonesia untuk transfer bank, dompet digital, virtual account, dan kartu sesuai konfigurasi merchant.
 - **Notifikasi WhatsApp:** Twilio WhatsApp API (*free trial*) atau Telegram Bot API (gratis) untuk fitur pengingat otomatis.
 
 ### 4.2 Alur Kerja Sistem
@@ -300,7 +300,7 @@ Hari 14    : Penutupan dengan pengumuman hasil leaderboard pengguna paling aktif
 | Supabase (DB + Storage) | Rp0 | *Free tier*: 500 MB database, 1 GB penyimpanan |
 | Vercel (Hosting) | Rp0 | *Free Hobby Plan* untuk Next.js |
 | Twilio WhatsApp / Telegram Bot | Rp0 | *Free trial* Twilio atau Telegram Bot API gratis |
-| Midtrans *Payment Gateway* | Rp0 | Biaya dipotong dari setiap transaksi sesuai metode pembayaran aktif |
+| DOKU *Payment Gateway* | Rp0 | Biaya dipotong dari setiap transaksi sesuai metode pembayaran aktif |
 | Dana Cadangan | Rp175.000 | Untuk *overage* API atau kebutuhan tak terduga |
 | **Total** | **Rp500.000** | |
 
@@ -318,7 +318,7 @@ BEP dihitung berdasarkan total modal awal yang harus dikembalikan dari pendapata
 | **Realistis** | **15** | **10** | **Rp475.000** | **Mendekati BEP** |
 | **Optimistis** | **20** | **10** | **Rp550.000** | **BEP Tercapai ✓** |
 
-Dengan asumsi biaya layanan Midtrans setara 2,9% per transaksi, BEP optimistis bersih adalah:
+Dengan asumsi biaya layanan DOKU setara 2,9% per transaksi, BEP optimistis bersih adalah:
 - Rp550.000 × (1 − 0,029) = **Rp534.045** — BEP tercapai dengan surplus Rp34.045.
 
 **Target pengguna minimum untuk BEP: 30 pengguna berbayar (kombinasi Basic dan Pro).**

@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
       .eq('id', user.id)
       .single()
 
-    if (profile?.plan !== 'pro') {
+    if (profile?.plan !== 'pro' && profile?.plan !== 'admin') {
       return NextResponse.json(
         { error: 'Jadwal dengan pengingat WhatsApp hanya tersedia untuk paket Pro.' },
         { status: 403 }

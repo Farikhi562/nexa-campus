@@ -23,12 +23,12 @@ function CheckoutContent() {
   const waLink = useMemo(() => {
     if (!adminWhatsapp) return ''
     const message = [
-      `Halo admin NEXA, saya mau bayar paket ${plan.name} via Midtrans.`,
+      `Halo admin NEXA, saya mau bayar paket ${plan.name} via DOKU.`,
       `Nama: ${name || '-'}`,
       `Email akun: ${email || '-'}`,
       `WhatsApp: ${whatsapp || '-'}`,
       `Nominal: ${plan.price}`,
-      'Mohon kirim link pembayaran Midtrans.',
+      'Mohon kirim link pembayaran DOKU.',
     ].join('\n')
     return `https://wa.me/${adminWhatsapp}?text=${encodeURIComponent(message)}`
   }, [adminWhatsapp, email, name, plan.name, plan.price, whatsapp])
@@ -48,7 +48,7 @@ function CheckoutContent() {
                 <CreditCard className="h-5 w-5" />
               </div>
               <div>
-                <h1 className="text-2xl font-black">Checkout Midtrans</h1>
+                <h1 className="text-2xl font-black">Checkout DOKU</h1>
                 <p className="text-sm text-slate-500">Isi data akun supaya admin bisa kirim link pembayaran yang benar.</p>
               </div>
             </div>
@@ -70,7 +70,7 @@ function CheckoutContent() {
 
             <a href={waLink || undefined} target="_blank" rel="noreferrer" className={`mt-6 inline-flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-black text-white ${waLink ? 'bg-brand-600 hover:bg-brand-700' : 'pointer-events-none bg-slate-400'}`}>
               <MessageCircle className="h-4 w-4" />
-              {waLink ? 'Minta Link Pembayaran Midtrans' : 'Nomor Admin Belum Dikonfigurasi'}
+              {waLink ? 'Minta Link Pembayaran DOKU' : 'Nomor Admin Belum Dikonfigurasi'}
             </a>
           </section>
 
@@ -83,7 +83,7 @@ function CheckoutContent() {
               <p className="mt-4 text-4xl font-black">{plan.price}</p>
               <p className="mt-1 text-sm font-semibold text-slate-500">per bulan</p>
               <div className="mt-5 space-y-3">
-                {['Pembayaran via Midtrans', 'Aktivasi admin setelah pembayaran', 'Bisa upgrade/downgrade manual'].map((item) => (
+                {['Pembayaran via DOKU', 'Aktivasi admin setelah pembayaran', 'Bisa upgrade/downgrade manual'].map((item) => (
                   <p key={item} className="flex gap-3 text-sm leading-6 text-slate-700">
                     <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-600" />
                     {item}

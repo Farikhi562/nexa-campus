@@ -16,7 +16,7 @@ import {
 import Button from '@/components/ui/Button'
 import { PlanBadge } from '@/components/ui/Badge'
 import { createClient } from '@/lib/supabase/client'
-import type { Plan, Profile } from '@/types'
+import { PLAN_LIMITS, type Plan, type Profile } from '@/types'
 
 type Preferences = {
   emailSummary: boolean
@@ -83,6 +83,7 @@ export default function SettingsPage() {
 
   const plan = (profile?.plan ?? 'free') as Plan
   const isPaid = plan !== 'free'
+  const limits = PLAN_LIMITS[plan]
 
   if (loading) {
     return (
@@ -200,7 +201,7 @@ export default function SettingsPage() {
                 ['Campus Tools', isPaid ? 'Semua terbuka' : 'Gratis terbatas'],
                 ['Mock Exam', isPaid ? 'Tak terbatas' : '1 sesi'],
                 ['Marketplace seller', isPaid ? 'Aktif' : 'Terkunci'],
-                ['Study Room', plan === 'pro' ? 'Aktif' : 'Pro only'],
+                ['Study Room', limits.canStudyRoom ? 'Aktif' : 'Pro only'],
               ].map(([label, value]) => (
                 <div key={label} className="flex items-center justify-between rounded-md border border-slate-200 px-3 py-2">
                   <span className="text-sm font-semibold text-slate-700">{label}</span>
@@ -212,7 +213,7 @@ export default function SettingsPage() {
 
           <Panel title="Bantuan" icon={MessageCircle}>
             <p className="text-sm leading-6 text-slate-600">
-              Butuh aktivasi paket, reset akun, atau bantuan integrasi kampus? Hubungi admin dari halaman pricing agar pesan upgrade otomatis membawa detail akunmu dan request link Midtrans.
+              Butuh aktivasi paket, reset akun, atau bantuan integrasi kampus? Hubungi admin dari halaman pricing agar pesan upgrade otomatis membawa detail akunmu dan request link DOKU.
             </p>
             <Link href="/pricing" className="mt-4 inline-flex">
               <Button type="button" variant="secondary">

@@ -2,7 +2,7 @@
 // NEXA Campus Ecosystem — Shared TypeScript Types
 // ============================================================
 
-export type Plan = 'free' | 'basic' | 'pro'
+export type Plan = 'free' | 'basic' | 'pro' | 'admin'
 export type DocStatus = 'pending' | 'processing' | 'completed' | 'error'
 export type SessionStatus = 'in_progress' | 'completed'
 
@@ -120,6 +120,7 @@ export const PLAN_LIMITS: Record<Plan, {
   free:  { maxDocuments: 1,    maxSessions: 1,    canExportPDF: false, canWhatsApp: false, canStudyRoom: false, canSellMarketplace: false },
   basic: { maxDocuments: 5,    maxSessions: null, canExportPDF: true,  canWhatsApp: false, canStudyRoom: false, canSellMarketplace: true  },
   pro:   { maxDocuments: null, maxSessions: null, canExportPDF: true,  canWhatsApp: true,  canStudyRoom: true,  canSellMarketplace: true  },
+  admin: { maxDocuments: null, maxSessions: null, canExportPDF: true,  canWhatsApp: true,  canStudyRoom: true,  canSellMarketplace: true  },
 }
 
 // ── AI Processing types ──────────────────────────

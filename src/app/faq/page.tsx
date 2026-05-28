@@ -17,7 +17,7 @@ import {
 export const metadata: Metadata = {
   title: 'FAQ NEXA Campus v1.0 - NEXA Campus Ecosystem',
   description:
-    'Pertanyaan umum resmi NEXA Campus Ecosystem v1.0 tentang akun, fitur belajar, marketplace, paket, Midtrans, dan support.',
+    'Pertanyaan umum resmi NEXA Campus Ecosystem v1.0 tentang akun, fitur belajar, marketplace, paket, DOKU, dan support.',
 }
 
 const FAQ_GROUPS = [
@@ -62,8 +62,8 @@ const FAQ_GROUPS = [
     icon: CreditCard,
     items: [
       ['Apa bedanya Free, Basic, dan Pro?', 'Free untuk coba fitur dasar. Basic membuka seller marketplace dan fitur belajar lebih luas. Pro membuka fitur lengkap seperti unlimited dokumen, WhatsApp reminder, Study Room, dan analytics.'],
-      ['Pembayaran pakai apa?', 'NEXA v1.0 diarahkan ke Midtrans checkout atau admin untuk aktivasi awal.'],
-      ['Setelah bayar, paket aktif kapan?', 'Paket diaktifkan setelah pembayaran Midtrans atau konfirmasi admin selesai. Pastikan email akun NEXA sama dengan data checkout.'],
+      ['Pembayaran pakai apa?', 'NEXA v1.0 diarahkan ke DOKU checkout atau admin untuk aktivasi awal.'],
+      ['Setelah bayar, paket aktif kapan?', 'Paket diaktifkan setelah pembayaran DOKU atau konfirmasi admin selesai. Pastikan email akun NEXA sama dengan data checkout.'],
     ],
   },
   {
@@ -104,12 +104,12 @@ export default function FAQPage() {
               FAQ resmi untuk user NEXA.
             </h1>
             <p className="mt-5 max-w-xl text-base leading-7 text-slate-600">
-              Halaman ini menjawab pertanyaan umum tentang akun, fitur belajar, marketplace, paket, Midtrans, dan support NEXA Campus Ecosystem v1.0.
+              Halaman ini menjawab pertanyaan umum tentang akun, fitur belajar, marketplace, paket, DOKU, dan support NEXA Campus Ecosystem v1.0.
             </p>
             <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
               {[
                 ['Versi', 'v1.0'],
-                ['Payment', 'Midtrans ready'],
+                ['Payment', 'DOKU ready'],
                 ['Support', 'Chatbot + Contact'],
               ].map(([label, value]) => (
                 <div key={label} className="rounded-lg border border-slate-200 bg-white p-4">
@@ -162,7 +162,7 @@ export default function FAQPage() {
               <div>
                 <h2 className="text-lg font-black">Masih bingung?</h2>
                 <p className="mt-1 text-sm leading-6 text-brand-900">
-                  Gunakan chatbot di pojok kanan bawah atau hubungi admin untuk aktivasi paket, Midtrans, dan support akun.
+                  Gunakan chatbot di pojok kanan bawah atau hubungi admin untuk aktivasi paket, DOKU, dan support akun.
                 </p>
               </div>
             </div>

@@ -20,7 +20,7 @@ alter table public.profiles
 
 alter table public.profiles
   add constraint profiles_plan_check
-  check (plan in ('free', 'basic', 'pro'));
+  check (plan in ('free', 'basic', 'pro', 'admin'));
 
 alter table public.profiles enable row level security;
 
@@ -47,7 +47,7 @@ for update
 using (auth.uid() = id)
 with check (
   auth.uid() = id
-  and plan in ('free', 'basic', 'pro')
+  and plan in ('free', 'basic', 'pro', 'admin')
 );
 
 create or replace function public.handle_new_user()
@@ -146,7 +146,7 @@ with check (
     select 1
     from public.profiles p
     where p.id = auth.uid()
-      and p.plan = 'pro'
+      and p.plan in ('pro', 'admin')
   )
 );
 
@@ -229,7 +229,7 @@ with check (
     select 1
     from public.profiles p
     where p.id = auth.uid()
-      and p.plan in ('basic', 'pro')
+      and p.plan in ('basic', 'pro', 'admin')
   )
 );
 
@@ -242,7 +242,7 @@ using (
     select 1
     from public.profiles p
     where p.id = auth.uid()
-      and p.plan in ('basic', 'pro')
+      and p.plan in ('basic', 'pro', 'admin')
   )
 )
 with check (
@@ -251,7 +251,7 @@ with check (
     select 1
     from public.profiles p
     where p.id = auth.uid()
-      and p.plan in ('basic', 'pro')
+      and p.plan in ('basic', 'pro', 'admin')
   )
 );
 
@@ -264,7 +264,7 @@ using (
     select 1
     from public.profiles p
     where p.id = auth.uid()
-      and p.plan in ('basic', 'pro')
+      and p.plan in ('basic', 'pro', 'admin')
   )
 );
 

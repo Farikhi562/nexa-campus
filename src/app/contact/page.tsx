@@ -4,7 +4,7 @@ import { ArrowLeft, Mail, MessageCircle, ShieldCheck, Zap } from 'lucide-react'
 export default function ContactPage() {
   const adminWhatsapp = process.env.NEXT_PUBLIC_ADMIN_WHATSAPP?.replace(/\D/g, '')
   const supportEmail = process.env.NEXT_PUBLIC_SUPPORT_EMAIL
-  const message = encodeURIComponent('Halo admin NEXA, saya ingin tanya paket dan aktivasi Midtrans.')
+  const message = encodeURIComponent('Halo admin NEXA, saya ingin tanya paket dan aktivasi DOKU.')
   const whatsappHref = adminWhatsapp ? `https://wa.me/${adminWhatsapp}?text=${message}` : ''
   const mailHref = supportEmail ? `mailto:${supportEmail}` : ''
 
@@ -22,7 +22,7 @@ export default function ContactPage() {
           </div>
           <h1 className="mt-6 text-4xl font-black tracking-tight">Kontak NEXA</h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600">
-            Pakai halaman ini untuk support, aktivasi paket, paket kampus, atau bantuan checkout Midtrans.
+            Pakai halaman ini untuk support, aktivasi paket, paket kampus, atau bantuan checkout DOKU.
           </p>
 
           <div className="mt-8 grid gap-4 sm:grid-cols-2">
@@ -47,7 +47,7 @@ export default function ContactPage() {
           <div className="flex gap-3">
             <ShieldCheck className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-700" />
             <p className="text-sm leading-6 text-emerald-900">
-              Untuk siap jual, isi env kontak admin, email support, akun Midtrans merchant, dan policy halaman legal dengan data brand final.
+              Untuk siap jual, isi env kontak admin, email support, akun DOKU merchant, dan policy halaman legal dengan data brand final.
             </p>
           </div>
         </section>
