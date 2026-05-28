@@ -1,0 +1,24 @@
+[project]
+name = "nexa_crew"
+version = "0.1.0"
+description = "nexa_crew using crewAI"
+authors = [{ name = "Your Name", email = "you@example.com" }]
+requires-python = ">=3.10,<3.14"
+dependencies = [
+    "crewai[tools]==1.14.5a2"
+]
+
+[project.scripts]
+nexa_crew = "nexa_crew.main:run"
+run_crew = "nexa_crew.main:run"
+train = "nexa_crew.main:train"
+replay = "nexa_crew.main:replay"
+test = "nexa_crew.main:test"
+run_with_trigger = "nexa_crew.main:run_with_trigger"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.crewai]
+type = "crew"
