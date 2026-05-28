@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { validateSensitiveData } from '@/lib/policy'
 import { PLAN_LIMITS } from '@/types'
 import type { Plan } from '@/types'
 
@@ -57,6 +58,11 @@ export async function POST(request: NextRequest) {
 
     if (!filePath.startsWith(`${user.id}/`) || !filePath.toLowerCase().endsWith('.pdf')) {
       return NextResponse.json({ error: 'filePath tidak valid.' }, { status: 400 })
+    }
+
+    const policyCheck = validateSensitiveData(`${title} ${filePath}`)
+    if (!policyCheck.ok) {
+      return NextResponse.json({ error: policyCheck.message }, { status: 400 })
     }
 
     // Check plan limits

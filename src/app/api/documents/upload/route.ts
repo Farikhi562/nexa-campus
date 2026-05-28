@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { validateSensitiveData } from '@/lib/policy'
 import { PLAN_LIMITS } from '@/types'
 import type { Plan } from '@/types'
 
@@ -42,6 +43,11 @@ export async function POST(request: NextRequest) {
 
     if (!(file instanceof File)) {
       return NextResponse.json({ error: 'File PDF wajib diupload.' }, { status: 400 })
+    }
+
+    const policyCheck = validateSensitiveData(`${file.name} ${title}`)
+    if (!policyCheck.ok) {
+      return NextResponse.json({ error: policyCheck.message }, { status: 400 })
     }
 
     const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
