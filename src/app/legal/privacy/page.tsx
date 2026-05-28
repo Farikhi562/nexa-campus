@@ -8,10 +8,35 @@ export default function PrivacyPage() {
         <h1 className="mt-4 text-4xl font-black">Kebijakan Privasi</h1>
         <p className="mt-4 text-sm leading-6 text-slate-600">Terakhir diperbarui: 29 Mei 2026</p>
         <div className="mt-8 space-y-6 text-sm leading-7 text-slate-700">
-          <p>NEXA mengumpulkan data akun, profil, dokumen belajar, jadwal, marketplace, dan aktivitas belajar yang diperlukan untuk menjalankan layanan.</p>
-          <p>Dokumen yang diunggah dipakai untuk memproses ringkasan, soal, dan fitur belajar. Jangan unggah dokumen yang melanggar hak cipta atau berisi data sensitif orang lain.</p>
-          <p>Pembayaran diproses melalui DOKU atau proses operasional admin. NEXA tidak menyimpan data kartu pembayaran di aplikasi.</p>
-          <p>Pengguna dapat meminta bantuan perubahan data, penghapusan akun, atau aktivasi paket melalui halaman kontak.</p>
+          <section>
+            <h2 className="mb-2 text-lg font-black text-slate-950">Data yang Dikumpulkan</h2>
+            <p>NEXA mengumpulkan data akun, email, profil, dokumen belajar, jadwal, marketplace, aktivitas belajar, dan data teknis yang diperlukan untuk menjalankan layanan.</p>
+          </section>
+
+          <section>
+            <h2 className="mb-2 text-lg font-black text-slate-950">Dokumen dan Data Sensitif</h2>
+            <p>Dokumen yang diunggah dipakai untuk memproses ringkasan, soal, dan fitur belajar. Pengguna dilarang mengunggah data sensitif seperti KTP, kartu keluarga, data kesehatan, data keuangan, password, rahasia dagang, dokumen yang melanggar hak cipta, atau data pribadi orang lain tanpa izin.</p>
+          </section>
+
+          <section>
+            <h2 className="mb-2 text-lg font-black text-slate-950">Pembayaran</h2>
+            <p>Pembayaran diproses melalui Midtrans atau proses operasional admin. NEXA tidak menyimpan data kartu pembayaran di aplikasi.</p>
+          </section>
+
+          <section>
+            <h2 className="mb-2 text-lg font-black text-slate-950">Cara Hapus Dokumen</h2>
+            <p>Pengguna dapat menghapus dokumen dari dashboard materi. Penghapusan dokumen dapat ikut menghapus soal, sesi ujian, dan data belajar yang terkait dengan dokumen tersebut.</p>
+          </section>
+
+          <section>
+            <h2 className="mb-2 text-lg font-black text-slate-950">Cara Hapus Akun</h2>
+            <p>Untuk meminta penghapusan akun, hubungi support resmi melalui WhatsApp admin 085697916845 atau email nexatechlabs271@gmail.com dengan subjek "Hapus Akun NEXA". Tim akan memverifikasi kepemilikan akun sebelum memproses penghapusan.</p>
+          </section>
+
+          <section>
+            <h2 className="mb-2 text-lg font-black text-slate-950">Kontak Resmi Support</h2>
+            <p>Kontak resmi NEXA adalah WhatsApp 085697916845 dan email nexatechlabs271@gmail.com. Gunakan kontak ini untuk bantuan akun, data, aktivasi paket, dan permintaan privasi.</p>
+          </section>
         </div>
       </article>
     </main>

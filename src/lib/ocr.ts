@@ -11,49 +11,85 @@ export interface OcrResult {
   errorMessage?: string
 }
 
+const OCR_API_URL = 'https://api.ocr.space/parse/image'
+const OCR_TIMEOUT_MS = 55_000
+
+function normalizeOcrError(value: unknown): string | undefined {
+  if (!value) return undefined
+  if (Array.isArray(value)) return value.filter(Boolean).join(', ')
+  if (typeof value === 'string') return value
+  return undefined
+}
+
 /**
  * Extract text from a PDF buffer using OCR.space API.
  * Falls back to returning empty string on error (handled upstream).
  */
-export async function extractTextFromPdf(pdfBuffer: ArrayBuffer): Promise<OcrResult> {
+export async function extractTextFromPdf(
+  pdfBuffer: ArrayBuffer,
+  filename = 'document.pdf'
+): Promise<OcrResult> {
   const API_KEY = process.env.OCR_SPACE_API_KEY || 'helloworld'
+  const language = process.env.OCR_SPACE_LANGUAGE || 'auto'
 
   const blob = new Blob([pdfBuffer], { type: 'application/pdf' })
   const formData = new FormData()
-  formData.append('file', blob, 'document.pdf')
+  formData.append('file', blob, filename)
   formData.append('apikey', API_KEY)
-  formData.append('language', 'ind')          // Indonesian
+  formData.append('language', language)
+  formData.append('filetype', 'PDF')
   formData.append('isOverlayRequired', 'false')
   formData.append('detectOrientation', 'true')
   formData.append('scale', 'true')
-  formData.append('OCREngine', '2')           // Engine 2 = better for printed text
+  formData.append('OCREngine', '2')
 
   try {
-    const response = await fetch('https://api.ocr.space/parse/image', {
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), OCR_TIMEOUT_MS)
+
+    const response = await fetch(OCR_API_URL, {
       method: 'POST',
       body: formData,
+      signal: controller.signal,
     })
+    clearTimeout(timeout)
+
+    const raw = await response.text()
+    let data: {
+      IsErroredOnProcessing?: boolean
+      ParsedResults?: Array<{ ParsedText?: string }>
+      ErrorMessage?: unknown
+      ErrorDetails?: unknown
+    } = {}
+
+    try {
+      data = raw ? JSON.parse(raw) : {}
+    } catch {
+      data = {}
+    }
+
+    const apiError =
+      normalizeOcrError(data.ErrorMessage) ||
+      normalizeOcrError(data.ErrorDetails)
 
     if (!response.ok) {
       return {
         text: '',
         isError: true,
-        errorMessage: `OCR API HTTP error: ${response.status}`,
+        errorMessage: `OCR.space menolak request (HTTP ${response.status})${apiError ? `: ${apiError}` : ''}`,
       }
     }
-
-    const data = await response.json()
 
     if (data.IsErroredOnProcessing) {
       return {
         text: '',
         isError: true,
-        errorMessage: data.ErrorMessage?.join(', ') || 'OCR processing error',
+        errorMessage: apiError || 'OCR.space gagal memproses dokumen.',
       }
     }
 
     const text = data.ParsedResults
-      ?.map((r: { ParsedText: string }) => r.ParsedText)
+      ?.map((r) => r.ParsedText ?? '')
       .join('\n\n') || ''
 
     if (!text.trim()) {
@@ -69,7 +105,7 @@ export async function extractTextFromPdf(pdfBuffer: ArrayBuffer): Promise<OcrRes
     return {
       text: '',
       isError: true,
-      errorMessage: `Network error: ${err instanceof Error ? err.message : 'Unknown'}`,
+      errorMessage: `Network/timeout error saat OCR: ${err instanceof Error ? err.message : 'Unknown'}`,
     }
   }
 }
