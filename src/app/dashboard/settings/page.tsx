@@ -6,11 +6,13 @@ import {
   BellRing,
   CheckCircle2,
   CreditCard,
+  FileText,
   Mail,
   MessageCircle,
   Save,
   Settings,
   ShieldCheck,
+  Trash2,
   UserRound,
 } from 'lucide-react'
 import Button from '@/components/ui/Button'
@@ -33,6 +35,8 @@ const DEFAULT_PREFERENCES: Preferences = {
 }
 
 const STORAGE_KEY = 'nexa-settings-preferences'
+const SUPPORT_EMAIL = 'nexatechlabs271@gmail.com'
+const SUPPORT_WHATSAPP = '6285697916845'
 
 export default function SettingsPage() {
   const supabase = useMemo(() => createClient(), [])
@@ -79,6 +83,31 @@ export default function SettingsPage() {
       setSaved(true)
       setTimeout(() => setSaved(false), 2500)
     }, 350)
+  }
+
+  function supportEmailLink(topic: 'delete-account' | 'refund') {
+    const subject = topic === 'delete-account' ? 'Hapus Akun NEXA' : 'Refund Paket NEXA'
+    const body = [
+      `Halo admin NEXA, saya ingin mengajukan ${topic === 'delete-account' ? 'penghapusan akun' : 'refund paket'}.`,
+      `Email akun: ${profile?.email || ''}`,
+      `Nama: ${profile?.full_name || ''}`,
+      'Alasan:',
+    ].join('\n')
+
+    return `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+  }
+
+  function supportWhatsappLink(topic: 'delete-account' | 'refund') {
+    const text = encodeURIComponent(
+      [
+        `Halo admin NEXA, saya ingin mengajukan ${topic === 'delete-account' ? 'penghapusan akun' : 'refund paket'}.`,
+        `Email akun: ${profile?.email || ''}`,
+        `Nama: ${profile?.full_name || ''}`,
+        'Mohon dibantu verifikasi.',
+      ].join('\n')
+    )
+
+    return `https://wa.me/${SUPPORT_WHATSAPP}?text=${text}`
   }
 
   const plan = (profile?.plan ?? 'free') as Plan
@@ -183,6 +212,45 @@ export default function SettingsPage() {
               )}
             </div>
           </Panel>
+
+          <Panel title="Data & Akun" icon={Trash2}>
+            <div className="space-y-3">
+              <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <div className="flex items-start gap-3">
+                  <FileText className="mt-0.5 h-5 w-5 flex-shrink-0 text-brand-600" />
+                  <div>
+                    <p className="text-sm font-black text-slate-950">Hapus dokumen</p>
+                    <p className="mt-1 text-xs leading-5 text-slate-600">
+                      Dokumen bisa dihapus dari dashboard materi. Penghapusan dokumen dapat ikut menghapus soal dan sesi ujian yang terkait.
+                    </p>
+                    <Link href="/dashboard" className="mt-3 inline-flex">
+                      <Button type="button" variant="outline" size="sm">Buka Materi</Button>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+                <div className="flex items-start gap-3">
+                  <Trash2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-700" />
+                  <div>
+                    <p className="text-sm font-black text-red-950">Request hapus akun</p>
+                    <p className="mt-1 text-xs leading-5 text-red-800">
+                      Penghapusan akun diproses lewat support resmi agar kepemilikan akun bisa diverifikasi. Data profil, dokumen, soal, sesi ujian, dan listing terkait dapat ikut dihapus.
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <a href={supportEmailLink('delete-account')}>
+                        <Button type="button" variant="danger" size="sm">Email Hapus Akun</Button>
+                      </a>
+                      <a href={supportWhatsappLink('delete-account')} target="_blank" rel="noreferrer">
+                        <Button type="button" variant="outline" size="sm">WhatsApp Support</Button>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Panel>
         </div>
 
         <div className="space-y-6">
@@ -213,14 +281,19 @@ export default function SettingsPage() {
 
           <Panel title="Bantuan" icon={MessageCircle}>
             <p className="text-sm leading-6 text-slate-600">
-              Butuh aktivasi paket, reset akun, atau bantuan integrasi kampus? Hubungi admin dari halaman pricing agar pesan upgrade otomatis membawa detail akunmu dan request link DOKU.
+              Butuh aktivasi paket, reset akun, refund, atau bantuan integrasi kampus? Hubungi support resmi NEXA untuk request link Midtrans dan verifikasi akun.
             </p>
-            <Link href="/pricing" className="mt-4 inline-flex">
-              <Button type="button" variant="secondary">
-                <MessageCircle className="h-4 w-4" />
-                Hubungi Admin
-              </Button>
-            </Link>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Link href="/contact" className="inline-flex">
+                <Button type="button" variant="secondary">
+                  <MessageCircle className="h-4 w-4" />
+                  Kontak Support
+                </Button>
+              </Link>
+              <a href={supportEmailLink('refund')}>
+                <Button type="button" variant="outline">Ajukan Refund</Button>
+              </a>
+            </div>
           </Panel>
         </div>
       </section>

@@ -11,7 +11,7 @@ Vercel (Frontend + Backend API)
 ├── OpenAI (GPT-4o-mini API)
 ├── OCR.space (PDF extraction)
 ├── Twilio (WhatsApp notifications)
-└── DOKU (Payment processing)
+└── Midtrans (Payment processing)
 ```
 
 ## Prerequisites for Production
@@ -21,7 +21,7 @@ Vercel (Frontend + Backend API)
 - [ ] OpenAI API key with billing enabled
 - [ ] Domain name (optional, Vercel provides .vercel.app)
 - [ ] Twilio account (for WhatsApp - optional)
-- [ ] DOKU merchant account (for payments - optional)
+- [ ] Midtrans merchant account (for payments - optional)
 
 ## Step 1: Prepare Repository
 
@@ -66,9 +66,10 @@ git push origin main
      TWILIO_AUTH_TOKEN (optional)
      TWILIO_WHATSAPP_FROM (optional)
      CRON_SECRET
-     DOKU_SECRET_KEY (optional)
-     DOKU_CLIENT_ID (optional)
-     DOKU_IS_PRODUCTION (optional)
+     MIDTRANS_SERVER_KEY (optional)
+     MIDTRANS_CLIENT_KEY (optional)
+     NEXT_PUBLIC_MIDTRANS_CLIENT_KEY (optional)
+     MIDTRANS_IS_PRODUCTION (optional)
      ```
    - Click "Deploy"
 

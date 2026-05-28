@@ -214,7 +214,7 @@ Before going live:
 - [ ] Rate limiting configured
 - [ ] HTTPS enabled
 - [ ] CORS properly configured
-- [ ] Payment gateway tested (DOKU)
+- [ ] Payment gateway tested (Midtrans)
 - [ ] Twilio WhatsApp moved out of sandbox
 - [ ] Database Row Level Security (RLS) policies reviewed
 - [ ] API rate limits set in Supabase
@@ -247,7 +247,7 @@ src/lib/
 
 ## Next Steps
 
-1. **Payment Integration**: Implement DOKU payment flow payment flow
+1. **Payment Integration**: Implement Midtrans payment flow
 2. **Analytics**: Add event tracking (e.g., Mixpanel)
 3. **Admin Dashboard**: Build admin interface for monitoring
 4. **AI Improvements**: Fine-tune prompts for better extraction

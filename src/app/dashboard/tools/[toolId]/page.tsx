@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { ArrowLeft, CheckCircle2, Clock3, Lock, Sparkles, Wand2, Zap } from 'lucide-react'
+import { ArrowLeft, CheckCircle2, Clock3, Lock, ShieldAlert, Sparkles, Wand2, Zap } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { PlanBadge } from '@/components/ui/Badge'
 import { createClient } from '@/lib/supabase/client'
@@ -137,7 +137,7 @@ export default function CampusToolDetailPage() {
               <p className="font-black text-red-950">
                 {isLocked ? 'Premium terkunci' : `${Math.max(0, FREE_DAILY_LIMIT - freeUses)} demo gratis tersisa`}
               </p>
-              <p className="mt-1 text-xs leading-5 text-red-800">Upgrade via DOKU untuk buka semua tools tanpa limit demo.</p>
+              <p className="mt-1 text-xs leading-5 text-red-800">Upgrade via Midtrans untuk buka semua tools tanpa limit demo.</p>
             </div>
           )}
         </div>
@@ -159,7 +159,7 @@ export default function CampusToolDetailPage() {
             <Link href="/pricing">
               <Button type="button" className="bg-red-600 hover:bg-red-700">
                 <Zap className="h-4 w-4" />
-                Upgrade via DOKU
+                Upgrade via Midtrans
               </Button>
             </Link>
           </div>
@@ -168,9 +168,21 @@ export default function CampusToolDetailPage() {
 
       {freeLimitReached && (
         <section className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-900">
-          Kuota demo gratis habis. Upgrade via DOKU untuk memakai semua Campus Tools tanpa batas demo.
+          Kuota demo gratis habis. Upgrade via Midtrans untuk memakai semua Campus Tools tanpa batas demo.
         </section>
       )}
+
+      <section className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+        <div className="flex gap-3">
+          <ShieldAlert className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-700" />
+          <div>
+            <p className="text-sm font-black text-amber-950">Gunakan AI secara etis</p>
+            <p className="mt-1 text-xs leading-5 text-amber-800">
+              Tool ini untuk belajar, memahami materi, dan menyusun rencana. Jangan gunakan untuk menyontek ujian, joki tugas, plagiarisme, spam, penipuan, phishing, malware, atau aktivitas ilegal.
+            </p>
+          </div>
+        </div>
+      </section>
 
       <section className="relative grid gap-6 lg:grid-cols-[1fr_0.95fr]">
         {isLocked && (
@@ -180,7 +192,7 @@ export default function CampusToolDetailPage() {
                 <Lock className="h-6 w-6" />
               </div>
               <h3 className="text-lg font-black text-red-950">Workspace premium terkunci</h3>
-              <p className="mt-2 text-sm leading-6 text-red-800">Basic/Pro membuka halaman ini penuh. Pembayaran diarahkan ke DOKU.</p>
+              <p className="mt-2 text-sm leading-6 text-red-800">Basic/Pro membuka halaman ini penuh. Pembayaran diarahkan ke Midtrans.</p>
               <Link href="/pricing" className="mt-4 inline-flex">
                 <Button type="button" className="bg-red-600 hover:bg-red-700">Buka Paket</Button>
               </Link>

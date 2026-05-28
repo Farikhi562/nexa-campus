@@ -30,7 +30,7 @@ export default function PrivacyPage() {
 
           <section>
             <h2 className="mb-2 text-lg font-black text-slate-950">Cara Hapus Akun</h2>
-            <p>Untuk meminta penghapusan akun, hubungi support resmi melalui WhatsApp admin 085697916845 atau email nexatechlabs271@gmail.com dengan subjek "Hapus Akun NEXA". Tim akan memverifikasi kepemilikan akun sebelum memproses penghapusan.</p>
+            <p>Untuk meminta penghapusan akun, hubungi support resmi melalui WhatsApp admin 085697916845 atau email nexatechlabs271@gmail.com dengan subjek &quot;Hapus Akun NEXA&quot;. Tim akan memverifikasi kepemilikan akun sebelum memproses penghapusan.</p>
           </section>
 
           <section>

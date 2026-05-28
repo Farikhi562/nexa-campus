@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, useMemo, useState } from 'react'
+import { Suspense, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { ArrowLeft, CheckCircle2, CreditCard, MessageCircle, ShieldCheck, Zap } from 'lucide-react'
@@ -15,23 +15,60 @@ function CheckoutContent() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [whatsapp, setWhatsapp] = useState('')
+  const [paying, setPaying] = useState(false)
+  const [paymentError, setPaymentError] = useState('')
   const adminWhatsapp = process.env.NEXT_PUBLIC_ADMIN_WHATSAPP?.replace(/\D/g, '')
 
   const selectedPlan = search.get('plan') === 'pro' ? 'pro' : 'basic'
   const plan = PLAN_DATA[selectedPlan]
 
+  useEffect(() => {
+    setName(search.get('name') || '')
+    setEmail(search.get('email') || '')
+  }, [search])
+
   const waLink = useMemo(() => {
     if (!adminWhatsapp) return ''
     const message = [
-      `Halo admin NEXA, saya mau bayar paket ${plan.name} via DOKU.`,
+      `Halo admin NEXA, saya mau bayar paket ${plan.name} via Midtrans.`,
       `Nama: ${name || '-'}`,
       `Email akun: ${email || '-'}`,
       `WhatsApp: ${whatsapp || '-'}`,
       `Nominal: ${plan.price}`,
-      'Mohon kirim link pembayaran DOKU.',
+      'Mohon kirim link pembayaran Midtrans.',
     ].join('\n')
     return `https://wa.me/${adminWhatsapp}?text=${encodeURIComponent(message)}`
   }, [adminWhatsapp, email, name, plan.name, plan.price, whatsapp])
+
+  async function payWithMidtrans() {
+    setPaying(true)
+    setPaymentError('')
+
+    try {
+      const response = await fetch('/api/payments/midtrans', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          plan: selectedPlan,
+          name,
+          email,
+          whatsapp,
+        }),
+      })
+      const data = await response.json().catch(() => ({}))
+
+      if (!response.ok || !data.redirectUrl) {
+        setPaymentError(data.error || 'Gagal membuat pembayaran Midtrans.')
+        return
+      }
+
+      window.location.href = data.redirectUrl
+    } catch {
+      setPaymentError('Koneksi ke Midtrans sedang bermasalah. Coba lagi atau minta link manual ke admin.')
+    } finally {
+      setPaying(false)
+    }
+  }
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-950">
@@ -48,7 +85,7 @@ function CheckoutContent() {
                 <CreditCard className="h-5 w-5" />
               </div>
               <div>
-                <h1 className="text-2xl font-black">Checkout DOKU</h1>
+                <h1 className="text-2xl font-black">Checkout Midtrans</h1>
                 <p className="text-sm text-slate-500">Isi data akun supaya admin bisa kirim link pembayaran yang benar.</p>
               </div>
             </div>
@@ -68,9 +105,25 @@ function CheckoutContent() {
               </label>
             </div>
 
-            <a href={waLink || undefined} target="_blank" rel="noreferrer" className={`mt-6 inline-flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-black text-white ${waLink ? 'bg-brand-600 hover:bg-brand-700' : 'pointer-events-none bg-slate-400'}`}>
+            {paymentError && (
+              <div className="mt-5 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm leading-6 text-amber-900">
+                {paymentError}
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={payWithMidtrans}
+              disabled={paying}
+              className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 py-3 text-sm font-black text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-slate-400"
+            >
+              <CreditCard className="h-4 w-4" />
+              {paying ? 'Membuat Pembayaran...' : 'Bayar dengan Midtrans'}
+            </button>
+
+            <a href={waLink || undefined} target="_blank" rel="noreferrer" className={`mt-3 inline-flex w-full items-center justify-center gap-2 rounded-lg border px-4 py-3 text-sm font-black ${waLink ? 'border-slate-300 text-slate-700 hover:border-brand-300 hover:text-brand-700' : 'pointer-events-none border-slate-200 text-slate-400'}`}>
               <MessageCircle className="h-4 w-4" />
-              {waLink ? 'Minta Link Pembayaran DOKU' : 'Nomor Admin Belum Dikonfigurasi'}
+              {waLink ? 'Minta Link Manual ke Admin' : 'Nomor Admin Belum Dikonfigurasi'}
             </a>
           </section>
 
@@ -83,7 +136,7 @@ function CheckoutContent() {
               <p className="mt-4 text-4xl font-black">{plan.price}</p>
               <p className="mt-1 text-sm font-semibold text-slate-500">per bulan</p>
               <div className="mt-5 space-y-3">
-                {['Pembayaran via DOKU', 'Aktivasi admin setelah pembayaran', 'Bisa upgrade/downgrade manual'].map((item) => (
+                {['Pembayaran via Midtrans', 'Aktivasi admin setelah pembayaran', 'Bisa upgrade/downgrade manual'].map((item) => (
                   <p key={item} className="flex gap-3 text-sm leading-6 text-slate-700">
                     <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-600" />
                     {item}

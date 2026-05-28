@@ -14,12 +14,14 @@ import {
   Package,
   Plus,
   Search,
+  ShieldAlert,
   Store,
   Tag,
 } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { PlanBadge } from '@/components/ui/Badge'
 import { createClient } from '@/lib/supabase/client'
+import { validateMarketplaceListing } from '@/lib/policy'
 import type { Plan, Profile } from '@/types'
 
 type ListingType = 'barang' | 'jasa'
@@ -63,6 +65,7 @@ export default function MarketplacePage() {
     location: '',
     description: '',
   })
+  const [policyAccepted, setPolicyAccepted] = useState(false)
   const [notice, setNotice] = useState('')
   const [error, setError] = useState('')
 
@@ -127,6 +130,17 @@ export default function MarketplacePage() {
       setNotice('Nama, harga, kategori, dan deskripsi wajib diisi.')
       return
     }
+    if (!policyAccepted) {
+      setNotice('Centang persetujuan aturan marketplace sebelum menerbitkan listing.')
+      return
+    }
+
+    const policyCheck = validateMarketplaceListing(`${draftType} ${draft.title} ${draft.category} ${draft.description}`)
+    if (!policyCheck.ok) {
+      setNotice(policyCheck.message)
+      return
+    }
+
     if (!profile?.whatsapp_number) {
       setNotice('Isi nomor WhatsApp di profil dulu supaya pembeli bisa menghubungi seller.')
       return
@@ -162,6 +176,7 @@ export default function MarketplacePage() {
     }
 
     setDraft({ title: '', price: '', category: '', location: '', description: '' })
+    setPolicyAccepted(false)
     setShowComposer(false)
     setNotice('Listing berhasil diterbitkan.')
     setSaving(false)
@@ -322,11 +337,32 @@ export default function MarketplacePage() {
             <textarea value={draft.description} onChange={(e) => updateDraft('description', e.target.value)} className="min-h-24 rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 md:col-span-2" placeholder="Deskripsi singkat, kondisi barang, metode ketemu, atau detail jasa" />
           </div>
 
+          <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-4">
+            <div className="flex gap-3">
+              <ShieldAlert className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-700" />
+              <div>
+                <p className="text-sm font-black text-red-950">Aturan konten marketplace</p>
+                <p className="mt-1 text-xs leading-5 text-red-800">
+                  Dilarang menjual barang ilegal, narkotika, senjata, alkohol, rokok/vape untuk minor, konten dewasa, jasa joki tugas/ujian, akun, data pribadi, dokumen palsu, produk bajakan, plagiarisme, dan penipuan.
+                </p>
+                <label className="mt-3 flex items-start gap-2 text-xs font-semibold leading-5 text-red-900">
+                  <input
+                    type="checkbox"
+                    checked={policyAccepted}
+                    onChange={(event) => setPolicyAccepted(event.target.checked)}
+                    className="mt-1"
+                  />
+                  Saya memastikan listing ini tidak melanggar aturan marketplace dan bertanggung jawab atas transaksi yang saya lakukan.
+                </label>
+              </div>
+            </div>
+          </div>
+
           <div className="mt-4 flex items-center justify-end gap-3">
-            <Button type="button" variant="outline" onClick={() => setShowComposer(false)}>
+            <Button type="button" variant="outline" onClick={() => { setShowComposer(false); setPolicyAccepted(false) }}>
               Batal
             </Button>
-            <Button type="button" onClick={publishListing} loading={saving}>
+            <Button type="button" onClick={publishListing} loading={saving} disabled={!policyAccepted}>
               Terbitkan Listing
             </Button>
           </div>

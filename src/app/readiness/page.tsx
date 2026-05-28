@@ -7,9 +7,9 @@ const CHECKS = [
   { label: 'Supabase service role', ok: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY), key: 'SUPABASE_SERVICE_ROLE_KEY' },
   { label: 'OpenAI API key', ok: Boolean(process.env.OPENAI_API_KEY), key: 'OPENAI_API_KEY' },
   { label: 'OCR.space API key', ok: Boolean(process.env.OCR_SPACE_API_KEY), key: 'OCR_SPACE_API_KEY' },
-  { label: 'DOKU client ID', ok: Boolean(process.env.DOKU_CLIENT_ID), key: 'DOKU_CLIENT_ID' },
-  { label: 'DOKU secret key', ok: Boolean(process.env.DOKU_SECRET_KEY), key: 'DOKU_SECRET_KEY' },
-  { label: 'DOKU merchant ID', ok: Boolean(process.env.DOKU_MERCHANT_ID), key: 'DOKU_MERCHANT_ID' },
+  { label: 'Midtrans server key', ok: Boolean(process.env.MIDTRANS_SERVER_KEY), key: 'MIDTRANS_SERVER_KEY' },
+  { label: 'Midtrans client key', ok: Boolean(process.env.MIDTRANS_CLIENT_KEY), key: 'MIDTRANS_CLIENT_KEY' },
+  { label: 'Midtrans public client key', ok: Boolean(process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY), key: 'NEXT_PUBLIC_MIDTRANS_CLIENT_KEY' },
 ]
 
 export default function ReadinessPage() {
@@ -59,7 +59,7 @@ export default function ReadinessPage() {
             <ShieldCheck className="h-6 w-6 text-brand-700" />
             <h2 className="mt-3 font-black">Sebelum dijual</h2>
             <p className="mt-2 text-sm leading-6 text-brand-900">
-              Pastikan SQL + RLS sudah dijalankan di Supabase, Google OAuth redirect sudah benar, dan paket user bisa diaktifkan admin setelah DOKU confirm.
+              Pastikan SQL + RLS sudah dijalankan di Supabase, Google OAuth redirect sudah benar, dan paket user bisa diaktifkan admin setelah Midtrans confirm.
             </p>
           </div>
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">

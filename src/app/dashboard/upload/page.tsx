@@ -2,16 +2,15 @@
 
 import { useState, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
 import Button from '@/components/ui/Button'
-import { Upload, FileText, X, CheckCircle2, AlertCircle, Cpu, Sparkles } from 'lucide-react'
+import { Upload, FileText, X, CheckCircle2, AlertCircle, Cpu, Sparkles, ShieldAlert } from 'lucide-react'
 import clsx from 'clsx'
+import { validateSensitiveData } from '@/lib/policy'
 
 type Stage = 'idle' | 'uploading' | 'processing' | 'done' | 'error'
 
 export default function UploadPage() {
   const router    = useRouter()
-  const supabase  = createClient()
   const inputRef  = useRef<HTMLInputElement>(null)
 
   const [file, setFile]         = useState<File | null>(null)
@@ -21,6 +20,7 @@ export default function UploadPage() {
   const [progress, setProgress] = useState('')
   const [docId, setDocId]       = useState<string | null>(null)
   const [error, setError]       = useState('')
+  const [policyAccepted, setPolicyAccepted] = useState(false)
 
   const pickFile = (f: File) => {
     if (f.type !== 'application/pdf') {
@@ -33,6 +33,7 @@ export default function UploadPage() {
     }
     setFile(f)
     setError('')
+    setPolicyAccepted(false)
     // Auto-fill title from filename
     setTitle(f.name.replace(/\.pdf$/i, '').replace(/[-_]/g, ' '))
   }
@@ -46,40 +47,38 @@ export default function UploadPage() {
 
   async function handleUpload() {
     if (!file || !title.trim()) return
-
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { router.push('/auth/login'); return }
-
-    setStage('uploading')
-    setError('')
-
-    // 1. Upload to Supabase Storage
-    const filePath = `${user.id}/${Date.now()}_${file.name}`
-    const { error: storageError } = await supabase.storage
-      .from('documents')
-      .upload(filePath, file, { contentType: 'application/pdf', upsert: false })
-
-    if (storageError) {
-      setError(`Upload gagal: ${storageError.message}`)
-      setStage('error')
+    if (!policyAccepted) {
+      setError('Centang konfirmasi bahwa dokumen tidak berisi data sensitif atau konten terlarang.')
       return
     }
 
-    // 2. Create document record
-    const { data: docData, error: dbError } = await supabase
-      .from('documents')
-      .insert({
-        user_id:   user.id,
-        title:     title.trim(),
-        file_path: filePath,
-        status:    'processing',
-      })
-      .select()
-      .single()
+    const policyCheck = validateSensitiveData(`${file.name} ${title}`)
+    if (!policyCheck.ok) {
+      setError(policyCheck.message)
+      return
+    }
 
-    if (dbError || !docData) {
-      await supabase.storage.from('documents').remove([filePath])
-      setError(`Gagal menyimpan dokumen: ${dbError?.message}`)
+    setStage('uploading')
+    setProgress('Mengupload file...')
+    setError('')
+
+    const uploadForm = new FormData()
+    uploadForm.append('title', title.trim())
+    uploadForm.append('file', file)
+
+    const uploadRes = await fetch('/api/documents/upload', {
+      method: 'POST',
+      body: uploadForm,
+    })
+    const docData = await uploadRes.json()
+
+    if (uploadRes.status === 401) {
+      router.push('/auth/login')
+      return
+    }
+
+    if (!uploadRes.ok || docData.error || !docData.id) {
+      setError(docData.error || 'Upload gagal.')
       setStage('error')
       return
     }
@@ -101,12 +100,10 @@ export default function UploadPage() {
       setError(result.error || 'Gagal memproses dokumen.')
       setStage('error')
 
-      // Mark doc as error
-      await supabase.from('documents').update({ status: 'error', error_message: result.error }).eq('id', docData.id)
       return
     }
 
-    setProgress(`✅ ${result.questionCount} soal berhasil diekstrak!`)
+    setProgress(`${result.questionCount} soal berhasil diekstrak.`)
     setStage('done')
   }
 
@@ -186,7 +183,7 @@ export default function UploadPage() {
                 {stage === 'idle' && (
                   <button
                     className="mt-1 text-xs text-red-400 hover:text-red-600 flex items-center gap-1"
-                    onClick={e => { e.stopPropagation(); setFile(null); setTitle('') }}
+                    onClick={e => { e.stopPropagation(); setFile(null); setTitle(''); setPolicyAccepted(false) }}
                   >
                     <X className="w-3 h-3" /> Ganti file
                   </button>
@@ -207,18 +204,41 @@ export default function UploadPage() {
 
           {/* Title input */}
           {file && stage === 'idle' && (
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                Judul Dokumen
-              </label>
-              <input
-                type="text"
-                value={title}
-                onChange={e => setTitle(e.target.value)}
-                placeholder="contoh: Soal UTS Manajemen Keuangan 2025"
-                className="w-full px-4 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-              />
-            </div>
+            <>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Judul Dokumen
+                </label>
+                <input
+                  type="text"
+                  value={title}
+                  onChange={e => setTitle(e.target.value)}
+                  placeholder="contoh: Soal UTS Manajemen Keuangan 2025"
+                  className="w-full px-4 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                />
+              </div>
+
+              <div className="rounded-xl border border-red-200 bg-red-50 p-4">
+                <div className="flex gap-3">
+                  <ShieldAlert className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-700" />
+                  <div>
+                    <p className="text-sm font-black text-red-950">Jangan unggah data sensitif</p>
+                    <p className="mt-1 text-xs leading-5 text-red-800">
+                      Hindari KTP, kartu keluarga, data kesehatan, data keuangan, password, rahasia kampus, atau data pribadi orang lain. Dokumen yang melanggar hak cipta atau aturan kampus juga tidak boleh diunggah.
+                    </p>
+                    <label className="mt-3 flex items-start gap-2 text-xs font-semibold leading-5 text-red-900">
+                      <input
+                        type="checkbox"
+                        checked={policyAccepted}
+                        onChange={(event) => setPolicyAccepted(event.target.checked)}
+                        className="mt-1"
+                      />
+                      Saya memastikan dokumen ini aman untuk diproses dan tidak berisi data sensitif atau konten terlarang.
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </>
           )}
 
           {/* Processing status */}
@@ -261,7 +281,7 @@ export default function UploadPage() {
               fullWidth
               size="lg"
               onClick={handleUpload}
-              disabled={!title.trim()}
+              disabled={!title.trim() || !policyAccepted}
               loading={false}
             >
               <Upload className="w-5 h-5" />
@@ -271,7 +291,7 @@ export default function UploadPage() {
 
           {/* Retry */}
           {stage === 'error' && (
-            <Button fullWidth variant="secondary" onClick={() => { setStage('idle'); setFile(null); setTitle('') }}>
+            <Button fullWidth variant="secondary" onClick={() => { setStage('idle'); setFile(null); setTitle(''); setPolicyAccepted(false) }}>
               Coba Lagi
             </Button>
           )}
