@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
@@ -7,7 +7,6 @@ export async function GET(request: NextRequest) {
   const error = searchParams.get('error')
   const error_description = searchParams.get('error_description')
 
-  // Log errors from Supabase OAuth provider
   if (error) {
     console.error('OAuth Error:', error, error_description)
     return NextResponse.redirect(
@@ -30,17 +29,34 @@ export async function GET(request: NextRequest) {
 
     if (!user) {
       return NextResponse.redirect(
-        `${origin}/auth/login?error=no_user&error_description=${encodeURIComponent('Login berhasil diproses, tapi session user tidak ditemukan.')}`
+        `${origin}/auth/login?error=no_user&error_description=${encodeURIComponent('Session user tidak ditemukan.')}`
       )
     }
 
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('profile_completed')
-      .eq('id', user.id)
-      .single()
+    // FIX: Ensure profile exists for new users (e.g. Google OAuth first login)
+    const serviceClient = createServiceClient()
 
-    if (!profile?.profile_completed) {
+    const { data: existingProfile } = await serviceClient
+      .from('profiles')
+      .select('id, profile_completed')
+      .eq('id', user.id)
+      .maybeSingle()
+
+    if (!existingProfile) {
+      // Create profile — handles case where DB trigger didn't fire
+      await serviceClient.from('profiles').insert({
+        id: user.id,
+        email: user.email || '',
+        full_name: user.user_metadata?.full_name || user.user_metadata?.name || null,
+        avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture || null,
+        plan: 'free',
+        profile_completed: false,
+      }).onConflict('id').ignore()
+    }
+
+    const profileCompleted = existingProfile?.profile_completed ?? false
+
+    if (!profileCompleted) {
       return NextResponse.redirect(`${origin}/dashboard/setup-profile`)
     }
 

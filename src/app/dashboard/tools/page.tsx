@@ -1,224 +1,507 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import Link from 'next/link'
+import { useState, useRef, useEffect } from 'react'
 import {
-  BadgeCheck,
-  BarChart3,
-  BookMarked,
-  Bot,
-  BriefcaseBusiness,
-  CalendarClock,
-  CheckCircle2,
-  ClipboardCheck,
-  FileSearch,
+  BookOpen,
+  Calculator,
+  FileText,
   GraduationCap,
-  HeartPulse,
-  LineChart,
-  Lock,
-  MessageSquareText,
-  Network,
-  PenTool,
-  PiggyBank,
+  Lightbulb,
+  Mic,
+  Search,
   Sparkles,
+  Target,
+  Timer,
+  TrendingUp,
   Users,
+  X,
+  ChevronRight,
+  ArrowLeft,
+  Send,
+  Loader2,
+  Lock,
 } from 'lucide-react'
-import Button from '@/components/ui/Button'
 
-type Plan = 'Free' | 'Basic' | 'Pro'
+// ─── Tool definitions ────────────────────────────────────────────
+type ToolId =
+  | 'ipk-calculator'
+  | 'citation-generator'
+  | 'essay-planner'
+  | 'pomodoro'
+  | 'summarizer'
+  | 'quiz-generator'
+  | 'career-advisor'
+  | 'grammar-checker'
+  | 'study-plan'
+  | 'presentation-coach'
+  | 'habit-tracker'
+  | 'research-helper'
 
-const FEATURES = [
-  { title: 'AI Ringkas Materi', icon: Bot, plan: 'Free' as Plan, desc: 'Ubah catatan panjang jadi poin belajar, outline, dan action item.' },
-  { title: 'Flashcard Generator', icon: BookMarked, plan: 'Free' as Plan, desc: 'Buat kartu tanya jawab cepat dari topik kuliah.' },
-  { title: 'Deadline Risk Score', icon: CalendarClock, plan: 'Free' as Plan, desc: 'Hitung risiko telat dari sisa hari, bobot tugas, dan progres.' },
-  { title: 'IPK Planner', icon: LineChart, plan: 'Free' as Plan, desc: 'Simulasikan target nilai tiap mata kuliah.' },
-  { title: 'Citation Builder', icon: PenTool, plan: 'Free' as Plan, desc: 'Format sitasi APA sederhana untuk jurnal, buku, dan web.' },
-  { title: 'Group Project Board', icon: Users, plan: 'Free' as Plan, desc: 'Bagi peran, deadline, dan status kerja kelompok.' },
-  { title: 'Scholarship Radar', icon: PiggyBank, plan: 'Basic' as Plan, desc: 'Checklist persiapan beasiswa dan prioritas dokumen.' },
-  { title: 'Career Launchpad', icon: BriefcaseBusiness, plan: 'Basic' as Plan, desc: 'Mapping skill, portofolio, dan target magang.' },
-  { title: 'Campus Event Hub', icon: Network, plan: 'Basic' as Plan, desc: 'Kurasi seminar, lomba, volunteer, dan agenda organisasi.' },
-  { title: 'Thesis Compass', icon: GraduationCap, plan: 'Basic' as Plan, desc: 'Bantu pecah ide skripsi jadi rumusan masalah dan milestone.' },
-  { title: 'Exam Readiness', icon: ClipboardCheck, plan: 'Basic' as Plan, desc: 'Cek kesiapan ujian dari confidence, latihan, dan waktu tersisa.' },
-  { title: 'Mental Load Check', icon: HeartPulse, plan: 'Basic' as Plan, desc: 'Pantau beban akademik dan sarankan ritme istirahat.' },
-  { title: 'Anti Plagiarism Prep', icon: FileSearch, plan: 'Pro' as Plan, desc: 'Checklist parafrase, kutipan, dan sumber sebelum submit.' },
-  { title: 'AI Mentor Chat', icon: MessageSquareText, plan: 'Pro' as Plan, desc: 'Rancang sesi belajar personal dengan gaya tutor.' },
-  { title: 'Campus Analytics', icon: BarChart3, plan: 'Pro' as Plan, desc: 'Dashboard performa belajar lintas dokumen, ujian, dan reminder.' },
-]
-
-const PLAN_CLASS: Record<Plan, string> = {
-  Free: 'border-emerald-200 bg-emerald-50 text-emerald-700',
-  Basic: 'border-blue-200 bg-blue-50 text-blue-700',
-  Pro: 'border-violet-200 bg-violet-50 text-violet-700',
+interface Tool {
+  id: ToolId
+  name: string
+  desc: string
+  icon: typeof BookOpen
+  category: string
+  color: string
+  bgColor: string
+  available: boolean
+  systemPrompt: string
+  placeholder: string
 }
 
-export default function CampusToolsPage() {
-  const [topic, setTopic] = useState('Sistem basis data relasional')
-  const [daysLeft, setDaysLeft] = useState(3)
-  const [progress, setProgress] = useState(45)
-  const [selectedIndex, setSelectedIndex] = useState(0)
+const TOOLS: Tool[] = [
+  {
+    id: 'ipk-calculator',
+    name: 'Kalkulator IPK',
+    desc: 'Hitung IPK semester & kumulatif dari nilai matakuliahmu.',
+    icon: Calculator,
+    category: 'Akademik',
+    color: 'text-blue-600',
+    bgColor: 'bg-blue-50 border-blue-100',
+    available: true,
+    systemPrompt: `Kamu adalah asisten kalkulator IPK mahasiswa Indonesia. 
+Bantu user menghitung IPK semester dan kumulatif berdasarkan nilai (A=4, AB=3.5, B=3, BC=2.5, C=2, D=1, E=0) dan SKS tiap matakuliah.
+Jika user memberi daftar nilai, hitung IPK-nya langsung. Berikan juga analisis singkat dan tips untuk meningkatkan IPK jika diperlukan.
+Balas dalam Bahasa Indonesia, ramah, dan to-the-point.`,
+    placeholder: 'Contoh: Kalkulus 3 SKS nilai B, Fisika 2 SKS nilai A, Algoritma 4 SKS nilai BC...',
+  },
+  {
+    id: 'citation-generator',
+    name: 'Generator Sitasi',
+    desc: 'Buat sitasi APA, MLA, Harvard, atau Chicago dari sumber apapun.',
+    icon: FileText,
+    category: 'Akademik',
+    color: 'text-violet-600',
+    bgColor: 'bg-violet-50 border-violet-100',
+    available: true,
+    systemPrompt: `Kamu adalah ahli sitasi akademik. Bantu mahasiswa Indonesia membuat sitasi yang benar untuk format APA 7th, MLA 9th, Harvard, atau Chicago.
+Jika user memberi info sumber (judul, penulis, tahun, dll), buatkan sitasi lengkap sesuai format yang diminta.
+Jika format tidak disebutkan, tanya dulu. Jelaskan komponen sitasi jika perlu.
+Balas dalam Bahasa Indonesia.`,
+    placeholder: 'Contoh: Buku "Metodologi Penelitian" oleh Sugiyono, 2019, Alfabeta Bandung. Format APA.',
+  },
+  {
+    id: 'essay-planner',
+    name: 'Essay & Makalah Planner',
+    desc: 'Buat kerangka essay, makalah, atau skripsi yang terstruktur.',
+    icon: BookOpen,
+    category: 'Menulis',
+    color: 'text-emerald-600',
+    bgColor: 'bg-emerald-50 border-emerald-100',
+    available: true,
+    systemPrompt: `Kamu adalah konsultan penulisan akademik untuk mahasiswa Indonesia.
+Bantu buat outline/kerangka essay, makalah, laporan, atau skripsi yang terstruktur dan logis.
+Sesuaikan dengan standar akademik Indonesia: pendahuluan, tinjauan pustaka, metodologi, hasil, kesimpulan.
+Berikan sub-topik yang spesifik, bukan sekadar placeholder. Bisa juga bantu dengan judul, rumusan masalah, atau tujuan penelitian.
+Balas dalam Bahasa Indonesia.`,
+    placeholder: 'Contoh: Saya mau buat makalah tentang dampak media sosial pada kesehatan mental remaja, 3000 kata...',
+  },
+  {
+    id: 'pomodoro',
+    name: 'Study Timer (Pomodoro)',
+    desc: 'Timer Pomodoro cerdas dengan saran sesi belajar optimal.',
+    icon: Timer,
+    category: 'Produktivitas',
+    color: 'text-orange-600',
+    bgColor: 'bg-orange-50 border-orange-100',
+    available: true,
+    systemPrompt: `Kamu adalah coach produktivitas belajar untuk mahasiswa Indonesia.
+Bantu user merancang sesi belajar menggunakan teknik Pomodoro (25 menit fokus, 5 menit istirahat).
+Rekomendasikan jadwal berdasarkan materi yang ingin dipelajari, tenggat waktu, dan durasi belajar yang diinginkan.
+Berikan tips menghindari distraksi dan menjaga energi selama sesi belajar.
+Balas dalam Bahasa Indonesia, singkat dan actionable.`,
+    placeholder: 'Contoh: Saya perlu belajar Kalkulus 2 selama 3 jam untuk UAS besok, bisa buat jadwal Pomodoro?',
+  },
+  {
+    id: 'summarizer',
+    name: 'Ringkasan Teks',
+    desc: 'Ringkas artikel, jurnal, atau teks panjang jadi poin-poin kunci.',
+    icon: Lightbulb,
+    category: 'Belajar',
+    color: 'text-amber-600',
+    bgColor: 'bg-amber-50 border-amber-100',
+    available: true,
+    systemPrompt: `Kamu adalah asisten ringkasan teks akademik untuk mahasiswa Indonesia.
+Ringkas teks yang diberikan menjadi:
+1. Poin-poin kunci (maks 5-7 poin)
+2. Kesimpulan utama (2-3 kalimat)
+3. Istilah/konsep penting (jika ada)
+Pertahankan akurasi dan jangan hilangkan informasi kritis. Balas dalam Bahasa Indonesia.`,
+    placeholder: 'Paste teks artikel, jurnal, atau bab buku yang ingin kamu ringkas di sini...',
+  },
+  {
+    id: 'quiz-generator',
+    name: 'Generator Soal Latihan',
+    desc: 'Buat soal latihan dari topik atau teks materi yang kamu input.',
+    icon: Target,
+    category: 'Belajar',
+    color: 'text-cyan-600',
+    bgColor: 'bg-cyan-50 border-cyan-100',
+    available: true,
+    systemPrompt: `Kamu adalah pembuat soal latihan untuk mahasiswa Indonesia.
+Dari topik atau teks yang diberikan, buat 5-10 soal latihan pilihan ganda (dengan 4 pilihan A-D dan jawaban) atau soal esai singkat.
+Soal harus bervariasi: pemahaman konsep, aplikasi, dan analisis. Sertakan kunci jawaban dan penjelasan singkat.
+Balas dalam Bahasa Indonesia.`,
+    placeholder: 'Contoh: Buat 7 soal pilihan ganda tentang Hukum Newton, tingkat SMA/D1...',
+  },
+  {
+    id: 'career-advisor',
+    name: 'Konselor Karier',
+    desc: 'Saran jalur karier, internship, dan pengembangan diri sesuai jurusanmu.',
+    icon: TrendingUp,
+    category: 'Karier',
+    color: 'text-rose-600',
+    bgColor: 'bg-rose-50 border-rose-100',
+    available: true,
+    systemPrompt: `Kamu adalah konselor karier untuk mahasiswa Indonesia.
+Berikan saran jalur karier, rekomendasi magang/internship, skill yang perlu dikembangkan, dan sertifikasi yang relevan berdasarkan jurusan dan minat user.
+Sesuaikan dengan kondisi pasar kerja Indonesia dan peluang global. Bisa juga bantu review CV, surat lamaran, atau persiapan wawancara.
+Balas dalam Bahasa Indonesia.`,
+    placeholder: 'Contoh: Saya mahasiswa Teknik Informatika semester 5, tertarik di bidang AI/ML, mau mulai dari mana?',
+  },
+  {
+    id: 'grammar-checker',
+    name: 'Grammar & Parafrase',
+    desc: 'Cek dan perbaiki tata bahasa, atau parafrase kalimat akademik.',
+    icon: Search,
+    category: 'Menulis',
+    color: 'text-indigo-600',
+    bgColor: 'bg-indigo-50 border-indigo-100',
+    available: true,
+    systemPrompt: `Kamu adalah editor bahasa akademik untuk mahasiswa Indonesia.
+Bantu user dengan:
+- Cek dan koreksi tata bahasa Indonesia atau Inggris
+- Parafrase kalimat agar lebih akademik dan formal
+- Saran perbaikan gaya penulisan ilmiah
+Berikan teks yang sudah diperbaiki beserta penjelasan singkat perubahannya.
+Balas dalam Bahasa Indonesia.`,
+    placeholder: 'Paste kalimat atau paragraf yang ingin dicek grammar-nya atau diparafrase...',
+  },
+  {
+    id: 'study-plan',
+    name: 'Rencana Belajar',
+    desc: 'Buat jadwal belajar personal berdasarkan target dan deadline-mu.',
+    icon: GraduationCap,
+    category: 'Produktivitas',
+    color: 'text-teal-600',
+    bgColor: 'bg-teal-50 border-teal-100',
+    available: true,
+    systemPrompt: `Kamu adalah perencana studi personal untuk mahasiswa Indonesia.
+Buat jadwal belajar yang realistis dan terstruktur berdasarkan:
+- Matakuliah yang perlu dipelajari
+- Deadline ujian/tugas
+- Jam belajar tersedia per hari
+- Tingkat kesulitan tiap subjek
+Hasilkan jadwal harian/mingguan yang spesifik dan achievable. Balas dalam Bahasa Indonesia.`,
+    placeholder: 'Contoh: UAS 5 matakuliah dalam 2 minggu lagi, saya bisa belajar 4 jam per hari. Bantu buat jadwal!',
+  },
+  {
+    id: 'presentation-coach',
+    name: 'Coach Presentasi',
+    desc: 'Tips struktur slide, teknik public speaking, dan persiapan sidang.',
+    icon: Mic,
+    category: 'Karier',
+    color: 'text-pink-600',
+    bgColor: 'bg-pink-50 border-pink-100',
+    available: true,
+    systemPrompt: `Kamu adalah coach presentasi untuk mahasiswa Indonesia.
+Bantu user mempersiapkan presentasi akademik: seminar, sidang skripsi, presentasi kelompok, atau pitching.
+Berikan saran:
+- Struktur slide yang efektif
+- Teknik public speaking dan mengatasi gugup
+- Cara menjawab pertanyaan penguji
+- Latihan dan persiapan mental
+Balas dalam Bahasa Indonesia.`,
+    placeholder: 'Contoh: Saya mau sidang skripsi minggu depan tentang analisis data keuangan, ada tips?',
+  },
+  {
+    id: 'habit-tracker',
+    name: 'Habit & Refleksi',
+    desc: 'Analisis kebiasaan belajar dan saran untuk meningkatkan konsistensi.',
+    icon: Users,
+    category: 'Produktivitas',
+    color: 'text-green-600',
+    bgColor: 'bg-green-50 border-green-100',
+    available: true,
+    systemPrompt: `Kamu adalah coach kebiasaan belajar untuk mahasiswa Indonesia.
+Bantu user menganalisis dan membangun kebiasaan belajar yang konsisten. Berikan:
+- Analisis kebiasaan belajar saat ini
+- Strategi membangun habit positif (habit stacking, tracking, dll)
+- Tips menjaga motivasi dan mengatasi prokrastinasi
+- Framework refleksi mingguan
+Balas dalam Bahasa Indonesia, suportif dan praktis.`,
+    placeholder: 'Ceritakan kebiasaan belajarmu sekarang, atau tantangan yang kamu hadapi...',
+  },
+  {
+    id: 'research-helper',
+    name: 'Research Helper',
+    desc: 'Bantu rumuskan masalah penelitian, hipotesis, dan metodologi.',
+    icon: BookOpen,
+    category: 'Akademik',
+    color: 'text-slate-600',
+    bgColor: 'bg-slate-50 border-slate-200',
+    available: true,
+    systemPrompt: `Kamu adalah asisten penelitian untuk mahasiswa Indonesia.
+Bantu proses penelitian: merumuskan masalah, membuat hipotesis, memilih metodologi, dan merancang instrumen.
+Bisa juga bantu interpretasi hasil, menulis abstrak, atau menjelaskan konsep statistik/analisis data.
+Berikan penjelasan yang mudah dipahami mahasiswa. Balas dalam Bahasa Indonesia.`,
+    placeholder: 'Contoh: Saya mau meneliti pengaruh penggunaan TikTok terhadap IPK mahasiswa, bantu rumuskan...',
+  },
+]
 
-  const selected = FEATURES[selectedIndex]
-  const SelectedIcon = selected.icon
+const CATEGORIES = ['Semua', 'Akademik', 'Belajar', 'Menulis', 'Produktivitas', 'Karier']
 
-  const risk = useMemo(() => {
-    const urgency = Math.max(0, 100 - daysLeft * 12)
-    const missing = Math.max(0, 100 - progress)
-    return Math.min(100, Math.round(urgency * 0.55 + missing * 0.45))
-  }, [daysLeft, progress])
+// ─── Chat interface ────────────────────────────────────────────────
+interface Message {
+  role: 'user' | 'assistant'
+  content: string
+}
 
-  const summary = useMemo(() => {
-    const clean = topic.trim() || 'Topik kuliah'
-    return [
-      `${clean} perlu dipahami dari konsep inti, contoh kasus, dan latihan soal.`,
-      `Mulai dari definisi utama, lanjutkan ke penerapan, lalu cek bagian yang paling sering keluar ujian.`,
-      `Target hari ini: buat 5 flashcard, 1 rangkuman, dan 1 mini quiz.`,
-    ]
-  }, [topic])
+function ToolChat({ tool, onBack }: { tool: Tool; onBack: () => void }) {
+  const [messages, setMessages] = useState<Message[]>([])
+  const [input, setInput] = useState('')
+  const [loading, setLoading] = useState(false)
+  const bottomRef = useRef<HTMLDivElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  const flashcards = useMemo(() => {
-    const clean = topic.trim() || 'Topik kuliah'
-    return [
-      { q: `Apa inti dari ${clean}?`, a: 'Jelaskan definisi, tujuan, dan contoh penerapan.' },
-      { q: 'Bagian mana yang rawan muncul di ujian?', a: 'Konsep dasar, perbandingan istilah, dan studi kasus.' },
-      { q: 'Apa latihan tercepat malam ini?', a: 'Buat rangkuman 7 poin lalu jawab 10 soal singkat.' },
-    ]
-  }, [topic])
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
+
+  async function sendMessage() {
+    const text = input.trim()
+    if (!text || loading) return
+
+    const newMessages: Message[] = [...messages, { role: 'user', content: text }]
+    setMessages(newMessages)
+    setInput('')
+    setLoading(true)
+
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1000,
+          system: tool.systemPrompt,
+          messages: newMessages.map((m) => ({ role: m.role, content: m.content })),
+        }),
+      })
+
+      const data = await response.json()
+      const reply = data.content?.[0]?.text || 'Maaf, terjadi kesalahan. Coba lagi.'
+
+      setMessages([...newMessages, { role: 'assistant', content: reply }])
+    } catch {
+      setMessages([
+        ...newMessages,
+        { role: 'assistant', content: 'Koneksi bermasalah. Coba beberapa saat lagi.' },
+      ])
+    }
+
+    setLoading(false)
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      sendMessage()
+    }
+  }
+
+  const Icon = tool.icon
 
   return (
-    <div className="space-y-8">
-      <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-bold text-brand-700">
-              <Sparkles className="h-3.5 w-3.5" />
-              Campus Tools
+    <div className="flex flex-col h-[calc(100vh-8rem)] max-h-[700px]">
+      {/* Chat header */}
+      <div className="flex items-center gap-3 p-4 border-b border-slate-200 bg-white rounded-t-xl">
+        <button
+          onClick={onBack}
+          className="p-1.5 hover:bg-slate-100 rounded-lg transition"
+          aria-label="Kembali"
+        >
+          <ArrowLeft className="w-4 h-4 text-slate-600" />
+        </button>
+        <div className={`w-8 h-8 rounded-lg ${tool.bgColor} border flex items-center justify-center flex-shrink-0`}>
+          <Icon className={`w-4 h-4 ${tool.color}`} />
+        </div>
+        <div className="min-w-0">
+          <p className="font-bold text-slate-900 text-sm">{tool.name}</p>
+          <p className="text-xs text-slate-500 truncate">{tool.desc}</p>
+        </div>
+      </div>
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50">
+        {messages.length === 0 && (
+          <div className="flex flex-col items-center justify-center h-full text-center gap-3 py-8">
+            <div className={`w-14 h-14 rounded-2xl ${tool.bgColor} border flex items-center justify-center`}>
+              <Icon className={`w-7 h-7 ${tool.color}`} />
             </div>
-            <h1 className="text-3xl font-black tracking-tight text-slate-950 md:text-4xl">
-              15 fitur produktivitas mahasiswa dalam satu dashboard.
-            </h1>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 md:text-base">
-              Tools ini dibuat agar user langsung bisa mencoba planner, ringkasan, flashcard, scoring deadline, dan fitur kampus lain tanpa menunggu backend tambahan.
+            <div>
+              <p className="font-bold text-slate-900 mb-1">{tool.name}</p>
+              <p className="text-sm text-slate-500 max-w-xs">{tool.desc}</p>
+            </div>
+            <p className="text-xs text-slate-400 mt-2">
+              Ketik pertanyaanmu di bawah untuk mulai
             </p>
           </div>
-          <Link href="/pricing">
-            <Button>
-              <BadgeCheck className="h-4 w-4" />
-              Lihat Paket
-            </Button>
-          </Link>
-        </div>
-      </section>
+        )}
 
-      <section className="grid gap-6 xl:grid-cols-[360px_1fr]">
-        <div className="rounded-lg border border-slate-200 bg-white p-4">
-          <h2 className="mb-4 text-sm font-black uppercase tracking-wide text-slate-500">Daftar fitur</h2>
-          <div className="space-y-2">
-            {FEATURES.map((feature, index) => {
-              const Icon = feature.icon
-              return (
-                <button
-                  key={feature.title}
-                  type="button"
-                  onClick={() => setSelectedIndex(index)}
-                  className={`w-full rounded-lg border p-3 text-left transition ${selectedIndex === index ? 'border-brand-300 bg-brand-50' : 'border-slate-200 bg-white hover:bg-slate-50'}`}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="rounded-lg bg-white p-2 text-brand-700 shadow-sm">
-                      <Icon className="h-4 w-4" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="text-sm font-black text-slate-950">{feature.title}</p>
-                        <span className={`rounded-full border px-2 py-0.5 text-[10px] font-black ${PLAN_CLASS[feature.plan]}`}>
-                          {feature.plan}
-                        </span>
-                      </div>
-                      <p className="mt-1 text-xs leading-5 text-slate-500">{feature.desc}</p>
-                    </div>
-                  </div>
-                </button>
-              )
-            })}
+        {messages.map((msg, i) => (
+          <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div
+              className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-6 whitespace-pre-wrap ${
+                msg.role === 'user'
+                  ? 'bg-brand-600 text-white rounded-br-sm'
+                  : 'bg-white border border-slate-200 text-slate-800 rounded-bl-sm shadow-sm'
+              }`}
+            >
+              {msg.content}
+            </div>
+          </div>
+        ))}
+
+        {loading && (
+          <div className="flex justify-start">
+            <div className="bg-white border border-slate-200 rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm">
+              <Loader2 className="w-4 h-4 text-slate-400 animate-spin" />
+            </div>
+          </div>
+        )}
+
+        <div ref={bottomRef} />
+      </div>
+
+      {/* Input */}
+      <div className="p-4 border-t border-slate-200 bg-white rounded-b-xl">
+        <div className="flex gap-2 items-end">
+          <textarea
+            ref={textareaRef}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={tool.placeholder}
+            rows={2}
+            className="flex-1 resize-none rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 min-h-[44px] max-h-[120px]"
+          />
+          <button
+            onClick={sendMessage}
+            disabled={!input.trim() || loading}
+            className="h-10 w-10 flex-shrink-0 flex items-center justify-center rounded-xl bg-brand-600 text-white hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+          >
+            <Send className="w-4 h-4" />
+          </button>
+        </div>
+        <p className="text-xs text-slate-400 mt-1.5">Enter kirim · Shift+Enter baris baru</p>
+      </div>
+    </div>
+  )
+}
+
+// ─── Main page ────────────────────────────────────────────────────
+export default function ToolsPage() {
+  const [selectedCategory, setSelectedCategory] = useState('Semua')
+  const [activeTool, setActiveTool] = useState<Tool | null>(null)
+
+  const filtered = TOOLS.filter(
+    (t) => selectedCategory === 'Semua' || t.category === selectedCategory
+  )
+
+  if (activeTool) {
+    return (
+      <div className="max-w-2xl mx-auto">
+        <ToolChat tool={activeTool} onBack={() => setActiveTool(null)} />
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-6 pb-8">
+      {/* Hero */}
+      <div className="rounded-2xl bg-gradient-to-r from-brand-600 to-cyan-600 p-6 text-white sm:p-8">
+        <div className="flex items-start gap-4">
+          <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
+            <Sparkles className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest text-brand-100 mb-1">Campus Tools</p>
+            <h1 className="text-2xl font-black mb-2 sm:text-3xl">12 Tool AI untuk Mahasiswa</h1>
+            <p className="text-brand-100 text-sm leading-6 max-w-xl">
+              Semua tool bisa langsung digunakan — pilih tool, ketik pertanyaanmu, dan dapatkan bantuan AI seketika. Tidak perlu setup apapun.
+            </p>
           </div>
         </div>
+      </div>
 
-        <div className="space-y-6">
-          <div className="rounded-lg border border-slate-200 bg-white p-6">
-            <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-              <div>
-                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-lg bg-brand-50 text-brand-700">
-                  <SelectedIcon className="h-6 w-6" />
+      {/* Category filter */}
+      <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+        {CATEGORIES.map((cat) => (
+          <button
+            key={cat}
+            onClick={() => setSelectedCategory(cat)}
+            className={`flex-shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition ${
+              selectedCategory === cat
+                ? 'bg-brand-600 text-white'
+                : 'bg-white border border-slate-200 text-slate-600 hover:border-brand-200 hover:text-brand-700'
+            }`}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
+
+      {/* Tools grid */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {filtered.map((tool) => {
+          const Icon = tool.icon
+          return (
+            <button
+              key={tool.id}
+              onClick={() => tool.available && setActiveTool(tool)}
+              className={`relative text-left rounded-xl border bg-white p-5 transition group ${
+                tool.available
+                  ? 'hover:border-brand-300 hover:shadow-md cursor-pointer border-slate-200'
+                  : 'border-slate-200 opacity-60 cursor-not-allowed'
+              }`}
+            >
+              {/* Category label */}
+              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3 block">
+                {tool.category}
+              </span>
+
+              {/* Icon + title */}
+              <div className="flex items-start gap-3 mb-2">
+                <div className={`w-10 h-10 rounded-xl border ${tool.bgColor} flex items-center justify-center flex-shrink-0`}>
+                  <Icon className={`w-5 h-5 ${tool.color}`} />
                 </div>
-                <h2 className="text-2xl font-black text-slate-950">{selected.title}</h2>
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">{selected.desc}</p>
+                <div className="min-w-0 flex-1 pt-0.5">
+                  <p className="font-bold text-slate-900 text-sm leading-snug">{tool.name}</p>
+                </div>
+                {!tool.available && (
+                  <Lock className="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5" />
+                )}
               </div>
-              {selected.plan === 'Pro' && (
-                <div className="inline-flex items-center gap-2 rounded-lg border border-violet-200 bg-violet-50 px-3 py-2 text-xs font-bold text-violet-700">
-                  <Lock className="h-4 w-4" />
-                  Pro feature
+
+              <p className="text-xs text-slate-500 leading-5">{tool.desc}</p>
+
+              {tool.available && (
+                <div className="flex items-center gap-1 mt-3 text-xs font-semibold text-brand-600 group-hover:gap-2 transition-all">
+                  <span>Mulai</span>
+                  <ChevronRight className="w-3 h-3" />
                 </div>
               )}
-            </div>
-          </div>
+            </button>
+          )
+        })}
+      </div>
 
-          <div className="grid gap-6 lg:grid-cols-2">
-            <div className="rounded-lg border border-slate-200 bg-white p-5">
-              <h3 className="text-lg font-black text-slate-950">AI study cockpit</h3>
-              <label className="mt-4 block text-sm font-semibold text-slate-700">Topik kuliah</label>
-              <input
-                value={topic}
-                onChange={(event) => setTopic(event.target.value)}
-                className="mt-2 w-full rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
-              />
-              <div className="mt-4 space-y-3">
-                {summary.map((item) => (
-                  <div key={item} className="flex gap-3 rounded-lg bg-slate-50 p-3 text-sm leading-6 text-slate-600">
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-600" />
-                    {item}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-lg border border-slate-200 bg-white p-5">
-              <h3 className="text-lg font-black text-slate-950">Flashcard cepat</h3>
-              <div className="mt-4 space-y-3">
-                {flashcards.map((card) => (
-                  <div key={card.q} className="rounded-lg border border-slate-200 p-4">
-                    <p className="text-sm font-black text-slate-950">{card.q}</p>
-                    <p className="mt-2 text-sm leading-6 text-slate-600">{card.a}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-lg border border-slate-200 bg-white p-5">
-            <div className="grid gap-5 lg:grid-cols-[1fr_220px]">
-              <div>
-                <h3 className="text-lg font-black text-slate-950">Deadline risk score</h3>
-                <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                  <label className="text-sm font-semibold text-slate-700">
-                    Sisa hari: {daysLeft}
-                    <input type="range" min="0" max="14" value={daysLeft} onChange={(event) => setDaysLeft(Number(event.target.value))} className="mt-3 w-full" />
-                  </label>
-                  <label className="text-sm font-semibold text-slate-700">
-                    Progres: {progress}%
-                    <input type="range" min="0" max="100" value={progress} onChange={(event) => setProgress(Number(event.target.value))} className="mt-3 w-full" />
-                  </label>
-                </div>
-              </div>
-              <div className="rounded-lg bg-slate-950 p-5 text-white">
-                <p className="text-xs font-bold uppercase tracking-wide text-slate-300">Risk score</p>
-                <p className="mt-2 text-5xl font-black">{risk}</p>
-                <p className="mt-3 text-sm leading-6 text-slate-300">
-                  {risk > 70 ? 'Prioritaskan tugas ini hari ini.' : risk > 40 ? 'Masih aman, tapi perlu jadwal kerja.' : 'Ritmenya aman.'}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Footer note */}
+      <p className="text-center text-xs text-slate-400">
+        Semua tool menggunakan Claude AI · Jawaban bersifat informatif, bukan pengganti profesional
+      </p>
     </div>
   )
 }

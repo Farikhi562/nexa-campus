@@ -6,7 +6,6 @@ export const dynamic = 'force-dynamic'
 
 /**
  * GET /api/user/profile
- * Get current user's profile
  */
 export async function GET(request: NextRequest) {
   try {
@@ -17,33 +16,36 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Try to fetch existing profile
     const { data: profile, error: getError } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
 
-    if (getError && getError.code !== 'PGRST116') {
-      // PGRST116 = no rows returned, which is fine
+    if (getError) {
       return NextResponse.json({ error: getError.message }, { status: 500 })
     }
 
-    // If no profile, create default one
     if (!profile) {
+      // Auto-create profile for new users (fixes new user bug)
       const { data: newProfile, error: createError } = await supabase
         .from('profiles')
         .insert({
           id: user.id,
-          email: user.email,
-          full_name: user.user_metadata?.full_name || null,
-          avatar_url: user.user_metadata?.avatar_url || null,
+          email: user.email || '',
+          full_name: user.user_metadata?.full_name || user.user_metadata?.name || null,
+          avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture || null,
           plan: 'free',
+          profile_completed: false,
         })
         .select()
         .single()
 
       if (createError) {
+        // Profile might have been created by another concurrent request
+        const { data: retryProfile } = await supabase
+          .from('profiles').select('*').eq('id', user.id).single()
+        if (retryProfile) return NextResponse.json(retryProfile)
         return NextResponse.json({ error: createError.message }, { status: 500 })
       }
 
@@ -59,7 +61,6 @@ export async function GET(request: NextRequest) {
 
 /**
  * PUT /api/user/profile
- * Update user profile
  */
 export async function PUT(request: NextRequest) {
   try {
@@ -70,6 +71,8 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const body = await request.json().catch(() => ({}))
+
     const {
       full_name,
       whatsapp_number,
@@ -78,15 +81,24 @@ export async function PUT(request: NextRequest) {
       universitas,
       provinsi,
       profile_completed,
-    } = await request.json()
+    } = body
 
-    // Validate WhatsApp number format if provided
+    // Validate WhatsApp number if provided
     if (whatsapp_number) {
-      // Simple validation: should start with + or digits, minimal 10 chars
       const cleanNumber = whatsapp_number.replace(/\D/g, '')
       if (cleanNumber.length < 10) {
         return NextResponse.json(
           { error: 'Nomor WhatsApp tidak valid.' },
+          { status: 400 }
+        )
+      }
+    }
+
+    // Validate avatar URL if provided
+    if (avatar_url && typeof avatar_url === 'string') {
+      if (!avatar_url.startsWith('https://')) {
+        return NextResponse.json(
+          { error: 'URL avatar tidak valid.' },
           { status: 400 }
         )
       }

@@ -18,6 +18,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     .eq('id', user.id)
     .single()
 
+  // If no profile yet (race condition on first login), still render children
   if (!profile) {
     return (
       <div className="min-h-screen bg-slate-50">
@@ -30,9 +31,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
     <div className="min-h-screen bg-slate-50">
       <DashboardNav profile={profile as Profile} />
 
-      {/* Main content — offset for sidebar on desktop */}
+      {/*
+        Mobile: pt-16 to clear top nav bar
+        Desktop: pl-64 to clear sidebar, no top padding needed
+      */}
       <main className="lg:pl-64 pt-16 lg:pt-0 min-h-screen">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           {children}
         </div>
         <PoweredByFooter className="lg:mx-0" />

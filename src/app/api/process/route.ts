@@ -3,7 +3,7 @@ import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { ocrFromUrl } from '@/lib/ocr'
 import { extractQuestions } from '@/lib/openai'
 
-export const maxDuration = 60 // 60s timeout
+export const maxDuration = 60
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,15 +14,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { documentId } = await request.json()
-
-    if (!documentId) {
+    const body = await request.json().catch(() => null)
+    if (!body?.documentId) {
       return NextResponse.json({ error: 'documentId wajib diisi.' }, { status: 400 })
     }
 
+    const { documentId } = body
+
     const { data: doc, error: docError } = await supabase
       .from('documents')
-      .select('id, file_path, status')
+      .select('id, file_path, status, title')
       .eq('id', documentId)
       .eq('user_id', user.id)
       .single()
@@ -31,77 +32,121 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Dokumen tidak ditemukan.' }, { status: 404 })
     }
 
-    if (doc.status !== 'processing' && doc.status !== 'pending') {
-      return NextResponse.json({ error: 'Dokumen tidak dalam status siap diproses.' }, { status: 409 })
+    // Allow reprocessing of errored docs too
+    if (doc.status === 'completed') {
+      return NextResponse.json({ error: 'Dokumen sudah selesai diproses.' }, { status: 409 })
     }
 
     if (!doc.file_path.startsWith(`${user.id}/`)) {
       return NextResponse.json({ error: 'Path dokumen tidak valid.' }, { status: 403 })
     }
 
-    // Use service client to bypass RLS for storage signed URL
     const serviceClient = createServiceClient()
 
-    // Get signed URL for the uploaded PDF
+    // Mark as processing
+    await serviceClient
+      .from('documents')
+      .update({ status: 'processing', error_message: null })
+      .eq('id', doc.id)
+
+    // Get signed URL
     const { data: signedUrlData, error: signedUrlError } = await serviceClient
       .storage
       .from('documents')
-      .createSignedUrl(doc.file_path, 60) // 1 min expiry
+      .createSignedUrl(doc.file_path, 120) // 2 min expiry for OCR
 
     if (signedUrlError || !signedUrlData?.signedUrl) {
+      const errMsg = signedUrlError?.message || 'Gagal mengakses file. Coba upload ulang.'
+      console.error('[Process] signedUrl error:', signedUrlError)
+
       await serviceClient.from('documents').update({
         status: 'error',
-        error_message: 'Gagal mengakses file. Coba upload ulang.',
+        error_message: errMsg,
       }).eq('id', doc.id)
 
       return NextResponse.json({ error: 'Gagal mendapatkan URL file.' }, { status: 500 })
     }
 
-    // Step 1: OCR
+    // Step 1: OCR — with retry
     console.log(`[Process] Starting OCR for doc ${documentId}`)
-    const ocrResult = await ocrFromUrl(signedUrlData.signedUrl)
+    let ocrResult = await ocrFromUrl(signedUrlData.signedUrl)
 
     if (ocrResult.isError) {
-      await serviceClient.from('documents').update({
-        status: 'error',
-        error_message: ocrResult.errorMessage,
-      }).eq('id', doc.id)
+      // Retry once with fresh signed URL
+      console.warn(`[Process] OCR failed first attempt: ${ocrResult.errorMessage}. Retrying...`)
+      await new Promise((r) => setTimeout(r, 2000))
 
-      return NextResponse.json({ error: ocrResult.errorMessage }, { status: 422 })
+      const { data: retryUrlData } = await serviceClient
+        .storage
+        .from('documents')
+        .createSignedUrl(doc.file_path, 120)
+
+      if (retryUrlData?.signedUrl) {
+        ocrResult = await ocrFromUrl(retryUrlData.signedUrl)
+      }
     }
 
-    console.log(`[Process] OCR complete. Text length: ${ocrResult.text.length}`)
+    if (ocrResult.isError) {
+      const errorMessage = ocrResult.errorMessage || 'OCR gagal. Pastikan file PDF bisa dibaca dengan baik.'
+      console.error('[Process] OCR error after retry:', errorMessage)
 
-    // Step 2: AI Question Extraction
-    const { questions, error: aiError } = await extractQuestions(ocrResult.text)
-
-    if (aiError || questions.length === 0) {
       await serviceClient.from('documents').update({
         status: 'error',
-        error_message: aiError || 'Tidak ada soal yang berhasil diekstrak.',
+        error_message: `OCR gagal: ${errorMessage}`,
       }).eq('id', doc.id)
 
-      return NextResponse.json({ error: aiError }, { status: 422 })
+      return NextResponse.json({ error: errorMessage }, { status: 422 })
+    }
+
+    const ocrText = ocrResult.text?.trim()
+    if (!ocrText || ocrText.length < 50) {
+      const errMsg = 'Teks dari dokumen terlalu pendek atau tidak terbaca. Coba PDF dengan teks yang lebih jelas.'
+      await serviceClient.from('documents').update({
+        status: 'error',
+        error_message: errMsg,
+      }).eq('id', doc.id)
+      return NextResponse.json({ error: errMsg }, { status: 422 })
+    }
+
+    console.log(`[Process] OCR complete. Text length: ${ocrText.length}`)
+
+    // Step 2: AI Question Extraction
+    const { questions, error: aiError } = await extractQuestions(ocrText)
+
+    if (aiError || !questions || questions.length === 0) {
+      const errMsg = aiError || 'Tidak ada soal yang berhasil diekstrak dari materi ini.'
+      console.error('[Process] AI extraction error:', errMsg)
+
+      await serviceClient.from('documents').update({
+        status: 'error',
+        error_message: errMsg,
+      }).eq('id', doc.id)
+
+      return NextResponse.json({ error: errMsg }, { status: 422 })
     }
 
     console.log(`[Process] Extracted ${questions.length} questions`)
 
-    // Step 3: Save questions to DB
+    // Step 3: Save questions
     const questionRows = questions.map((q, i) => ({
-      document_id:    doc.id,
-      user_id:        user.id,
-      question_text:  q.question_text,
-      options:        q.options,
+      document_id: doc.id,
+      user_id: user.id,
+      question_text: q.question_text,
+      options: q.options,
       correct_answer: q.correct_answer,
-      explanation:    q.explanation ?? null,
-      order_index:    i,
+      explanation: q.explanation ?? null,
+      order_index: i,
     }))
+
+    // Delete existing questions if reprocessing
+    await serviceClient.from('questions').delete().eq('document_id', doc.id)
 
     const { error: insertError } = await serviceClient
       .from('questions')
       .insert(questionRows)
 
     if (insertError) {
+      console.error('[Process] Insert error:', insertError)
       await serviceClient.from('documents').update({
         status: 'error',
         error_message: `Gagal menyimpan soal: ${insertError.message}`,
@@ -110,11 +155,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: insertError.message }, { status: 500 })
     }
 
-    // Step 4: Mark document as completed
+    // Step 4: Mark completed
     await serviceClient.from('documents').update({
       status: 'completed',
       question_count: questions.length,
+      error_message: null,
     }).eq('id', doc.id)
+
+    console.log(`[Process] Doc ${documentId} completed with ${questions.length} questions`)
 
     return NextResponse.json({
       success: true,
