@@ -43,7 +43,7 @@ git push origin main
    - Go to https://vercel.com/new
    - Click "Import Project"
    - Select your Git provider (GitHub, GitLab, Bitbucket)
-   - Choose the `diktat-ai` repository
+   - Choose the `nexa-campus-ecosystem` repository
    - Click "Import"
 
 2. **Configure Project**
@@ -149,7 +149,7 @@ const nextConfig = {
 
 module.exports = withSentryConfig(nextConfig, {
   org: "your-org",
-  project: "diktat-ai",
+  project: "nexa-campus-ecosystem",
   authToken: process.env.SENTRY_AUTH_TOKEN,
 });
 ```
@@ -186,7 +186,7 @@ curl $PROD_URL/api/documents
 
 ```bash
 # View deployment logs
-vercel logs diktat-ai
+vercel logs nexa-campus-ecosystem
 
 # Check Cron job status
 # Via Dashboard: Project → Cron Jobs
@@ -332,7 +332,7 @@ Setup for 24/7 visibility:
 **Cron job not running:**
 - Check `vercel.json` exists
 - Verify `CRON_SECRET` set
-- View logs: `vercel logs diktat-ai --follow`
+- View logs: `vercel logs nexa-campus-ecosystem --follow`
 
 **Telegram not sending:**
 - Verify `TELEGRAM_BOT_TOKEN`

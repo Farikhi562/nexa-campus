@@ -11,7 +11,7 @@
 ## Step 1: Clone & Install Dependencies
 
 ```bash
-cd diktat-ai
+cd nexa-campus-ecosystem
 npm install
 ```
 

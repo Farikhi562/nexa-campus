@@ -29,7 +29,7 @@ export default function ContactPage() {
           <div className="mt-8 grid gap-4 sm:grid-cols-2">
             <a href={whatsappHref} target="_blank" rel="noreferrer" className="rounded-lg border border-slate-200 p-5 hover:border-brand-300 hover:bg-brand-50">
               <MessageCircle className="h-6 w-6 text-brand-600" />
-              <h2 className="mt-4 font-black">WhatsApp Admin</h2>
+              <h2 className="mt-4 font-black">Support Resmi NEXA</h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">
                 085697916845
               </p>

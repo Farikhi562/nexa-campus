@@ -184,7 +184,7 @@ Before launch:
 ## 📦 Project Files
 
 ```
-diktat-ai/
+nexa-campus-ecosystem/
 ├── src/
 │   ├── app/
 │   │   ├── api/                    # Backend API routes (9 endpoints)

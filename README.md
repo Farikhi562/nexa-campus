@@ -23,7 +23,7 @@ Upload diktat PDF → AI ekstrak soal → Langsung ujian. Dalam 2 menit.
 
 ```bash
 # Clone atau ekstrak project
-cd diktat-ai
+cd nexa-campus-ecosystem
 
 # Install dependencies
 npm install
@@ -101,7 +101,7 @@ vercel env add OCR_SPACE_API_KEY
 ## 📁 Struktur Project
 
 ```
-diktat-ai/
+nexa-campus-ecosystem/
 ├── src/
 │   ├── app/
 │   │   ├── page.tsx                    # Landing page
