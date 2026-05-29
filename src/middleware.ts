@@ -1,50 +1,55 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { createServerClient, type CookieOptions } from '@supabase/ssr'
+import { createServerClient } from '@supabase/ssr'
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({
     request: { headers: request.headers },
   })
 
-  const path = request.nextUrl.pathname
-
-  // Skip middleware for auth routes
-  if (path.startsWith('/auth/')) {
-    return response
-  }
-
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value
+        getAll() {
+          return request.cookies.getAll()
         },
-        set(name: string, value: string, options: CookieOptions) {
-          request.cookies.set(name, value)
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) =>
+            request.cookies.set(name, value)
+          )
           response = NextResponse.next({ request })
-          response.cookies.set(name, value, options)
-        },
-        remove(name: string, options: CookieOptions) {
-          request.cookies.set(name, '')
-          response = NextResponse.next({ request })
-          response.cookies.set(name, '', { ...options, maxAge: 0 })
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          )
         },
       },
     }
   )
 
+  // Refresh session — JANGAN dihapus, ini yang bikin token tetap fresh
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Protect dashboard & exam routes
-  const protectedPaths = ['/dashboard', '/exam', '/study-room', '/tim', '/jadwal', '/leaderboard', '/pengaturan', '/marketplace']
+  const path = request.nextUrl.pathname
+
+  // Protect routes
+  const protectedPaths = [
+    '/dashboard', '/exam', '/study-room', '/tim',
+    '/jadwal', '/leaderboard', '/pengaturan', '/marketplace',
+  ]
   const isProtected = protectedPaths.some(p => path.startsWith(p))
 
   if (isProtected && !user) {
     const url = request.nextUrl.clone()
     url.pathname = '/auth/login'
+    return NextResponse.redirect(url)
+  }
+
+  // Kalau sudah login dan buka halaman auth, redirect ke dashboard
+  if (user && path.startsWith('/auth/')) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/dashboard'
     return NextResponse.redirect(url)
   }
 

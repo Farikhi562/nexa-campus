@@ -21,10 +21,10 @@ import NexaLogo from '@/components/NexaLogo'
 type AuthMode = 'login' | 'signup' | 'magic'
 
 const BLOCKED_TEST_DOMAINS = ['example.com', 'example.net', 'example.org', 'test.com']
-const AUTH_CALLBACK_PATH = '/auth/callback'
+const AUTH_CALLBACK_URL = 'https://campus.nexatechlabs.my.id/auth/callback'
 
 function getAuthCallbackUrl() {
-  return `${window.location.origin}${AUTH_CALLBACK_PATH}`
+  return AUTH_CALLBACK_URL
 }
 
 function validateEmailForAuth(value: string) {

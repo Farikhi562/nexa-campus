@@ -171,7 +171,7 @@ diktat-ai/
 | Supabase | ✅ Gratis (500MB DB) | - |
 | OCR.space | ✅ 500 hal/bulan | $0.006/halaman |
 | Google Gemini 1.5 Flash | ✅ Free tier | Sesuai kuota Gemini aktif |
-| DOKU | ✅ Gratis setup | Biaya sesuai metode pembayaran aktif |
+| Midtrans | ✅ Gratis setup | Biaya sesuai metode pembayaran aktif |
 
 ---
 

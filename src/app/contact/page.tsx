@@ -4,7 +4,7 @@ import { ArrowLeft, Mail, MessageCircle, ShieldCheck, Zap } from 'lucide-react'
 export default function ContactPage() {
   const adminTelegram = (process.env.NEXT_PUBLIC_ADMIN_TELEGRAM || 'NEXATchBot').replace(/^@/, '')
   const supportEmail = process.env.NEXT_PUBLIC_SUPPORT_EMAIL || 'nexatechlabs271@gmail.com'
-  const message = encodeURIComponent('Halo admin NEXA, saya ingin tanya support, aktivasi paket, paket kampus, atau bantuan checkout DOKU.')
+  const message = encodeURIComponent('Halo admin NEXA, saya ingin tanya support, aktivasi paket, paket kampus, atau bantuan checkout Midtrans.')
   const telegramHref = adminTelegram ? `https://t.me/${adminTelegram}?start=${message}` : ''
   const mailHref = supportEmail ? `mailto:${supportEmail}` : ''
 
@@ -22,7 +22,7 @@ export default function ContactPage() {
           </div>
           <h1 className="mt-6 text-4xl font-black tracking-tight">Kontak NEXA</h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600">
-            Halaman ini dipakai untuk support, aktivasi paket, paket kampus, dan bantuan checkout DOKU.
+            Halaman ini dipakai untuk support, aktivasi paket, paket kampus, dan bantuan checkout Midtrans.
           </p>
 
           <div className="mt-8 grid gap-4 sm:grid-cols-2">
@@ -47,7 +47,7 @@ export default function ContactPage() {
           <div className="flex gap-3">
             <ShieldCheck className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-700" />
             <p className="text-sm leading-6 text-emerald-900">
-              Gunakan kontak resmi ini untuk bantuan akun, aktivasi pembayaran DOKU, kerja sama paket kampus, dan permintaan penghapusan akun atau data.
+              Gunakan kontak resmi ini untuk bantuan akun, aktivasi pembayaran Midtrans, kerja sama paket kampus, dan permintaan penghapusan akun atau data.
             </p>
           </div>
         </section>

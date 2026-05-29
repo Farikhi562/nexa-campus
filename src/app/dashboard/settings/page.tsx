@@ -275,9 +275,9 @@ export default function SettingsPage() {
                 <div className="flex items-start gap-3">
                   <FileText className="mt-0.5 h-5 w-5 flex-shrink-0 text-brand-600" />
                   <div>
-                    <p className="text-sm font-black text-slate-950">Hapus dokumen</p>
+                    <p className="text-sm font-black text-slate-950">Hapus midtransmen</p>
                     <p className="mt-1 text-xs leading-5 text-slate-600">
-                      Dokumen bisa dihapus dari dashboard materi. Penghapusan dokumen dapat ikut menghapus soal dan sesi ujian yang terkait.
+                      Midtransmen bisa dihapus dari dashboard materi. Penghapusan midtransmen dapat ikut menghapus soal dan sesi ujian yang terkait.
                     </p>
                     <Link href="/dashboard" className="mt-3 inline-flex">
                       <Button type="button" variant="outline" size="sm">Buka Materi</Button>
@@ -292,7 +292,7 @@ export default function SettingsPage() {
                   <div>
                     <p className="text-sm font-black text-red-950">Request hapus akun</p>
                     <p className="mt-1 text-xs leading-5 text-red-800">
-                      Penghapusan akun diproses lewat support resmi agar kepemilikan akun bisa diverifikasi. Data profil, dokumen, soal, sesi ujian, dan listing terkait dapat ikut dihapus.
+                      Penghapusan akun diproses lewat support resmi agar kepemilikan akun bisa diverifikasi. Data profil, midtransmen, soal, sesi ujian, dan listing terkait dapat ikut dihapus.
                     </p>
                     <div className="mt-3 flex flex-wrap gap-2">
                       <a href={supportEmailLink('delete-account')}>
@@ -341,7 +341,7 @@ export default function SettingsPage() {
 
           <Panel title="Bantuan" icon={MessageCircle}>
             <p className="text-sm leading-6 text-slate-600">
-              Butuh aktivasi paket, reset akun, refund, atau bantuan integrasi kampus? Hubungi support resmi NEXA untuk request link DOKU dan verifikasi akun.
+              Butuh aktivasi paket, reset akun, refund, atau bantuan integrasi kampus? Hubungi support resmi NEXA untuk request link Midtrans dan verifikasi akun.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               <Link href="/contact" className="inline-flex">

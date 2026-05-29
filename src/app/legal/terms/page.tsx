@@ -17,7 +17,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="mb-2 text-lg font-black text-slate-950">Paket dan Pembayaran</h2>
-            <p>NEXA menyediakan tiga paket layanan. Paket Free dapat mencoba fitur dasar dengan batasan. Paket Basic seharga Rp19.000/bulan membuka mock exam tak terbatas, ekspor PDF, 5 Campus Tools, dan hak jual di marketplace. Paket Pro seharga Rp39.000/bulan membuka seluruh fitur termasuk Chat with PDF, analisis kelemahan AI, ringkasan otomatis, study room private, tim belajar permanen, laporan mingguan via Telegram, prediksi nilai, priority processing, semua 15+ Campus Tools, ekspor multi-format (Anki, Quizlet, Word), dan 3 sub-akun/team seat. Pembayaran dilakukan melalui DOKU atau alur admin resmi. Paket aktif setelah pembayaran terkonfirmasi.</p>
+            <p>NEXA menyediakan tiga paket layanan. Paket Free dapat mencoba fitur dasar dengan batasan. Paket Basic seharga Rp19.000/bulan membuka mock exam tak terbatas, ekspor PDF, 5 Campus Tools, dan hak jual di marketplace. Paket Pro seharga Rp39.000/bulan membuka seluruh fitur termasuk Chat with PDF, analisis kelemahan AI, ringkasan otomatis, study room private, tim belajar permanen, laporan mingguan via Telegram, prediksi nilai, priority processing, semua 15+ Campus Tools, ekspor multi-format (Anki, Quizlet, Word), dan 3 sub-akun/team seat. Pembayaran dilakukan melalui Midtrans atau alur admin resmi. Paket aktif setelah pembayaran terkonfirmasi.</p>
           </section>
 
           <section>
@@ -42,7 +42,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="mb-2 text-lg font-black text-slate-950">Study Room dan Tim Belajar</h2>
-            <p>Study Room publik dapat diakses oleh semua pengguna terdaftar. Study Room private (paket Pro) hanya dapat diakses dengan password yang ditetapkan oleh pembuat room. Tim belajar permanen (paket Pro) bersifat kolaboratif — anggota dapat mengakses dokumen yang dibagikan dalam tim. Pengguna bertanggung jawab atas konten yang dibagikan dalam room dan tim. NEXA berhak menutup room atau tim yang melanggar aturan komunitas.</p>
+            <p>Study Room publik dapat diakses oleh semua pengguna terdaftar. Study Room private (paket Pro) hanya dapat diakses dengan password yang ditetapkan oleh pembuat room. Tim belajar permanen (paket Pro) bersifat kolaboratif — anggota dapat mengakses midtransmen yang dibagikan dalam tim. Pengguna bertanggung jawab atas konten yang dibagikan dalam room dan tim. NEXA berhak menutup room atau tim yang melanggar aturan komunitas.</p>
           </section>
 
           <section>
@@ -57,12 +57,12 @@ export default function TermsPage() {
 
           <section>
             <h2 className="mb-2 text-lg font-black text-slate-950">Marketplace dan Konten Terlarang</h2>
-            <p>Transaksi marketplace dilakukan antar pengguna. NEXA menyediakan sarana listing dan kontak, tetapi pengguna wajib bertransaksi secara aman dan jujur. Konten terlarang meliputi barang ilegal, narkotika, senjata, alkohol, rokok/vape untuk minor, konten dewasa, penipuan, jasa joki tugas/ujian, jual beli akun, data pribadi, dokumen palsu, produk bajakan, plagiarisme, dan barang atau jasa yang melanggar hukum Indonesia atau aturan kampus.</p>
+            <p>Transaksi marketplace dilakukan antar pengguna. NEXA menyediakan sarana listing dan kontak, tetapi pengguna wajib bertransaksi secara aman dan jujur. Konten terlarang meliputi barang ilegal, narkotika, senjata, alkohol, rokok/vape untuk minor, konten dewasa, penipuan, jasa joki tugas/ujian, jual beli akun, data pribadi, midtransmen palsu, produk bajakan, plagiarisme, dan barang atau jasa yang melanggar hukum Indonesia atau aturan kampus.</p>
           </section>
 
           <section>
             <h2 className="mb-2 text-lg font-black text-slate-950">Larangan Upload Data Sensitif</h2>
-            <p>Pengguna dilarang mengunggah KTP, kartu keluarga, data kesehatan, data keuangan, password, data login, rahasia dagang, dokumen rahasia kampus, atau data pribadi orang lain tanpa izin. Jika data sensitif terunggah, pengguna wajib segera menghapusnya dan menghubungi support.</p>
+            <p>Pengguna dilarang mengunggah KTP, kartu keluarga, data kesehatan, data keuangan, password, data login, rahasia dagang, midtransmen rahasia kampus, atau data pribadi orang lain tanpa izin. Jika data sensitif terunggah, pengguna wajib segera menghapusnya dan menghubungi support.</p>
           </section>
 
           <section>
@@ -76,13 +76,13 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="mb-2 text-lg font-black text-slate-950">Penghapusan Akun dan Dokumen</h2>
-            <p>Dokumen dapat dihapus dari dashboard materi. Untuk penghapusan akun, hubungi support resmi dan sertakan email akun yang ingin dihapus. Penghapusan akun bersifat permanen dan menghapus seluruh data terkait termasuk profil, dokumen, soal, sesi ujian, reminder, tim belajar, keanggotaan tim, chat PDF, dan listing marketplace.</p>
+            <h2 className="mb-2 text-lg font-black text-slate-950">Penghapusan Akun dan Midtransmen</h2>
+            <p>Midtransmen dapat dihapus dari dashboard materi. Untuk penghapusan akun, hubungi support resmi dan sertakan email akun yang ingin dihapus. Penghapusan akun bersifat permanen dan menghapus seluruh data terkait termasuk profil, midtransmen, soal, sesi ujian, reminder, tim belajar, keanggotaan tim, chat PDF, dan listing marketplace.</p>
           </section>
 
           <section>
             <h2 className="mb-2 text-lg font-black text-slate-950">Kontak Resmi Support</h2>
-            <p>Kontak resmi NEXA adalah Telegram bot @NEXATchBot dan email nexatechlabs271@gmail.com. Gunakan kontak ini untuk support, aktivasi paket, paket kampus, checkout DOKU, refund, dan penghapusan akun.</p>
+            <p>Kontak resmi NEXA adalah Telegram bot @NEXATchBot dan email nexatechlabs271@gmail.com. Gunakan kontak ini untuk support, aktivasi paket, paket kampus, checkout Midtrans, refund, dan penghapusan akun.</p>
           </section>
 
         </div>

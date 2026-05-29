@@ -11,7 +11,7 @@ type Message = {
 
 const STARTERS = [
   'Apa bedanya Free, Basic, dan Pro?',
-  'Gimana cara bayar via DOKU?',
+  'Gimana cara bayar via Midtrans?',
   'Siapa yang bisa jual di marketplace?',
 ]
 
@@ -23,7 +23,7 @@ export default function NexaChatbot() {
     {
       role: 'assistant',
       content:
-        'Halo, aku NEXA Assistant v1.0. Aku bisa bantu jelasin fitur, paket, DOKU checkout, marketplace, dan alur pakai NEXA.',
+        'Halo, aku NEXA Assistant v1.0. Aku bisa bantu jelasin fitur, paket, Midtrans checkout, marketplace, dan alur pakai NEXA.',
     },
   ])
   const bottomRef = useRef<HTMLDivElement>(null)
@@ -126,7 +126,7 @@ export default function NexaChatbot() {
               <div className="flex gap-2">
                 <Sparkles className="mt-0.5 h-4 w-4 flex-shrink-0 text-brand-700" />
                 <p className="text-xs leading-5 text-brand-900">
-                  Tanya seputar fitur NEXA, paket, DOKU, marketplace, reminder, atau kendala akun.
+                  Tanya seputar fitur NEXA, paket, Midtrans, marketplace, reminder, atau kendala akun.
                 </p>
               </div>
             </div>

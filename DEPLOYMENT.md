@@ -11,7 +11,7 @@ Vercel (Frontend + Backend API)
 ├── Google Gemini (gemini-1.5-flash)
 ├── OCR.space (PDF extraction)
 ├── Telegram Bot API (reminder notifications)
-└── DOKU (Payment processing)
+└── Midtrans (Payment processing)
 ```
 
 ## Prerequisites for Production
@@ -21,7 +21,7 @@ Vercel (Frontend + Backend API)
 - [ ] Google Gemini API key
 - [ ] Domain name (optional, Vercel provides .vercel.app)
 - [ ] Telegram bot token from BotFather
-- [ ] DOKU merchant account (for payments - optional)
+- [ ] Midtrans merchant account (for payments - optional)
 
 ## Step 1: Prepare Repository
 
@@ -64,12 +64,12 @@ git push origin main
      NEXT_PUBLIC_APP_URL
      TELEGRAM_BOT_TOKEN (optional)
      CRON_SECRET
-     DOKU_CLIENT_ID (optional)
-     DOKU_SECRET_KEY (optional)
-     DOKU_MERCHANT_ID (optional)
-     DOKU_CLIENT_KEY (optional)
-     NEXT_PUBLIC_DOKU_CLIENT_KEY (optional)
-     DOKU_IS_PRODUCTION (optional)
+     Midtrans_CLIENT_ID (optional)
+     Midtrans_SECRET_KEY (optional)
+     Midtrans_MERCHANT_ID (optional)
+     Midtrans_CLIENT_KEY (optional)
+     NEXT_PUBLIC_Midtrans_CLIENT_KEY (optional)
+     Midtrans_IS_PRODUCTION (optional)
      ```
    - Click "Deploy"
 
