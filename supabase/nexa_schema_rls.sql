@@ -11,7 +11,8 @@ create extension if not exists "uuid-ossp";
 -- ============================================================
 
 alter table public.profiles
-  add column if not exists whatsapp_number text,
+  add column if not exists telegram_number text,
+  add column if not exists telegram_chat_id text,
   add column if not exists profile_completed boolean default false,
   add column if not exists updated_at timestamptz default now();
 
@@ -107,8 +108,9 @@ create table if not exists public.academic_reminders (
     check (priority in ('normal', 'penting', 'urgent')),
 
   notes text,
-  whatsapp_number text,
-  channel_whatsapp boolean not null default true,
+  telegram_number text,
+  telegram_chat_id text,
+  channel_telegram boolean not null default true,
   reminder_offsets jsonb not null default '["P7D", "P3D", "P1D", "PT3H", "PT30M"]'::jsonb,
   sent_log jsonb not null default '{}'::jsonb,
 
@@ -136,7 +138,7 @@ on public.academic_reminders
 for select
 using (auth.uid() = user_id);
 
--- Pro only, because automatic WhatsApp reminder is a paid feature.
+-- Pro only, because automatic Telegram reminder is a paid feature.
 create policy "pro academic reminders insert"
 on public.academic_reminders
 for insert
@@ -177,7 +179,7 @@ create table if not exists public.marketplace_listings (
   price_label text,
   campus text,
   location text,
-  contact_whatsapp text,
+  contact_telegram text,
   image_url text,
 
   status text not null default 'active'

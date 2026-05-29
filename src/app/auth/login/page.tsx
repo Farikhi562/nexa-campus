@@ -21,6 +21,11 @@ import NexaLogo from '@/components/NexaLogo'
 type AuthMode = 'login' | 'signup' | 'magic'
 
 const BLOCKED_TEST_DOMAINS = ['example.com', 'example.net', 'example.org', 'test.com']
+const AUTH_CALLBACK_PATH = '/auth/callback'
+
+function getAuthCallbackUrl() {
+  return `${window.location.origin}${AUTH_CALLBACK_PATH}`
+}
 
 function validateEmailForAuth(value: string) {
   const email = value.trim().toLowerCase()
@@ -140,7 +145,7 @@ export default function LoginPage() {
         email: email.trim(),
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: getAuthCallbackUrl(),
           data: { full_name: fullName.trim() },
         },
       })
@@ -201,7 +206,7 @@ export default function LoginPage() {
     const { error: otpError } = await supabase.auth.signInWithOtp({
       email: email.trim(),
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: getAuthCallbackUrl(),
       },
     })
 
@@ -222,7 +227,7 @@ export default function LoginPage() {
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: getAuthCallbackUrl(),
       },
     })
 

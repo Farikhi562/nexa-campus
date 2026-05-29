@@ -46,21 +46,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Check plan — schedules with WhatsApp reminders are Pro only
+    // Check plan - schedules with Telegram reminders are Pro only
     const { data: profile } = await supabase
       .from('profiles')
-      .select('plan, whatsapp_number')
+      .select('plan, telegram_chat_id')
       .eq('id', user.id)
       .single()
 
     if (profile?.plan !== 'pro' && profile?.plan !== 'admin') {
       return NextResponse.json(
-        { error: 'Jadwal dengan pengingat WhatsApp hanya tersedia untuk paket Pro.' },
+        { error: 'Jadwal dengan pengingat Telegram hanya tersedia untuk paket Pro.' },
         { status: 403 }
       )
     }
 
-    const { subject_name, exam_date, exam_time, document_id, whatsapp_number } =
+    const { subject_name, exam_date, exam_time, document_id, telegram_chat_id } =
       await request.json()
 
     if (!subject_name?.trim() || !exam_date) {
@@ -76,16 +76,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Format exam_date tidak valid.' }, { status: 400 })
     }
 
-    // Validate WhatsApp number if provided
-    let finalWhatsAppNumber = whatsapp_number || profile?.whatsapp_number
-    if (finalWhatsAppNumber) {
-      const cleanNumber = finalWhatsAppNumber.replace(/\D/g, '')
-      if (cleanNumber.length < 10) {
-        return NextResponse.json(
-          { error: 'Nomor WhatsApp tidak valid.' },
-          { status: 400 }
-        )
-      }
+    let finalTelegramChatId = telegram_chat_id || profile?.telegram_chat_id
+    if (finalTelegramChatId && !/^-?\d{5,20}$/.test(String(finalTelegramChatId))) {
+      return NextResponse.json(
+        { error: 'Telegram chat_id tidak valid.' },
+        { status: 400 }
+      )
     }
 
     const { data: schedule, error } = await supabase
@@ -96,7 +92,7 @@ export async function POST(request: NextRequest) {
         exam_date,
         exam_time: exam_time || null,
         document_id: document_id || null,
-        whatsapp_number: finalWhatsAppNumber || null,
+        telegram_chat_id: finalTelegramChatId || null,
         reminder_sent_h3: false,
         reminder_sent_h1: false,
         reminder_sent_h0: false,
@@ -147,7 +143,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Jadwal tidak ditemukan.' }, { status: 404 })
     }
 
-    const { subject_name, exam_date, exam_time, document_id, whatsapp_number } =
+    const { subject_name, exam_date, exam_time, document_id, telegram_chat_id } =
       await request.json()
 
     const updates: Record<string, unknown> = {}
@@ -155,7 +151,7 @@ export async function PUT(request: NextRequest) {
     if (exam_date !== undefined) updates.exam_date = exam_date
     if (exam_time !== undefined) updates.exam_time = exam_time
     if (document_id !== undefined) updates.document_id = document_id
-    if (whatsapp_number !== undefined) updates.whatsapp_number = whatsapp_number
+    if (telegram_chat_id !== undefined) updates.telegram_chat_id = telegram_chat_id
 
     const { data: updated, error } = await supabase
       .from('schedules')

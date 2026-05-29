@@ -19,6 +19,7 @@ import {
   Tag,
 } from 'lucide-react'
 import Button from '@/components/ui/Button'
+import EmptyState from '@/components/EmptyState'
 import { PlanBadge } from '@/components/ui/Badge'
 import { createClient } from '@/lib/supabase/client'
 import { validateMarketplaceListing } from '@/lib/policy'
@@ -36,7 +37,7 @@ interface MarketplaceListing {
   price_label: string | null
   campus: string | null
   location: string | null
-  contact_whatsapp: string | null
+  contact_telegram: string | null
   status: 'draft' | 'pending' | 'active' | 'sold' | 'archived' | 'rejected'
   is_verified: boolean
   created_at: string
@@ -141,8 +142,8 @@ export default function MarketplacePage() {
       return
     }
 
-    if (!profile?.whatsapp_number) {
-      setNotice('Isi nomor WhatsApp di profil dulu supaya pembeli bisa menghubungi seller.')
+    if (!profile?.telegram_number) {
+      setNotice('Isi nomor Telegram di profil dulu supaya pembeli bisa menghubungi seller.')
       return
     }
 
@@ -165,7 +166,7 @@ export default function MarketplacePage() {
       location: draft.location.trim() || profile.provinsi,
       campus: profile.universitas,
       description: draft.description.trim(),
-      contact_whatsapp: profile.whatsapp_number,
+      contact_telegram: profile.telegram_number,
       status: 'active',
     })
 
@@ -184,17 +185,17 @@ export default function MarketplacePage() {
   }
 
   function contactSeller(listing: MarketplaceListing) {
-    if (!listing.contact_whatsapp) {
-      setNotice('Seller belum memasang nomor WhatsApp.')
+    if (!listing.contact_telegram) {
+      setNotice('Seller belum memasang nomor Telegram.')
       return
     }
 
-    const digits = listing.contact_whatsapp.replace(/\D/g, '')
+    const digits = listing.contact_telegram.replace(/\D/g, '')
     const normalized = digits.startsWith('0') ? `62${digits.slice(1)}` : digits
     const text = encodeURIComponent(
       `Halo, saya tertarik dengan ${listing.type} "${listing.title}" di NEXA Marketplace. Apakah masih tersedia?`
     )
-    window.open(`https://wa.me/${normalized}?text=${text}`, '_blank', 'noopener,noreferrer')
+    window.open(`https://t.me/${normalized}?text=${text}`, '_blank', 'noopener,noreferrer')
   }
 
   return (
@@ -376,10 +377,14 @@ export default function MarketplacePage() {
             <p className="mt-3 text-sm font-semibold text-slate-500">Memuat listing...</p>
           </div>
         ) : filteredListings.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-slate-300 bg-white p-10 text-center md:col-span-2 xl:col-span-3">
-            <Store className="mx-auto mb-3 h-10 w-10 text-slate-300" />
-            <p className="font-bold text-slate-700">Belum ada listing aktif</p>
-            <p className="mt-1 text-sm text-slate-500">Marketplace akan terisi setelah user Basic/Pro menerbitkan listing.</p>
+          <div className="md:col-span-2 xl:col-span-3">
+            <EmptyState
+              variant="marketplace"
+              title="Belum ada listing. Jadilah yang pertama jualan di sini!"
+              description="Barang bekas kuliah, jasa desain, tutoring, dan kebutuhan kampus bisa kamu tawarkan ke mahasiswa lain."
+              actionLabel="Buat Listing"
+              onAction={() => setShowComposer(true)}
+            />
           </div>
         ) : filteredListings.map((listing) => (
           <article key={listing.id} className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition hover:border-brand-200 hover:shadow-md">
@@ -416,7 +421,7 @@ export default function MarketplacePage() {
                 <p className="truncate text-sm font-bold text-slate-900">Seller NEXA</p>
                 <p className="text-xs text-slate-500">{listing.is_verified ? 'Terverifikasi' : 'Akun seller aktif'}</p>
               </div>
-              <Button size="sm" type="button" onClick={() => contactSeller(listing)} disabled={!listing.contact_whatsapp}>
+              <Button size="sm" type="button" onClick={() => contactSeller(listing)} disabled={!listing.contact_telegram}>
                 <MessageCircle className="h-3.5 w-3.5" />
                 Hubungi
               </Button>

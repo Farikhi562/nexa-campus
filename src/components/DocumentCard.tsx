@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { FileText, Play, Trash2, Clock } from 'lucide-react'
+import { FileText, Play, Trash2, Clock, ExternalLink, Zap } from 'lucide-react'
 import { Card } from './ui/Card'
 import { StatusBadge } from './ui/Badge'
 import Button from './ui/Button'
@@ -43,6 +43,15 @@ export default function DocumentCard({ doc, onDelete, onStartExam, disabled }: D
               <span className="text-brand-600 font-medium">{doc.question_count} soal</span>
             </>
           )}
+          {(doc.priority ?? 0) > 0 && (
+            <>
+              <span className="text-slate-300">·</span>
+              <span className="inline-flex items-center gap-1 font-bold text-amber-600">
+                <Zap className="h-3 w-3" />
+                Priority
+              </span>
+            </>
+          )}
         </div>
 
         {/* Error message */}
@@ -55,12 +64,19 @@ export default function DocumentCard({ doc, onDelete, onStartExam, disabled }: D
 
       {/* Actions */}
       <div className="px-5 pb-5 flex gap-2">
+        {doc.status === 'completed' && (
+          <Link href={`/dashboard/documents/${doc.id}`} className="flex-1">
+            <Button size="sm" variant="secondary" className="w-full">
+              <ExternalLink className="w-3.5 h-3.5" />
+              Detail
+            </Button>
+          </Link>
+        )}
         {doc.status === 'completed' && doc.question_count > 0 && (
           <Button
             size="sm"
             onClick={() => onStartExam(doc.id)}
             disabled={disabled}
-            className="flex-1"
           >
             <Play className="w-3.5 h-3.5" />
             Mulai Ujian

@@ -1,12 +1,13 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Button from '@/components/ui/Button'
-import { Trophy, RotateCcw, Home, Download, CheckCircle2, XCircle, MinusCircle } from 'lucide-react'
+import { Trophy, RotateCcw, Home, Download, CheckCircle2, XCircle, MinusCircle, Share2 } from 'lucide-react'
 import type { ExamSession, Question, SessionAnswer, Profile } from '@/types'
 import { PLAN_LIMITS } from '@/types'
+import { hasProAccess } from '@/lib/plans'
 import clsx from 'clsx'
 
 interface AnswerWithQuestion extends SessionAnswer { question: Question }
@@ -14,7 +15,7 @@ interface AnswerWithQuestion extends SessionAnswer { question: Question }
 export default function ResultsPage() {
   const router    = useRouter()
   const params    = useParams()
-  const supabase  = createClient()
+  const supabase  = useMemo(() => createClient(), [])
   const sessionId = params.sessionId as string
 
   const [session,  setSession]  = useState<ExamSession | null>(null)
@@ -23,6 +24,8 @@ export default function ResultsPage() {
   const [docTitle, setDocTitle] = useState('')
   const [loading,  setLoading]  = useState(true)
   const [exporting, setExporting] = useState(false)
+  const [sharing, setSharing] = useState(false)
+  const [streak, setStreak] = useState(0)
   const [tab, setTab] = useState<'summary' | 'detail'>('summary')
 
   const fetchResults = useCallback(async () => {
@@ -52,6 +55,22 @@ export default function ResultsPage() {
       .order('created_at', { ascending: true })
 
     if (answersData) setAnswers(answersData as AnswerWithQuestion[])
+
+    const { data: streakRows } = await supabase
+      .from('learning_streaks')
+      .select('date, exams_completed')
+      .eq('user_id', user.id)
+      .order('date', { ascending: false })
+      .limit(30)
+
+    const activeDates = new Set((streakRows ?? []).filter((row) => row.exams_completed > 0).map((row) => row.date))
+    const cursor = new Date()
+    let count = 0
+    while (activeDates.has(cursor.toISOString().slice(0, 10))) {
+      count++
+      cursor.setDate(cursor.getDate() - 1)
+    }
+    setStreak(count)
     setLoading(false)
   }, [sessionId, router, supabase])
 
@@ -70,6 +89,65 @@ export default function ResultsPage() {
       })
     } finally {
       setExporting(false)
+    }
+  }
+
+  function downloadText(filename: string, content: string, type = 'text/plain;charset=utf-8') {
+    const blob = new Blob([content], { type })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename
+    link.click()
+    URL.revokeObjectURL(url)
+  }
+
+  function handleExportQuizlet() {
+    const content = answers.map((answer) => {
+      const term = answer.question?.question_text || ''
+      const correct = answer.question?.correct_answer
+      const definition = correct ? `${correct}. ${answer.question?.options?.[correct] || ''} - ${answer.question?.explanation || ''}` : ''
+      return `${term}\t${definition}`
+    }).join('\n')
+    downloadText(`nexa-quizlet-${sessionId}.txt`, content)
+  }
+
+  function handleExportWord() {
+    const rows = answers.map((answer, index) => {
+      const correct = answer.question?.correct_answer
+      return `<h2>Soal ${index + 1}</h2><p>${answer.question?.question_text || ''}</p><p><strong>Kunci:</strong> ${correct}. ${correct ? answer.question?.options?.[correct] || '' : ''}</p><p><strong>Pembahasan:</strong> ${answer.question?.explanation || '-'}</p>`
+    }).join('')
+    downloadText(`nexa-hasil-${sessionId}.doc`, `<html><body><h1>NEXA Campus - ${docTitle}</h1>${rows}</body></html>`, 'application/msword')
+  }
+
+  async function handleShareResult() {
+    if (!session) return
+    setSharing(true)
+    try {
+      const html2canvas = (await import('html2canvas')).default
+      const card = document.getElementById('share-result-card')
+      if (!card) return
+      const canvas = await html2canvas(card, { backgroundColor: null, scale: 2 })
+      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'))
+      if (!blob) return
+      const file = new File([blob], 'nexa-campus-result.png', { type: 'image/png' })
+
+      if (navigator.share && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({
+          title: 'Hasil Exam NEXA Campus',
+          text: `Aku baru selesai ujian ${docTitle}! Skor: ${session.score}/100`,
+          files: [file],
+        })
+      } else {
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = 'nexa-campus-result.png'
+        link.click()
+        URL.revokeObjectURL(url)
+      }
+    } finally {
+      setSharing(false)
     }
   }
 
@@ -92,6 +170,7 @@ export default function ResultsPage() {
   const minutes      = Math.floor(timeTaken / 60)
   const seconds      = timeTaken % 60
   const canExport    = PLAN_LIMITS[profile?.plan ?? 'free'].canExportPDF
+  const canExportPro = hasProAccess(profile)
 
   const scoreColor =
     score >= 80 ? 'text-green-600' :
@@ -148,7 +227,7 @@ export default function ResultsPage() {
         </div>
 
         {/* Actions */}
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <Button
             variant="secondary"
             className="flex-1"
@@ -194,6 +273,42 @@ export default function ResultsPage() {
             <RotateCcw className="w-4 h-4" />
             Ulang
           </Button>
+          <Button variant="outline" className="flex-1" onClick={handleShareResult} loading={sharing}>
+            <Share2 className="w-4 h-4" />
+            Bagikan Hasil
+          </Button>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <p className="mb-3 text-sm font-black text-slate-950">Export multi-format</p>
+          <div className="grid gap-2 sm:grid-cols-3">
+            <button onClick={canExportPro ? handleExportQuizlet : undefined} className={clsx('rounded-lg border px-3 py-2 text-sm font-bold', canExportPro ? 'border-slate-200 text-slate-700 hover:border-brand-300' : 'cursor-not-allowed border-red-200 bg-red-50 text-red-600')} title={canExportPro ? 'Export Quizlet' : 'Khusus Pro'}>
+              Quizlet .txt
+            </button>
+            <button onClick={canExportPro ? handleExportWord : undefined} className={clsx('rounded-lg border px-3 py-2 text-sm font-bold', canExportPro ? 'border-slate-200 text-slate-700 hover:border-brand-300' : 'cursor-not-allowed border-red-200 bg-red-50 text-red-600')} title={canExportPro ? 'Export Word' : 'Khusus Pro'}>
+              Word .doc
+            </button>
+            <button onClick={canExportPro ? handleExportQuizlet : undefined} className={clsx('rounded-lg border px-3 py-2 text-sm font-bold', canExportPro ? 'border-slate-200 text-slate-700 hover:border-brand-300' : 'cursor-not-allowed border-red-200 bg-red-50 text-red-600')} title={canExportPro ? 'Export deck Anki sederhana' : 'Khusus Pro'}>
+              Anki deck
+            </button>
+          </div>
+        </div>
+
+        <div className="fixed -left-[9999px] top-0">
+          <div
+            id="share-result-card"
+            className="flex h-[630px] w-[1080px] flex-col justify-between rounded-[44px] bg-gradient-to-br from-blue-600 to-purple-700 p-16 text-white"
+          >
+            <div>
+              <p className="text-4xl font-black tracking-wide">NEXA Campus</p>
+              <p className="mt-8 text-5xl font-black leading-tight">Aku baru selesai ujian {docTitle || 'materi kampus'}!</p>
+            </div>
+            <div>
+              <p className="text-8xl font-black">Skor: {score}/100 🎉</p>
+              <p className="mt-8 text-4xl font-bold">🔥 {streak} hari streak</p>
+            </div>
+            <p className="text-3xl font-bold text-white/80">Coba juga di campus.nexatechlabs.my.id</p>
+          </div>
         </div>
 
         {/* Detail answers */}

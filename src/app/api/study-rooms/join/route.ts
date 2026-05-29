@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { roomCode } = await request.json()
+    const { roomCode, password } = await request.json()
 
     if (!roomCode?.trim()) {
       return NextResponse.json({ error: 'Kode room wajib diisi.' }, { status: 400 })
@@ -35,6 +35,19 @@ export async function POST(request: NextRequest) {
 
     if (new Date(room.expires_at) < new Date()) {
       return NextResponse.json({ error: 'Room sudah kadaluarsa.' }, { status: 422 })
+    }
+
+    if (room.is_private && String(room.room_password || '') !== String(password || '').trim()) {
+      return NextResponse.json({ error: 'Password room private salah.' }, { status: 403 })
+    }
+
+    const { count } = await serviceClient
+      .from('room_participants')
+      .select('id', { count: 'exact', head: true })
+      .eq('room_id', room.id)
+
+    if ((room.max_members ?? 5) < 9999 && (count ?? 0) >= (room.max_members ?? 5)) {
+      return NextResponse.json({ error: 'Room sudah penuh.' }, { status: 422 })
     }
 
     // Add participant (upsert = ignore if already joined)

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { updateLearningProgress } from '@/lib/gamification'
 import type { ClientAnswer } from '@/types'
 
 export async function POST(
@@ -113,6 +114,14 @@ export async function POST(
         .eq('id', sessionId)
       return NextResponse.json({ error: answerError.message }, { status: 500 })
     }
+
+    await updateLearningProgress({
+      db: serviceClient,
+      userId: user.id,
+      documentId: session.document_id,
+      sessionId,
+      score,
+    })
 
     return NextResponse.json({
       data: {

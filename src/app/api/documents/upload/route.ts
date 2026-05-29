@@ -107,6 +107,7 @@ export async function POST(request: NextRequest) {
 
     const plan = (profile?.plan ?? 'free') as Plan
     const limits = PLAN_LIMITS[plan] ?? PLAN_LIMITS.free
+    const priority = plan === 'pro' || plan === 'admin' ? 1 : 0
 
     if (limits.maxDocuments !== null) {
       const { count, error: countError } = await serviceClient
@@ -163,6 +164,7 @@ export async function POST(request: NextRequest) {
         title,
         file_path: filePath,
         file_url: publicUrlData.publicUrl,
+        priority,
         status: 'pending',
         error_message: null,
         question_count: 0,

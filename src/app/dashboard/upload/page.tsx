@@ -3,9 +3,11 @@
 import { useState, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Button from '@/components/ui/Button'
-import { Upload, FileText, X, CheckCircle2, AlertCircle, Cpu, Sparkles, ShieldAlert } from 'lucide-react'
+import { Upload, FileText, X, CheckCircle2, Cpu, Sparkles, ShieldAlert } from 'lucide-react'
 import clsx from 'clsx'
 import { validateSensitiveData } from '@/lib/policy'
+import AppErrorState from '@/components/AppErrorState'
+import { logClientError } from '@/lib/client-error-log'
 
 type Stage = 'idle' | 'uploading' | 'processing' | 'done' | 'error'
 
@@ -20,10 +22,13 @@ export default function UploadPage() {
   const [progress, setProgress] = useState('')
   const [docId, setDocId]       = useState<string | null>(null)
   const [error, setError]       = useState('')
+  const [errorKind, setErrorKind] = useState<'upload' | 'ai' | 'network' | 'generic'>('generic')
   const [policyAccepted, setPolicyAccepted] = useState(false)
+  const [isPriority, setIsPriority] = useState(false)
 
   const pickFile = (f: File) => {
-    if (f.type !== 'application/pdf') {
+    const isPdf = f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf')
+    if (!isPdf) {
       setError('Hanya file PDF yang didukung.')
       return
     }
@@ -71,17 +76,20 @@ export default function UploadPage() {
       body: uploadForm,
     })
     const docData = await uploadRes.json()
+    setIsPriority((docData.priority ?? 0) > 0)
 
     if (uploadRes.status === 401) {
       router.push('/auth/login')
       return
     }
 
-    if (!uploadRes.ok || docData.error || !docData.id) {
-      setError(docData.error || 'Upload gagal.')
-      setStage('error')
-      return
-    }
+      if (!uploadRes.ok || docData.error || !docData.id) {
+        setErrorKind('upload')
+        setError(docData.error || 'Upload gagal.')
+        await logClientError('upload', docData.error || 'Upload gagal.')
+        setStage('error')
+        return
+      }
 
     setDocId(docData.id)
     setStage('processing')
@@ -96,12 +104,14 @@ export default function UploadPage() {
 
     const result = await res.json()
 
-    if (!res.ok || result.error) {
-      setError(result.error || 'Gagal memproses dokumen.')
-      setStage('error')
+      if (!res.ok || result.error) {
+        setErrorKind('ai')
+        setError(result.error || 'Gagal memproses dokumen.')
+        await logClientError('ai_processing', result.error || 'Gagal memproses dokumen.')
+        setStage('error')
 
-      return
-    }
+        return
+      }
 
     setProgress(`${result.questionCount} soal berhasil diekstrak.`)
     setStage('done')
@@ -252,7 +262,9 @@ export default function UploadPage() {
                   <p className="font-semibold text-brand-900 text-sm">
                     {stage === 'uploading' ? 'Mengupload file...' : 'AI sedang memproses...'}
                   </p>
-                  <p className="text-brand-600 text-xs mt-0.5">{progress || 'Harap tunggu sebentar...'}</p>
+                  <p className="text-brand-600 text-xs mt-0.5">
+                    {isPriority ? '⚡ Priority Pro aktif · ' : ''}{progress || 'Harap tunggu sebentar...'}
+                  </p>
                 </div>
               </div>
               <div className="w-full bg-brand-200 rounded-full h-1.5">
@@ -266,13 +278,15 @@ export default function UploadPage() {
 
           {/* Error */}
           {error && (
-            <div className="flex items-start gap-2.5 p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
-              <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-medium">Terjadi kesalahan</p>
-                <p className="text-red-500 mt-0.5">{error}</p>
-              </div>
-            </div>
+            <AppErrorState
+              kind={errorKind}
+              message={error}
+              onRetry={() => {
+                setError('')
+                setStage('idle')
+              }}
+              retryLabel={errorKind === 'ai' ? 'Retry' : 'Coba Lagi'}
+            />
           )}
 
           {/* Upload button */}

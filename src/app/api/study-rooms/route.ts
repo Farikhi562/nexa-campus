@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { PLAN_LIMITS, type Plan, type Profile } from '@/types'
+import { hasProAccess } from '@/lib/plans'
 
 function generateRoomCode(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' // no ambiguous chars
@@ -59,21 +61,35 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { title, documentId } = await request.json()
+    const { title, documentId, isPrivate, roomPassword, maxMembers, bannerUrl, welcomeMessage, customName } = await request.json()
 
     if (!title?.trim() || !documentId) {
       return NextResponse.json({ error: 'title dan documentId wajib diisi.' }, { status: 400 })
     }
 
-    // Check plan — study room is Pro/Admin only
+    // Basic can create public rooms. Private/custom rooms are Pro only.
     const { data: profile } = await supabase
       .from('profiles')
-      .select('plan')
+      .select('plan, seat_owner_id')
       .eq('id', user.id)
       .single()
 
-    if (profile?.plan !== 'pro' && profile?.plan !== 'admin') {
-      return NextResponse.json({ error: 'Study Room hanya tersedia untuk paket Pro.' }, { status: 403 })
+    const plan = (profile?.plan ?? 'free') as Plan
+    if (!PLAN_LIMITS[plan]?.canStudyRoom) {
+      return NextResponse.json({ error: 'Buat Study Room tersedia mulai paket Basic.' }, { status: 403 })
+    }
+
+    const isPro = hasProAccess(profile as Pick<Profile, 'plan' | 'seat_owner_id'> | null)
+    const requestedPrivate = Boolean(isPrivate)
+    const requestedCustom = Boolean(String(bannerUrl || '').trim() || String(welcomeMessage || '').trim() || String(customName || '').trim())
+    const normalizedMaxMembers = maxMembers === 'unlimited' ? 9999 : Number(maxMembers || 5)
+
+    if ((requestedPrivate || requestedCustom || normalizedMaxMembers !== 5) && !isPro) {
+      return NextResponse.json({ error: 'Room private, custom branding, dan pilihan max members khusus Pro.' }, { status: 403 })
+    }
+
+    if (requestedPrivate && !String(roomPassword || '').trim()) {
+      return NextResponse.json({ error: 'Password wajib diisi untuk room private.' }, { status: 400 })
     }
 
     const { data: doc } = await supabase
@@ -112,6 +128,12 @@ export async function POST(request: NextRequest) {
         document_id: documentId,
         room_code:   roomCode,
         title:       title.trim(),
+        is_private:  requestedPrivate,
+        room_password: requestedPrivate ? String(roomPassword).trim() : null,
+        max_members: isPro ? normalizedMaxMembers : 5,
+        banner_url: isPro ? String(bannerUrl || '').trim() || null : null,
+        welcome_message: isPro ? String(welcomeMessage || '').trim() || null : null,
+        custom_name: isPro ? String(customName || '').trim() || null : null,
       })
       .select()
       .single()

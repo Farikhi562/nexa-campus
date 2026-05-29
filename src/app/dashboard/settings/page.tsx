@@ -24,14 +24,14 @@ type Preferences = {
   emailSummary: boolean
   deadlineReminder: boolean
   campusUpdates: boolean
-  whatsappReminder: boolean
+  telegramReminder: boolean
 }
 
 const DEFAULT_PREFERENCES: Preferences = {
   emailSummary: true,
   deadlineReminder: true,
   campusUpdates: false,
-  whatsappReminder: false,
+  telegramReminder: false,
 }
 
 const STORAGE_KEY = 'nexa-settings-preferences'
@@ -43,7 +43,10 @@ export default function SettingsPage() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [savingTelegram, setSavingTelegram] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [telegramSaved, setTelegramSaved] = useState(false)
+  const [telegramChatId, setTelegramChatId] = useState('')
   const [preferences, setPreferences] = useState<Preferences>(DEFAULT_PREFERENCES)
 
   useEffect(() => {
@@ -57,7 +60,10 @@ export default function SettingsPage() {
           .eq('id', user.id)
           .single()
 
-        if (data) setProfile(data as Profile)
+        if (data) {
+          setProfile(data as Profile)
+          setTelegramChatId(data.telegram_chat_id || '')
+        }
       }
 
       const stored = window.localStorage.getItem(STORAGE_KEY)
@@ -85,6 +91,26 @@ export default function SettingsPage() {
     }, 350)
   }
 
+  async function saveTelegramChatId() {
+    setSavingTelegram(true)
+    setTelegramSaved(false)
+
+    const response = await fetch('/api/user/profile', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ telegram_chat_id: telegramChatId.trim() || null }),
+    })
+
+    if (response.ok) {
+      const updated = await response.json()
+      setProfile(updated as Profile)
+      setTelegramSaved(true)
+      setTimeout(() => setTelegramSaved(false), 2500)
+    }
+
+    setSavingTelegram(false)
+  }
+
   function supportEmailLink(topic: 'delete-account' | 'refund') {
     const subject = topic === 'delete-account' ? 'Hapus Akun NEXA' : 'Refund Paket NEXA'
     const body = [
@@ -107,7 +133,7 @@ export default function SettingsPage() {
       ].join('\n')
     )
 
-    return `https://wa.me/${SUPPORT_WHATSAPP}?text=${text}`
+    return `https://t.me/${SUPPORT_WHATSAPP}?text=${text}`
   }
 
   const plan = (profile?.plan ?? 'free') as Plan
@@ -192,11 +218,11 @@ export default function SettingsPage() {
                 onChange={() => updatePreference('campusUpdates')}
               />
               <Toggle
-                title="WhatsApp reminder"
-                desc={isPaid ? 'Reminder WhatsApp aktif untuk paket berbayar.' : 'Upgrade paket untuk memakai reminder WhatsApp.'}
-                checked={preferences.whatsappReminder && isPaid}
+                title="Telegram reminder"
+                desc={isPaid ? 'Reminder Telegram aktif via @NEXATchBot.' : 'Upgrade paket untuk memakai reminder Telegram otomatis.'}
+                checked={preferences.telegramReminder && isPaid}
                 disabled={!isPaid}
-                onChange={() => updatePreference('whatsappReminder')}
+                onChange={() => updatePreference('telegramReminder')}
               />
             </div>
             <div className="mt-5 flex items-center gap-3">
@@ -208,6 +234,36 @@ export default function SettingsPage() {
                 <span className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-700">
                   <CheckCircle2 className="h-4 w-4" />
                   Tersimpan
+                </span>
+              )}
+            </div>
+          </Panel>
+
+          <Panel title="Hubungkan Telegram" icon={MessageCircle}>
+            <div className="rounded-lg border border-sky-200 bg-sky-50 p-4">
+              <p className="text-sm font-black text-sky-950">Bot reminder: @NEXATchBot</p>
+              <p className="mt-1 text-xs leading-5 text-sky-800">
+                Buka https://t.me/NEXATchBot, chat /start, lalu masukkan chat_id kamu di sini agar reminder ujian dikirim lewat Telegram.
+              </p>
+            </div>
+            <label className="mt-4 block">
+              <span className="text-sm font-bold text-slate-700">Telegram chat_id</span>
+              <input
+                value={telegramChatId}
+                onChange={(event) => setTelegramChatId(event.target.value)}
+                placeholder="Contoh: 123456789"
+                className="mt-2 w-full rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+              />
+            </label>
+            <div className="mt-4 flex items-center gap-3">
+              <Button type="button" loading={savingTelegram} onClick={saveTelegramChatId}>
+                <Save className="h-4 w-4" />
+                Simpan Telegram
+              </Button>
+              {telegramSaved && (
+                <span className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-700">
+                  <CheckCircle2 className="h-4 w-4" />
+                  Terhubung
                 </span>
               )}
             </div>
@@ -243,7 +299,7 @@ export default function SettingsPage() {
                         <Button type="button" variant="danger" size="sm">Email Hapus Akun</Button>
                       </a>
                       <a href={supportWhatsappLink('delete-account')} target="_blank" rel="noreferrer">
-                        <Button type="button" variant="outline" size="sm">WhatsApp Support</Button>
+                        <Button type="button" variant="outline" size="sm">Telegram Support</Button>
                       </a>
                     </div>
                   </div>
@@ -269,7 +325,8 @@ export default function SettingsPage() {
                 ['Campus Tools', isPaid ? 'Semua terbuka' : 'Gratis terbatas'],
                 ['Mock Exam', isPaid ? 'Tak terbatas' : '1 sesi'],
                 ['Marketplace seller', isPaid ? 'Aktif' : 'Terkunci'],
-                ['Study Room', limits.canStudyRoom ? 'Aktif' : 'Pro only'],
+                ['Study Room', limits.canStudyRoom ? 'Aktif' : 'Basic+'],
+                ['Team Seat', plan === 'pro' || plan === 'admin' ? '3 seat' : 'Pro only'],
               ].map(([label, value]) => (
                 <div key={label} className="flex items-center justify-between rounded-md border border-slate-200 px-3 py-2">
                   <span className="text-sm font-semibold text-slate-700">{label}</span>
@@ -277,11 +334,14 @@ export default function SettingsPage() {
                 </div>
               ))}
             </div>
+            <Link href="/pengaturan/tim-seat" className="mt-4 inline-flex">
+              <Button type="button" variant="outline" size="sm">Kelola Team Seat</Button>
+            </Link>
           </Panel>
 
           <Panel title="Bantuan" icon={MessageCircle}>
             <p className="text-sm leading-6 text-slate-600">
-              Butuh aktivasi paket, reset akun, refund, atau bantuan integrasi kampus? Hubungi support resmi NEXA untuk request link Midtrans dan verifikasi akun.
+              Butuh aktivasi paket, reset akun, refund, atau bantuan integrasi kampus? Hubungi support resmi NEXA untuk request link DOKU dan verifikasi akun.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               <Link href="/contact" className="inline-flex">

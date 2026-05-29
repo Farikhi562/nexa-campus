@@ -1,50 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 
-/**
- * GET/POST /api/cron/remind-exams
- * Send WhatsApp reminders for upcoming exams (H-3, H-1, H-0)
- *
- * Setup Vercel Cron:
- * Add to vercel.json:
- * {
- *   "crons": [{
- *     "path": "/api/cron/remind-exams",
- *     "schedule": "0 7 * * *"
- *   }]
- * }
- *
- * Or use external service like EasyCron:
- * https://www.easycron.com/
- * Trigger: POST http://your-domain.com/api/cron/remind-exams?auth=YOUR_CRON_SECRET
- */
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
   try {
     const authHeader = request.headers.get('authorization')
     const cronSecret = process.env.CRON_SECRET
     if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json(
-        { error: 'Unauthorized - invalid cron secret' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized - invalid cron secret' }, { status: 401 })
     }
 
     const supabase = createServiceClient()
-
-    // Get all active schedules
-    const { data: schedules, error: schedulesError } = await supabase
+    const { data: schedules, error } = await supabase
       .from('schedules')
-      .select('*, profiles:user_id(whatsapp_number, email)')
+      .select('*, profiles:user_id(telegram_chat_id, email)')
 
-    if (schedulesError) {
-      return NextResponse.json({ error: schedulesError.message }, { status: 500 })
-    }
-
-    if (!schedules || schedules.length === 0) {
-      return NextResponse.json({
-        data: { processed: 0, sent: 0 },
-        message: 'No schedules to process',
-      })
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    if (!schedules?.length) {
+      return NextResponse.json({ data: { processed: 0, sent: 0 }, message: 'No schedules to process' })
     }
 
     let sent = 0
@@ -52,98 +26,52 @@ export async function POST(request: NextRequest) {
 
     for (const schedule of schedules) {
       const examDate = new Date(schedule.exam_date)
-      const daysUntilExam = Math.floor(
-        (examDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
-      )
+      const daysUntilExam = Math.floor((examDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
 
-      let shouldSend = false
-      let reminderType = ''
+      const reminderType =
+        daysUntilExam === 3 && !schedule.reminder_sent_h3 ? 'H-3' :
+        daysUntilExam === 1 && !schedule.reminder_sent_h1 ? 'H-1' :
+        daysUntilExam === 0 && !schedule.reminder_sent_h0 ? 'H-0' :
+        ''
 
-      // H-3 (3 days before)
-      if (
-        daysUntilExam === 3 &&
-        !schedule.reminder_sent_h3
-      ) {
-        shouldSend = true
-        reminderType = 'H-3'
-      }
-      // H-1 (1 day before)
-      else if (
-        daysUntilExam === 1 &&
-        !schedule.reminder_sent_h1
-      ) {
-        shouldSend = true
-        reminderType = 'H-1'
-      }
-      // H-0 (today)
-      else if (
-        daysUntilExam === 0 &&
-        !schedule.reminder_sent_h0
-      ) {
-        shouldSend = true
-        reminderType = 'H-0'
-      }
+      if (!reminderType) continue
 
-      if (!shouldSend) continue
+      const updateField =
+        reminderType === 'H-3' ? 'reminder_sent_h3' :
+        reminderType === 'H-1' ? 'reminder_sent_h1' :
+        'reminder_sent_h0'
 
-      const whatsappNumber =
-        schedule.whatsapp_number ||
-        schedule.profiles?.whatsapp_number
+      const chatId = schedule.telegram_chat_id || schedule.profiles?.telegram_chat_id
 
-      if (!whatsappNumber) {
-        // Update flag even if no number (skip sending)
-        const updateField =
-          reminderType === 'H-3'
-            ? 'reminder_sent_h3'
-            : reminderType === 'H-1'
-            ? 'reminder_sent_h1'
-            : 'reminder_sent_h0'
-
-        await supabase
-          .from('schedules')
-          .update({ [updateField]: true })
-          .eq('id', schedule.id)
-
+      if (!chatId) {
+        await supabase.from('schedules').update({ [updateField]: true }).eq('id', schedule.id)
         continue
       }
 
-      // Send WhatsApp (using Twilio)
-      const result = await sendWhatsAppReminder(
-        whatsappNumber,
-        schedule.subject_name,
+      const result = await sendTelegramReminder({
+        chatId,
+        subject: schedule.subject_name,
         reminderType,
-        schedule.exam_time || 'waktu belum ditentukan'
-      )
+        examTime: schedule.exam_time || 'waktu belum ditentukan',
+      })
 
       if (result.success) {
-        // Update reminder flag
-        const updateField =
-          reminderType === 'H-3'
-            ? 'reminder_sent_h3'
-            : reminderType === 'H-1'
-            ? 'reminder_sent_h1'
-            : 'reminder_sent_h0'
-
-        await supabase
-          .from('schedules')
-          .update({ [updateField]: true })
-          .eq('id', schedule.id)
-
+        await supabase.from('schedules').update({ [updateField]: true }).eq('id', schedule.id)
         sent++
-        console.log(`[Cron] WhatsApp reminder sent for schedule ${schedule.id} (${reminderType})`)
+        console.log(`[Cron] Telegram reminder sent for schedule ${schedule.id} (${reminderType})`)
       } else {
-        console.error(`[Cron] Failed to send WhatsApp for schedule ${schedule.id}: ${result.error}`)
+        console.error(`[Cron] Failed to send Telegram for schedule ${schedule.id}: ${result.error}`)
       }
     }
 
     return NextResponse.json({
       data: { processed: schedules.length, sent },
-      message: `Processed ${schedules.length} schedules, sent ${sent} reminders`,
+      message: `Processed ${schedules.length} schedules, sent ${sent} Telegram reminders`,
     })
-  } catch (err) {
-    console.error('[Cron Remind] Error:', err)
+  } catch (error) {
+    console.error('[Cron Remind] Error:', error)
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : 'Terjadi kesalahan' },
+      { error: error instanceof Error ? error.message : 'Terjadi kesalahan' },
       { status: 500 }
     )
   }
@@ -151,65 +79,47 @@ export async function POST(request: NextRequest) {
 
 export const GET = POST
 
-/**
- * Send WhatsApp reminder via Twilio
- */
-async function sendWhatsAppReminder(
-  whatsappNumber: string,
-  subject: string,
-  reminderType: string,
+async function sendTelegramReminder({
+  chatId,
+  subject,
+  reminderType,
+  examTime,
+}: {
+  chatId: string
+  subject: string
+  reminderType: string
   examTime: string
-): Promise<{ success: boolean; error?: string }> {
-  const accountSid = process.env.TWILIO_ACCOUNT_SID
-  const authToken = process.env.TWILIO_AUTH_TOKEN
-  const fromNumber = process.env.TWILIO_WHATSAPP_FROM
+}): Promise<{ success: boolean; error?: string }> {
+  const token = process.env.TELEGRAM_BOT_TOKEN
+  if (!token) return { success: false, error: 'TELEGRAM_BOT_TOKEN not configured' }
 
-  if (!accountSid || !authToken || !fromNumber) {
-    console.warn(
-      '[WhatsApp] Twilio credentials not configured. Skipping send.'
-    )
-    return { success: false, error: 'Twilio not configured' }
+  const intro =
+    reminderType === 'H-3' ? 'Pengingat 3 hari lagi' :
+    reminderType === 'H-1' ? 'Pengingat besok' :
+    'Pengingat hari ini'
+
+  const text = [
+    'NEXA Campus Reminder',
+    `${intro}: ${subject}`,
+    `Waktu: ${examTime}`,
+    '',
+    'Buka NEXA untuk latihan, cek materi, dan rapikan agenda kamu.',
+  ].join('\n')
+
+  const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chat_id: chatId,
+      text,
+      disable_web_page_preview: true,
+    }),
+  })
+
+  const data = await response.json().catch(() => ({}))
+  if (!response.ok || !data.ok) {
+    return { success: false, error: data.description || 'Telegram API error' }
   }
 
-  const remindText =
-    reminderType === 'H-3'
-      ? `📚 *Pengingat Ujian 3 Hari Lagi* 📚\n\nMata Kuliah: *${subject}*\nWaktu Ujian: ${examTime}\n\nTetap semangat belajar! Gunakan Diktat.AI untuk latihan soal.\n\n👉 https://diktat.ai`
-      : reminderType === 'H-1'
-      ? `📚 *Pengingat Ujian Besok!* 📚\n\nMata Kuliah: *${subject}*\nWaktu Ujian: ${examTime}\n\nJangan lupa istirahat yang cukup ✨\n\n👉 https://diktat.ai`
-      : `🚀 *Ujian HARI INI!* 🚀\n\nMata Kuliah: *${subject}*\nWaktu Ujian: ${examTime}\n\nSemoga sukses! Yakin diri, kamu pasti bisa! 💪\n\n👉 https://diktat.ai`
-
-  try {
-    const url = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        Authorization: `Basic ${Buffer.from(
-          `${accountSid}:${authToken}`
-        ).toString('base64')}`,
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        From: fromNumber,
-        To: `whatsapp:${whatsappNumber}`,
-        Body: remindText,
-      }).toString(),
-    })
-
-    if (!response.ok) {
-      const error = await response.json()
-      return {
-        success: false,
-        error: error.message || 'Twilio API error',
-      }
-    }
-
-    const data = await response.json()
-    return { success: !!data.sid }
-  } catch (err) {
-    return {
-      success: false,
-      error: err instanceof Error ? err.message : 'Unknown error',
-    }
-  }
+  return { success: true }
 }

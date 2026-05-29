@@ -8,20 +8,20 @@ User Browser
 Vercel (Frontend + Backend API)
     ↓
 ├── Supabase (Database, Auth, Storage)
-├── OpenAI (GPT-4o-mini API)
+├── Google Gemini (gemini-1.5-flash)
 ├── OCR.space (PDF extraction)
-├── Twilio (WhatsApp notifications)
-└── Midtrans (Payment processing)
+├── Telegram Bot API (reminder notifications)
+└── DOKU (Payment processing)
 ```
 
 ## Prerequisites for Production
 
 - [ ] Vercel account (https://vercel.com)
 - [ ] Supabase project with production database
-- [ ] OpenAI API key with billing enabled
+- [ ] Google Gemini API key
 - [ ] Domain name (optional, Vercel provides .vercel.app)
-- [ ] Twilio account (for WhatsApp - optional)
-- [ ] Midtrans merchant account (for payments - optional)
+- [ ] Telegram bot token from BotFather
+- [ ] DOKU merchant account (for payments - optional)
 
 ## Step 1: Prepare Repository
 
@@ -59,17 +59,17 @@ git push origin main
      NEXT_PUBLIC_SUPABASE_URL
      NEXT_PUBLIC_SUPABASE_ANON_KEY
      SUPABASE_SERVICE_ROLE_KEY
-     OPENAI_API_KEY
+     GEMINI_API_KEY
      OCR_SPACE_API_KEY
      NEXT_PUBLIC_APP_URL
-     TWILIO_ACCOUNT_SID (optional)
-     TWILIO_AUTH_TOKEN (optional)
-     TWILIO_WHATSAPP_FROM (optional)
+     TELEGRAM_BOT_TOKEN (optional)
      CRON_SECRET
-     MIDTRANS_SERVER_KEY (optional)
-     MIDTRANS_CLIENT_KEY (optional)
-     NEXT_PUBLIC_MIDTRANS_CLIENT_KEY (optional)
-     MIDTRANS_IS_PRODUCTION (optional)
+     DOKU_CLIENT_ID (optional)
+     DOKU_SECRET_KEY (optional)
+     DOKU_MERCHANT_ID (optional)
+     DOKU_CLIENT_KEY (optional)
+     NEXT_PUBLIC_DOKU_CLIENT_KEY (optional)
+     DOKU_IS_PRODUCTION (optional)
      ```
    - Click "Deploy"
 
@@ -114,7 +114,7 @@ vercel
 
 Cron is automatically enabled in production (via `vercel.json`):
 - Schedule: **Daily at 7:00 AM UTC**
-- Task: Send WhatsApp exam reminders
+- Task: Send Telegram exam reminders
 
 **Monitor Cron:**
 - Vercel Dashboard → Project → Cron Jobs
@@ -178,7 +178,7 @@ curl $PROD_URL/api/documents
 - [ ] Answer submission
 - [ ] Result export
 - [ ] Study room creation
-- [ ] WhatsApp reminder send (if Pro)
+- [ ] Telegram reminder send (if Pro)
 
 ## Step 6: Monitor & Maintain
 
@@ -298,9 +298,9 @@ vercel rollback
 |---------|------|----------|-------|
 | Vercel | $0 | $20 (Pro) | Auto-scales based on usage |
 | Supabase | $0 | $25 (Pro) | Per month after free tier |
-| OpenAI API | - | $0-50 | Pay-per-usage, ~$0.005 per question |
+| Google Gemini | $0 | Usage-based | Free tier available for Gemini 1.5 Flash |
 | OCR.space | $0 | $0 | 500 pages/month free tier |
-| Twilio | - | $0-20 | WhatsApp: ~$0.08/msg |
+| Telegram Bot API | $0 | $0 | Bot notifications via sendMessage |
 | Domain | - | $10-15 | Annual or monthly |
 | **TOTAL** | **$0** | **$55-120** | Varies with usage |
 
@@ -334,10 +334,10 @@ Setup for 24/7 visibility:
 - Verify `CRON_SECRET` set
 - View logs: `vercel logs diktat-ai --follow`
 
-**WhatsApp not sending:**
-- Verify Twilio credentials
-- Check phone number format
-- View Twilio logs: https://www.twilio.com/console/sms/logs
+**Telegram not sending:**
+- Verify `TELEGRAM_BOT_TOKEN`
+- Pastikan user sudah chat `/start` ke @NEXATchBot
+- Pastikan `telegram_chat_id` tersimpan di profil atau reminder
 
 **Database connection timeout:**
 - Upgrade Supabase plan
@@ -345,7 +345,7 @@ Setup for 24/7 visibility:
 - Check network policies
 
 **High API costs:**
-- Reduce OpenAI tokens (optimize prompt)
+- Reduce Gemini output tokens (optimize prompt)
 - Implement caching
 - Batch API requests
 
@@ -353,5 +353,5 @@ Setup for 24/7 visibility:
 
 - Vercel Docs: https://vercel.com/docs
 - Supabase Docs: https://supabase.com/docs
-- OpenAI API: https://platform.openai.com/docs
+- Google Gemini API: https://ai.google.dev/gemini-api/docs
 - Next.js Deployment: https://nextjs.org/docs/deployment

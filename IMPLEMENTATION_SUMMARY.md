@@ -74,7 +74,7 @@ git push origin main
 | `/api/schedules` | GET/POST/PUT/DELETE | Exam schedules | ✓ | ✓ |
 | `/api/study-rooms` | GET/POST | Study rooms | ✓ | ✓ |
 | `/api/study-rooms/join` | POST | Join room | ✓ | ✓ |
-| `/api/cron/remind-exams` | POST | WhatsApp reminder | ✓ | ✓ |
+| `/api/cron/remind-exams` | POST | Telegram reminder | ✓ | ✓ |
 
 ## 🔒 Security & Privacy
 
@@ -94,7 +94,7 @@ git push origin main
 | Supabase | ✓ | $25 | After free tier |
 | OpenAI | - | $0-50 | ~$0.005/question extracted |
 | OCR.space | ✓ | $0 | 500 pages/month free |
-| Twilio | - | $0-20 | WhatsApp reminders |
+| Twilio | - | $0-20 | Telegram reminders |
 | Domain | - | $10/yr | Or use vercel.app |
 | **TOTAL** | **$0** | **~$75** | All in for MVP |
 
@@ -110,14 +110,14 @@ git push origin main
 
 ### Pro Features
 - ✅ Study rooms with leaderboard
-- ✅ WhatsApp exam reminders (H-3, H-1, H-0)
+- ✅ Telegram exam reminders (H-3, H-1, H-0)
 - ✅ Exam scheduling
 - ✅ Plan-based limits
 
 ### Freemium Model
 - ✅ Free: 1 upload, 1 session
 - ✅ Basic: 5 uploads, unlimited sessions, PDF export
-- ✅ Pro: Unlimited, WhatsApp, study rooms
+- ✅ Pro: Unlimited, Telegram, study rooms
 
 ## 🧪 Testing
 
@@ -136,7 +136,7 @@ curl http://localhost:3001/api/documents \
 ## 🎯 Next Phases
 
 ### Phase 2 (Recommended)
-- [ ] Implement payment gateway (Midtrans payment flow)
+- [ ] Implement payment gateway (DOKU payment flow)
 - [ ] Add user analytics
 - [ ] Create admin dashboard
 - [ ] Setup monitoring (Sentry)
@@ -177,7 +177,7 @@ Before launch:
 - [ ] HTTPS enabled
 - [ ] API rate limiting set
 - [ ] Cron jobs tested
-- [ ] WhatsApp reminders tested
+- [ ] Telegram reminders tested
 - [ ] Load testing completed
 - [ ] Security audit done
 

@@ -17,9 +17,12 @@ import {
   Users,
 } from 'lucide-react'
 import Button from '@/components/ui/Button'
+import EmptyState from '@/components/EmptyState'
 import { PlanBadge } from '@/components/ui/Badge'
+import ProUpgradeModal from '@/components/ProUpgradeModal'
 import { createClient } from '@/lib/supabase/client'
 import { PLAN_LIMITS, type Profile, type StudyRoom } from '@/types'
+import { hasProAccess } from '@/lib/plans'
 
 export default function StudyRoomListPage() {
   const supabase = useMemo(() => createClient(), [])
@@ -33,9 +36,17 @@ export default function StudyRoomListPage() {
   const [showCreate, setShowCreate] = useState(false)
   const [newTitle, setNewTitle] = useState('')
   const [docId, setDocId] = useState('')
+  const [isPrivate, setIsPrivate] = useState(false)
+  const [roomPassword, setRoomPassword] = useState('')
+  const [maxMembers, setMaxMembers] = useState('5')
+  const [customName, setCustomName] = useState('')
+  const [bannerUrl, setBannerUrl] = useState('')
+  const [welcomeMessage, setWelcomeMessage] = useState('')
   const [joinCode, setJoinCode] = useState('')
+  const [joinPassword, setJoinPassword] = useState('')
   const [joinError, setJoinError] = useState('')
   const [copied, setCopied] = useState<string | null>(null)
+  const [lockedFeature, setLockedFeature] = useState<string | null>(null)
 
   const fetchData = useCallback(async () => {
     setLoading(true)
@@ -68,6 +79,7 @@ export default function StudyRoomListPage() {
 
   const plan = profile?.plan ?? 'free'
   const canCreateRoom = PLAN_LIMITS[plan].canStudyRoom
+  const isPro = hasProAccess(profile)
   const activeRooms = rooms.filter((room) => room.is_active && new Date(room.expires_at) > new Date()).length
 
   async function handleCreateRoom() {
@@ -77,7 +89,16 @@ export default function StudyRoomListPage() {
     const res = await fetch('/api/study-rooms', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title: newTitle.trim(), documentId: docId }),
+      body: JSON.stringify({
+        title: newTitle.trim(),
+        documentId: docId,
+        isPrivate,
+        roomPassword,
+        maxMembers,
+        customName,
+        bannerUrl,
+        welcomeMessage,
+      }),
     })
     const { data, error } = await res.json()
 
@@ -90,6 +111,12 @@ export default function StudyRoomListPage() {
     setShowCreate(false)
     setNewTitle('')
     setDocId('')
+    setIsPrivate(false)
+    setRoomPassword('')
+    setMaxMembers('5')
+    setCustomName('')
+    setBannerUrl('')
+    setWelcomeMessage('')
     router.push(`/study-room/${data.roomId}`)
   }
 
@@ -100,7 +127,7 @@ export default function StudyRoomListPage() {
     const res = await fetch('/api/study-rooms/join', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ roomCode: joinCode.toUpperCase().trim() }),
+      body: JSON.stringify({ roomCode: joinCode.toUpperCase().trim(), password: joinPassword }),
     })
     const { data, error } = await res.json()
 
@@ -210,6 +237,13 @@ export default function StudyRoomListPage() {
             />
             <Button onClick={handleJoin} disabled={joinCode.length !== 6}>Gabung</Button>
           </div>
+          <input
+            type="password"
+            value={joinPassword}
+            onChange={(event) => setJoinPassword(event.target.value)}
+            placeholder="Password room private jika ada"
+            className="mt-3 w-full rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+          />
           {joinError && <p className="mt-3 rounded-md bg-red-50 px-3 py-2 text-sm font-semibold text-red-700">{joinError}</p>}
         </div>
 
@@ -227,11 +261,13 @@ export default function StudyRoomListPage() {
               <div className="h-8 w-8 animate-spin rounded-full border-4 border-brand-100 border-t-brand-600" />
             </div>
           ) : rooms.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
-              <Users className="mx-auto mb-3 h-10 w-10 text-slate-300" />
-              <p className="font-bold text-slate-700">Belum ada room</p>
-              <p className="mt-1 text-sm text-slate-500">Buat room dari dokumen siap pakai atau gabung memakai kode.</p>
-            </div>
+            <EmptyState
+              variant="study"
+              title="Belum ada room aktif. Buat room dan ajak temanmu!"
+              description="Pilih dokumen yang sudah selesai diproses, lalu bagikan kode room ke teman kelas."
+              actionLabel="Buat Room"
+              onAction={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            />
           ) : (
             <div className="grid gap-3 md:grid-cols-2">
               {rooms.map((room) => {
@@ -240,15 +276,23 @@ export default function StudyRoomListPage() {
                   <article key={room.id} className="rounded-lg border border-slate-200 p-4 transition hover:border-brand-300 hover:shadow-sm">
                     <div className="mb-4 flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <h3 className="truncate font-black text-slate-950">{room.title}</h3>
+                        <h3 className="truncate font-black text-slate-950">{room.custom_name || room.title}</h3>
                         <p className="mt-1 flex items-center gap-1 text-xs text-slate-500">
                           <Clock className="h-3.5 w-3.5" />
                           {expired ? 'Kadaluarsa' : `Aktif sampai ${new Date(room.expires_at).toLocaleDateString('id-ID')}`}
                         </p>
                       </div>
-                      <span className={`rounded-full px-2 py-1 text-xs font-bold ${room.is_active && !expired ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
-                        {room.is_active && !expired ? 'Aktif' : 'Selesai'}
-                      </span>
+                      <div className="flex flex-col items-end gap-1">
+                        {room.is_private && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-1 text-xs font-bold text-red-700">
+                            <Lock className="h-3 w-3" />
+                            Private
+                          </span>
+                        )}
+                        <span className={`rounded-full px-2 py-1 text-xs font-bold ${room.is_active && !expired ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                          {room.is_active && !expired ? 'Aktif' : 'Selesai'}
+                        </span>
+                      </div>
                     </div>
                     <div className="mb-4 flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
                       <span className="font-mono text-sm font-black tracking-[0.2em] text-slate-800">{room.room_code}</span>
@@ -309,6 +353,83 @@ export default function StudyRoomListPage() {
                   </p>
                 )}
               </label>
+
+              <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-black text-slate-950">Room Privat</p>
+                    <p className="mt-1 text-xs leading-5 text-slate-500">Khusus Pro, peserta harus memasukkan password.</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!isPro) {
+                        setLockedFeature('Room Privat')
+                        return
+                      }
+                      setIsPrivate((value) => !value)
+                    }}
+                    className={`relative h-6 w-11 rounded-full transition ${isPrivate ? 'bg-brand-600' : 'bg-slate-300'}`}
+                    aria-label="Toggle room privat"
+                  >
+                    <span className={`absolute top-1 h-4 w-4 rounded-full bg-white transition ${isPrivate ? 'left-6' : 'left-1'}`} />
+                  </button>
+                </div>
+                {isPrivate && (
+                  <input
+                    type="password"
+                    value={roomPassword}
+                    onChange={(event) => setRoomPassword(event.target.value)}
+                    placeholder="Password room"
+                    className="mt-3 w-full rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+                  />
+                )}
+              </div>
+
+              <label className="block">
+                <span className="text-sm font-bold text-slate-700">Max members</span>
+                <select
+                  value={maxMembers}
+                  onChange={(event) => {
+                    if (!isPro && event.target.value !== '5') {
+                      setLockedFeature('Max members custom')
+                      return
+                    }
+                    setMaxMembers(event.target.value)
+                  }}
+                  className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+                >
+                  <option value="2">2 anggota</option>
+                  <option value="5">5 anggota</option>
+                  <option value="10">10 anggota</option>
+                  <option value="unlimited">Unlimited</option>
+                </select>
+              </label>
+
+              <div className="rounded-lg border border-slate-200 bg-white p-4">
+                <p className="text-sm font-black text-slate-950">Custom Branding Pro</p>
+                <div className="mt-3 grid gap-3">
+                  <input
+                    value={customName}
+                    onChange={(event) => isPro ? setCustomName(event.target.value) : setLockedFeature('Custom nama room')}
+                    placeholder="Custom room name"
+                    className="rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+                  />
+                  <input
+                    value={bannerUrl}
+                    onChange={(event) => isPro ? setBannerUrl(event.target.value) : setLockedFeature('Custom banner room')}
+                    placeholder="URL logo/banner room"
+                    className="rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+                  />
+                  <textarea
+                    value={welcomeMessage}
+                    onChange={(event) => isPro ? setWelcomeMessage(event.target.value) : setLockedFeature('Welcome message room')}
+                    placeholder="Welcome message saat anggota join"
+                    rows={2}
+                    className="resize-none rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+                  />
+                </div>
+              </div>
             </div>
 
             <div className="mt-6 flex gap-3">
@@ -320,6 +441,7 @@ export default function StudyRoomListPage() {
           </div>
         </div>
       )}
+      <ProUpgradeModal open={Boolean(lockedFeature)} feature={lockedFeature || 'Study Room Pro'} onClose={() => setLockedFeature(null)} />
     </div>
   )
 }

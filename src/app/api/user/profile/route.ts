@@ -66,7 +66,7 @@ export async function GET() {
         universitas: null,
         provinsi: null,
         plan: 'free',
-        whatsapp_number: null,
+        telegram_chat_id: null,
         profile_completed: false,
         updated_at: new Date().toISOString(),
       })
@@ -96,12 +96,12 @@ export async function PUT(request: Request) {
 
     const body = await request.json().catch(() => ({}))
 
-    const whatsapp = nullableText(body.whatsapp_number)
-    if (typeof whatsapp === 'string') {
-      const cleanNumber = whatsapp.replace(/\D/g, '')
-      if (cleanNumber.length < 10) {
-        return NextResponse.json({ error: 'Nomor WhatsApp tidak valid.' }, { status: 400 })
-      }
+    const telegramChatId = nullableText(body.telegram_chat_id)
+    if (typeof telegramChatId === 'string' && !/^-?\d{5,20}$/.test(telegramChatId)) {
+      return NextResponse.json(
+        { error: 'Telegram chat_id tidak valid. Chat /start ke @NEXATchBot lalu masukkan chat_id angka.' },
+        { status: 400 }
+      )
     }
 
     const avatarUrl = nullableText(body.avatar_url)
@@ -119,7 +119,7 @@ export async function PUT(request: Request) {
     const provinsi = nullableText(body.provinsi)
 
     if (fullName !== undefined) updates.full_name = fullName
-    if (whatsapp !== undefined) updates.whatsapp_number = whatsapp
+    if (telegramChatId !== undefined) updates.telegram_chat_id = telegramChatId
     if (avatarUrl !== undefined) updates.avatar_url = avatarUrl
     if (jurusan !== undefined) updates.jurusan = jurusan
     if (universitas !== undefined) updates.universitas = universitas
@@ -157,7 +157,7 @@ export async function PUT(request: Request) {
           universitas: null,
           provinsi: null,
           plan: 'free',
-          whatsapp_number: null,
+          telegram_chat_id: null,
           profile_completed: false,
           ...updates,
         })

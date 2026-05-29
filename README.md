@@ -1,6 +1,6 @@
-# Diktat.AI 🎓
+# NEXA Campus Ecosystem
 
-**AI-Powered Mock Exam & CBT Simulator untuk Mahasiswa Indonesia**
+**AI-powered campus ecosystem untuk mahasiswa Indonesia**
 
 Upload diktat PDF → AI ekstrak soal → Langsung ujian. Dalam 2 menit.
 
@@ -12,7 +12,7 @@ Upload diktat PDF → AI ekstrak soal → Langsung ujian. Dalam 2 menit.
 - Node.js 18+ (`node -v`)
 - npm atau pnpm
 - Akun [Supabase](https://supabase.com) (gratis)
-- Akun [OpenAI](https://platform.openai.com) (butuh kredit ~$1)
+- API key [Google Gemini](https://ai.google.dev)
 - API key [OCR.space](https://ocr.space/ocrapi) (gratis via email)
 
 ---
@@ -54,7 +54,8 @@ NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
 SUPABASE_SERVICE_ROLE_KEY=eyJ...
 
-OPENAI_API_KEY=sk-...
+GEMINI_API_KEY=...
+TELEGRAM_BOT_TOKEN=...
 
 # OCR.space free key (works for testing):
 OCR_SPACE_API_KEY=helloworld
@@ -88,7 +89,8 @@ vercel
 vercel env add NEXT_PUBLIC_SUPABASE_URL
 vercel env add NEXT_PUBLIC_SUPABASE_ANON_KEY
 vercel env add SUPABASE_SERVICE_ROLE_KEY
-vercel env add OPENAI_API_KEY
+vercel env add GEMINI_API_KEY
+vercel env add TELEGRAM_BOT_TOKEN
 vercel env add OCR_SPACE_API_KEY
 ```
 
@@ -135,7 +137,7 @@ diktat-ai/
 │   │   ├── supabase/client.ts
 │   │   ├── supabase/server.ts
 │   │   ├── ocr.ts                      # OCR.space integration
-│   │   ├── openai.ts                   # GPT-4o-mini extraction
+│   │   ├── gemini.ts                   # Gemini extraction/chat
 │   │   └── pdf-export.ts               # jsPDF export
 │   ├── types/index.ts
 │   └── middleware.ts                   # Auth middleware
@@ -153,7 +155,7 @@ diktat-ai/
 
 1. **Upload PDF** → disimpan di Supabase Storage
 2. **OCR.space API** → ekstrak teks dari PDF
-3. **GPT-4o-mini** → identifikasi soal pilihan ganda, output JSON
+3. **Gemini 1.5 Flash** → identifikasi soal pilihan ganda, output JSON
 4. **Supabase DB** → simpan questions, sessions, answers
 5. **CBT Interface** → timer, navigasi, submit
 6. **Results** → skor, analisis, export PDF (Basic+)
@@ -168,8 +170,8 @@ diktat-ai/
 | Vercel | ✅ Gratis (Hobby) | - |
 | Supabase | ✅ Gratis (500MB DB) | - |
 | OCR.space | ✅ 500 hal/bulan | $0.006/halaman |
-| OpenAI GPT-4o-mini | ❌ (bayar) | ~Rp750/dokumen |
-| Midtrans | ✅ Gratis setup | Biaya sesuai metode pembayaran aktif |
+| Google Gemini 1.5 Flash | ✅ Free tier | Sesuai kuota Gemini aktif |
+| DOKU | ✅ Gratis setup | Biaya sesuai metode pembayaran aktif |
 
 ---
 

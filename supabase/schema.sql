@@ -18,8 +18,12 @@ create table public.profiles (
   universitas   text,
   provinsi      text,
   plan          text not null default 'free' check (plan in ('free','basic','pro','admin')),
-  whatsapp_number text,
+  telegram_number text,
+  telegram_chat_id text,
   profile_completed boolean default false,
+  onboarding_completed boolean not null default false,
+  badges jsonb not null default '[]'::jsonb,
+  is_public_profile boolean not null default false,
   created_at    timestamptz default now(),
   updated_at    timestamptz default now()
 );
@@ -112,7 +116,7 @@ create table public.room_participants (
 );
 
 -- ──────────────────────────────────────────────
--- SCHEDULES (WhatsApp Reminder — Pro feature)
+-- SCHEDULES (Telegram Reminder - Pro feature)
 -- ──────────────────────────────────────────────
 create table public.schedules (
   id                  uuid default uuid_generate_v4() primary key,
@@ -121,11 +125,61 @@ create table public.schedules (
   subject_name        text not null,
   exam_date           date not null,
   exam_time           time,
-  whatsapp_number     text not null,
+  telegram_number     text,
+  telegram_chat_id    text,
   reminder_sent_h3    boolean default false,
   reminder_sent_h1    boolean default false,
   reminder_sent_h0    boolean default false,
   created_at          timestamptz default now()
+);
+
+create table if not exists public.error_logs (
+  id uuid default uuid_generate_v4() primary key,
+  user_id uuid references public.profiles(id) on delete set null,
+  error_type text not null,
+  message text not null,
+  created_at timestamptz default now()
+);
+
+create table if not exists public.learning_streaks (
+  user_id uuid references public.profiles(id) on delete cascade not null,
+  date date not null,
+  exams_completed integer not null default 0,
+  avg_score integer not null default 0,
+  primary key (user_id, date)
+);
+
+create table if not exists public.notifications (
+  id uuid default uuid_generate_v4() primary key,
+  user_id uuid references public.profiles(id) on delete cascade not null,
+  title text not null,
+  message text not null,
+  type text not null check (type in ('reminder','exam_result','badge_earned','system')),
+  is_read boolean not null default false,
+  created_at timestamptz default now()
+);
+
+create table if not exists public.exam_schedules (
+  id uuid default uuid_generate_v4() primary key,
+  user_id uuid references public.profiles(id) on delete cascade not null,
+  subject text not null,
+  type text not null default 'UTS',
+  exam_date timestamptz not null,
+  room text,
+  notes text,
+  university text,
+  is_public boolean not null default false,
+  created_at timestamptz default now()
+);
+
+create table if not exists public.leaderboard_stats (
+  user_id uuid references public.profiles(id) on delete cascade primary key,
+  total_exams integer not null default 0,
+  avg_score integer not null default 0,
+  current_streak integer not null default 0,
+  last_session_id uuid references public.exam_sessions(id) on delete set null,
+  last_document_id uuid references public.documents(id) on delete set null,
+  updated_at timestamptz default now()
 );
 
 -- ──────────────────────────────────────────────
@@ -142,7 +196,7 @@ create table if not exists public.marketplace_listings (
   price_label text,
   campus text,
   location text,
-  contact_whatsapp text,
+  contact_telegram text,
   image_url text,
   status text not null default 'active'
     check (status in ('draft', 'pending', 'active', 'sold', 'archived', 'rejected')),
@@ -169,6 +223,11 @@ alter table public.session_answers   enable row level security;
 alter table public.study_rooms       enable row level security;
 alter table public.room_participants enable row level security;
 alter table public.schedules         enable row level security;
+alter table public.error_logs        enable row level security;
+alter table public.learning_streaks  enable row level security;
+alter table public.notifications     enable row level security;
+alter table public.exam_schedules    enable row level security;
+alter table public.leaderboard_stats enable row level security;
 alter table public.marketplace_listings enable row level security;
 
 -- profiles
@@ -245,6 +304,24 @@ create policy "participants update" on public.room_participants for update using
 
 -- schedules
 create policy "own schedules" on public.schedules for all using (auth.uid() = user_id);
+
+create policy "own error logs insert" on public.error_logs for insert with check (auth.uid() = user_id or user_id is null);
+create policy "own error logs read" on public.error_logs for select using (auth.uid() = user_id);
+
+create policy "own learning streaks" on public.learning_streaks for select using (auth.uid() = user_id);
+
+create policy "own notifications" on public.notifications for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+create policy "own exam schedules" on public.exam_schedules for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+create policy "public suggested exam schedules" on public.exam_schedules for select using (is_public = true);
+
+create policy "own leaderboard stats" on public.leaderboard_stats for select using (auth.uid() = user_id);
+create policy "public leaderboard stats" on public.leaderboard_stats for select using (
+  exists (
+    select 1 from public.profiles p
+    where p.id = user_id and p.is_public_profile = true
+  )
+);
 
 -- marketplace_listings
 create policy "active listings readable by auth users"

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { ocrFromUrl } from '@/lib/ocr'
-import { extractQuestions } from '@/lib/openai'
+import { extractQuestions, extractQuestionsFromPdf } from '@/lib/gemini'
 
 export const maxDuration = 60
 
@@ -49,6 +49,41 @@ export async function POST(request: NextRequest) {
       .update({ status: 'processing', error_message: null })
       .eq('id', doc.id)
 
+    const { data: fileData, error: downloadError } = await serviceClient
+      .storage
+      .from('documents')
+      .download(doc.file_path)
+
+    if (downloadError || !fileData) {
+      const errMsg = downloadError?.message || 'Gagal membaca file PDF dari storage.'
+      await serviceClient.from('documents').update({
+        status: 'error',
+        error_message: errMsg,
+      }).eq('id', doc.id)
+      return NextResponse.json({ error: errMsg }, { status: 500 })
+    }
+
+    const pdfBytes = Buffer.from(await fileData.arrayBuffer())
+
+    // Step 1: Gemini PDF vision/file extraction
+    const pdfResult = await extractQuestionsFromPdf({
+      bytes: pdfBytes,
+      mimeType: fileData.type || 'application/pdf',
+      title: doc.title,
+    })
+
+    let questions = pdfResult.questions
+    let aiError = pdfResult.error
+    let extractedText: string | null = null
+
+    if (questions.length > 0) {
+      console.log(`[Process] Gemini PDF extraction complete. Questions: ${questions.length}`)
+    }
+
+    // Fallback: OCR then Gemini text extraction
+    if (questions.length === 0) {
+      console.warn(`[Process] Gemini PDF extraction failed: ${aiError}. Falling back to OCR...`)
+
     // Get signed URL
     const { data: signedUrlData, error: signedUrlError } = await serviceClient
       .storage
@@ -67,7 +102,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Gagal mendapatkan URL file.' }, { status: 500 })
     }
 
-    // Step 1: OCR — with retry
+    // OCR — with retry
     console.log(`[Process] Starting OCR for doc ${documentId}`)
     let ocrResult = await ocrFromUrl(signedUrlData.signedUrl)
 
@@ -99,6 +134,7 @@ export async function POST(request: NextRequest) {
     }
 
     const ocrText = ocrResult.text?.trim()
+    extractedText = ocrText || null
     if (!ocrText || ocrText.length < 50) {
       const errMsg = 'Teks dari dokumen terlalu pendek atau tidak terbaca. Coba PDF dengan teks yang lebih jelas.'
       await serviceClient.from('documents').update({
@@ -110,8 +146,10 @@ export async function POST(request: NextRequest) {
 
     console.log(`[Process] OCR complete. Text length: ${ocrText.length}`)
 
-    // Step 2: AI Question Extraction
-    const { questions, error: aiError } = await extractQuestions(ocrText)
+      const textResult = await extractQuestions(ocrText)
+      questions = textResult.questions
+      aiError = textResult.error
+    }
 
     if (aiError || !questions || questions.length === 0) {
       const errMsg = aiError || 'Tidak ada soal yang berhasil diekstrak dari materi ini.'
@@ -159,6 +197,7 @@ export async function POST(request: NextRequest) {
     await serviceClient.from('documents').update({
       status: 'completed',
       question_count: questions.length,
+      extracted_text: extractedText,
       error_message: null,
     }).eq('id', doc.id)
 

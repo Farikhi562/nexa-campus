@@ -33,11 +33,11 @@ Diktat.AI memungkinkan pengguna mengunggah dokumen diktat atau kumpulan soal uji
 
 **Keunggulan Teknologi**
 
-Platform dibangun menggunakan Next.js (App Router), Tailwind CSS, dan Supabase sebagai infrastruktur *backend* dan basis data. Integrasi API OCR dan *Large Language Model* (LLM) memungkinkan pemrosesan dokumen secara otomatis dengan akurasi tinggi. Tiga fitur diferensiasi utama yang membedakan Diktat.AI dari kompetitor adalah: (1) **WhatsApp Reminder Bot** yang mengirimkan pengingat ujian dan tautan langsung ke sesi CBT secara otomatis; (2) **Ekspor Hasil Ujian ke PDF** sebagai laporan belajar mandiri yang dapat dibagikan; dan (3) **Study Room & Leaderboard** yang memungkinkan mahasiswa bersaing dengan rekan sekelas secara daring.
+Platform dibangun menggunakan Next.js (App Router), Tailwind CSS, dan Supabase sebagai infrastruktur *backend* dan basis data. Integrasi API OCR dan *Large Language Model* (LLM) memungkinkan pemrosesan dokumen secara otomatis dengan akurasi tinggi. Tiga fitur diferensiasi utama yang membedakan Diktat.AI dari kompetitor adalah: (1) **Telegram Reminder Bot** yang mengirimkan pengingat ujian dan tautan langsung ke sesi CBT secara otomatis; (2) **Ekspor Hasil Ujian ke PDF** sebagai laporan belajar mandiri yang dapat dibagikan; dan (3) **Study Room & Leaderboard** yang memungkinkan mahasiswa bersaing dengan rekan sekelas secara daring.
 
 **Potensi Keuntungan**
 
-Dengan modal awal sebesar Rp500.000 dan tiga tingkatan paket langganan (Gratis, Basic Rp15.000/bulan, Pro Rp25.000/bulan), Diktat.AI memproyeksikan pencapaian *Break Even Point* (BEP) dalam 14 hari fase penjualan pertama melalui akuisisi 20–35 pengguna berbayar. Dalam tiga bulan pertama, platform menargetkan 200 pengguna aktif dengan potensi pendapatan bulanan sebesar Rp3.000.000–Rp5.000.000.
+Dengan modal awal sebesar Rp500.000 dan tiga tingkatan paket langganan (Gratis, Basic Rp19.000/bulan, Pro Rp39.000/bulan), Diktat.AI memproyeksikan pencapaian *Break Even Point* (BEP) dalam 14 hari fase penjualan pertama melalui akuisisi 20–35 pengguna berbayar. Dalam tiga bulan pertama, platform menargetkan 200 pengguna aktif dengan potensi pendapatan bulanan sebesar Rp3.000.000–Rp5.000.000.
 
 ---
 
@@ -63,17 +63,17 @@ Diktat.AI adalah *web application* yang dapat diakses melalui *browser* di peran
 
 **Fitur Utama per Paket:**
 
-| Fitur | Gratis | Basic (Rp15.000/bln) | Pro (Rp25.000/bln) |
+| Fitur | Gratis | Basic (Rp19.000/bln) | Pro (Rp39.000/bln) |
 |---|:---:|:---:|:---:|
 | Upload Dokumen | 1 dokumen | 5 dokumen | Tidak terbatas |
 | Mock Exam (sesi) | 1 sesi | Tidak terbatas | Tidak terbatas |
 | Ekspor Hasil ke PDF | — | ✓ | ✓ |
-| WhatsApp Reminder Bot | — | — | ✓ |
+| Telegram Reminder Bot | — | — | ✓ |
 | Study Room & Leaderboard | — | — | ✓ |
 
 ### 2.3 Penetapan Harga
 
-Penetapan harga didasarkan pada analisis perilaku konsumen mahasiswa Indonesia. Harga paket Basic sebesar Rp15.000 per bulan setara dengan harga satu eksemplar diktat fotokopi untuk satu mata kuliah — sebuah referensi harga yang sudah familiar bagi target pengguna sehingga mempermudah pengambilan keputusan pembelian. Paket Pro pada Rp25.000 per bulan diposisikan sebagai nilai setara dengan dua diktat fisik, namun menawarkan akses tidak terbatas dan fitur-fitur eksklusif yang tidak dapat diperoleh dari media belajar konvensional.
+Penetapan harga didasarkan pada analisis perilaku konsumen mahasiswa Indonesia. Harga paket Basic sebesar Rp19.000 per bulan tetap berada di kisaran biaya fotokopi materi kuliah, sementara paket Pro pada Rp39.000 per bulan diposisikan untuk fitur AI premium, kolaborasi, dan otomasi belajar yang lebih lengkap.
 
 ### 2.4 Visi dan Misi
 
@@ -89,7 +89,7 @@ Penetapan harga didasarkan pada analisis perilaku konsumen mahasiswa Indonesia. 
 **Kekuatan (*Strengths*):**
 - Produk digital dengan biaya marginal mendekati nol — tidak ada biaya produksi fisik per unit.
 - Pendekatan "bawa dokumenmu sendiri" (*Bring Your Own Document*) menghilangkan kebutuhan kurasi konten, sekaligus membuat produk relevan untuk semua jurusan dan mata kuliah tanpa terkecuali.
-- Fitur WhatsApp Reminder Bot memanfaatkan platform komunikasi yang sudah menjadi kebiasaan sehari-hari mahasiswa Indonesia.
+- Fitur Telegram Reminder Bot memanfaatkan platform komunikasi yang sudah menjadi kebiasaan sehari-hari mahasiswa Indonesia.
 - *Stack* teknologi modern (Next.js, Supabase) memungkinkan iterasi produk yang cepat dengan tim yang ramping.
 
 **Kelemahan (*Weaknesses*):**
@@ -110,7 +110,7 @@ Penetapan harga didasarkan pada analisis perilaku konsumen mahasiswa Indonesia. 
 ### 2.6 Target Operasional
 
 - **Fase MVP (Mei–Juni 2026):** Meluncurkan versi pertama yang fungsional dengan fitur inti: unggah dokumen, pemrosesan OCR+AI, antarmuka CBT, dan sistem pembayaran.
-- **Fase Pertumbuhan (Juli–September 2026):** Mencapai 200 pengguna aktif bulanan, meluncurkan fitur Study Room dan WhatsApp Bot, serta memulai ekspansi ke jaringan kampus lain.
+- **Fase Pertumbuhan (Juli–September 2026):** Mencapai 200 pengguna aktif bulanan, meluncurkan fitur Study Room dan Telegram Bot, serta memulai ekspansi ke jaringan kampus lain.
 - **Fase Skala (Oktober 2026 dan seterusnya):** Mengembangkan fitur prediksi topik ujian berbasis analisis pola historis dan mengeksplorasi model kemitraan dengan institusi pendidikan.
 
 ---
@@ -131,7 +131,7 @@ Bertanggung jawab atas pengembangan seluruh lapisan aplikasi, mulai dari *fronte
 
 **Posisi 2 — *Product & Marketing Manager***
 
-Bertanggung jawab atas strategi akuisisi pengguna, pengelolaan konten media sosial, dan komunikasi dengan komunitas mahasiswa. Menjalankan kampanye pemasaran organik melalui Instagram, TikTok, dan grup WhatsApp mahasiswa. Berperan sebagai penghubung antara kebutuhan pengguna dan prioritas pengembangan fitur.
+Bertanggung jawab atas strategi akuisisi pengguna, pengelolaan konten media sosial, dan komunikasi dengan komunitas mahasiswa. Menjalankan kampanye pemasaran organik melalui Instagram, TikTok, dan grup Telegram mahasiswa. Berperan sebagai penghubung antara kebutuhan pengguna dan prioritas pengembangan fitur.
 
 **Posisi 3 — *UI/UX Designer* & *Content Creator***
 
@@ -164,8 +164,8 @@ Seluruh infrastruktur Diktat.AI dibangun di atas layanan *cloud* berbasis *free 
 - **Basis Data & Autentikasi:** Supabase (*free tier*) — PostgreSQL terkelola dengan sistem autentikasi bawaan, penyimpanan *file*, dan kemampuan *real-time*.
 - **OCR:** OCR.space API (*free tier*: 500 halaman/bulan) — ekstraksi teks dari dokumen PDF dan gambar.
 - **AI/LLM:** OpenAI GPT-4o-mini API — model yang paling efisien secara biaya dengan akurasi tinggi untuk tugas penguraian teks terstruktur.
-- **Pembayaran:** Midtrans payment flow — *payment gateway* Indonesia untuk transfer bank, dompet digital, virtual account, dan kartu sesuai konfigurasi merchant.
-- **Notifikasi WhatsApp:** Twilio WhatsApp API (*free trial*) atau Telegram Bot API (gratis) untuk fitur pengingat otomatis.
+- **Pembayaran:** DOKU payment flow — *payment gateway* Indonesia untuk transfer bank, dompet digital, virtual account, dan kartu sesuai konfigurasi merchant.
+- **Notifikasi Telegram:** Twilio Telegram API (*free trial*) atau Telegram Bot API (gratis) untuk fitur pengingat otomatis.
 
 ### 4.2 Alur Kerja Sistem
 
@@ -210,18 +210,18 @@ Setelah pengguna menekan tombol "Selesai" atau waktu habis, jawaban dikirimkan k
         [Halaman Hasil + Ekspor PDF]
 ```
 
-### 4.3 Alur Fitur WhatsApp Reminder Bot
+### 4.3 Alur Fitur Telegram Reminder Bot
 
 1. Pengguna (paket Pro) memasukkan jadwal ujian (mata kuliah, tanggal, jam) di *dashboard*.
 2. Sistem menyimpan jadwal ke tabel `schedules` di Supabase.
 3. *Cron job* yang berjalan setiap pukul 07.00 WIB memeriksa jadwal ujian yang mendekati (H-3, H-1, H-0).
-4. Untuk setiap jadwal yang memenuhi kriteria, sistem mengirimkan pesan WhatsApp otomatis melalui Twilio API berisi pengingat dan tautan langsung ke sesi *mock exam* mata kuliah yang bersangkutan.
+4. Untuk setiap jadwal yang memenuhi kriteria, sistem mengirimkan pesan Telegram otomatis melalui Twilio API berisi pengingat dan tautan langsung ke sesi *mock exam* mata kuliah yang bersangkutan.
 
 ### 4.4 Alur Fitur Study Room
 
 1. Pengguna (paket Pro) membuat "ruang belajar" (*study room*) dan memilih dokumen yang akan dijadikan bahan ujian.
 2. Sistem menghasilkan kode ruangan unik enam karakter.
-3. Pengguna membagikan kode tersebut kepada rekan-rekan sekelas melalui grup WhatsApp atau media sosial.
+3. Pengguna membagikan kode tersebut kepada rekan-rekan sekelas melalui grup Telegram atau media sosial.
 4. Peserta yang bergabung dengan kode yang sama mengerjakan soal yang identik.
 5. Setelah semua peserta menyelesaikan ujian, sistem menampilkan *leaderboard* peringkat berdasarkan skor dan kecepatan penyelesaian.
 
@@ -259,18 +259,18 @@ Strategi penetapan harga menggunakan pendekatan *value-based pricing* yang dises
 | Paket | Harga | Posisi Psikologis |
 |---|---|---|
 | Gratis | Rp0 | "Coba dulu, tidak ada risiko" |
-| Basic | Rp15.000/bulan | "Setara harga satu diktat fotokopi" |
-| Pro | Rp25.000/bulan | "Setara dua diktat, tapi jauh lebih powerful" |
+| Basic | Rp19.000/bulan | "Setara harga satu diktat fotokopi" |
+| Pro | Rp39.000/bulan | "Setara dua diktat, tapi jauh lebih powerful" |
 
 **Tempat (*Place*)**
 
-Distribusi sepenuhnya digital melalui *web application* yang dapat diakses dari perangkat apa pun tanpa instalasi. Akuisisi pengguna dilakukan melalui saluran organik: grup WhatsApp angkatan, komunitas belajar di Telegram, dan media sosial.
+Distribusi sepenuhnya digital melalui *web application* yang dapat diakses dari perangkat apa pun tanpa instalasi. Akuisisi pengguna dilakukan melalui saluran organik: grup Telegram angkatan, komunitas belajar di Telegram, dan media sosial.
 
 **Promosi (*Promotion*)**
 
 Strategi promosi dirancang untuk siklus 14 hari fase penjualan (14–28 Juni 2026) dengan anggaran terbatas:
 
-- **Pemasaran Berbasis Komunitas:** Memanfaatkan koneksi langsung ke jaringan mahasiswa untuk menyebarkan tautan pendaftaran melalui grup WhatsApp angkatan dan komunitas belajar. Pendekatan ini menghasilkan *word-of-mouth* organik tanpa biaya.
+- **Pemasaran Berbasis Komunitas:** Memanfaatkan koneksi langsung ke jaringan mahasiswa untuk menyebarkan tautan pendaftaran melalui grup Telegram angkatan dan komunitas belajar. Pendekatan ini menghasilkan *word-of-mouth* organik tanpa biaya.
 - **Konten Media Sosial:** Pembuatan konten *before-after* di Instagram Reels dan TikTok yang menunjukkan proses transformasi diktat fisik menjadi *mock exam* interaktif dalam 60 detik. Konten ini dirancang untuk mudah dibagikan (*shareable*).
 - **Viral Loop melalui Study Room:** Setiap pengguna yang membuat *study room* secara otomatis menjadi agen pemasaran organik dengan mengundang rekan-rekannya. Satu pengguna berpotensi mengakuisisi lima hingga sepuluh pengguna baru tanpa biaya tambahan.
 - **Iklan Berbayar Terbatas:** Alokasi Rp100.000 untuk iklan Instagram yang ditargetkan kepada mahasiswa berdasarkan minat akademis dan lokasi geografis selama tujuh hari pertama peluncuran.
@@ -299,8 +299,8 @@ Hari 14    : Penutupan dengan pengumuman hasil leaderboard pengguna paling aktif
 | OCR.space API | Rp0 | *Free tier*: 500 halaman per bulan, cukup untuk fase MVP |
 | Supabase (DB + Storage) | Rp0 | *Free tier*: 500 MB database, 1 GB penyimpanan |
 | Vercel (Hosting) | Rp0 | *Free Hobby Plan* untuk Next.js |
-| Twilio WhatsApp / Telegram Bot | Rp0 | *Free trial* Twilio atau Telegram Bot API gratis |
-| Midtrans *Payment Gateway* | Rp0 | Biaya dipotong dari setiap transaksi sesuai metode pembayaran aktif |
+| Twilio Telegram / Telegram Bot | Rp0 | *Free trial* Twilio atau Telegram Bot API gratis |
+| DOKU *Payment Gateway* | Rp0 | Biaya dipotong dari setiap transaksi sesuai metode pembayaran aktif |
 | Dana Cadangan | Rp175.000 | Untuk *overage* API atau kebutuhan tak terduga |
 | **Total** | **Rp500.000** | |
 
@@ -312,13 +312,13 @@ BEP dihitung berdasarkan total modal awal yang harus dikembalikan dari pendapata
 
 **Skenario BEP berdasarkan kombinasi paket:**
 
-| Skenario | Pengguna Basic (Rp15.000) | Pengguna Pro (Rp25.000) | Total Pendapatan | Status |
+| Skenario | Pengguna Basic (Rp19.000) | Pengguna Pro (Rp39.000) | Total Pendapatan | Status |
 |---|:---:|:---:|---:|---|
 | Konservatif | 15 | 8 | Rp425.000 | Belum BEP |
 | **Realistis** | **15** | **10** | **Rp475.000** | **Mendekati BEP** |
 | **Optimistis** | **20** | **10** | **Rp550.000** | **BEP Tercapai ✓** |
 
-Dengan asumsi biaya layanan Midtrans setara 2,9% per transaksi, BEP optimistis bersih adalah:
+Dengan asumsi biaya layanan DOKU setara 2,9% per transaksi, BEP optimistis bersih adalah:
 - Rp550.000 × (1 − 0,029) = **Rp534.045** — BEP tercapai dengan surplus Rp34.045.
 
 **Target pengguna minimum untuk BEP: 30 pengguna berbayar (kombinasi Basic dan Pro).**
@@ -350,7 +350,7 @@ Biaya variabel utama per dokumen yang diproses adalah biaya API:
 - OpenAI GPT-4o-mini: ~Rp750 per dokumen (estimasi 5.000 token × $0,15/1M token)
 
 HPP per pengguna Basic: Rp750 (biaya API) + Rp435 (*payment fee* 2,9%) = **Rp1.185**
-Margin kotor per pengguna Basic: Rp15.000 − Rp1.185 = **Rp13.815 (92,1%)**
+Margin kotor per pengguna Basic: Rp19.000 - Rp1.185 = **Rp17.815 (93,8%)**
 
 Margin kotor yang sangat tinggi ini merupakan keunggulan inheren model bisnis SaaS dibandingkan bisnis berbasis produk fisik.
 
@@ -376,7 +376,7 @@ Indikator keberhasilan yang akan dievaluasi setelah 14 hari fase penjualan melip
 
 ### 7.3 Strategi Retensi Pengguna Jangka Panjang
 
-Siklus akademis yang berulang (UTS dan UAS setiap semester) secara alami menciptakan *demand* yang berulang. Strategi retensi berfokus pada tiga hal: (1) memastikan pengguna menyimpan dokumen diktat mereka di platform sehingga ada *switching cost* yang organik; (2) membangun kebiasaan belajar harian melalui fitur *progress tracking* dan pengingat WhatsApp; dan (3) mendorong keterlibatan sosial melalui Study Room sehingga penggunaan platform menjadi aktivitas sosial, bukan sekadar alat individual.
+Siklus akademis yang berulang (UTS dan UAS setiap semester) secara alami menciptakan *demand* yang berulang. Strategi retensi berfokus pada tiga hal: (1) memastikan pengguna menyimpan dokumen diktat mereka di platform sehingga ada *switching cost* yang organik; (2) membangun kebiasaan belajar harian melalui fitur *progress tracking* dan pengingat Telegram; dan (3) mendorong keterlibatan sosial melalui Study Room sehingga penggunaan platform menjadi aktivitas sosial, bukan sekadar alat individual.
 
 ### 7.4 Potensi Pendapatan Jangka Menengah
 
@@ -393,7 +393,7 @@ Dengan asumsi pertumbuhan pengguna berbayar sebesar 50% per bulan selama enam bu
 
 Diktat.AI hadir sebagai solusi konkret atas permasalahan nyata yang dihadapi mahasiswa Indonesia setiap semester: ketidaksiapan menghadapi ujian akibat keterbatasan akses terhadap simulasi yang relevan dan *feedback* yang bermakna. Dengan memanfaatkan teknologi OCR dan kecerdasan buatan, platform ini mengotomatisasi proses yang selama ini dilakukan secara manual dan tidak efisien.
 
-Model bisnis *freemium* yang dipilih memungkinkan pengguna merasakan nilai produk sepenuhnya sebelum memutuskan untuk berlangganan, sehingga mengurangi hambatan adopsi awal. Tiga fitur diferensiasi utama — WhatsApp Reminder Bot, ekspor laporan PDF, dan Study Room — dirancang secara khusus untuk memenuhi kebiasaan dan kebutuhan spesifik mahasiswa Indonesia, bukan sekadar mengadaptasi solusi dari pasar luar negeri.
+Model bisnis *freemium* yang dipilih memungkinkan pengguna merasakan nilai produk sepenuhnya sebelum memutuskan untuk berlangganan, sehingga mengurangi hambatan adopsi awal. Tiga fitur diferensiasi utama — Telegram Reminder Bot, ekspor laporan PDF, dan Study Room — dirancang secara khusus untuk memenuhi kebiasaan dan kebutuhan spesifik mahasiswa Indonesia, bukan sekadar mengadaptasi solusi dari pasar luar negeri.
 
 Dari sisi finansial, model SaaS dengan biaya marginal mendekati nol dan margin kotor di atas 90% memberikan fondasi yang kuat untuk pertumbuhan yang berkelanjutan. BEP yang ditargetkan dalam 14 hari fase penjualan pertama bukan sekadar angka di atas kertas, melainkan proyeksi yang didasarkan pada strategi akuisisi komunitas yang terencana dan terukur.
 

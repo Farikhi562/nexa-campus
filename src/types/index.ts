@@ -15,8 +15,20 @@ export interface Profile {
   universitas: string | null
   provinsi: string | null
   plan: Plan
-  whatsapp_number: string | null
+  seat_owner_id?: string | null
+  weakness_analysis?: {
+    weakTopics?: string[]
+    patterns?: string[]
+    recommendations?: string[]
+    analyzedExamCount?: number
+    updatedAt?: string
+  } | null
+  telegram_number: string | null
+  telegram_chat_id: string | null
   profile_completed: boolean
+  onboarding_completed: boolean
+  badges: string[]
+  is_public_profile: boolean
   created_at: string
   updated_at: string
 }
@@ -30,6 +42,9 @@ export interface Document {
   status: DocStatus
   error_message: string | null
   question_count: number
+  extracted_text?: string | null
+  summary?: string | null
+  priority?: number | null
   created_at: string
 }
 
@@ -81,6 +96,12 @@ export interface StudyRoom {
   document_id: string | null
   room_code: string
   title: string
+  is_private?: boolean
+  room_password?: string | null
+  max_members?: number | null
+  banner_url?: string | null
+  welcome_message?: string | null
+  custom_name?: string | null
   is_active: boolean
   created_at: string
   expires_at: string
@@ -101,10 +122,40 @@ export interface Schedule {
   subject_name: string
   exam_date: string
   exam_time: string | null
-  whatsapp_number: string
+  telegram_chat_id: string | null
   reminder_sent_h3: boolean
   reminder_sent_h1: boolean
   reminder_sent_h0: boolean
+  created_at: string
+}
+
+export interface LearningStreak {
+  user_id: string
+  date: string
+  exams_completed: number
+  avg_score: number
+}
+
+export interface Notification {
+  id: string
+  user_id: string
+  title: string
+  message: string
+  type: 'reminder' | 'exam_result' | 'badge_earned' | 'system'
+  is_read: boolean
+  created_at: string
+}
+
+export interface ExamSchedule {
+  id: string
+  user_id: string
+  subject: string
+  type: 'UTS' | 'UAS' | 'Quiz' | string
+  exam_date: string
+  room: string | null
+  notes: string | null
+  university: string | null
+  is_public: boolean
   created_at: string
 }
 
@@ -113,14 +164,14 @@ export const PLAN_LIMITS: Record<Plan, {
   maxDocuments: number | null
   maxSessions: number | null
   canExportPDF: boolean
-  canWhatsApp: boolean
+  canTelegram: boolean
   canStudyRoom: boolean
   canSellMarketplace: boolean
 }> = {
-  free:  { maxDocuments: 1,    maxSessions: 1,    canExportPDF: false, canWhatsApp: false, canStudyRoom: false, canSellMarketplace: false },
-  basic: { maxDocuments: 5,    maxSessions: null, canExportPDF: true,  canWhatsApp: false, canStudyRoom: false, canSellMarketplace: true  },
-  pro:   { maxDocuments: null, maxSessions: null, canExportPDF: true,  canWhatsApp: true,  canStudyRoom: true,  canSellMarketplace: true  },
-  admin: { maxDocuments: null, maxSessions: null, canExportPDF: true,  canWhatsApp: true,  canStudyRoom: true,  canSellMarketplace: true  },
+  free:  { maxDocuments: 1,    maxSessions: 1,    canExportPDF: false, canTelegram: false, canStudyRoom: false, canSellMarketplace: false },
+  basic: { maxDocuments: 5,    maxSessions: null, canExportPDF: true,  canTelegram: false, canStudyRoom: true,  canSellMarketplace: true  },
+  pro:   { maxDocuments: null, maxSessions: null, canExportPDF: true,  canTelegram: true,  canStudyRoom: true,  canSellMarketplace: true  },
+  admin: { maxDocuments: null, maxSessions: null, canExportPDF: true,  canTelegram: true,  canStudyRoom: true,  canSellMarketplace: true  },
 }
 
 // ── AI Processing types ──────────────────────────
@@ -167,6 +218,9 @@ export interface LeaderboardEntry {
   user_id: string
   full_name: string | null
   avatar_url: string | null
+  university?: string | null
+  streak?: number
+  total_exams?: number
   score: number
   time_taken_seconds: number
   completed_at: string

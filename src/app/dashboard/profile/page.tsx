@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Button from '@/components/ui/Button'
@@ -8,6 +8,7 @@ import { AlertCircle, CheckCircle2, ArrowLeft, Camera, User, Search, X, ChevronD
 import Link from 'next/link'
 import type { Profile } from '@/types'
 import { MAJOR_UNIVERSITIES, PROVINCES, MAJORS } from '@/lib/indonesia-data'
+import BadgesGrid from '@/components/BadgesGrid'
 
 // Combobox: search + manual input
 function UniversityCombobox({
@@ -125,7 +126,7 @@ function UniversityCombobox({
 }
 
 export default function EditProfilePage() {
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const router = useRouter()
 
   const [profile, setProfile] = useState<Partial<Profile>>({})
@@ -230,6 +231,8 @@ export default function EditProfilePage() {
       jurusan: profile.jurusan,
       universitas: profile.universitas,
       provinsi: profile.provinsi,
+      telegram_chat_id: profile.telegram_chat_id,
+      is_public_profile: Boolean(profile.is_public_profile),
       updated_at: new Date().toISOString(),
     }
 
@@ -407,6 +410,35 @@ export default function EditProfilePage() {
           </div>
         </div>
 
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">
+            Telegram chat_id
+          </label>
+          <input
+            type="text"
+            value={profile.telegram_chat_id || ''}
+            onChange={(e) => setProfile({ ...profile, telegram_chat_id: e.target.value })}
+            placeholder="Chat /start ke @NEXATchBot lalu isi chat_id"
+            className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
+          />
+          <p className="mt-1 text-xs text-slate-400">
+            Dipakai untuk reminder Telegram otomatis via @NEXATchBot.
+          </p>
+        </div>
+
+        <label className="flex items-start gap-3 rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+          <input
+            type="checkbox"
+            checked={Boolean(profile.is_public_profile)}
+            onChange={(e) => setProfile({ ...profile, is_public_profile: e.target.checked })}
+            className="mt-1"
+          />
+          <span>
+            <span className="block font-black text-slate-900">Tampilkan profil di leaderboard</span>
+            Nama, kampus, rata-rata score, total exam, dan streak kamu akan terlihat untuk user lain.
+          </span>
+        </label>
+
         {/* Error */}
         {error && (
           <div className="flex items-center gap-3 p-3 bg-red-50 border border-red-200 rounded-lg">
@@ -439,6 +471,14 @@ export default function EditProfilePage() {
           </Link>
         </div>
       </form>
+
+      <section className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6">
+        <h2 className="text-base font-bold text-slate-900">Badge Belajar</h2>
+        <p className="mt-1 text-sm text-slate-500">Badge berwarna berarti sudah kamu dapatkan.</p>
+        <div className="mt-4">
+          <BadgesGrid earned={Array.isArray(profile.badges) ? profile.badges : []} />
+        </div>
+      </section>
     </div>
   )
 }

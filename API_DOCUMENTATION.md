@@ -19,18 +19,18 @@ OCR_SPACE_API_KEY=helloworld
 # App
 NEXT_PUBLIC_APP_URL=http://localhost:3001
 
-# Twilio WhatsApp (for Pro feature - optional)
+# Twilio Telegram (for Pro feature - optional)
 TWILIO_ACCOUNT_SID=your-twilio-account-sid
 TWILIO_AUTH_TOKEN=your-twilio-auth-token
-TWILIO_WHATSAPP_FROM=whatsapp:+14155238886
+TWILIO_WHATSAPP_FROM=telegram:+14155238886
 
 # Cron Secret (for reminders)
 CRON_SECRET=your-secret-cron-token
 
-# Midtrans (optional - for payment gateway)
-MIDTRANS_SERVER_KEY=your-midtrans-server-key
-NEXT_PUBLIC_MIDTRANS_CLIENT_KEY=your-midtrans-client-key
-MIDTRANS_IS_PRODUCTION=false
+# DOKU (optional - for payment gateway)
+DOKU_SERVER_KEY=your-doku-server-key
+NEXT_PUBLIC_DOKU_CLIENT_KEY=your-doku-client-key
+DOKU_IS_PRODUCTION=false
 ```
 
 ## API Endpoints
@@ -231,7 +231,7 @@ Get current user's profile. Auto-creates profile on first access.
   "full_name": "Nama Pengguna",
   "avatar_url": "https://...",
   "plan": "basic",
-  "whatsapp_number": "+62812345678",
+  "telegram_number": "+62812345678",
   "created_at": "2026-05-23T10:00:00Z",
   "updated_at": "2026-05-23T10:00:00Z"
 }
@@ -244,13 +244,13 @@ Update user profile.
 ```json
 {
   "full_name": "Nama Baru",
-  "whatsapp_number": "+62812345678",
+  "telegram_number": "+62812345678",
   "avatar_url": "https://..."
 }
 ```
 
 **Validation:**
-- `whatsapp_number`: Must have at least 10 digits
+- `telegram_number`: Must have at least 10 digits
 
 **Response:** Updated profile object
 
@@ -350,7 +350,7 @@ List all exam schedules.
     "exam_date": "2026-06-15",
     "exam_time": "10:00",
     "document_id": "doc-uuid (optional)",
-    "whatsapp_number": "+62812345678 (optional)",
+    "telegram_number": "+62812345678 (optional)",
     "reminder_sent_h3": false,
     "reminder_sent_h1": false,
     "reminder_sent_h0": false,
@@ -360,7 +360,7 @@ List all exam schedules.
 ```
 
 #### POST `/api/schedules`
-Create exam schedule with automatic WhatsApp reminders (Pro only).
+Create exam schedule with automatic Telegram reminders (Pro only).
 
 **Request:**
 ```json
@@ -369,7 +369,7 @@ Create exam schedule with automatic WhatsApp reminders (Pro only).
   "exam_date": "2026-06-15",
   "exam_time": "10:00",
   "document_id": "doc-uuid (optional)",
-  "whatsapp_number": "+62812345678 (optional, uses profile default if not provided)"
+  "telegram_number": "+62812345678 (optional, uses profile default if not provided)"
 }
 ```
 
@@ -377,7 +377,7 @@ Create exam schedule with automatic WhatsApp reminders (Pro only).
 - `subject_name`: Required
 - `exam_date`: Required, valid date format
 - `exam_time`: Optional
-- `whatsapp_number`: Optional, must have ≥10 digits if provided
+- `telegram_number`: Optional, must have ≥10 digits if provided
 
 **Response:** `201 Created`
 ```json
@@ -409,7 +409,7 @@ Delete schedule.
 ### Cron Jobs
 
 #### POST `/api/cron/remind-exams`
-Send WhatsApp reminders for upcoming exams (H-3, H-1, H-0).
+Send Telegram reminders for upcoming exams (H-3, H-1, H-0).
 
 **Setup Options:**
 
@@ -442,7 +442,7 @@ curl -X POST http://localhost:3001/api/cron/remind-exams \
 
 **Logic:**
 - Checks all Pro user schedules
-- Sends WhatsApp if:
+- Sends Telegram if:
   - Exam in 3 days (`H-3`) AND not yet sent
   - Exam in 1 day (`H-1`) AND not yet sent
   - Exam today (`H-0`) AND not yet sent
@@ -493,8 +493,8 @@ All errors follow this format:
 - Input: ~3,000 tokens per 12,000 chars
 - Output: ~100-200 tokens per response
 
-**Midtrans Payment:**
-- Transaction fee follows the active Midtrans payment method and merchant agreement
+**DOKU Payment:**
+- Transaction fee follows the active DOKU payment method and merchant agreement
 
 ---
 

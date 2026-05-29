@@ -116,8 +116,8 @@ curl http://localhost:3001/api/documents \
 ### Get Twilio Credentials
 1. Go to https://www.twilio.com/console
 2. Get Account SID and Auth Token
-3. Add WhatsApp sandbox:
-   - Go to Messaging → Try it out → Send a WhatsApp
+3. Add Telegram sandbox:
+   - Go to Messaging → Try it out → Send a Telegram
    - Follow setup steps
    - Get `TWILIO_WHATSAPP_FROM` number
 
@@ -125,7 +125,7 @@ curl http://localhost:3001/api/documents \
 ```env
 TWILIO_ACCOUNT_SID=your-account-sid
 TWILIO_AUTH_TOKEN=your-auth-token
-TWILIO_WHATSAPP_FROM=whatsapp:+14155238886
+TWILIO_WHATSAPP_FROM=telegram:+14155238886
 ```
 
 ### Test Reminder
@@ -175,7 +175,7 @@ vercel
 - [ ] Join study room by code
 - [ ] View leaderboard
 - [ ] Create exam schedule
-- [ ] Send test WhatsApp reminder
+- [ ] Send test Telegram reminder
 
 ## Troubleshooting
 
@@ -194,9 +194,9 @@ vercel
 - Verify billing set up in OpenAI dashboard
 - Check usage at https://platform.openai.com/account/usage
 
-### WhatsApp not sending
+### Telegram not sending
 - Verify Twilio credentials in `.env.local`
-- Check WhatsApp number format (international)
+- Check Telegram number format (international)
 - Confirm phone number is registered with Twilio sandbox
 
 ### Database errors
@@ -214,8 +214,8 @@ Before going live:
 - [ ] Rate limiting configured
 - [ ] HTTPS enabled
 - [ ] CORS properly configured
-- [ ] Payment gateway tested (Midtrans)
-- [ ] Twilio WhatsApp moved out of sandbox
+- [ ] Payment gateway tested (DOKU)
+- [ ] Twilio Telegram moved out of sandbox
 - [ ] Database Row Level Security (RLS) policies reviewed
 - [ ] API rate limits set in Supabase
 
@@ -235,7 +235,7 @@ src/app/api/
 │   ├── route.ts                # List/create rooms
 │   └── join/route.ts           # Join room by code
 └── cron/
-    └── remind-exams/route.ts   # WhatsApp reminders
+    └── remind-exams/route.ts   # Telegram reminders
 
 src/lib/
 ├── ocr.ts                       # OCR.space integration
@@ -247,7 +247,7 @@ src/lib/
 
 ## Next Steps
 
-1. **Payment Integration**: Implement Midtrans payment flow
+1. **Payment Integration**: Implement DOKU payment flow
 2. **Analytics**: Add event tracking (e.g., Mixpanel)
 3. **Admin Dashboard**: Build admin interface for monitoring
 4. **AI Improvements**: Fine-tune prompts for better extraction

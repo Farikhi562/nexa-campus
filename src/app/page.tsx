@@ -38,7 +38,7 @@ const FEATURES = [
   },
   {
     icon: MessageCircle,
-    title: 'WhatsApp Automation',
+    title: 'Telegram Automation',
     desc: 'Reminder otomatis untuk agenda penting agar deadline tidak lewat.',
   },
   {
@@ -59,7 +59,7 @@ const PLANS = [
   },
   {
     name: 'Basic',
-    price: 'Rp15.000',
+    price: 'Rp19.000',
     desc: 'Paling pas untuk mayoritas mahasiswa',
     features: ['5 materi belajar', 'Mock exam tak terbatas', 'Ekspor PDF', 'Buka lapak barang/jasa'],
     cta: 'Ambil Basic',
@@ -68,9 +68,9 @@ const PLANS = [
   },
   {
     name: 'Pro',
-    price: 'Rp25.000',
+    price: 'Rp39.000',
     desc: 'Untuk semester padat dan organisasi',
-    features: ['Materi tak terbatas', 'Study Room', 'Smart Reminder otomatis', 'WhatsApp reminder kampus'],
+    features: ['Materi tak terbatas', 'Study Room', 'Smart Reminder otomatis', 'Telegram reminder kampus'],
     cta: 'Ambil Pro',
     href: '/auth/login',
   },
@@ -150,7 +150,7 @@ export default function LandingPage() {
 
               <div className="mt-8 grid max-w-2xl grid-cols-3 gap-3">
                 {[
-                  ['Rp15rb', 'mulai berbayar'],
+                  ['Rp19rb', 'mulai berbayar'],
                   ['15+', 'campus tools'],
                   ['<2 menit', 'materi jadi latihan'],
                 ].map(([value, label]) => (
@@ -174,7 +174,7 @@ export default function LandingPage() {
                 <div className="space-y-3">
                   {[
                     ['AI Exam', 'Upload PDF jadi soal latihan', 'Siap dipakai'],
-                    ['Reminder', 'Agenda dan deadline user', 'WhatsApp Pro'],
+                    ['Reminder', 'Agenda dan deadline user', 'Telegram Pro'],
                     ['Marketplace', 'Listing asli dari user', 'Basic seller'],
                     ['Campus Tools', 'IPK, sitasi, beasiswa, career assistant', '15 tools'],
                   ].map(([type, title, status]) => (

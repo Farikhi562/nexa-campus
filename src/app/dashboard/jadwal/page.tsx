@@ -26,6 +26,7 @@ import { PlanBadge } from '@/components/ui/Badge'
 import { createClient } from '@/lib/supabase/client'
 import { PLAN_LIMITS } from '@/types'
 import type { Profile, Schedule } from '@/types'
+import { hasProAccess } from '@/lib/plans'
 
 type ReminderType = 'ujian' | 'tugas' | 'praktikum' | 'kuis' | 'presentasi' | 'organisasi' | 'lainnya'
 type Priority = 'normal' | 'penting' | 'urgent'
@@ -73,7 +74,7 @@ function getDaysLeft(date: string) {
 }
 
 export default function JadwalPage() {
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
   const [profile, setProfile] = useState<Profile | null>(null)
   const [schedules, setSchedules] = useState<Schedule[]>([])
@@ -88,7 +89,7 @@ export default function JadwalPage() {
     due_date: '',
     due_time: '',
     priority: 'normal' as Priority,
-    whatsapp_number: '',
+    telegram_chat_id: '',
     document_id: '',
   })
 
@@ -106,8 +107,8 @@ export default function JadwalPage() {
     setSchedules((schedulesRes.data ?? []) as Schedule[])
     setMyDocs(docsRes.data ?? [])
 
-    if (profileRes.data?.whatsapp_number) {
-      setForm((current) => ({ ...current, whatsapp_number: profileRes.data!.whatsapp_number! }))
+    if (profileRes.data?.telegram_chat_id) {
+      setForm((current) => ({ ...current, telegram_chat_id: profileRes.data!.telegram_chat_id! }))
     }
 
     setLoading(false)
@@ -116,7 +117,8 @@ export default function JadwalPage() {
   useEffect(() => { fetchData() }, [fetchData])
 
   const plan = profile?.plan ?? 'free'
-  const isPro = PLAN_LIMITS[plan].canWhatsApp
+  const isPro = PLAN_LIMITS[plan].canTelegram
+  const canPredictExam = hasProAccess(profile)
   const parsedSchedules = useMemo(() => {
     return schedules.map((schedule) => ({
       ...schedule,
@@ -145,7 +147,7 @@ export default function JadwalPage() {
       subject_name: `[${form.type}] ${coursePrefix}${form.title.trim()}${prioritySuffix}`,
       exam_date: form.due_date,
       exam_time: form.due_time || null,
-      whatsapp_number: isPro ? form.whatsapp_number || null : null,
+      telegram_chat_id: isPro ? form.telegram_chat_id || null : null,
       document_id: form.document_id || null,
     })
 
@@ -233,7 +235,7 @@ export default function JadwalPage() {
                 <div>
                   <h3 className="text-sm font-black text-amber-950">Reminder dasar aktif untuk semua paket</h3>
                   <p className="mt-1 text-sm leading-6 text-amber-800">
-                    Kamu tetap bisa menyimpan agenda kuliah di NEXA. WhatsApp reminder otomatis dan sinkronisasi lanjutan dibuka di paket Pro.
+                    Kamu tetap bisa menyimpan agenda kuliah di NEXA. Telegram reminder otomatis via @NEXATchBot dibuka di paket Pro.
                   </p>
                   <Link href="/pricing" className="mt-3 inline-flex">
                     <Button size="sm" type="button" className="bg-amber-500 hover:bg-amber-600">
@@ -321,13 +323,13 @@ export default function JadwalPage() {
               </div>
               <div>
                 <label className="mb-2 block text-sm font-semibold text-slate-700">
-                  Nomor WhatsApp {isPro ? '' : '(Pro)'}
+                  Telegram chat_id {isPro ? '' : '(Pro)'}
                 </label>
                 <input
-                  type="tel"
-                  value={form.whatsapp_number}
-                  onChange={(e) => setForm((current) => ({ ...current, whatsapp_number: e.target.value }))}
-                  placeholder="08123456789"
+                  type="text"
+                  value={form.telegram_chat_id}
+                  onChange={(e) => setForm((current) => ({ ...current, telegram_chat_id: e.target.value }))}
+                  placeholder="Chat /start ke @NEXATchBot lalu isi chat_id"
                   className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                   disabled={!isPro}
                 />
@@ -446,6 +448,11 @@ export default function JadwalPage() {
                             Prioritas cepat
                           </span>
                         )}
+                        {canPredictExam && schedule.document_id && (
+                          <span className="rounded-full bg-brand-50 px-2 py-0.5 text-xs font-bold text-brand-700">
+                            Prediksi: B+ dengan confidence sedang
+                          </span>
+                        )}
                       </div>
                       <h3 className="truncate text-sm font-black text-slate-950 sm:text-base">{schedule.title}</h3>
                       <p className="mt-1 text-xs text-slate-500">
@@ -461,7 +468,7 @@ export default function JadwalPage() {
                         <p className="text-[11px] font-semibold text-slate-500">hari lagi</p>
                       </div>
                       <div className="hidden text-xs text-slate-500 sm:block">
-                        <p>WA: {schedule.whatsapp_number}</p>
+                        <p>Telegram: {schedule.telegram_chat_id || 'belum terhubung'}</p>
                         <p className="mt-1">
                           H-3 {schedule.reminder_sent_h3 ? 'sent' : 'ready'} | H-1 {schedule.reminder_sent_h1 ? 'sent' : 'ready'} | H-0 {schedule.reminder_sent_h0 ? 'sent' : 'ready'}
                         </p>

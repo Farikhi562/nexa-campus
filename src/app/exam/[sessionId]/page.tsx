@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import ExamTimer from '@/components/ExamTimer'
@@ -14,7 +14,7 @@ const EXAM_DURATION = 90 * 60 // 90 minutes
 export default function ExamPage() {
   const router   = useRouter()
   const params   = useParams()
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const sessionId = params.sessionId as string
 
   const [questions, setQuestions]   = useState<Question[]>([])

@@ -154,19 +154,28 @@ export default function StudyRoomPage() {
 
       <section className="overflow-hidden rounded-lg border border-slate-200 bg-white">
         <div className="grid gap-0 lg:grid-cols-[1.25fr_0.75fr]">
-          <div className="bg-brand-950 p-6 text-white sm:p-8">
+          <div className="relative overflow-hidden bg-brand-950 p-6 text-white sm:p-8">
+            {room?.banner_url && (
+              <div className="absolute inset-0 bg-cover bg-center opacity-25" style={{ backgroundImage: `url(${room.banner_url})` }} />
+            )}
+            <div className="relative z-10">
             <div className="mb-5 flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-cyan-100">
                 <Trophy className="h-3.5 w-3.5" />
                 Live Study Room
               </span>
+              {room?.is_private && (
+                <span className="inline-flex items-center gap-2 rounded-full bg-red-400/15 px-3 py-1 text-xs font-bold text-red-100">
+                  Private
+                </span>
+              )}
               <span className={`rounded-full px-3 py-1 text-xs font-bold ${room?.is_active && !expired ? 'bg-emerald-400/15 text-emerald-200' : 'bg-white/10 text-white/70'}`}>
                 {room?.is_active && !expired ? 'Aktif' : 'Tidak aktif'}
               </span>
             </div>
-            <h1 className="max-w-2xl text-3xl font-black tracking-tight md:text-4xl">{room?.title}</h1>
+            <h1 className="max-w-2xl text-3xl font-black tracking-tight md:text-4xl">{room?.custom_name || room?.title}</h1>
             <p className="mt-4 max-w-2xl text-sm leading-6 text-brand-100">
-              Bagikan kode room, mulai ujian dari dokumen yang sama, lalu pantau leaderboard saat teman selesai.
+              {room?.welcome_message || 'Bagikan kode room, mulai ujian dari dokumen yang sama, lalu pantau leaderboard saat teman selesai.'}
             </p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
               <Button
@@ -182,6 +191,7 @@ export default function StudyRoomPage() {
                 {copied ? <CheckCircle2 className="h-4 w-4" /> : <Share2 className="h-4 w-4" />}
                 Salin Kode
               </Button>
+            </div>
             </div>
           </div>
 
