@@ -22,7 +22,7 @@ export const BADGES: Array<{
     id: 'diligent',
     icon: '📚',
     title: 'Rajin',
-    description: 'Upload 5 dokumen.',
+    description: 'Upload 5 Dokumen.',
   },
   {
     id: 'perfect_score',

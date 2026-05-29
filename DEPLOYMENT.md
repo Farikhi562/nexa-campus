@@ -1,4 +1,4 @@
-# Diktat.AI Deployment Guide
+# NEXA Campus Ecosystem Deployment Guide
 
 ## Deployment Architecture
 
@@ -64,18 +64,18 @@ git push origin main
      NEXT_PUBLIC_APP_URL
      TELEGRAM_BOT_TOKEN (optional)
      CRON_SECRET
-     Midtrans_CLIENT_ID (optional)
-     Midtrans_SECRET_KEY (optional)
-     Midtrans_MERCHANT_ID (optional)
-     Midtrans_CLIENT_KEY (optional)
-     NEXT_PUBLIC_Midtrans_CLIENT_KEY (optional)
-     Midtrans_IS_PRODUCTION (optional)
+     MIDTRANS_CLIENT_ID (optional)
+     MIDTRANS_SECRET_KEY (optional)
+     MIDTRANS_MERCHANT_ID (optional)
+     MIDTRANS_CLIENT_KEY (optional)
+     NEXT_PUBLIC_MIDTRANS_CLIENT_KEY (optional)
+     MIDTRANS_IS_PRODUCTION (optional)
      ```
    - Click "Deploy"
 
 4. **Wait for Deployment**
    - Vercel automatically builds and deploys
-   - Production URL: `https://diktat-ai.vercel.app` (or your domain)
+   - Production URL: `https://campus.nexatechlabs.my.id` (or your domain)
 
 ### Option B: Via Vercel CLI
 
@@ -97,7 +97,7 @@ vercel
 
 1. **Add Domain**
    - Go to Vercel Dashboard → Project Settings → Domains
-   - Add your custom domain (e.g., `diktat.ai`)
+   - Add your custom domain (e.g., `campus.nexatechlabs.my.id`)
    - Follow DNS setup instructions
 
 2. **Update DNS Records**
@@ -160,7 +160,7 @@ module.exports = withSentryConfig(nextConfig, {
 
 ```bash
 # Set PROD_URL to your Vercel domain
-PROD_URL=https://diktat-ai.vercel.app
+PROD_URL=https://campus.nexatechlabs.my.id
 
 # Test API health
 curl $PROD_URL/api/documents

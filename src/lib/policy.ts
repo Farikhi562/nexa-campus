@@ -19,7 +19,7 @@ const MARKETPLACE_PROHIBITED_KEYWORDS = [
   'ktp',
   'kk',
   'ijazah palsu',
-  'dokumen palsu',
+  'Dokumen palsu',
   'bajakan',
   'crack',
   'porn',
@@ -56,7 +56,7 @@ const AI_ABUSE_KEYWORDS = [
   'malware',
   'spam',
   'penipuan',
-  'dokumen palsu',
+  'Dokumen palsu',
   'plagiarisme',
   'joki',
 ]

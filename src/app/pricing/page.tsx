@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { Profile } from '@/types'
+import { BRAND } from '@/lib/brand'
 
 const PLANS = [
   {
@@ -30,7 +31,7 @@ const PLANS = [
     href: '/auth/login',
     featured: false,
     features: [
-      '1 midtransmen belajar',
+      '1 Dokumen belajar',
       'Mock exam dasar',
       'Campus Tools demo',
       'Reminder agenda dasar',
@@ -43,28 +44,28 @@ const PLANS = [
     name: 'Basic',
     price: 'Rp19.000',
     note: 'Untuk mahasiswa yang mulai serius.',
-    cta: 'Bayar Basic via Midtrans',
+    cta: `Bayar Basic via ${BRAND.paymentProvider}`,
     href: '/checkout?plan=basic',
     featured: true,
     features: [
-      '5 midtransmen belajar',
+      '5 Dokumen belajar',
       'Bisa jual barang dan jasa kampus',
       'Campus Tools Basic',
       'Export hasil belajar',
       'Priority support normal',
     ],
-    missing: ['Midtransmen unlimited', 'Telegram reminder otomatis'],
+    missing: ['Dokumen unlimited', 'Telegram reminder otomatis'],
   },
   {
     id: 'pro',
     name: 'Pro',
     price: 'Rp39.000',
     note: 'Paket lengkap untuk power user.',
-    cta: 'Bayar Pro via Midtrans',
+    cta: `Bayar Pro via ${BRAND.paymentProvider}`,
     href: '/checkout?plan=pro',
     featured: false,
     features: [
-      'Midtransmen belajar unlimited',
+      'Dokumen belajar unlimited',
       'Marketplace seller lengkap',
       'Telegram reminder otomatis',
       'Study Room dan leaderboard',
@@ -77,7 +78,7 @@ const PLANS = [
 const FAQ = [
   {
     q: 'Pembayaran pakai apa?',
-    a: 'NEXA disiapkan untuk Midtrans. User diarahkan ke checkout request agar admin bisa mengirim link pembayaran Midtrans sesuai paket.',
+    a: `${BRAND.productName} memakai ${BRAND.paymentProvider}. User diarahkan ke checkout request agar admin ${BRAND.companyName} bisa mengirim link pembayaran sesuai paket.`,
   },
   {
     q: 'Siapa yang bisa jual barang dan jasa?',
@@ -85,7 +86,7 @@ const FAQ = [
   },
   {
     q: 'Setelah bayar, paket aktif kapan?',
-    a: 'Untuk mode operasional awal, admin mengaktifkan paket setelah pembayaran Midtrans terkonfirmasi. Ini aman untuk MVP dan penjualan awal.',
+    a: `Untuk mode operasional awal, admin ${BRAND.companyName} mengaktifkan paket setelah pembayaran ${BRAND.paymentProvider} terkonfirmasi.`,
   },
 ]
 
@@ -117,8 +118,8 @@ export default function PricingPage() {
               <Zap className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-sm font-black">NEXA</p>
-              <p className="text-xs font-semibold text-slate-500">Campus Ecosystem</p>
+              <p className="text-sm font-black">{BRAND.productName}</p>
+              <p className="text-xs font-semibold text-slate-500">{BRAND.companyName}</p>
             </div>
           </Link>
           <div className="flex items-center gap-2">
@@ -136,13 +137,13 @@ export default function PricingPage() {
         <div className="max-w-3xl">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-black text-brand-700">
             <CreditCard className="h-3.5 w-3.5" />
-            Midtrans payment ready
+            {BRAND.paymentProvider} payment ready
           </div>
           <h1 className="text-4xl font-black tracking-tight md:text-6xl">
             Harga jelas, fitur siap dipakai, upgrade gampang.
           </h1>
           <p className="mt-5 text-base leading-7 text-slate-600 md:text-lg">
-            NEXA dibuat untuk dijual ke mahasiswa dengan model freemium. User bisa coba gratis, lalu upgrade saat butuh marketplace seller, reminder otomatis, Study Room, dan analytics.
+            {BRAND.productName} dibuat oleh {BRAND.companyName} untuk mahasiswa dengan model freemium. User bisa coba gratis, lalu upgrade saat butuh marketplace seller, reminder otomatis, Study Room, dan analytics.
           </p>
         </div>
 
@@ -198,7 +199,7 @@ export default function PricingPage() {
           {[
             { icon: ShieldCheck, title: 'RLS-ready', desc: 'Akses data dipisah per user lewat Supabase policy.' },
             { icon: Store, title: 'Monetizable', desc: 'Marketplace seller hanya untuk akun berbayar.' },
-            { icon: MessageCircle, title: 'Midtrans flow', desc: 'Checkout diarahkan ke request pembayaran Midtrans.' },
+            { icon: MessageCircle, title: `${BRAND.paymentProvider} flow`, desc: `Checkout diarahkan ke request pembayaran ${BRAND.paymentProvider}.` },
             { icon: Lock, title: 'Freemium gate', desc: 'Free bisa coba, Basic/Pro membuka fitur bernilai.' },
           ].map(({ icon: Icon, title, desc }) => (
             <div key={title} className="rounded-lg border border-slate-200 bg-slate-50 p-5">

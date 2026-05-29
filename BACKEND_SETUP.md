@@ -1,11 +1,11 @@
-# Diktat.AI Backend Setup Guide
+# NEXA Campus Ecosystem Backend Setup Guide
 
 ## Prerequisites
 
 - Node.js 18+ installed
 - npm or yarn
 - Supabase account (https://supabase.com)
-- OpenAI API key (https://platform.openai.com/api-keys)
+- Google Gemini API key (https://aistudio.google.com/app/apikey)
 - OCR.space free API key (https://ocr.space)
 
 ## Step 1: Clone & Install Dependencies
@@ -52,12 +52,12 @@ This creates:
 3. Set redirect URL: `http://localhost:3001/auth/callback`
 4. Add your Google OAuth credentials
 
-## Step 3: Setup OpenAI
+## Step 3: Setup Google Gemini
 
 ### Get API Key
-1. Go to https://platform.openai.com/api-keys
+1. Go to https://aistudio.google.com/app/apikey
 2. Create new secret key
-3. Copy to `.env.local` as `OPENAI_API_KEY`
+3. Copy to `.env.local` as `GEMINI_API_KEY`
 
 ### Add Billing
 1. Go to Billing → Overview
@@ -88,7 +88,7 @@ Fill in:
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
-- `OPENAI_API_KEY`
+- `GEMINI_API_KEY`
 - `CRON_SECRET` (generate: `openssl rand -base64 32`)
 
 ## Step 6: Run Local Development
@@ -111,21 +111,21 @@ curl http://localhost:3001/api/documents \
   -H "Authorization: Bearer <session_token>"
 ```
 
-## Step 7: Setup Whatsapp Reminders (Pro Feature - Optional)
+## Step 7: Setup Telegram Reminders (Pro Feature - Optional)
 
-### Get Twilio Credentials
-1. Go to https://www.twilio.com/console
+### Get Telegram Bot API Credentials
+1. Go to https://www.Telegram Bot API.com/console
 2. Get Account SID and Auth Token
 3. Add Telegram sandbox:
    - Go to Messaging → Try it out → Send a Telegram
    - Follow setup steps
-   - Get `TWILIO_WHATSAPP_FROM` number
+   - Get `TELEGRAM_BOT_TOKEN` number
 
 ### Update .env.local
 ```env
-TWILIO_ACCOUNT_SID=your-account-sid
-TWILIO_AUTH_TOKEN=your-auth-token
-TWILIO_WHATSAPP_FROM=telegram:+14155238886
+TELEGRAM_BOT_TOKEN=your-account-sid
+TELEGRAM_BOT_TOKEN=your-auth-token
+TELEGRAM_BOT_TOKEN=telegram:+14155238886
 ```
 
 ### Test Reminder
@@ -189,15 +189,15 @@ vercel
 - Check file size < 10MB
 - Try simpler PDF first
 
-### OpenAI quota exceeded
+### Google Gemini quota exceeded
 - Check API key is valid
-- Verify billing set up in OpenAI dashboard
-- Check usage at https://platform.openai.com/account/usage
+- Verify billing set up in Google Gemini dashboard
+- Check usage at https://aistudio.google.com/
 
 ### Telegram not sending
-- Verify Twilio credentials in `.env.local`
+- Verify Telegram Bot API credentials in `.env.local`
 - Check Telegram number format (international)
-- Confirm phone number is registered with Twilio sandbox
+- Confirm phone number is registered with Telegram Bot API sandbox
 
 ### Database errors
 - Verify Supabase SQL schema was run
@@ -215,7 +215,7 @@ Before going live:
 - [ ] HTTPS enabled
 - [ ] CORS properly configured
 - [ ] Payment gateway tested (Midtrans)
-- [ ] Twilio Telegram moved out of sandbox
+- [ ] Telegram Bot API Telegram moved out of sandbox
 - [ ] Database Row Level Security (RLS) policies reviewed
 - [ ] API rate limits set in Supabase
 
@@ -239,7 +239,7 @@ src/app/api/
 
 src/lib/
 ├── ocr.ts                       # OCR.space integration
-├── openai.ts                    # GPT-4o-mini extraction
+├── Google Gemini.ts                    # Gemini 1.5 Flash extraction
 └── supabase/
     ├── client.ts               # Client-side Supabase
     └── server.ts               # Server-side Supabase

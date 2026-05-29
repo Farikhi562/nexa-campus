@@ -15,11 +15,12 @@ import {
   Users,
   Zap,
 } from 'lucide-react'
+import { BRAND } from '@/lib/brand'
 
 export const metadata: Metadata = {
-  title: 'FAQ NEXA Campus v1.0 - NEXA Campus Ecosystem',
+  title: `FAQ ${BRAND.productName} v1.0`,
   description:
-    'Pertanyaan umum resmi NEXA Campus Ecosystem v1.0 tentang akun, fitur belajar, marketplace, paket, Midtrans, dan support.',
+    `Pertanyaan umum resmi ${BRAND.productName} by ${BRAND.companyName} tentang akun, fitur belajar, marketplace, paket, ${BRAND.paymentProvider}, dan support.`,
 }
 
 const FAQ_GROUPS = [
@@ -27,8 +28,8 @@ const FAQ_GROUPS = [
     title: 'Akun dan akses',
     icon: ShieldCheck,
     items: [
-      ['NEXA Campus v1.0 itu apa?', 'NEXA Campus Ecosystem v1.0 adalah platform mahasiswa untuk belajar dari midtransmen, latihan mock exam, mengatur reminder akademik, membuka marketplace kampus, dan memakai AI Campus Tools. Tersedia fitur kolaborasi tim belajar, leaderboard antar kampus, dan analisis kelemahan belajar berbasis AI.'],
-      ['Apakah harus login?', 'Ya. Login diperlukan untuk menyimpan profil, midtransmen, reminder, marketplace, tim belajar, dan hasil belajar.'],
+      [`${BRAND.productName} v1.0 itu apa?`, `${BRAND.productName} v1.0 adalah produk resmi ${BRAND.companyName} untuk belajar dari Dokumen, latihan mock exam, mengatur reminder akademik, membuka marketplace kampus, dan memakai AI Campus Tools. Founder & CEO: ${BRAND.founderName}.`],
+      ['Apakah harus login?', 'Ya. Login diperlukan untuk menyimpan profil, Dokumen, reminder, marketplace, tim belajar, dan hasil belajar.'],
       ['Kenapa harus lengkapi profil?', 'Profil membantu NEXA menyesuaikan pengalaman kampus, jurusan, leaderboard, marketplace, dan rekomendasi fitur. Profil lengkap juga diperlukan untuk fitur leaderboard antar kampus.'],
     ],
   },
@@ -36,8 +37,8 @@ const FAQ_GROUPS = [
     title: 'Belajar dan AI',
     icon: BookOpenCheck,
     items: [
-      ['Bagaimana mock exam AI bekerja?', 'Upload midtransmen PDF belajar → AI mengekstrak teks → membuat soal pilihan ganda dengan pembahasan → kamu latihan dan dapat skor. Progress tersimpan otomatis.'],
-      ['Chat with PDF itu apa?', 'Fitur Pro eksklusif yang memungkinkan kamu tanya jawab langsung ke midtransmen yang sudah diupload. Misalnya "Jelaskan konsep di bab 3" atau "Buat contoh soal dari topik ini" — AI menjawab berdasarkan isi midtransmenmu.'],
+      ['Bagaimana mock exam AI bekerja?', 'Upload Dokumen PDF belajar → AI mengekstrak teks → membuat soal pilihan ganda dengan pembahasan → kamu latihan dan dapat skor. Progress tersimpan otomatis.'],
+      ['Chat with PDF itu apa?', 'Fitur Pro eksklusif yang memungkinkan kamu tanya jawab langsung ke Dokumen yang sudah diupload. Misalnya "Jelaskan konsep di bab 3" atau "Buat contoh soal dari topik ini" — AI menjawab berdasarkan isi Dokumenmu.'],
       ['Apa itu analisis kelemahan AI?', 'Setelah menyelesaikan minimal 3 exam, AI menganalisis pola kesalahanmu dan memberikan rekomendasi spesifik topik yang perlu dipelajari ulang. Fitur ini eksklusif untuk paket Pro.'],
       ['Apakah jawaban AI selalu benar?', 'Tidak selalu. AI membantu mempercepat belajar, tetapi kamu tetap perlu mengecek ulang materi penting sebelum ujian asli.'],
       ['Campus Tools bisa dipakai untuk apa?', 'Basic membuka 5 tools, Pro membuka semua 15+ tools: kalkulator IPK, generator sitasi, ringkasan AI, career assistant, habit tracker, pomodoro timer, konverter nilai, planner semester, generator abstrak, parafrase AI, cek plagiarisme, translator akademik, mind map generator, flashcard generator, dan event kampus.'],
@@ -76,9 +77,9 @@ const FAQ_GROUPS = [
     title: 'Paket dan pembayaran',
     icon: CreditCard,
     items: [
-      ['Apa bedanya Free, Basic, dan Pro?', 'Free untuk mencoba core learning (1 midtransmen, 1 exam). Basic Rp19.000/bulan membuka mock exam tak terbatas, ekspor PDF, 5 Campus Tools, dan hak jual di marketplace. Pro Rp39.000/bulan membuka semua fitur termasuk Chat with PDF, analisis kelemahan, tim belajar, room private, Telegram reminder, laporan mingguan, prediksi nilai, 15+ Campus Tools, ekspor Anki/Quizlet/Word, dan 3 team seat.'],
-      ['Pembayaran pakai apa?', 'NEXA v1.0 diarahkan ke Midtrans checkout atau admin untuk aktivasi awal.'],
-      ['Setelah bayar, paket aktif kapan?', 'Paket diaktifkan setelah pembayaran Midtrans atau konfirmasi admin selesai. Pastikan email akun NEXA sama dengan data checkout.'],
+      ['Apa bedanya Free, Basic, dan Pro?', 'Free untuk mencoba core learning (1 Dokumen, 1 exam). Basic Rp19.000/bulan membuka mock exam tak terbatas, ekspor PDF, 5 Campus Tools, dan hak jual di marketplace. Pro Rp39.000/bulan membuka semua fitur termasuk Chat with PDF, analisis kelemahan, tim belajar, room private, Telegram reminder, laporan mingguan, prediksi nilai, 15+ Campus Tools, ekspor Anki/Quizlet/Word, dan 3 team seat.'],
+      ['Pembayaran pakai apa?', `${BRAND.productName} memakai ${BRAND.paymentProvider} checkout atau aktivasi admin resmi ${BRAND.companyName}.`],
+      ['Setelah bayar, paket aktif kapan?', `Paket diaktifkan setelah pembayaran ${BRAND.paymentProvider} atau konfirmasi admin selesai. Pastikan email akun ${BRAND.productName} sama dengan data checkout.`],
       ['Team Seat itu apa?', 'Fitur Pro yang memungkinkan kamu mengundang hingga 3 orang untuk menikmati fitur Pro tanpa mereka perlu berlangganan sendiri. Cocok untuk grup belajar atau pengurus organisasi kampus.'],
       ['Bagaimana jika saya ingin refund?', 'Refund bisa diajukan maksimal 3 hari setelah pembayaran jika paket belum aktif, ada pembayaran ganda, atau fitur utama tidak berfungsi karena kesalahan sistem NEXA. Hubungi admin via Telegram 085697916845 atau email nexatechlabs271@gmail.com.'],
     ],
@@ -107,8 +108,8 @@ const FAQ_GROUPS = [
     icon: HelpCircle,
     items: [
       ['Kalau profil gagal disimpan bagaimana?', 'Coba refresh dan login ulang. Jika masih gagal, hubungi admin dengan email akun, nama, dan screenshot error.'],
-      ['Apakah midtransmen saya aman?', 'Midtransmen dipakai hanya untuk fitur belajar akun kamu. Teks hasil ekstraksi disimpan terenkripsi. Jangan upload midtransmen yang melanggar hak cipta atau berisi data sensitif orang lain.'],
-      ['Data apa saja yang dikumpulkan NEXA?', 'Profil akademik, midtransmen belajar, hasil exam, streak, badge, notifikasi, dan Telegram Chat ID (jika dihubungkan). Selengkapnya di halaman Kebijakan Privasi.'],
+      ['Apakah Dokumen saya aman?', 'Dokumen dipakai hanya untuk fitur belajar akun kamu. Teks hasil ekstraksi disimpan terenkripsi. Jangan upload Dokumen yang melanggar hak cipta atau berisi data sensitif orang lain.'],
+      ['Data apa saja yang dikumpulkan NEXA?', 'Profil akademik, Dokumen belajar, hasil exam, streak, badge, notifikasi, dan Telegram Chat ID (jika dihubungkan). Selengkapnya di halaman Kebijakan Privasi.'],
       ['Bagaimana cara hubungi admin?', 'Gunakan chatbot di pojok kanan bawah, atau langsung ke Telegram 085697916845 / email nexatechlabs271@gmail.com untuk aktivasi paket, refund, dan support akun.'],
     ],
   },
@@ -135,20 +136,20 @@ export default function FAQPage() {
           <div>
             <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-black text-brand-700">
               <Sparkles className="h-3.5 w-3.5" />
-              NEXA Campus v1.0
+              {BRAND.productName} v1.0
             </div>
             <h1 className="text-4xl font-black tracking-tight md:text-6xl">
-              FAQ resmi untuk user NEXA.
+              FAQ resmi untuk user {BRAND.productName}.
             </h1>
             <p className="mt-5 max-w-xl text-base leading-7 text-slate-600">
-              Halaman ini menjawab pertanyaan umum tentang akun, fitur belajar, marketplace, paket, Midtrans, dan support NEXA Campus Ecosystem v1.0.
+              Halaman ini menjawab pertanyaan umum tentang akun, fitur belajar, marketplace, paket, {BRAND.paymentProvider}, dan support {BRAND.productName} v1.0 di {BRAND.domain}.
             </p>
             <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
               {[
                 ['Versi', 'v1.0'],
                 ['Basic', 'Rp19.000/bulan'],
                 ['Pro', 'Rp39.000/bulan'],
-                ['Payment', 'Midtrans ready'],
+                ['Payment', `${BRAND.paymentProvider} ready`],
                 ['Support', 'Chatbot + Contact'],
               ].map(([label, value]) => (
                 <div key={label} className="rounded-lg border border-slate-200 bg-white p-4">

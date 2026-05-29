@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import NexaLogo from '@/components/NexaLogo'
 import PoweredByFooter from '@/components/PoweredByFooter'
+import { BRAND } from '@/lib/brand'
 
 const FEATURES = [
   {
@@ -123,13 +124,16 @@ export default function LandingPage() {
             <div className="flex flex-col justify-center">
               <div className="mb-5 inline-flex w-fit items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-bold text-brand-700">
                 <Rocket className="h-3.5 w-3.5" />
-                Siap dijual untuk mahasiswa Indonesia
+                Produk resmi {BRAND.companyName}
               </div>
               <h1 className="max-w-3xl text-4xl font-black tracking-tight text-slate-950 md:text-6xl">
-                Sistem operasi kuliah untuk belajar, deadline, komunitas, dan income kampus.
+                {BRAND.productName}: sistem operasi kuliah untuk belajar, deadline, komunitas, dan income kampus.
               </h1>
               <p className="mt-6 max-w-2xl text-base leading-7 text-slate-600 md:text-lg">
-                NEXA Campus Ecosystem menyatukan mock exam AI, smart reminder, marketplace mahasiswa, study room, dan 15 Campus Tools dalam satu produk yang gampang dijual: murah, relevan, dan langsung terasa manfaatnya.
+                {BRAND.productName} menyatukan mock exam AI berbasis {BRAND.aiProvider}, smart reminder, marketplace mahasiswa, study room, 15 Campus Tools, dan pembayaran {BRAND.paymentProvider} di {BRAND.domain}.
+              </p>
+              <p className="mt-3 text-sm font-semibold text-slate-500">
+                {BRAND.founderTitle}: {BRAND.founderName}
               </p>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">

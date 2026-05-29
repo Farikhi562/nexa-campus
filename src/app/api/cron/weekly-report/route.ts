@@ -17,7 +17,7 @@ type WeeklySession = {
 
 function formatReport(profile: WeeklyProfile, stats: { streak: number; exams: number; avgScore: number; diff: number; weak: string[]; rank: number; total: number }) {
   return [
-    'Laporan Minggu Ini - NEXA Campus',
+    'Laporan Minggu Ini - NEXA Campus Ecosystem',
     '',
     `Halo ${profile.full_name || 'Mahasiswa'}! Ini ringkasan belajarmu minggu ini:`,
     '',
@@ -39,7 +39,7 @@ function formatReport(profile: WeeklyProfile, stats: { streak: number; exams: nu
 export async function GET(request: Request) {
   const auth = request.headers.get('authorization') || ''
   const secret = process.env.CRON_SECRET
-  if (secret && auth !== `Bearer ${secret}`) {
+  if (!secret || auth !== `Bearer ${secret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

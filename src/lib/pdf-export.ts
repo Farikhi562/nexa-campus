@@ -1,5 +1,5 @@
 // ============================================================
-// DIKTAT.AI — PDF Export (client-side, jsPDF)
+// NEXA Campus Ecosystem — PDF Export (client-side, jsPDF)
 // ============================================================
 'use client'
 
@@ -35,7 +35,7 @@ export async function exportResultsToPdf(data: ExportData): Promise<void> {
   doc.setTextColor(255, 255, 255)
   doc.setFontSize(22)
   doc.setFont('helvetica', 'bold')
-  doc.text('DIKTAT.AI', 14, 16)
+  doc.text('NEXA Campus Ecosystem', 14, 16)
 
   doc.setFontSize(10)
   doc.setFont('helvetica', 'normal')
@@ -134,7 +134,7 @@ export async function exportResultsToPdf(data: ExportData): Promise<void> {
     doc.setPage(i)
     doc.setFontSize(8)
     doc.setTextColor(...(GRAY as [number,number,number]))
-    doc.text('NEXA Campus Ecosystem - Platform mahasiswa terpadu', 14, 290)
+    doc.text('NEXA Campus Ecosystem by NEXA Tech Labs - campus.nexatechlabs.my.id', 14, 290)
     doc.text(`Hal ${i} / ${pageCount}`, 196, 290, { align: 'right' })
   }
 

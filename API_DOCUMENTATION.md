@@ -1,4 +1,4 @@
-# Diktat.AI Backend API Documentation
+# NEXA Campus Ecosystem Backend API Documentation
 
 ## Setup Environment Variables
 
@@ -10,8 +10,8 @@ NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
 
-# OpenAI
-OPENAI_API_KEY=sk-your-openai-api-key
+# Google Gemini
+GEMINI_API_KEY=your-gemini-api-key
 
 # OCR.space (free tier with 500 pages/month)
 OCR_SPACE_API_KEY=helloworld
@@ -19,18 +19,18 @@ OCR_SPACE_API_KEY=helloworld
 # App
 NEXT_PUBLIC_APP_URL=http://localhost:3001
 
-# Twilio Telegram (for Pro feature - optional)
-TWILIO_ACCOUNT_SID=your-twilio-account-sid
-TWILIO_AUTH_TOKEN=your-twilio-auth-token
-TWILIO_WHATSAPP_FROM=telegram:+14155238886
+# Telegram Bot API Telegram (for Pro feature - optional)
+TELEGRAM_BOT_TOKEN=your-Telegram Bot API-account-sid
+TELEGRAM_BOT_TOKEN=your-Telegram Bot API-auth-token
+TELEGRAM_BOT_TOKEN=telegram:+14155238886
 
 # Cron Secret (for reminders)
 CRON_SECRET=your-secret-cron-token
 
-# DOKU (optional - for payment gateway)
-DOKU_SERVER_KEY=your-doku-server-key
-NEXT_PUBLIC_DOKU_CLIENT_KEY=your-doku-client-key
-DOKU_IS_PRODUCTION=false
+# Midtrans (optional - for payment gateway)
+MIDTRANS_SERVER_KEY=your-midtrans-server-key
+NEXT_PUBLIC_MIDTRANS_CLIENT_KEY=your-midtrans-client-key
+MIDTRANS_IS_PRODUCTION=false
 ```
 
 ## API Endpoints
@@ -121,7 +121,7 @@ Process uploaded PDF: OCR + AI extraction (60s timeout)
 1. Verify document ownership
 2. Download PDF from Supabase Storage (signed URL)
 3. Extract text using OCR.space API
-4. Parse questions using OpenAI GPT-4o-mini
+4. Parse questions using Google Gemini 1.5 Flash
 5. Save questions to database
 6. Update document status to `completed`
 
@@ -488,13 +488,13 @@ All errors follow this format:
 **Free Tier (OCR.space):**
 - 500 pages/month
 
-**OpenAI GPT-4o-mini:**
+**Google Gemini 1.5 Flash:**
 - Estimated $0.005 per question extraction (cost varies)
 - Input: ~3,000 tokens per 12,000 chars
 - Output: ~100-200 tokens per response
 
-**DOKU Payment:**
-- Transaction fee follows the active DOKU payment method and merchant agreement
+**Midtrans Payment:**
+- Transaction fee follows the active Midtrans payment method and merchant agreement
 
 ---
 

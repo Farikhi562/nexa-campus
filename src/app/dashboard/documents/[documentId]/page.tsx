@@ -96,7 +96,7 @@ export default function DocumentDetailPage() {
   }
 
   async function shareToTeam() {
-    if (!selectedTeam || !requirePro('Share dokumen ke tim khusus Pro')) return
+    if (!selectedTeam || !requirePro('Share Dokumen ke tim khusus Pro')) return
     await fetch(`/api/documents/${documentId}/share-team`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -108,7 +108,7 @@ export default function DocumentDetailPage() {
   function downloadSummaryPdf() {
     const pdf = new jsPDF()
     pdf.setFontSize(16)
-    pdf.text('NEXA Campus - Ringkasan Dokumen', 14, 18)
+    pdf.text('NEXA Campus Ecosystem - Ringkasan Dokumen', 14, 18)
     pdf.setFontSize(11)
     pdf.text(doc?.title || 'Dokumen', 14, 28)
     pdf.setFontSize(10)
@@ -189,7 +189,7 @@ export default function DocumentDetailPage() {
       ) : (
         <section className="rounded-lg border border-slate-200 bg-white">
           <div className="h-[480px] space-y-3 overflow-y-auto bg-slate-50 p-4">
-            {chats.length === 0 && <p className="text-center text-sm text-slate-500">Tanya isi dokumen ini, misalnya “Ringkas poin utama” atau “Buat contoh soal dari bab 2”.</p>}
+            {chats.length === 0 && <p className="text-center text-sm text-slate-500">Tanya isi Dokumen ini, misalnya “Ringkas poin utama” atau “Buat contoh soal dari bab 2”.</p>}
             {chats.map((chat) => (
               <div key={chat.id} className={`flex ${chat.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <p className={`max-w-[80%] whitespace-pre-wrap rounded-2xl px-4 py-3 text-sm leading-6 ${chat.role === 'user' ? 'rounded-br-sm bg-brand-600 text-white' : 'rounded-bl-sm border border-slate-200 bg-white text-slate-700'}`}>{chat.message}</p>
@@ -198,7 +198,7 @@ export default function DocumentDetailPage() {
             {loadingChat && <p className="text-sm text-slate-500">AI sedang mengetik...</p>}
           </div>
           <div className="flex gap-2 border-t border-slate-200 p-3">
-            <input value={message} onChange={(e) => setMessage(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && sendChat()} className="min-w-0 flex-1 rounded-lg border border-slate-300 px-4 py-2 text-sm outline-none focus:border-brand-500" placeholder="Tanya tentang dokumen..." />
+            <input value={message} onChange={(e) => setMessage(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && sendChat()} className="min-w-0 flex-1 rounded-lg border border-slate-300 px-4 py-2 text-sm outline-none focus:border-brand-500" placeholder="Tanya tentang Dokumen..." />
             <Button type="button" onClick={sendChat} disabled={!message.trim() || loadingChat}><Send className="h-4 w-4" /></Button>
           </div>
         </section>

@@ -10,7 +10,7 @@ const PRO_FEATURES = [
   'Chat with PDF dan ringkasan otomatis',
   'Analisis kelemahan AI',
   'Study Room private dan custom branding',
-  'Tim belajar permanen dan share dokumen',
+  'Tim belajar permanen dan share Dokumen',
   'Semua 15 Campus Tools tanpa batas',
   'Export Anki, Quizlet, dan Word',
   'Laporan mingguan Telegram',
@@ -41,7 +41,7 @@ export default function ProUpgradeModal({
               <p className="text-xs font-black uppercase tracking-wide text-brand-700">Fitur khusus Pro</p>
               <h2 className="mt-1 text-xl font-black text-slate-950">{feature}</h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                Upgrade ke Pro untuk membuka fitur ini dan seluruh workflow premium NEXA Campus.
+                Upgrade ke Pro untuk membuka fitur ini dan seluruh workflow premium NEXA Campus Ecosystem.
               </p>
             </div>
           </div>

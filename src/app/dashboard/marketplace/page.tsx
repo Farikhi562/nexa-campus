@@ -157,21 +157,22 @@ export default function MarketplacePage() {
       return
     }
 
-    const { error: insertError } = await supabase.from('marketplace_listings').insert({
-      seller_id: user.id,
-      type: draftType,
-      title: draft.title.trim(),
-      price_label: draft.price.trim(),
-      category: draft.category.trim(),
-      location: draft.location.trim() || profile.provinsi,
-      campus: profile.universitas,
-      description: draft.description.trim(),
-      contact_telegram: profile.telegram_number,
-      status: 'active',
+    const response = await fetch('/api/marketplace/listings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: draftType,
+        title: draft.title.trim(),
+        price_label: draft.price.trim(),
+        category: draft.category.trim(),
+        location: draft.location.trim() || profile.provinsi,
+        description: draft.description.trim(),
+      }),
     })
+    const payload = await response.json().catch(() => null)
 
-    if (insertError) {
-      setNotice(insertError.message)
+    if (!response.ok) {
+      setNotice(payload?.error || 'Gagal menerbitkan listing.')
       setSaving(false)
       return
     }
@@ -344,7 +345,7 @@ export default function MarketplacePage() {
               <div>
                 <p className="text-sm font-black text-red-950">Aturan konten marketplace</p>
                 <p className="mt-1 text-xs leading-5 text-red-800">
-                  Dilarang menjual barang ilegal, narkotika, senjata, alkohol, rokok/vape untuk minor, konten dewasa, jasa joki tugas/ujian, akun, data pribadi, dokumen palsu, produk bajakan, plagiarisme, dan penipuan.
+                  Dilarang menjual barang ilegal, narkotika, senjata, alkohol, rokok/vape untuk minor, konten dewasa, jasa joki tugas/ujian, akun, data pribadi, Dokumen palsu, produk bajakan, plagiarisme, dan penipuan.
                 </p>
                 <label className="mt-3 flex items-start gap-2 text-xs font-semibold leading-5 text-red-900">
                   <input

@@ -72,7 +72,7 @@ export default function LeaderboardPage() {
           <Trophy className="h-4 w-4" />
           Leaderboard Antar Kampus
         </div>
-        <h1 className="text-3xl font-black text-slate-950">Rank belajar NEXA Campus</h1>
+        <h1 className="text-3xl font-black text-slate-950">Rank belajar NEXA Campus Ecosystem</h1>
         <p className="mt-2 text-sm text-slate-600">Hanya profil yang opt-in publik yang tampil di leaderboard.</p>
       </section>
 

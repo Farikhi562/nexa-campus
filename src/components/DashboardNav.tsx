@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
-import { BookOpen, Calendar, ChevronDown, Home, LayoutDashboard, LogOut, Settings, Sparkles, Store, Trophy, UserRound, Users, X } from 'lucide-react'
+import { BookOpen, Calendar, Home, LayoutDashboard, LogOut, MoreVertical, Settings, Sparkles, Store, Trophy, UserRound, Users, X } from 'lucide-react'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import NexaLogo from './NexaLogo'
@@ -105,7 +105,7 @@ export default function DashboardNav({ profile }: { profile: Profile }) {
         <div className="flex items-center justify-between">
         <Link href="/dashboard" className="flex items-center gap-2">
           <NexaLogo className="h-7 w-7 rounded-lg bg-white" />
-          <span className="font-bold">NEXA Campus</span>
+          <span className="font-bold">NEXA Campus Ecosystem</span>
         </Link>
         <div className="flex items-center gap-1">
         <NotificationBell />
@@ -118,7 +118,7 @@ export default function DashboardNav({ profile }: { profile: Profile }) {
           <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#4F8EF7] to-[#A78BFA] text-xs font-black">
             {initials}
           </span>
-          <ChevronDown className={`h-4 w-4 text-white/70 transition ${profileOpen ? 'rotate-180' : ''}`} />
+          <MoreVertical className="h-4 w-4 text-white/70" />
         </button>
         </div>
         </div>

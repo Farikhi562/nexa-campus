@@ -117,7 +117,7 @@ export default function ResultsPage() {
       const correct = answer.question?.correct_answer
       return `<h2>Soal ${index + 1}</h2><p>${answer.question?.question_text || ''}</p><p><strong>Kunci:</strong> ${correct}. ${correct ? answer.question?.options?.[correct] || '' : ''}</p><p><strong>Pembahasan:</strong> ${answer.question?.explanation || '-'}</p>`
     }).join('')
-    downloadText(`nexa-hasil-${sessionId}.doc`, `<html><body><h1>NEXA Campus - ${docTitle}</h1>${rows}</body></html>`, 'application/msword')
+    downloadText(`nexa-hasil-${sessionId}.doc`, `<html><body><h1>NEXA Campus Ecosystem - ${docTitle}</h1>${rows}</body></html>`, 'application/msword')
   }
 
   async function handleShareResult() {
@@ -134,7 +134,7 @@ export default function ResultsPage() {
 
       if (navigator.share && navigator.canShare?.({ files: [file] })) {
         await navigator.share({
-          title: 'Hasil Exam NEXA Campus',
+          title: 'Hasil Exam NEXA Campus Ecosystem',
           text: `Aku baru selesai ujian ${docTitle}! Skor: ${session.score}/100`,
           files: [file],
         })
@@ -300,7 +300,7 @@ export default function ResultsPage() {
             className="flex h-[630px] w-[1080px] flex-col justify-between rounded-[44px] bg-gradient-to-br from-blue-600 to-purple-700 p-16 text-white"
           >
             <div>
-              <p className="text-4xl font-black tracking-wide">NEXA Campus</p>
+              <p className="text-4xl font-black tracking-wide">NEXA Campus Ecosystem</p>
               <p className="mt-8 text-5xl font-black leading-tight">Aku baru selesai ujian {docTitle || 'materi kampus'}!</p>
             </div>
             <div>

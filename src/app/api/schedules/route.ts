@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient, createServiceClient } from '@/lib/supabase/server'
-import { PLAN_LIMITS } from '@/types'
-import type { Plan } from '@/types'
+import { createClient } from '@/lib/supabase/server'
+import type { Profile } from '@/types'
+import { hasProAccess } from '@/lib/plans'
 
 /**
  * GET /api/schedules
@@ -49,11 +49,11 @@ export async function POST(request: NextRequest) {
     // Check plan - schedules with Telegram reminders are Pro only
     const { data: profile } = await supabase
       .from('profiles')
-      .select('plan, telegram_chat_id')
+      .select('plan, seat_owner_id, telegram_chat_id')
       .eq('id', user.id)
       .single()
 
-    if (profile?.plan !== 'pro' && profile?.plan !== 'admin') {
+    if (!hasProAccess(profile as Pick<Profile, 'plan' | 'seat_owner_id'> | null)) {
       return NextResponse.json(
         { error: 'Jadwal dengan pengingat Telegram hanya tersedia untuk paket Pro.' },
         { status: 403 }
@@ -84,6 +84,18 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    let finalDocumentId = document_id || null
+    if (finalDocumentId) {
+      const { data: doc } = await supabase
+        .from('documents')
+        .select('id')
+        .eq('id', finalDocumentId)
+        .eq('user_id', user.id)
+        .single()
+
+      if (!doc) return NextResponse.json({ error: 'Dokumen tidak valid.' }, { status: 400 })
+    }
+
     const { data: schedule, error } = await supabase
       .from('schedules')
       .insert({
@@ -91,7 +103,7 @@ export async function POST(request: NextRequest) {
         subject_name: subject_name.trim(),
         exam_date,
         exam_time: exam_time || null,
-        document_id: document_id || null,
+        document_id: finalDocumentId,
         telegram_chat_id: finalTelegramChatId || null,
         reminder_sent_h3: false,
         reminder_sent_h1: false,
@@ -147,11 +159,34 @@ export async function PUT(request: NextRequest) {
       await request.json()
 
     const updates: Record<string, unknown> = {}
-    if (subject_name !== undefined) updates.subject_name = subject_name.trim()
-    if (exam_date !== undefined) updates.exam_date = exam_date
-    if (exam_time !== undefined) updates.exam_time = exam_time
-    if (document_id !== undefined) updates.document_id = document_id
-    if (telegram_chat_id !== undefined) updates.telegram_chat_id = telegram_chat_id
+    if (subject_name !== undefined) {
+      if (!String(subject_name).trim()) return NextResponse.json({ error: 'subject_name tidak valid.' }, { status: 400 })
+      updates.subject_name = String(subject_name).trim().slice(0, 160)
+    }
+    if (exam_date !== undefined) {
+      const nextDate = new Date(exam_date)
+      if (isNaN(nextDate.getTime())) return NextResponse.json({ error: 'Format exam_date tidak valid.' }, { status: 400 })
+      updates.exam_date = exam_date
+    }
+    if (exam_time !== undefined) updates.exam_time = exam_time || null
+    if (document_id !== undefined) {
+      if (document_id) {
+        const { data: doc } = await supabase
+          .from('documents')
+          .select('id')
+          .eq('id', document_id)
+          .eq('user_id', user.id)
+          .single()
+        if (!doc) return NextResponse.json({ error: 'Dokumen tidak valid.' }, { status: 400 })
+      }
+      updates.document_id = document_id || null
+    }
+    if (telegram_chat_id !== undefined) {
+      if (telegram_chat_id && !/^-?\d{5,20}$/.test(String(telegram_chat_id))) {
+        return NextResponse.json({ error: 'Telegram chat_id tidak valid.' }, { status: 400 })
+      }
+      updates.telegram_chat_id = telegram_chat_id || null
+    }
 
     const { data: updated, error } = await supabase
       .from('schedules')

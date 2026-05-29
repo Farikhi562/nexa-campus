@@ -1,45 +1,48 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { AlertCircle, ArrowLeft, Camera, CheckCircle2, ChevronDown, Search, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import Button from '@/components/ui/Button'
-import { AlertCircle, CheckCircle2, ArrowLeft, Camera, User, Search, X, ChevronDown } from 'lucide-react'
-import Link from 'next/link'
-import type { Profile } from '@/types'
-import { MAJOR_UNIVERSITIES, PROVINCES, MAJORS } from '@/lib/indonesia-data'
 import BadgesGrid from '@/components/BadgesGrid'
+import type { Profile } from '@/types'
+import { MAJOR_UNIVERSITIES, MAJORS, PROVINCES } from '@/lib/indonesia-data'
 
-// Combobox: search + manual input
 function UniversityCombobox({
   value,
   onChange,
 }: {
   value: string
-  onChange: (v: string) => void
+  onChange: (value: string) => void
 }) {
   const [query, setQuery] = useState(value)
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
-  const filtered = query.length >= 2
-    ? MAJOR_UNIVERSITIES.filter((u) =>
-        u.toLowerCase().includes(query.toLowerCase())
-      ).slice(0, 8)
-    : []
+  const filtered =
+    query.length >= 2
+      ? MAJOR_UNIVERSITIES.filter((university) =>
+          university.toLowerCase().includes(query.toLowerCase())
+        ).slice(0, 8)
+      : []
 
   useEffect(() => {
     setQuery(value)
   }, [value])
 
   useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
+    function handleClick(event: MouseEvent) {
+      if (ref.current && !ref.current.contains(event.target as Node)) {
         setOpen(false)
-        // If query doesn't match any option, treat as manual input
-        if (query.trim()) onChange(query.trim())
+
+        if (query.trim()) {
+          onChange(query.trim())
+        }
       }
     }
+
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
   }, [query, onChange])
@@ -47,22 +50,27 @@ function UniversityCombobox({
   return (
     <div ref={ref} className="relative">
       <div className="relative">
-        <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
+        <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
         <input
           type="text"
           value={query}
-          onChange={(e) => {
-            setQuery(e.target.value)
+          onChange={(event) => {
+            setQuery(event.target.value)
             setOpen(true)
           }}
           onFocus={() => setOpen(true)}
           placeholder="Cari atau ketik nama universitas..."
           className="w-full rounded-lg border border-slate-300 py-2.5 pl-10 pr-4 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
         />
+
         {query && (
           <button
             type="button"
-            onClick={() => { setQuery(''); onChange(''); setOpen(false) }}
+            onClick={() => {
+              setQuery('')
+              onChange('')
+              setOpen(false)
+            }}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
           >
             <X className="h-4 w-4" />
@@ -72,20 +80,21 @@ function UniversityCombobox({
 
       {open && filtered.length > 0 && (
         <div className="absolute z-50 mt-1 w-full rounded-lg border border-slate-200 bg-white shadow-lg">
-          {filtered.map((uni) => (
+          {filtered.map((university) => (
             <button
-              key={uni}
+              key={university}
               type="button"
               onMouseDown={() => {
-                onChange(uni)
-                setQuery(uni)
+                onChange(university)
+                setQuery(university)
                 setOpen(false)
               }}
-              className="flex w-full items-center px-4 py-2.5 text-left text-sm text-slate-700 hover:bg-brand-50 hover:text-brand-700 transition first:rounded-t-lg last:rounded-b-lg"
+              className="flex w-full items-center px-4 py-2.5 text-left text-sm text-slate-700 transition first:rounded-t-lg last:rounded-b-lg hover:bg-brand-50 hover:text-brand-700"
             >
-              {uni}
+              {university}
             </button>
           ))}
+
           {query.length >= 2 && (
             <button
               type="button"
@@ -93,7 +102,7 @@ function UniversityCombobox({
                 onChange(query.trim())
                 setOpen(false)
               }}
-              className="flex w-full items-center gap-2 border-t border-slate-100 px-4 py-2.5 text-left text-sm text-brand-600 font-semibold hover:bg-brand-50 transition rounded-b-lg"
+              className="flex w-full items-center gap-2 rounded-b-lg border-t border-slate-100 px-4 py-2.5 text-left text-sm font-semibold text-brand-600 transition hover:bg-brand-50"
             >
               <span>+ Gunakan &ldquo;{query}&rdquo;</span>
             </button>
@@ -109,7 +118,7 @@ function UniversityCombobox({
               onChange(query.trim())
               setOpen(false)
             }}
-            className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-brand-600 font-semibold hover:bg-brand-50 transition rounded-lg"
+            className="flex w-full items-center gap-2 rounded-lg px-4 py-3 text-left text-sm font-semibold text-brand-600 transition hover:bg-brand-50"
           >
             + Gunakan &ldquo;{query}&rdquo; sebagai universitas
           </button>
@@ -135,197 +144,226 @@ export default function EditProfilePage() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
 
-  // Photo upload state
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
   const [uploadingPhoto, setUploadingPhoto] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const loadProfile = useCallback(async () => {
-    const { data: { user } } = await supabase.auth.getUser()
+    setLoading(true)
+    setError('')
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
     if (!user) {
       router.push('/auth/login')
       return
     }
 
-    const { data: profileData } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single()
+    const response = await fetch('/api/user/profile', {
+      method: 'GET',
+      cache: 'no-store',
+    })
 
-    if (profileData) {
-      setProfile(profileData)
-      if (profileData.avatar_url) {
-        setAvatarPreview(profileData.avatar_url)
-      }
+    if (!response.ok) {
+      setError('Gagal memuat profil.')
+      setLoading(false)
+      return
     }
 
+    const profileData = (await response.json()) as Profile
+
+    setProfile(profileData)
+    setAvatarPreview(profileData.avatar_url || null)
     setLoading(false)
   }, [supabase, router])
 
-  useEffect(() => { loadProfile() }, [loadProfile])
+  useEffect(() => {
+    loadProfile()
+  }, [loadProfile])
 
-  function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
+  function handleAvatarChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
     if (!file) return
 
     if (file.size > 5 * 1024 * 1024) {
       setError('Foto maksimal 5MB.')
       return
     }
+
     if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
       setError('Format foto harus JPG, PNG, atau WebP.')
       return
     }
 
     setAvatarFile(file)
-    const url = URL.createObjectURL(file)
-    setAvatarPreview(url)
+    setAvatarPreview(URL.createObjectURL(file))
     setError('')
+    setSuccess(false)
   }
 
   async function uploadAvatar(userId: string): Promise<string | null> {
-    if (!avatarFile) return profile.avatar_url || null
+    if (!avatarFile) {
+      return profile.avatar_url || null
+    }
 
     setUploadingPhoto(true)
-    const ext = avatarFile.name.split('.').pop()
-    const path = `${userId}/avatar.${ext}`
 
-    const { error: uploadError } = await supabase.storage
-      .from('avatars')
-      .upload(path, avatarFile, { upsert: true })
+    try {
+      const ext = avatarFile.name.split('.').pop()?.toLowerCase() || 'jpg'
+      const path = `${userId}/avatar.${ext}`
 
-    if (uploadError) {
-      setError('Gagal upload foto: ' + uploadError.message)
+      const { error: uploadError } = await supabase.storage.from('avatars').upload(path, avatarFile, {
+        upsert: true,
+        contentType: avatarFile.type,
+      })
+
+      if (uploadError) {
+        throw new Error(uploadError.message)
+      }
+
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from('avatars').getPublicUrl(path)
+
+      return `${publicUrl}?t=${Date.now()}`
+    } finally {
       setUploadingPhoto(false)
-      return null
     }
-
-    const { data: { publicUrl } } = supabase.storage
-      .from('avatars')
-      .getPublicUrl(path)
-
-    setUploadingPhoto(false)
-    return publicUrl + `?t=${Date.now()}` // cache bust
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault()
+
     setError('')
+    setSuccess(false)
     setSaving(true)
 
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      setError('Sesi tidak valid')
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+
+      if (!user) {
+        throw new Error('Sesi tidak valid. Login ulang dulu.')
+      }
+
+      const avatarUrl = await uploadAvatar(user.id)
+
+      const updates: Record<string, unknown> = {
+        full_name: profile.full_name || null,
+        jurusan: profile.jurusan || null,
+        universitas: profile.universitas || null,
+        provinsi: profile.provinsi || null,
+        telegram_chat_id: profile.telegram_chat_id || null,
+        is_public_profile: Boolean(profile.is_public_profile),
+      }
+
+      if (avatarUrl) {
+        updates.avatar_url = avatarUrl
+      }
+
+      const response = await fetch('/api/user/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updates),
+      })
+
+      const data = await response.json().catch(() => ({}))
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Gagal menyimpan profil.')
+      }
+
+      const updatedProfile = data as Profile
+
+      setProfile(updatedProfile)
+      setAvatarFile(null)
+      setAvatarPreview(updatedProfile.avatar_url || null)
+      setSuccess(true)
+
+      setTimeout(() => setSuccess(false), 3000)
+    } catch (err) {
+      setError(err instanceof Error ? `Gagal menyimpan profil: ${err.message}` : 'Gagal menyimpan profil.')
+    } finally {
       setSaving(false)
-      return
     }
-
-    // Upload photo first if changed
-    const avatarUrl = await uploadAvatar(user.id)
-    if (uploadingPhoto) return // still uploading (shouldn't happen but guard)
-
-    const updates: Record<string, unknown> = {
-      full_name: profile.full_name,
-      jurusan: profile.jurusan,
-      universitas: profile.universitas,
-      provinsi: profile.provinsi,
-      telegram_chat_id: profile.telegram_chat_id,
-      is_public_profile: Boolean(profile.is_public_profile),
-      updated_at: new Date().toISOString(),
-    }
-
-    if (avatarUrl) updates.avatar_url = avatarUrl
-
-    const { error: updateError } = await supabase
-      .from('profiles')
-      .update(updates)
-      .eq('id', user.id)
-
-    setSaving(false)
-
-    if (updateError) {
-      setError('Gagal menyimpan profil: ' + updateError.message)
-      return
-    }
-
-    setSuccess(true)
-    setTimeout(() => setSuccess(false), 3000)
   }
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="flex min-h-[60vh] items-center justify-center">
         <div className="text-center">
-          <div className="w-10 h-10 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin mx-auto mb-3" />
-          <p className="text-slate-500 text-sm">Memuat profil...</p>
+          <div className="mx-auto mb-3 h-10 w-10 animate-spin rounded-full border-4 border-brand-200 border-t-brand-600" />
+          <p className="text-sm text-slate-500">Memuat profil...</p>
         </div>
       </div>
     )
   }
 
   const initials = profile.full_name
-    ? profile.full_name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
+    ? profile.full_name
+        .split(' ')
+        .map((name) => name[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2)
     : 'U'
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6 px-4 sm:px-0">
-      {/* Header */}
+    <div className="mx-auto max-w-2xl space-y-6 px-4 sm:px-0">
       <div className="flex items-center gap-4">
-        <Link href="/dashboard" className="p-2 hover:bg-slate-100 rounded-lg transition">
-          <ArrowLeft className="w-5 h-5 text-slate-600" />
+        <Link href="/dashboard" className="rounded-lg p-2 transition hover:bg-slate-100">
+          <ArrowLeft className="h-5 w-5 text-slate-600" />
         </Link>
+
         <div>
           <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">Edit Profil</h1>
-          <p className="text-slate-600 text-sm">Perbarui informasi profil kamu</p>
+          <p className="text-sm text-slate-600">Perbarui informasi profil kamu</p>
         </div>
       </div>
 
-      {/* Avatar section */}
-      <div className="bg-white rounded-xl border border-slate-200 p-5 sm:p-6">
-        <h2 className="text-base font-bold text-slate-900 mb-4">Foto Profil</h2>
-        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
-          {/* Avatar preview */}
+      <div className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6">
+        <h2 className="mb-4 text-base font-bold text-slate-900">Foto Profil</h2>
+
+        <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-start">
           <div className="relative flex-shrink-0">
-            <div className="w-24 h-24 rounded-2xl overflow-hidden bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center">
+            <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-brand-400 to-brand-600">
               {avatarPreview ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={avatarPreview}
-                  alt="Avatar"
-                  className="w-full h-full object-cover"
-                />
+                <img src={avatarPreview} alt="Avatar" className="h-full w-full object-cover" />
               ) : (
                 <span className="text-2xl font-black text-white">{initials}</span>
               )}
             </div>
+
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-brand-600 flex items-center justify-center shadow-lg border-2 border-white hover:bg-brand-700 transition"
+              className="absolute -bottom-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-brand-600 shadow-lg transition hover:bg-brand-700"
             >
-              <Camera className="w-3.5 h-3.5 text-white" />
+              <Camera className="h-3.5 w-3.5 text-white" />
             </button>
           </div>
 
-          {/* Upload info */}
           <div className="text-center sm:text-left">
-            <p className="text-sm font-semibold text-slate-700 mb-1">Upload foto profil</p>
-            <p className="text-xs text-slate-500 mb-3">JPG, PNG, atau WebP. Maks 5MB.</p>
+            <p className="mb-1 text-sm font-semibold text-slate-700">Upload foto profil</p>
+            <p className="mb-3 text-xs text-slate-500">JPG, PNG, atau WebP. Maks 5MB.</p>
+
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition"
+              className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
             >
-              <Camera className="w-4 h-4" />
+              <Camera className="h-4 w-4" />
               Pilih Foto
             </button>
-            {avatarFile && (
-              <p className="mt-2 text-xs text-emerald-600 font-medium">
-                ✓ {avatarFile.name} dipilih
-              </p>
-            )}
+
+            {avatarFile && <p className="mt-2 text-xs font-medium text-emerald-600">✓ {avatarFile.name} dipilih</p>}
           </div>
 
           <input
@@ -338,99 +376,86 @@ export default function EditProfilePage() {
         </div>
       </div>
 
-      {/* Info form */}
-      <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-slate-200 p-5 sm:p-6 space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-5 rounded-xl border border-slate-200 bg-white p-5 sm:p-6">
         <h2 className="text-base font-bold text-slate-900">Informasi Akademik</h2>
 
-        {/* Full Name */}
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">
-            Nama Lengkap
-          </label>
+          <label className="mb-1.5 block text-sm font-medium text-slate-700">Nama Lengkap</label>
           <input
             type="text"
             value={profile.full_name || ''}
-            onChange={(e) => setProfile({ ...profile, full_name: e.target.value })}
+            onChange={(event) => setProfile({ ...profile, full_name: event.target.value })}
             placeholder="Nama lengkap"
-            className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
+            className="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-brand-500"
           />
         </div>
 
-        {/* Major */}
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">
-            Jurusan / Program Studi
-          </label>
+          <label className="mb-1.5 block text-sm font-medium text-slate-700">Jurusan / Program Studi</label>
           <div className="relative">
             <select
               value={profile.jurusan || ''}
-              onChange={(e) => setProfile({ ...profile, jurusan: e.target.value })}
-              className="w-full appearance-none px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm bg-white pr-10"
+              onChange={(event) => setProfile({ ...profile, jurusan: event.target.value })}
+              className="w-full appearance-none rounded-lg border border-slate-300 bg-white px-4 py-2.5 pr-10 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-brand-500"
             >
               <option value="">Pilih Jurusan</option>
               {MAJORS.map((major) => (
-                <option key={major} value={major}>{major}</option>
+                <option key={major} value={major}>
+                  {major}
+                </option>
               ))}
             </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           </div>
         </div>
 
-        {/* University — searchable combobox */}
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">
-            Universitas / Perguruan Tinggi
-          </label>
+          <label className="mb-1.5 block text-sm font-medium text-slate-700">Universitas / Perguruan Tinggi</label>
           <UniversityCombobox
             value={profile.universitas || ''}
-            onChange={(v) => setProfile({ ...profile, universitas: v })}
+            onChange={(value) => setProfile({ ...profile, universitas: value })}
           />
           <p className="mt-1 text-xs text-slate-400">
             Ketik min. 2 huruf untuk cari. Tidak ada? Ketik nama universitas kamu lalu tekan &ldquo;Gunakan&rdquo;.
           </p>
         </div>
 
-        {/* Province */}
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">
-            Provinsi
-          </label>
+          <label className="mb-1.5 block text-sm font-medium text-slate-700">Provinsi</label>
           <div className="relative">
             <select
               value={profile.provinsi || ''}
-              onChange={(e) => setProfile({ ...profile, provinsi: e.target.value })}
-              className="w-full appearance-none px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm bg-white pr-10"
+              onChange={(event) => setProfile({ ...profile, provinsi: event.target.value })}
+              className="w-full appearance-none rounded-lg border border-slate-300 bg-white px-4 py-2.5 pr-10 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-brand-500"
             >
               <option value="">Pilih Provinsi</option>
-              {PROVINCES.map((prov) => (
-                <option key={prov} value={prov}>{prov}</option>
+              {PROVINCES.map((province) => (
+                <option key={province} value={province}>
+                  {province}
+                </option>
               ))}
             </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">
-            Telegram chat_id
-          </label>
+          <label className="mb-1.5 block text-sm font-medium text-slate-700">Telegram chat_id</label>
           <input
             type="text"
             value={profile.telegram_chat_id || ''}
-            onChange={(e) => setProfile({ ...profile, telegram_chat_id: e.target.value })}
+            onChange={(event) => setProfile({ ...profile, telegram_chat_id: event.target.value })}
             placeholder="Chat /start ke @NEXATchBot lalu isi chat_id"
-            className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
+            className="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-brand-500"
           />
-          <p className="mt-1 text-xs text-slate-400">
-            Dipakai untuk reminder Telegram otomatis via @NEXATchBot.
-          </p>
+          <p className="mt-1 text-xs text-slate-400">Dipakai untuk reminder Telegram otomatis via @NEXATchBot.</p>
         </div>
 
         <label className="flex items-start gap-3 rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
           <input
             type="checkbox"
             checked={Boolean(profile.is_public_profile)}
-            onChange={(e) => setProfile({ ...profile, is_public_profile: e.target.checked })}
+            onChange={(event) => setProfile({ ...profile, is_public_profile: event.target.checked })}
             className="mt-1"
           />
           <span>
@@ -439,31 +464,25 @@ export default function EditProfilePage() {
           </span>
         </label>
 
-        {/* Error */}
         {error && (
-          <div className="flex items-center gap-3 p-3 bg-red-50 border border-red-200 rounded-lg">
-            <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0" />
+          <div className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-3">
+            <AlertCircle className="h-4 w-4 flex-shrink-0 text-red-600" />
             <p className="text-sm text-red-700">{error}</p>
           </div>
         )}
 
-        {/* Success */}
         {success && (
-          <div className="flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-            <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />
+          <div className="flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 p-3">
+            <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-green-600" />
             <p className="text-sm text-green-700">Profil berhasil diperbarui!</p>
           </div>
         )}
 
-        {/* Submit */}
-        <div className="flex flex-col sm:flex-row gap-3 pt-1">
-          <Button
-            type="submit"
-            disabled={saving || uploadingPhoto}
-            className="flex-1"
-          >
+        <div className="flex flex-col gap-3 pt-1 sm:flex-row">
+          <Button type="submit" disabled={saving || uploadingPhoto} className="flex-1">
             {saving || uploadingPhoto ? 'Menyimpan...' : 'Simpan Perubahan'}
           </Button>
+
           <Link href="/dashboard" className="sm:w-auto">
             <Button type="button" variant="secondary" className="w-full">
               Batal

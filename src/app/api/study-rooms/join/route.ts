@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { normalizeRoomCode, verifySecret } from '@/lib/server-security'
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,8 +12,9 @@ export async function POST(request: NextRequest) {
     }
 
     const { roomCode, password } = await request.json()
+    const normalizedRoomCode = normalizeRoomCode(roomCode)
 
-    if (!roomCode?.trim()) {
+    if (!normalizedRoomCode) {
       return NextResponse.json({ error: 'Kode room wajib diisi.' }, { status: 400 })
     }
 
@@ -22,7 +24,7 @@ export async function POST(request: NextRequest) {
     const { data: room } = await serviceClient
       .from('study_rooms')
       .select('*')
-      .eq('room_code', roomCode.toUpperCase().trim())
+      .eq('room_code', normalizedRoomCode)
       .single()
 
     if (!room) {
@@ -37,8 +39,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Room sudah kadaluarsa.' }, { status: 422 })
     }
 
-    if (room.is_private && String(room.room_password || '') !== String(password || '').trim()) {
-      return NextResponse.json({ error: 'Password room private salah.' }, { status: 403 })
+    if (room.is_private) {
+      const passwordText = String(password || '').trim()
+      const validHash = room.room_password_hash
+        ? verifySecret(passwordText, String(room.room_password_hash))
+        : false
+      const validLegacy = !room.room_password_hash && String(room.room_password || '') === passwordText
+      if (!validHash && !validLegacy) {
+        return NextResponse.json({ error: 'Password room private salah.' }, { status: 403 })
+      }
     }
 
     const { count } = await serviceClient

@@ -38,9 +38,19 @@ export async function POST(request: Request) {
   const { count } = await service.from('profiles').select('id', { count: 'exact', head: true }).eq('seat_owner_id', user.id)
   if ((count ?? 0) >= 3) return NextResponse.json({ error: 'Maksimal 3 team seat untuk paket Pro.' }, { status: 422 })
 
-  const { data: target } = await service.from('profiles').select('id, email').eq('email', normalizedEmail).single()
+  const { data: target } = await service
+    .from('profiles')
+    .select('id, email, plan, seat_owner_id')
+    .eq('email', normalizedEmail)
+    .single()
   if (!target) return NextResponse.json({ error: 'Akun dengan email itu belum ditemukan. Minta dia daftar dulu.' }, { status: 404 })
   if (target.id === user.id) return NextResponse.json({ error: 'Tidak bisa invite akun sendiri.' }, { status: 422 })
+  if (target.seat_owner_id && target.seat_owner_id !== user.id) {
+    return NextResponse.json({ error: 'Akun ini sudah menjadi seat tim lain.' }, { status: 409 })
+  }
+  if (target.plan === 'pro' || target.plan === 'admin') {
+    return NextResponse.json({ error: 'Akun Pro/Admin tidak bisa dijadikan seat.' }, { status: 409 })
+  }
 
   const { error } = await service.from('profiles').update({ seat_owner_id: user.id }).eq('id', target.id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

@@ -19,6 +19,7 @@ import Button from '@/components/ui/Button'
 import { PlanBadge } from '@/components/ui/Badge'
 import { createClient } from '@/lib/supabase/client'
 import { PLAN_LIMITS, type Plan, type Profile } from '@/types'
+import { hasProAccess } from '@/lib/plans'
 
 type Preferences = {
   emailSummary: boolean
@@ -37,6 +38,7 @@ const DEFAULT_PREFERENCES: Preferences = {
 const STORAGE_KEY = 'nexa-settings-preferences'
 const SUPPORT_EMAIL = 'nexatechlabs271@gmail.com'
 const SUPPORT_WHATSAPP = '6285697916845'
+const TELEGRAM_BOT_USERNAME = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'NEXATchBot'
 
 export default function SettingsPage() {
   const supabase = useMemo(() => createClient(), [])
@@ -92,6 +94,11 @@ export default function SettingsPage() {
   }
 
   async function saveTelegramChatId() {
+    if (!hasProAccess(profile)) {
+      alert('Koneksi Telegram otomatis khusus paket Pro.')
+      return
+    }
+
     setSavingTelegram(true)
     setTelegramSaved(false)
 
@@ -133,11 +140,12 @@ export default function SettingsPage() {
       ].join('\n')
     )
 
-    return `https://t.me/${SUPPORT_WHATSAPP}?text=${text}`
+    return `https://wa.me/${SUPPORT_WHATSAPP}?text=${text}`
   }
 
   const plan = (profile?.plan ?? 'free') as Plan
   const isPaid = plan !== 'free'
+  const isPro = hasProAccess(profile)
   const limits = PLAN_LIMITS[plan]
 
   if (loading) {
@@ -219,9 +227,9 @@ export default function SettingsPage() {
               />
               <Toggle
                 title="Telegram reminder"
-                desc={isPaid ? 'Reminder Telegram aktif via @NEXATchBot.' : 'Upgrade paket untuk memakai reminder Telegram otomatis.'}
-                checked={preferences.telegramReminder && isPaid}
-                disabled={!isPaid}
+                desc={isPro ? `Reminder Telegram aktif via @${TELEGRAM_BOT_USERNAME}.` : 'Upgrade ke Pro untuk memakai reminder Telegram otomatis.'}
+                checked={preferences.telegramReminder && isPro}
+                disabled={!isPro}
                 onChange={() => updatePreference('telegramReminder')}
               />
             </div>
@@ -241,11 +249,17 @@ export default function SettingsPage() {
 
           <Panel title="Hubungkan Telegram" icon={MessageCircle}>
             <div className="rounded-lg border border-sky-200 bg-sky-50 p-4">
-              <p className="text-sm font-black text-sky-950">Bot reminder: @NEXATchBot</p>
+              <p className="text-sm font-black text-sky-950">Bot reminder: @{TELEGRAM_BOT_USERNAME}</p>
               <p className="mt-1 text-xs leading-5 text-sky-800">
-                Buka https://t.me/NEXATchBot, chat /start, lalu masukkan chat_id kamu di sini agar reminder ujian dikirim lewat Telegram.
+                Fitur ini khusus Pro. Buka bot resmi, chat /start, lalu masukkan chat_id angka di sini agar reminder ujian dan laporan mingguan terkirim lewat Telegram.
               </p>
             </div>
+            <a href={`https://t.me/${TELEGRAM_BOT_USERNAME}?start=nexa_connect`} target="_blank" rel="noreferrer" className="mt-4 inline-flex">
+              <Button type="button" variant="secondary" disabled={!isPro}>
+                <MessageCircle className="h-4 w-4" />
+                Buka @{TELEGRAM_BOT_USERNAME}
+              </Button>
+            </a>
             <label className="mt-4 block">
               <span className="text-sm font-bold text-slate-700">Telegram chat_id</span>
               <input
@@ -253,10 +267,11 @@ export default function SettingsPage() {
                 onChange={(event) => setTelegramChatId(event.target.value)}
                 placeholder="Contoh: 123456789"
                 className="mt-2 w-full rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+                disabled={!isPro}
               />
             </label>
             <div className="mt-4 flex items-center gap-3">
-              <Button type="button" loading={savingTelegram} onClick={saveTelegramChatId}>
+              <Button type="button" loading={savingTelegram} onClick={saveTelegramChatId} disabled={!isPro}>
                 <Save className="h-4 w-4" />
                 Simpan Telegram
               </Button>
@@ -275,9 +290,9 @@ export default function SettingsPage() {
                 <div className="flex items-start gap-3">
                   <FileText className="mt-0.5 h-5 w-5 flex-shrink-0 text-brand-600" />
                   <div>
-                    <p className="text-sm font-black text-slate-950">Hapus midtransmen</p>
+                    <p className="text-sm font-black text-slate-950">Hapus Dokumen</p>
                     <p className="mt-1 text-xs leading-5 text-slate-600">
-                      Midtransmen bisa dihapus dari dashboard materi. Penghapusan midtransmen dapat ikut menghapus soal dan sesi ujian yang terkait.
+                      Dokumen bisa dihapus dari dashboard materi. Penghapusan Dokumen dapat ikut menghapus soal dan sesi ujian yang terkait.
                     </p>
                     <Link href="/dashboard" className="mt-3 inline-flex">
                       <Button type="button" variant="outline" size="sm">Buka Materi</Button>
@@ -292,14 +307,14 @@ export default function SettingsPage() {
                   <div>
                     <p className="text-sm font-black text-red-950">Request hapus akun</p>
                     <p className="mt-1 text-xs leading-5 text-red-800">
-                      Penghapusan akun diproses lewat support resmi agar kepemilikan akun bisa diverifikasi. Data profil, midtransmen, soal, sesi ujian, dan listing terkait dapat ikut dihapus.
+                      Penghapusan akun diproses lewat support resmi agar kepemilikan akun bisa diverifikasi. Data profil, Dokumen, soal, sesi ujian, dan listing terkait dapat ikut dihapus.
                     </p>
                     <div className="mt-3 flex flex-wrap gap-2">
                       <a href={supportEmailLink('delete-account')}>
                         <Button type="button" variant="danger" size="sm">Email Hapus Akun</Button>
                       </a>
                       <a href={supportWhatsappLink('delete-account')} target="_blank" rel="noreferrer">
-                        <Button type="button" variant="outline" size="sm">Telegram Support</Button>
+                        <Button type="button" variant="outline" size="sm">WhatsApp Support</Button>
                       </a>
                     </div>
                   </div>

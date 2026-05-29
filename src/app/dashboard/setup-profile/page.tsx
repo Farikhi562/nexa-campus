@@ -110,8 +110,18 @@ export default function SetupProfilePage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { router.push('/auth/login'); return }
 
-    const { data: profileData } = await supabase
-      .from('profiles').select('*').eq('id', user.id).single()
+    const response = await fetch('/api/user/profile', {
+      method: 'GET',
+      cache: 'no-store',
+    })
+
+    if (!response.ok) {
+      setError('Gagal memuat profil.')
+      setLoading(false)
+      return
+    }
+
+    const profileData = (await response.json()) as Profile
 
     if (profileData) {
       setProfile(profileData)
@@ -138,6 +148,10 @@ export default function SetupProfilePage() {
     const file = e.target.files?.[0]
     if (!file) return
     if (file.size > 5 * 1024 * 1024) { setError('Foto maksimal 5MB.'); return }
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      setError('Format foto harus JPG, PNG, atau WebP.')
+      return
+    }
     setAvatarFile(file)
     setAvatarPreview(URL.createObjectURL(file))
     setError('')
@@ -160,14 +174,23 @@ export default function SetupProfilePage() {
     // Upload avatar if provided
     let avatarUrl = profile.avatar_url || null
     if (avatarFile) {
-      const ext = avatarFile.name.split('.').pop()
+      const ext = avatarFile.name.split('.').pop()?.toLowerCase() || 'jpg'
       const path = `${user.id}/avatar.${ext}`
       const { error: upErr } = await supabase.storage
-        .from('avatars').upload(path, avatarFile, { upsert: true })
-      if (!upErr) {
-        const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
-        avatarUrl = publicUrl + `?t=${Date.now()}`
+        .from('avatars')
+        .upload(path, avatarFile, {
+          upsert: true,
+          contentType: avatarFile.type,
+        })
+
+      if (upErr) {
+        setError('Gagal upload foto: ' + upErr.message)
+        setSaving(false)
+        return
       }
+
+      const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
+      avatarUrl = publicUrl + `?t=${Date.now()}`
     }
 
     const body: Record<string, unknown> = {

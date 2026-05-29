@@ -53,7 +53,7 @@ export default function UploadPage() {
   async function handleUpload() {
     if (!file || !title.trim()) return
     if (!policyAccepted) {
-      setError('Centang konfirmasi bahwa dokumen tidak berisi data sensitif atau konten terlarang.')
+      setError('Centang konfirmasi bahwa Dokumen tidak berisi data sensitif atau konten terlarang.')
       return
     }
 
@@ -106,8 +106,8 @@ export default function UploadPage() {
 
       if (!res.ok || result.error) {
         setErrorKind('ai')
-        setError(result.error || 'Gagal memproses dokumen.')
-        await logClientError('ai_processing', result.error || 'Gagal memproses dokumen.')
+        setError(result.error || 'Gagal memproses Dokumen.')
+        await logClientError('ai_processing', result.error || 'Gagal memproses Dokumen.')
         setStage('error')
 
         return
@@ -243,7 +243,7 @@ export default function UploadPage() {
                         onChange={(event) => setPolicyAccepted(event.target.checked)}
                         className="mt-1"
                       />
-                      Saya memastikan dokumen ini aman untuk diproses dan tidak berisi data sensitif atau konten terlarang.
+                      Saya memastikan Dokumen ini aman untuk diproses dan tidak berisi data sensitif atau konten terlarang.
                     </label>
                   </div>
                 </div>
@@ -317,7 +317,7 @@ export default function UploadPage() {
               <li>Dokumen dengan teks yang jelas menghasilkan ekstrasi lebih akurat.</li>
               <li>Soal pilihan ganda dengan format A/B/C/D paling mudah diproses AI.</li>
               <li>Hindari PDF hasil scan kamera yang buram atau miring.</li>
-              <li>Jika hasil kurang akurat, coba dokumen yang kualitas cetakannya lebih baik.</li>
+              <li>Jika hasil kurang akurat, coba Dokumen yang kualitas cetakannya lebih baik.</li>
             </ul>
           </div>
         </div>

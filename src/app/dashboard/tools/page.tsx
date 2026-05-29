@@ -80,7 +80,7 @@ const TOOLS: Tool[] = [
   {
     id: 'scholarship-checker',
     name: 'Cek Beasiswa',
-    desc: 'Checklist peluang, dokumen, timeline, dan strategi apply.',
+    desc: 'Checklist peluang, Dokumen, timeline, dan strategi apply.',
     icon: GraduationCap,
     category: 'Karier',
     color: 'text-amber-700',
@@ -190,12 +190,12 @@ const TOOLS: Tool[] = [
   {
     id: 'pdf-flashcard-generator',
     name: 'Flashcard Generator dari PDF',
-    desc: 'Buat pasangan kartu tanya-jawab dari isi dokumen atau catatan.',
+    desc: 'Buat pasangan kartu tanya-jawab dari isi Dokumen atau catatan.',
     icon: BrainCircuit,
     category: 'Belajar',
     color: 'text-purple-600',
     bgColor: 'bg-purple-50 border-purple-100',
-    placeholder: 'Tempel poin materi dari PDF atau dokumen detail, lalu minta 20 flashcard.',
+    placeholder: 'Tempel poin materi dari PDF atau Dokumen detail, lalu minta 20 flashcard.',
   },
   {
     id: 'campus-event-aggregator',

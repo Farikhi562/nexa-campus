@@ -14,11 +14,22 @@ export async function POST(request: Request, { params }: { params: { documentId:
 
   const { data: profile } = await service.from('profiles').select('plan, seat_owner_id').eq('id', user.id).single()
   if (!hasProAccess(profile as Pick<Profile, 'plan' | 'seat_owner_id'> | null)) {
-    return NextResponse.json({ error: 'Share dokumen ke tim khusus Pro.' }, { status: 403 })
+    return NextResponse.json({ error: 'Share Dokumen ke tim khusus Pro.' }, { status: 403 })
   }
 
   const { data: doc } = await service.from('documents').select('id, user_id').eq('id', params.documentId).single()
   if (!doc || doc.user_id !== user.id) return NextResponse.json({ error: 'Dokumen tidak ditemukan.' }, { status: 404 })
+
+  const { data: membership } = await service
+    .from('team_members')
+    .select('id')
+    .eq('team_id', teamId)
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  if (!membership) {
+    return NextResponse.json({ error: 'Kamu bukan anggota tim ini.' }, { status: 403 })
+  }
 
   if (revoke) {
     await service.from('team_documents').delete().eq('team_id', teamId).eq('document_id', doc.id).eq('shared_by', user.id)

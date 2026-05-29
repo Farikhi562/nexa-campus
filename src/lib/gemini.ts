@@ -2,7 +2,7 @@ import 'server-only'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import type { ExtractedQuestion } from '@/types'
 
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-1.5-flash'
+const GEMINI_MODEL = 'gemini-1.5-flash'
 
 function model(systemInstruction?: string) {
   if (!process.env.GEMINI_API_KEY) {
@@ -73,7 +73,7 @@ function normalizeQuestions(text: string): ExtractedQuestion[] {
   return out
 }
 
-const QUESTION_SYSTEM_PROMPT = `Kamu adalah AI NEXA Campus untuk membaca materi kuliah dan membuat soal pilihan ganda.
+const QUESTION_SYSTEM_PROMPT = `Kamu adalah AI NEXA Campus Ecosystem untuk membaca materi kuliah dan membuat soal pilihan ganda.
 Aturan:
 - Baca teks atau PDF yang diberikan.
 - Ekstrak soal pilihan ganda A/B/C/D jika sudah ada.

@@ -1,15 +1,18 @@
 import type { Metadata } from 'next'
 import NexaChatbot from '@/components/NexaChatbot'
+import { BRAND } from '@/lib/brand'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'NEXA Campus Ecosystem - Platform Mahasiswa Terpadu',
+  title: `${BRAND.productName} - Platform Mahasiswa Terpadu`,
   description:
-    'Ekosistem mahasiswa untuk mock exam AI, study room, jadwal ujian, reminder akademik, dan marketplace barang serta jasa kampus.',
+    `${BRAND.productName} by ${BRAND.companyName}: ekosistem mahasiswa dengan mock exam AI ${BRAND.aiProvider}, study room, jadwal ujian, reminder akademik, marketplace kampus, dan pembayaran ${BRAND.paymentProvider}.`,
   keywords: ['mock exam', 'CBT', 'mahasiswa', 'marketplace kampus', 'ujian', 'AI', 'belajar'],
+  metadataBase: new URL(BRAND.siteUrl),
   openGraph: {
-    title: 'NEXA Campus Ecosystem',
-    description: 'Platform belajar, komunitas, dan marketplace untuk mahasiswa Indonesia',
+    title: BRAND.productName,
+    description: `Produk resmi ${BRAND.companyName} untuk belajar, komunitas, dan marketplace mahasiswa Indonesia.`,
+    url: BRAND.siteUrl,
     type: 'website',
   },
 }

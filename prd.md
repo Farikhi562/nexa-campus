@@ -1,5 +1,12 @@
-# DIKTAT.AI
+# NEXA Campus Ecosystem
 ## *AI-Powered Mock Exam & CBT Simulator untuk Mahasiswa*
+
+**Usaha:** NEXA Tech Labs  
+**Founder & CEO:** Muhamad Fauzan Al Farikhi  
+**Produk:** NEXA Campus Ecosystem  
+**Domain:** campus.nexatechlabs.my.id  
+**Pembayaran:** Midtrans  
+**LLM AI:** Google Gemini
 
 ### Proposal Bisnis — Business Plan Competition "Zero To Cash" 2026
 **HIMAMEN — Himpunan Mahasiswa Manajemen**
@@ -21,7 +28,7 @@
 
 ## 1. RINGKASAN EKSEKUTIF
 
-**Diktat.AI** adalah platform perangkat lunak berbasis langganan (*Software as a Service*/SaaS) yang mengubah diktat dan kumpulan soal ujian konvensional menjadi simulasi ujian berbasis komputer (*Computer-Based Test*/CBT) yang cerdas dan interaktif. Platform ini dirancang khusus untuk mahasiswa Indonesia yang membutuhkan cara belajar lebih efektif, terukur, dan berbasis data menjelang ujian tengah semester maupun akhir semester.
+**NEXA Campus Ecosystem** adalah platform perangkat lunak berbasis langganan (*Software as a Service*/SaaS) yang mengubah diktat dan kumpulan soal ujian konvensional menjadi simulasi ujian berbasis komputer (*Computer-Based Test*/CBT) yang cerdas dan interaktif. Platform ini dirancang khusus untuk mahasiswa Indonesia yang membutuhkan cara belajar lebih efektif, terukur, dan berbasis data menjelang ujian tengah semester maupun akhir semester.
 
 **Permasalahan yang Diselesaikan**
 
@@ -29,15 +36,15 @@ Mahasiswa Indonesia menghadapi tiga permasalahan mendasar dalam persiapan ujian:
 
 **Solusi Digital**
 
-Diktat.AI memungkinkan pengguna mengunggah dokumen diktat atau kumpulan soal ujian lama dalam format PDF. Sistem secara otomatis mengekstrak teks menggunakan teknologi *Optical Character Recognition* (OCR), kemudian kecerdasan buatan (*Artificial Intelligence*/AI) mengurai dan menyusun soal-soal tersebut menjadi sesi mock exam yang siap dikerjakan langsung di *browser*. Seluruh proses berlangsung dalam waktu kurang dari dua menit.
+NEXA Campus Ecosystem memungkinkan pengguna mengunggah dokumen diktat atau kumpulan soal ujian lama dalam format PDF. Sistem secara otomatis mengekstrak teks menggunakan teknologi *Optical Character Recognition* (OCR), kemudian kecerdasan buatan (*Artificial Intelligence*/AI) mengurai dan menyusun soal-soal tersebut menjadi sesi mock exam yang siap dikerjakan langsung di *browser*. Seluruh proses berlangsung dalam waktu kurang dari dua menit.
 
 **Keunggulan Teknologi**
 
-Platform dibangun menggunakan Next.js (App Router), Tailwind CSS, dan Supabase sebagai infrastruktur *backend* dan basis data. Integrasi API OCR dan *Large Language Model* (LLM) memungkinkan pemrosesan dokumen secara otomatis dengan akurasi tinggi. Tiga fitur diferensiasi utama yang membedakan Diktat.AI dari kompetitor adalah: (1) **Telegram Reminder Bot** yang mengirimkan pengingat ujian dan tautan langsung ke sesi CBT secara otomatis; (2) **Ekspor Hasil Ujian ke PDF** sebagai laporan belajar mandiri yang dapat dibagikan; dan (3) **Study Room & Leaderboard** yang memungkinkan mahasiswa bersaing dengan rekan sekelas secara daring.
+Platform dibangun menggunakan Next.js (App Router), Tailwind CSS, dan Supabase sebagai infrastruktur *backend* dan basis data. Integrasi API OCR dan *Large Language Model* (LLM) memungkinkan pemrosesan dokumen secara otomatis dengan akurasi tinggi. Tiga fitur diferensiasi utama yang membedakan NEXA Campus Ecosystem dari kompetitor adalah: (1) **Telegram Reminder Bot** yang mengirimkan pengingat ujian dan tautan langsung ke sesi CBT secara otomatis; (2) **Ekspor Hasil Ujian ke PDF** sebagai laporan belajar mandiri yang dapat dibagikan; dan (3) **Study Room & Leaderboard** yang memungkinkan mahasiswa bersaing dengan rekan sekelas secara daring.
 
 **Potensi Keuntungan**
 
-Dengan modal awal sebesar Rp500.000 dan tiga tingkatan paket langganan (Gratis, Basic Rp19.000/bulan, Pro Rp39.000/bulan), Diktat.AI memproyeksikan pencapaian *Break Even Point* (BEP) dalam 14 hari fase penjualan pertama melalui akuisisi 20–35 pengguna berbayar. Dalam tiga bulan pertama, platform menargetkan 200 pengguna aktif dengan potensi pendapatan bulanan sebesar Rp3.000.000–Rp5.000.000.
+Dengan modal awal sebesar Rp500.000 dan tiga tingkatan paket langganan (Gratis, Basic Rp19.000/bulan, Pro Rp39.000/bulan), NEXA Campus Ecosystem memproyeksikan pencapaian *Break Even Point* (BEP) dalam 14 hari fase penjualan pertama melalui akuisisi 20–35 pengguna berbayar. Dalam tiga bulan pertama, platform menargetkan 200 pengguna aktif dengan potensi pendapatan bulanan sebesar Rp3.000.000–Rp5.000.000.
 
 ---
 
@@ -53,7 +60,7 @@ Kesenjangan ini menciptakan peluang bisnis yang nyata: sebuah platform yang mamp
 
 ### 2.2 Deskripsi Produk
 
-Diktat.AI adalah *web application* yang dapat diakses melalui *browser* di perangkat apa pun tanpa perlu mengunduh aplikasi tambahan. Alur penggunaan inti adalah sebagai berikut:
+NEXA Campus Ecosystem adalah *web application* yang dapat diakses melalui *browser* di perangkat apa pun tanpa perlu mengunduh aplikasi tambahan. Alur penggunaan inti adalah sebagai berikut:
 
 1. Pengguna mendaftar dan masuk ke platform menggunakan akun Google atau email.
 2. Pengguna mengunggah dokumen diktat atau kumpulan soal dalam format PDF (maksimal 10 MB).
@@ -105,7 +112,7 @@ Penetapan harga didasarkan pada analisis perilaku konsumen mahasiswa Indonesia. 
 **Ancaman (*Threats*):**
 - Risiko pengguna menggunakan layanan AI generik (ChatGPT, Gemini) sebagai alternatif untuk membuat soal latihan secara manual.
 - Potensi pelanggaran hak cipta jika pengguna mengunggah materi yang dilindungi tanpa izin. Hal ini diatasi melalui klausul tanggung jawab pengguna dalam *Terms of Service*.
-- Fluktuasi biaya API pihak ketiga (OpenAI, OCR) yang dapat memengaruhi struktur biaya operasional.
+- Fluktuasi biaya API pihak ketiga (Google Gemini, OCR) yang dapat memengaruhi struktur biaya operasional.
 
 ### 2.6 Target Operasional
 
@@ -119,7 +126,7 @@ Penetapan harga didasarkan pada analisis perilaku konsumen mahasiswa Indonesia. 
 
 ### 3.1 Filosofi Tim
 
-Diktat.AI dioperasikan dengan prinsip tim ramping (*lean team*) yang memaksimalkan output dengan sumber daya minimal. Setiap anggota tim memiliki tanggung jawab ganda yang mencakup fungsi teknis dan non-teknis, sesuai dengan kebutuhan tahap awal *startup*.
+NEXA Campus Ecosystem dioperasikan dengan prinsip tim ramping (*lean team*) yang memaksimalkan output dengan sumber daya minimal. Setiap anggota tim memiliki tanggung jawab ganda yang mencakup fungsi teknis dan non-teknis, sesuai dengan kebutuhan tahap awal *startup*.
 
 ### 3.2 Kebutuhan Sumber Daya Manusia
 
@@ -158,13 +165,13 @@ Marketing Mgr]    & Content Creator] Finance Officer]
 
 ### 4.1 Infrastruktur Teknis
 
-Seluruh infrastruktur Diktat.AI dibangun di atas layanan *cloud* berbasis *free tier* untuk meminimalkan biaya operasional pada tahap awal:
+Seluruh infrastruktur NEXA Campus Ecosystem dibangun di atas layanan *cloud* berbasis *free tier* untuk meminimalkan biaya operasional pada tahap awal:
 
 - **Komputasi & Hosting:** Vercel (*free tier*) — *zero-configuration deployment* untuk aplikasi Next.js dengan waktu respons global yang cepat.
 - **Basis Data & Autentikasi:** Supabase (*free tier*) — PostgreSQL terkelola dengan sistem autentikasi bawaan, penyimpanan *file*, dan kemampuan *real-time*.
 - **OCR:** OCR.space API (*free tier*: 500 halaman/bulan) — ekstraksi teks dari dokumen PDF dan gambar.
-- **AI/LLM:** OpenAI GPT-4o-mini API — model yang paling efisien secara biaya dengan akurasi tinggi untuk tugas penguraian teks terstruktur.
-- **Pembayaran:** DOKU payment flow — *payment gateway* Indonesia untuk transfer bank, dompet digital, virtual account, dan kartu sesuai konfigurasi merchant.
+- **AI/LLM:** Google Gemini 1.5 Flash API — model yang paling efisien secara biaya dengan akurasi tinggi untuk tugas penguraian teks terstruktur.
+- **Pembayaran:** Midtrans payment flow — *payment gateway* Indonesia untuk transfer bank, dompet digital, virtual account, dan kartu sesuai konfigurasi merchant.
 - **Notifikasi Telegram:** Twilio Telegram API (*free trial*) atau Telegram Bot API (gratis) untuk fitur pengingat otomatis.
 
 ### 4.2 Alur Kerja Sistem
@@ -178,7 +185,7 @@ Pengguna mengunggah file PDF melalui antarmuka *drag-and-drop* di *dashboard*. F
 Server memanggil OCR.space API dengan file PDF yang telah diunggah. API mengembalikan teks mentah (*raw text*) dari seluruh halaman dokumen. Teks ini kemudian dibersihkan dari karakter tidak relevan dan disiapkan untuk tahap berikutnya.
 
 **Tahap 3 — Penguraian Soal dengan AI**
-Teks hasil OCR dikirimkan ke OpenAI GPT-4o-mini API dengan *prompt* yang didesain secara khusus untuk mengidentifikasi dan mengekstrak soal pilihan ganda beserta pilihan jawaban dan kunci jawaban. *Output* dikembalikan dalam format JSON terstruktur dan disimpan ke tabel `questions` di Supabase.
+Teks hasil OCR dikirimkan ke Google Gemini 1.5 Flash API dengan *prompt* yang didesain secara khusus untuk mengidentifikasi dan mengekstrak soal pilihan ganda beserta pilihan jawaban dan kunci jawaban. *Output* dikembalikan dalam format JSON terstruktur dan disimpan ke tabel `questions` di Supabase.
 
 **Tahap 4 — Antarmuka Mock Exam**
 Pengguna memulai sesi ujian. Sistem mengambil soal-soal dari basis data dan menampilkannya satu per satu dengan antarmuka CBT: nomor soal, teks pertanyaan, empat pilihan jawaban, tombol navigasi, dan *countdown timer*. Jawaban pengguna disimpan secara sementara di *client state*.
@@ -197,7 +204,7 @@ Setelah pengguna menekan tombol "Selesai" atau waktu habis, jawaban dikirimkan k
                 ↓
         [OCR.space API] → Teks Mentah
                 ↓
-        [OpenAI GPT-4o-mini] → JSON Soal Terstruktur
+        [Google Gemini 1.5 Flash] → JSON Soal Terstruktur
                 ↓
         [Supabase DB: tabel questions]
                 ↓
@@ -244,13 +251,13 @@ Target utama adalah **Segmen A** untuk akuisisi pengguna berbayar jangka panjang
 
 **Positioning**
 
-Diktat.AI diposisikan sebagai: **"Diktat kamu, ujian kamu — diubah menjadi pengalaman belajar yang cerdas dalam dua menit."** Positioning ini menekankan pada personalisasi (materi berasal dari dokumen pengguna sendiri), kecepatan (proses otomatis kurang dari dua menit), dan kecerdasan (berbasis AI, bukan sekadar *flashcard* manual).
+NEXA Campus Ecosystem diposisikan sebagai: **"Diktat kamu, ujian kamu — diubah menjadi pengalaman belajar yang cerdas dalam dua menit."** Positioning ini menekankan pada personalisasi (materi berasal dari dokumen pengguna sendiri), kecepatan (proses otomatis kurang dari dua menit), dan kecerdasan (berbasis AI, bukan sekadar *flashcard* manual).
 
 ### 5.2 Bauran Pemasaran 4P
 
 **Produk (*Product*)**
 
-Diktat.AI menawarkan tiga lapisan nilai: (1) fungsional — mengerjakan *mock exam* dari materi sendiri; (2) emosional — rasa percaya diri dan kesiapan menghadapi ujian; dan (3) sosial — kompetisi sehat dengan teman melalui *Study Room*. Paket *freemium* memungkinkan pengguna merasakan nilai inti sebelum diminta berkomitmen secara finansial.
+NEXA Campus Ecosystem menawarkan tiga lapisan nilai: (1) fungsional — mengerjakan *mock exam* dari materi sendiri; (2) emosional — rasa percaya diri dan kesiapan menghadapi ujian; dan (3) sosial — kompetisi sehat dengan teman melalui *Study Room*. Paket *freemium* memungkinkan pengguna merasakan nilai inti sebelum diminta berkomitmen secara finansial.
 
 **Harga (*Price*)**
 
@@ -293,14 +300,14 @@ Hari 14    : Penutupan dengan pengumuman hasil leaderboard pengguna paling aktif
 
 | Komponen Biaya | Estimasi | Keterangan |
 |---|---|---|
-| OpenAI GPT-4o-mini API | Rp75.000 | ~500.000 token, cukup untuk memproses 50–100 dokumen selama fase MVP |
+| Google Gemini 1.5 Flash API | Rp75.000 | ~500.000 token, cukup untuk memproses 50–100 dokumen selama fase MVP |
 | Nama Domain (.id atau .site) | Rp150.000 | Pembelian domain satu tahun untuk membangun kredibilitas merek |
 | Iklan Instagram/TikTok | Rp100.000 | Kampanye berbayar bertarget selama 7 hari pertama peluncuran |
 | OCR.space API | Rp0 | *Free tier*: 500 halaman per bulan, cukup untuk fase MVP |
 | Supabase (DB + Storage) | Rp0 | *Free tier*: 500 MB database, 1 GB penyimpanan |
 | Vercel (Hosting) | Rp0 | *Free Hobby Plan* untuk Next.js |
 | Twilio Telegram / Telegram Bot | Rp0 | *Free trial* Twilio atau Telegram Bot API gratis |
-| DOKU *Payment Gateway* | Rp0 | Biaya dipotong dari setiap transaksi sesuai metode pembayaran aktif |
+| Midtrans *Payment Gateway* | Rp0 | Biaya dipotong dari setiap transaksi sesuai metode pembayaran aktif |
 | Dana Cadangan | Rp175.000 | Untuk *overage* API atau kebutuhan tak terduga |
 | **Total** | **Rp500.000** | |
 
@@ -318,7 +325,7 @@ BEP dihitung berdasarkan total modal awal yang harus dikembalikan dari pendapata
 | **Realistis** | **15** | **10** | **Rp475.000** | **Mendekati BEP** |
 | **Optimistis** | **20** | **10** | **Rp550.000** | **BEP Tercapai ✓** |
 
-Dengan asumsi biaya layanan DOKU setara 2,9% per transaksi, BEP optimistis bersih adalah:
+Dengan asumsi biaya layanan Midtrans setara 2,9% per transaksi, BEP optimistis bersih adalah:
 - Rp550.000 × (1 − 0,029) = **Rp534.045** — BEP tercapai dengan surplus Rp34.045.
 
 **Target pengguna minimum untuk BEP: 30 pengguna berbayar (kombinasi Basic dan Pro).**
@@ -334,7 +341,7 @@ Angka ini realistis mengingat jaringan mahasiswa yang dapat diakses langsung ole
 | Paket Pro | Rp250.000 | Rp500.000 | Rp750.000 |
 | **Total Pendapatan** | **Rp475.000** | **Rp950.000** | **Rp1.500.000** |
 | **Biaya Operasional** | | | |
-| OpenAI API | Rp75.000 | Rp150.000 | Rp200.000 |
+| Gemini API | Rp75.000 | Rp150.000 | Rp200.000 |
 | Iklan Digital | Rp100.000 | Rp100.000 | Rp150.000 |
 | Biaya *Payment Gateway* (2,9%) | Rp13.775 | Rp27.550 | Rp43.500 |
 | Biaya Domain (amortisasi) | Rp12.500 | Rp12.500 | Rp12.500 |
@@ -347,7 +354,7 @@ Angka ini realistis mengingat jaringan mahasiswa yang dapat diakses langsung ole
 
 Biaya variabel utama per dokumen yang diproses adalah biaya API:
 - OCR: Rp0 (dalam batas *free tier*)
-- OpenAI GPT-4o-mini: ~Rp750 per dokumen (estimasi 5.000 token × $0,15/1M token)
+- Google Gemini 1.5 Flash: ~Rp750 per dokumen (estimasi 5.000 token × $0,15/1M token)
 
 HPP per pengguna Basic: Rp750 (biaya API) + Rp435 (*payment fee* 2,9%) = **Rp1.185**
 Margin kotor per pengguna Basic: Rp19.000 - Rp1.185 = **Rp17.815 (93,8%)**
@@ -380,7 +387,7 @@ Siklus akademis yang berulang (UTS dan UAS setiap semester) secara alami mencipt
 
 ### 7.4 Potensi Pendapatan Jangka Menengah
 
-Dengan asumsi pertumbuhan pengguna berbayar sebesar 50% per bulan selama enam bulan pertama dan tingkat *churn* di bawah 20%, Diktat.AI memproyeksikan:
+Dengan asumsi pertumbuhan pengguna berbayar sebesar 50% per bulan selama enam bulan pertama dan tingkat *churn* di bawah 20%, NEXA Campus Ecosystem memproyeksikan:
 
 - **Bulan 6 (Desember 2026):** ~150 pengguna berbayar aktif, pendapatan bulanan Rp3.000.000–Rp3.750.000.
 - **Tahun 1 (Juni 2027):** 500+ pengguna berbayar aktif, pendapatan bulanan Rp7.500.000–Rp12.500.000, dengan potensi profitabilitas penuh setelah overhead tim mulai ditanggung dari pendapatan operasional.
@@ -391,7 +398,7 @@ Dengan asumsi pertumbuhan pengguna berbayar sebesar 50% per bulan selama enam bu
 
 ### 8.1 Kesimpulan
 
-Diktat.AI hadir sebagai solusi konkret atas permasalahan nyata yang dihadapi mahasiswa Indonesia setiap semester: ketidaksiapan menghadapi ujian akibat keterbatasan akses terhadap simulasi yang relevan dan *feedback* yang bermakna. Dengan memanfaatkan teknologi OCR dan kecerdasan buatan, platform ini mengotomatisasi proses yang selama ini dilakukan secara manual dan tidak efisien.
+NEXA Campus Ecosystem hadir sebagai solusi konkret atas permasalahan nyata yang dihadapi mahasiswa Indonesia setiap semester: ketidaksiapan menghadapi ujian akibat keterbatasan akses terhadap simulasi yang relevan dan *feedback* yang bermakna. Dengan memanfaatkan teknologi OCR dan kecerdasan buatan, platform ini mengotomatisasi proses yang selama ini dilakukan secara manual dan tidak efisien.
 
 Model bisnis *freemium* yang dipilih memungkinkan pengguna merasakan nilai produk sepenuhnya sebelum memutuskan untuk berlangganan, sehingga mengurangi hambatan adopsi awal. Tiga fitur diferensiasi utama — Telegram Reminder Bot, ekspor laporan PDF, dan Study Room — dirancang secara khusus untuk memenuhi kebiasaan dan kebutuhan spesifik mahasiswa Indonesia, bukan sekadar mengadaptasi solusi dari pasar luar negeri.
 
@@ -399,9 +406,9 @@ Dari sisi finansial, model SaaS dengan biaya marginal mendekati nol dan margin k
 
 ### 8.2 Saran Pengembangan
 
-Keberhasilan jangka panjang Diktat.AI bergantung pada dua faktor kritis yang perlu dijaga konsistensinya: kualitas pemrosesan dokumen (akurasi OCR dan penguraian soal oleh AI) dan kecepatan iterasi produk berdasarkan umpan balik pengguna nyata. Tim disarankan untuk memprioritaskan pengumpulan data pengguna sejak hari pertama peluncuran, dan menggunakan data tersebut sebagai kompas pengambilan keputusan produk — bukan asumsi atau intuisi semata.
+Keberhasilan jangka panjang NEXA Campus Ecosystem bergantung pada dua faktor kritis yang perlu dijaga konsistensinya: kualitas pemrosesan dokumen (akurasi OCR dan penguraian soal oleh AI) dan kecepatan iterasi produk berdasarkan umpan balik pengguna nyata. Tim disarankan untuk memprioritaskan pengumpulan data pengguna sejak hari pertama peluncuran, dan menggunakan data tersebut sebagai kompas pengambilan keputusan produk — bukan asumsi atau intuisi semata.
 
-Dengan eksekusi yang disiplin, Diktat.AI memiliki potensi untuk berkembang dari sebuah proyek kompetisi menjadi platform edukasi yang memberikan dampak nyata bagi ratusan ribu mahasiswa Indonesia.
+Dengan eksekusi yang disiplin, NEXA Campus Ecosystem memiliki potensi untuk berkembang dari sebuah proyek kompetisi menjadi platform edukasi yang memberikan dampak nyata bagi ratusan ribu mahasiswa Indonesia.
 
 ---
 

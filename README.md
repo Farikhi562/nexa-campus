@@ -2,6 +2,8 @@
 
 **AI-powered campus ecosystem untuk mahasiswa Indonesia**
 
+Produk resmi **NEXA Tech Labs**. Founder & CEO: **Muhamad Fauzan Al Farikhi**. Domain produksi: **campus.nexatechlabs.my.id**.
+
 Upload diktat PDF → AI ekstrak soal → Langsung ujian. Dalam 2 menit.
 
 ---

@@ -1,9 +1,8 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { CheckCircle2, PartyPopper, Upload } from 'lucide-react'
 import Button from '@/components/ui/Button'
-import { createClient } from '@/lib/supabase/client'
 import type { Profile } from '@/types'
 
 type Step = 'welcome' | 'profile' | 'upload' | 'done'
@@ -15,7 +14,6 @@ export default function OnboardingOverlay({
   profile: Profile
   onComplete: () => void
 }) {
-  const supabase = useMemo(() => createClient(), [])
   const needsProfile = !profile.jurusan || !profile.universitas || !profile.provinsi
   const [step, setStep] = useState<Step>('welcome')
   const [saving, setSaving] = useState(false)
@@ -27,24 +25,48 @@ export default function OnboardingOverlay({
 
   async function complete() {
     setSaving(true)
-    await supabase.from('profiles').update({ onboarding_completed: true }).eq('id', profile.id)
+
+    const response = await fetch('/api/user/profile', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        onboarding_completed: true,
+      }),
+    })
+
     setSaving(false)
+
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}))
+      alert(data.error || 'Gagal menyelesaikan onboarding.')
+      return
+    }
+
     onComplete()
   }
 
   async function saveProfile() {
     setSaving(true)
-    await supabase
-      .from('profiles')
-      .update({
+
+    const response = await fetch('/api/user/profile', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
         jurusan: form.jurusan.trim(),
         universitas: form.universitas.trim(),
         provinsi: form.provinsi.trim(),
         profile_completed: true,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', profile.id)
+      }),
+    })
+
     setSaving(false)
+
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}))
+      alert(data.error || 'Gagal menyimpan profil.')
+      return
+    }
+
     setStep('upload')
   }
 
@@ -87,7 +109,9 @@ export default function OnboardingOverlay({
         {step === 'profile' && (
           <div>
             <h2 className="text-xl font-black text-slate-950">Lengkapi profil akademik</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-600">Data ini dipakai untuk personalisasi leaderboard, jadwal, dan rekomendasi kampus.</p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              Data ini dipakai untuk personalisasi leaderboard, jadwal, dan rekomendasi kampus.
+            </p>
             <div className="mt-5 grid gap-3">
               {[
                 ['jurusan', 'Jurusan / Program Studi'],
@@ -98,13 +122,23 @@ export default function OnboardingOverlay({
                   {label}
                   <input
                     value={form[key as keyof typeof form]}
-                    onChange={(event) => setForm((current) => ({ ...current, [key]: event.target.value }))}
+                    onChange={(event) =>
+                      setForm((current) => ({
+                        ...current,
+                        [key]: event.target.value,
+                      }))
+                    }
                     className="mt-1.5 w-full rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                   />
                 </label>
               ))}
             </div>
-            <Button className="mt-5" onClick={saveProfile} loading={saving} disabled={!form.jurusan || !form.universitas || !form.provinsi}>
+            <Button
+              className="mt-5"
+              onClick={saveProfile}
+              loading={saving}
+              disabled={!form.jurusan || !form.universitas || !form.provinsi}
+            >
               Simpan & Lanjut
             </Button>
           </div>
@@ -115,9 +149,9 @@ export default function OnboardingOverlay({
             <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700">
               <Upload className="h-8 w-8" />
             </div>
-            <h2 className="text-xl font-black text-slate-950">Upload dokumen pertamamu</h2>
+            <h2 className="text-xl font-black text-slate-950">Upload Dokumen pertamamu</h2>
             <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-slate-600">
-              Upload PDF materi, diktat, atau soal lama. NEXA akan OCR dokumen itu lalu membuat soal latihan yang bisa langsung dikerjakan.
+              Upload PDF materi, diktat, atau soal lama. NEXA akan OCR Dokumen itu lalu membuat soal latihan yang bisa langsung dikerjakan.
             </p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
               <Button onClick={() => window.location.assign('/dashboard/upload')}>

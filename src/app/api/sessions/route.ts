@@ -62,6 +62,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Dokumen tidak memiliki soal.' }, { status: 422 })
     }
 
+    if (studyRoomId) {
+      const { data: room } = await supabase
+        .from('room_participants')
+        .select('room_id, study_rooms(document_id, is_active, expires_at)')
+        .eq('room_id', studyRoomId)
+        .eq('user_id', user.id)
+        .single()
+
+      const roomInfo = Array.isArray(room?.study_rooms) ? room?.study_rooms[0] : room?.study_rooms
+      if (!room || !roomInfo || !roomInfo.is_active || new Date(roomInfo.expires_at) < new Date()) {
+        return NextResponse.json({ error: 'Study room tidak valid atau kamu belum bergabung.' }, { status: 403 })
+      }
+
+      if (roomInfo.document_id && roomInfo.document_id !== documentId) {
+        return NextResponse.json({ error: 'Dokumen tidak sesuai dengan study room.' }, { status: 403 })
+      }
+    }
+
     // Create exam session
     const { data: session, error: sessionError } = await supabase
       .from('exam_sessions')

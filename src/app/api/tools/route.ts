@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { validateAiUsage } from '@/lib/policy'
 import { geminiChat } from '@/lib/gemini'
 import { canUseBasicTool } from '@/lib/plans'
+import { checkRateLimit } from '@/lib/server-security'
 import type { Profile } from '@/types'
 
 export const dynamic = 'force-dynamic'
@@ -10,7 +11,7 @@ export const dynamic = 'force-dynamic'
 const TOOL_SYSTEM_PROMPTS: Record<string, string> = {
   'ipk-calculator': 'Kamu adalah kalkulator IPK mahasiswa Indonesia. Hitung IPK dari nilai A=4, AB=3.5, B=3, BC=2.5, C=2, D=1, E=0 dan SKS.',
   'citation-generator': 'Kamu adalah ahli sitasi akademik. Buat sitasi APA 7, MLA, Harvard, Chicago, atau format yang diminta.',
-  'scholarship-checker': 'Kamu adalah mentor beasiswa mahasiswa Indonesia. Berdasarkan data user, buat daftar peluang yang masuk akal, checklist dokumen, timeline, strategi essay, dan cara verifikasi info resmi. Jangan mengarang deadline spesifik jika tidak diberi data.',
+  'scholarship-checker': 'Kamu adalah mentor beasiswa mahasiswa Indonesia. Berdasarkan data user, buat daftar peluang yang masuk akal, checklist Dokumen, timeline, strategi essay, dan cara verifikasi info resmi. Jangan mengarang deadline spesifik jika tidak diberi data.',
   'career-assistant': 'Kamu adalah career assistant mahasiswa. Bantu review CV, cover letter, skill gap, portfolio, internship, roadmap karier, dan simulasi interview.',
   'academic-habit-tracker': 'Kamu adalah coach habit belajar. Analisis kebiasaan, prokrastinasi, beban kuliah, dan buat tracker akademik yang realistis.',
   'pomodoro-timer': 'Kamu adalah coach produktivitas belajar. Buat jadwal Pomodoro realistis, anti distraksi, dan prioritas sesi belajar.',
@@ -21,7 +22,7 @@ const TOOL_SYSTEM_PROMPTS: Record<string, string> = {
   'simple-plagiarism-checker': 'Kamu adalah reviewer integritas akademik. Identifikasi risiko kemiripan, klaim tanpa sitasi, bagian terlalu dekat dengan sumber, dan beri saran parafrase etis. Jangan mengklaim skor plagiarisme resmi.',
   'academic-translator': 'Kamu adalah translator akademik EN-ID dan ID-EN. Terjemahkan dengan gaya formal, jelas, dan natural untuk konteks kampus.',
   'mind-map-generator': 'Kamu adalah pembuat mind map belajar. Ubah materi menjadi struktur hirarkis visual berbasis teks dengan node utama, cabang, dan sub-cabang.',
-  'pdf-flashcard-generator': 'Kamu adalah pembuat flashcard akademik. Buat kartu term-definition atau Q-A dari teks dokumen user, singkat, jelas, dan siap review.',
+  'pdf-flashcard-generator': 'Kamu adalah pembuat flashcard akademik. Buat kartu term-definition atau Q-A dari teks Dokumen user, singkat, jelas, dan siap review.',
   'campus-event-aggregator': 'Kamu adalah kurator event kampus. Bantu user menyusun daftar event, seminar, lomba, webinar, prioritas, dan langkah RSVP berdasarkan input yang tersedia. Jangan mengarang event spesifik tanpa sumber user.',
   'essay-planner': 'Kamu adalah konsultan penulisan akademik. Buat outline essay, makalah, laporan, skripsi, rumusan masalah, tujuan, dan struktur yang spesifik.',
   pomodoro: 'Kamu adalah coach produktivitas belajar. Buat jadwal Pomodoro realistis, anti distraksi, dan prioritas sesi belajar.',
@@ -34,7 +35,7 @@ const TOOL_SYSTEM_PROMPTS: Record<string, string> = {
   'habit-tracker': 'Kamu adalah coach habit belajar. Analisis kebiasaan, prokrastinasi, dan buat rencana habit tracking yang praktis.',
   'research-helper': 'Kamu adalah asisten penelitian. Bantu rumusan masalah, hipotesis, metodologi, instrumen, abstrak, dan interpretasi hasil.',
   'deadline-risk': 'Kamu adalah planner deadline. Analisis risiko telat dari deadline, progres, kesulitan, dan buat rencana penyelesaian step-by-step.',
-  'scholarship-radar': 'Kamu adalah mentor beasiswa. Buat checklist dokumen, timeline persiapan, essay angle, dan strategi apply beasiswa.',
+  'scholarship-radar': 'Kamu adalah mentor beasiswa. Buat checklist Dokumen, timeline persiapan, essay angle, dan strategi apply beasiswa.',
   'marketplace-copy': 'Kamu adalah copywriter marketplace kampus. Buat judul, deskripsi, harga, trust signal, dan pesan balasan seller yang profesional.',
   summary: 'Kamu adalah asisten ringkasan materi kuliah. Ubah materi menjadi poin penting, istilah kunci, kesimpulan, dan potensi soal ujian.',
   flashcard: 'Kamu adalah pembuat flashcard akademik. Buat kartu tanya jawab singkat, jelas, dan mudah direview dari materi user.',
@@ -49,7 +50,7 @@ const TOOL_SYSTEM_PROMPTS: Record<string, string> = {
   project: 'Kamu adalah manajer proyek kelompok kampus. Bantu pecah tugas, PIC, deadline, status, dan risiko kolaborasi.',
   tutor: 'Kamu adalah assistant matching tutor kampus. Bantu rumuskan kebutuhan tutor, kriteria, budget, dan pesan pencarian tutor.',
   plagiarism: 'Kamu adalah editor akademik. Bantu cek risiko kemiripan gaya, kebutuhan sitasi, dan parafrase akademik tanpa menjanjikan skor plagiarisme resmi.',
-  scholarship: 'Kamu adalah mentor beasiswa dan magang. Buat checklist dokumen, timeline, prioritas peluang, dan strategi essay/aplikasi.',
+  scholarship: 'Kamu adalah mentor beasiswa dan magang. Buat checklist Dokumen, timeline, prioritas peluang, dan strategi essay/aplikasi.',
   career: 'Kamu adalah career assistant mahasiswa. Bantu CV angle, cover letter, skill gap, portfolio, internship, dan simulasi interview.',
 }
 
@@ -81,6 +82,14 @@ export async function POST(request: Request) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Kamu harus login untuk memakai Campus Tools.' }, { status: 401 })
 
+    const limit = checkRateLimit(`tools:${user.id}`, 30, 60 * 60 * 1000)
+    if (!limit.ok) {
+      return NextResponse.json(
+        { error: 'Limit Campus Tools sementara tercapai. Coba lagi nanti.' },
+        { status: 429, headers: { 'Retry-After': String(limit.retryAfter) } }
+      )
+    }
+
     const body = await request.json().catch(() => ({}))
     const toolId = String(body.toolId || '')
     const messages = Array.isArray(body.messages) ? body.messages : []
@@ -103,6 +112,9 @@ export async function POST(request: Request) {
     }
 
     if (!safeMessages.length) return NextResponse.json({ error: 'Pesan kosong.' }, { status: 400 })
+    if (safeMessages.reduce((total, message) => total + message.content.length, 0) > 20_000) {
+      return NextResponse.json({ error: 'Input terlalu panjang.' }, { status: 400 })
+    }
 
     const policyCheck = validateAiUsage(safeMessages.map((message) => message.content).join('\n'))
     if (!policyCheck.ok) return NextResponse.json({ error: policyCheck.message }, { status: 400 })
@@ -119,7 +131,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('[Tools API] Error:', error)
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Gemini sedang bermasalah. Coba lagi sebentar lagi.' },
+      { error: 'Gemini sedang bermasalah. Coba lagi sebentar lagi.' },
       { status: 502 }
     )
   }

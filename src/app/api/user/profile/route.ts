@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { hasProAccess } from '@/lib/plans'
+import type { Profile } from '@/types'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,6 +18,7 @@ function optionalServiceClient() {
 function nullableText(value: unknown) {
   if (value === undefined) return undefined
   if (value === null) return null
+
   const text = String(value).trim()
   return text.length ? text : null
 }
@@ -37,7 +40,6 @@ export async function GET() {
     if (userError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-    const authUser = user
 
     const admin = optionalServiceClient()
     const db = admin ?? supabase
@@ -53,7 +55,9 @@ export async function GET() {
       return NextResponse.json({ error: getError.message }, { status: 500 })
     }
 
-    if (profile) return NextResponse.json(profile)
+    if (profile) {
+      return NextResponse.json(profile)
+    }
 
     const { data: newProfile, error: createError } = await db
       .from('profiles')
@@ -68,6 +72,8 @@ export async function GET() {
         plan: 'free',
         telegram_chat_id: null,
         profile_completed: false,
+        onboarding_completed: false,
+        is_public_profile: false,
         updated_at: new Date().toISOString(),
       })
       .select()
@@ -92,7 +98,6 @@ export async function PUT(request: Request) {
     if (userError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-    const authUser = user
 
     const body = await request.json().catch(() => ({}))
 
@@ -109,14 +114,14 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'URL avatar tidak valid.' }, { status: 400 })
     }
 
-    const updates: Record<string, unknown> = {
-      updated_at: new Date().toISOString(),
-    }
-
     const fullName = nullableText(body.full_name)
     const jurusan = nullableText(body.jurusan)
     const universitas = nullableText(body.universitas)
     const provinsi = nullableText(body.provinsi)
+
+    const updates: Record<string, unknown> = {
+      updated_at: new Date().toISOString(),
+    }
 
     if (fullName !== undefined) updates.full_name = fullName
     if (telegramChatId !== undefined) updates.telegram_chat_id = telegramChatId
@@ -124,24 +129,53 @@ export async function PUT(request: Request) {
     if (jurusan !== undefined) updates.jurusan = jurusan
     if (universitas !== undefined) updates.universitas = universitas
     if (provinsi !== undefined) updates.provinsi = provinsi
-    if (body.profile_completed !== undefined) updates.profile_completed = Boolean(body.profile_completed)
+
+    if (body.profile_completed !== undefined) {
+      updates.profile_completed = Boolean(body.profile_completed)
+    }
+
+    if (body.onboarding_completed !== undefined) {
+      updates.onboarding_completed = Boolean(body.onboarding_completed)
+    }
+
+    if (body.is_public_profile !== undefined) {
+      updates.is_public_profile = Boolean(body.is_public_profile)
+    }
 
     const admin = optionalServiceClient()
+
+    if (typeof telegramChatId === 'string') {
+      const db = admin ?? supabase
+      const { data: currentProfile } = await db
+        .from('profiles')
+        .select('plan, seat_owner_id')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      if (!hasProAccess(currentProfile as Pick<Profile, 'plan' | 'seat_owner_id'> | null)) {
+        return NextResponse.json(
+          { error: 'Koneksi Telegram otomatis hanya tersedia untuk paket Pro.' },
+          { status: 403 }
+        )
+      }
+    }
 
     const saveWith = async (db: typeof supabase) => {
       const { data: existing, error: existingError } = await db
         .from('profiles')
         .select('id, plan')
-        .eq('id', authUser.id)
+        .eq('id', user.id)
         .maybeSingle()
 
-      if (existingError) return { data: null, error: existingError }
+      if (existingError) {
+        return { data: null, error: existingError }
+      }
 
       if (existing) {
         return db
           .from('profiles')
           .update(updates)
-          .eq('id', authUser.id)
+          .eq('id', user.id)
           .select()
           .single()
       }
@@ -149,16 +183,18 @@ export async function PUT(request: Request) {
       return db
         .from('profiles')
         .insert({
-          id: authUser.id,
-          email: authUser.email || '',
-          full_name: authUser.user_metadata?.full_name || authUser.user_metadata?.name || null,
-          avatar_url: authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture || null,
+          id: user.id,
+          email: user.email || '',
+          full_name: user.user_metadata?.full_name || user.user_metadata?.name || null,
+          avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture || null,
           jurusan: null,
           universitas: null,
           provinsi: null,
           plan: 'free',
           telegram_chat_id: null,
           profile_completed: false,
+          onboarding_completed: false,
+          is_public_profile: false,
           ...updates,
         })
         .select()
@@ -174,6 +210,7 @@ export async function PUT(request: Request) {
 
     if (result.error) {
       console.error('[Profile PUT] Save error:', result.error)
+
       return NextResponse.json(
         {
           error: result.error.message,
@@ -186,6 +223,7 @@ export async function PUT(request: Request) {
     return NextResponse.json(result.data)
   } catch (error) {
     console.error('[Profile PUT] Error:', error)
+
     const message = error instanceof Error ? error.message : 'Terjadi kesalahan server.'
     return NextResponse.json({ error: message }, { status: 500 })
   }

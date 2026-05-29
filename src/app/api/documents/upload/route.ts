@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { validateSensitiveData } from '@/lib/policy'
+import { checkRateLimit, isPdfBytes, MAX_GEMINI_PDF_SIZE, publicError } from '@/lib/server-security'
 import { PLAN_LIMITS } from '@/types'
 import type { Plan } from '@/types'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
 
-const MAX_PDF_SIZE = 10 * 1024 * 1024
+const MAX_PDF_SIZE = MAX_GEMINI_PDF_SIZE
 const BUCKET = 'documents'
 
 function cleanPdfName(name: string) {
@@ -38,6 +39,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const limit = checkRateLimit(`upload:${user.id}`, 10, 60 * 60 * 1000)
+    if (!limit.ok) {
+      return NextResponse.json(
+        { error: 'Limit upload sementara tercapai. Coba lagi nanti.' },
+        { status: 429, headers: { 'Retry-After': String(limit.retryAfter) } }
+      )
+    }
+
     const formData = await request.formData()
     const file = formData.get('file')
     const title = String(formData.get('title') || '').trim()
@@ -47,6 +56,10 @@ export async function POST(request: NextRequest) {
         { error: 'Judul dokumen wajib diisi.' },
         { status: 400 }
       )
+    }
+
+    if (title.length > 160) {
+      return NextResponse.json({ error: 'Judul terlalu panjang. Maksimal 160 karakter.' }, { status: 400 })
     }
 
     if (!(file instanceof File)) {
@@ -65,7 +78,7 @@ export async function POST(request: NextRequest) {
     }
 
     const isPdf =
-      file.type === 'application/pdf' ||
+      file.type === 'application/pdf' &&
       file.name.toLowerCase().endsWith('.pdf')
 
     if (!isPdf) {
@@ -84,7 +97,7 @@ export async function POST(request: NextRequest) {
 
     if (file.size > MAX_PDF_SIZE) {
       return NextResponse.json(
-        { error: 'File terlalu besar. Maksimal 10 MB.' },
+        { error: 'File terlalu besar. Maksimal 5 MB.' },
         { status: 400 }
       )
     }
@@ -138,6 +151,13 @@ export async function POST(request: NextRequest) {
 
     const bytes = Buffer.from(await file.arrayBuffer())
 
+    if (!isPdfBytes(bytes)) {
+      return NextResponse.json(
+        { error: 'File tidak valid. Pastikan file benar-benar PDF.' },
+        { status: 400 }
+      )
+    }
+
     const { error: storageError } = await serviceClient.storage
       .from(BUCKET)
       .upload(filePath, bytes, {
@@ -153,17 +173,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { data: publicUrlData } = serviceClient.storage
-      .from(BUCKET)
-      .getPublicUrl(filePath)
-
     const { data: doc, error: insertError } = await serviceClient
       .from('documents')
       .insert({
         user_id: user.id,
         title,
         file_path: filePath,
-        file_url: publicUrlData.publicUrl,
+        file_url: null,
         priority,
         status: 'pending',
         error_message: null,
@@ -189,14 +205,6 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     console.error('[Documents upload] Error:', err)
 
-    return NextResponse.json(
-      {
-        error:
-          err instanceof Error
-            ? err.message
-            : 'Terjadi kesalahan server.',
-      },
-      { status: 500 }
-    )
+    return NextResponse.json(publicError('Upload gagal. Coba lagi sebentar lagi.'), { status: 500 })
   }
 }

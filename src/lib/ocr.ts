@@ -1,5 +1,5 @@
 // ============================================================
-// DIKTAT.AI — OCR.space Integration
+// NEXA Campus Ecosystem — OCR.space Integration
 // Docs: https://ocr.space/ocrapi
 // Free tier: 500 pages/month (helloworld key)
 // ============================================================
@@ -84,7 +84,7 @@ export async function extractTextFromPdf(
       return {
         text: '',
         isError: true,
-        errorMessage: apiError || 'OCR.space gagal memproses dokumen.',
+        errorMessage: apiError || 'OCR.space gagal memproses Dokumen.',
       }
     }
 

@@ -99,7 +99,7 @@ async function sendTelegramReminder({
     'Pengingat hari ini'
 
   const text = [
-    'NEXA Campus Reminder',
+    'NEXA Campus Ecosystem Reminder',
     `${intro}: ${subject}`,
     `Waktu: ${examTime}`,
     '',

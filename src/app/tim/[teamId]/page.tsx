@@ -128,7 +128,7 @@ export default function TeamDetailPage() {
 
         {tab === 'docs' && (
           <div className="grid gap-3 md:grid-cols-2">
-            {docs.length === 0 ? <p className="py-10 text-center text-sm text-slate-500">Belum ada dokumen dishare ke tim.</p> : docs.map((item) => item.documents && (
+            {docs.length === 0 ? <p className="py-10 text-center text-sm text-slate-500">Belum ada Dokumen dishare ke tim.</p> : docs.map((item) => item.documents && (
               <Link key={item.id} href={`/dashboard/documents/${item.documents.id}`} className="rounded-lg border border-slate-200 p-4 transition hover:border-brand-300">
                 <p className="font-black text-slate-950">{item.documents.title}</p>
                 <p className="mt-2 text-xs font-semibold text-slate-500">{item.documents.question_count || 0} soal tersedia</p>
@@ -141,7 +141,7 @@ export default function TeamDetailPage() {
           <div className="py-12 text-center">
             <Trophy className="mx-auto mb-3 h-10 w-10 text-amber-400" />
             <p className="font-black text-slate-950">Leaderboard internal siap dipakai.</p>
-            <p className="mt-1 text-sm text-slate-500">Skor anggota dari dokumen bersama akan tampil setelah sesi exam selesai.</p>
+            <p className="mt-1 text-sm text-slate-500">Skor anggota dari Dokumen bersama akan tampil setelah sesi exam selesai.</p>
           </div>
         )}
 

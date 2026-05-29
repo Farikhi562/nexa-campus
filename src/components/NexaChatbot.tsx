@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Bot, Loader2, MessageCircle, Minus, Send, Sparkles, X } from 'lucide-react'
+import { BRAND } from '@/lib/brand'
 
 type Message = {
   role: 'user' | 'assistant'
@@ -11,7 +12,7 @@ type Message = {
 
 const STARTERS = [
   'Apa bedanya Free, Basic, dan Pro?',
-  'Gimana cara bayar via Midtrans?',
+  `Gimana cara bayar via ${BRAND.paymentProvider}?`,
   'Siapa yang bisa jual di marketplace?',
 ]
 
@@ -23,7 +24,7 @@ export default function NexaChatbot() {
     {
       role: 'assistant',
       content:
-        'Halo, aku NEXA Assistant v1.0. Aku bisa bantu jelasin fitur, paket, Midtrans checkout, marketplace, dan alur pakai NEXA.',
+        `Halo, aku NEXA Assistant v1.0 untuk ${BRAND.productName}. Aku bisa bantu jelasin fitur, paket, ${BRAND.paymentProvider} checkout, marketplace, dan alur pakai produk resmi ${BRAND.companyName}.`,
     },
   ])
   const bottomRef = useRef<HTMLDivElement>(null)
@@ -95,7 +96,7 @@ export default function NexaChatbot() {
                     Online
                   </span>
                 </div>
-                <p className="text-xs font-semibold text-slate-300">Campus v1.0 support</p>
+                <p className="text-xs font-semibold text-slate-300">{BRAND.productName} support</p>
               </div>
             </div>
             <div className="flex items-center gap-1">
@@ -126,7 +127,7 @@ export default function NexaChatbot() {
               <div className="flex gap-2">
                 <Sparkles className="mt-0.5 h-4 w-4 flex-shrink-0 text-brand-700" />
                 <p className="text-xs leading-5 text-brand-900">
-                  Tanya seputar fitur NEXA, paket, Midtrans, marketplace, reminder, atau kendala akun.
+                  Tanya seputar fitur {BRAND.productName}, paket, {BRAND.paymentProvider}, marketplace, reminder, atau kendala akun.
                 </p>
               </div>
             </div>

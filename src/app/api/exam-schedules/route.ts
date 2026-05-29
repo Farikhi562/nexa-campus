@@ -44,13 +44,36 @@ export async function POST(request: NextRequest) {
   const examDate = String(body.exam_date || '').trim()
   const room = String(body.room || '').trim()
   const isPublic = Boolean(body.is_public)
+  const notes = String(body.notes || '').trim()
 
   if (!subject || !examDate) {
     return NextResponse.json({ error: 'subject dan exam_date wajib diisi.' }, { status: 400 })
   }
 
+  if (subject.length > 160 || room.length > 80 || notes.length > 500) {
+    return NextResponse.json({ error: 'Input jadwal terlalu panjang.' }, { status: 400 })
+  }
+
+  if (!['UTS', 'UAS', 'Quiz'].includes(type)) {
+    return NextResponse.json({ error: 'Tipe ujian tidak valid.' }, { status: 400 })
+  }
+
+  const parsedDate = new Date(examDate)
+  if (isNaN(parsedDate.getTime())) {
+    return NextResponse.json({ error: 'Tanggal ujian tidak valid.' }, { status: 400 })
+  }
+
   const { data: profile } = await supabase.from('profiles').select('universitas').eq('id', user.id).single()
   const db = createServiceClient()
+  const { count } = await db
+    .from('exam_schedules')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+
+  if ((count ?? 0) >= 100) {
+    return NextResponse.json({ error: 'Batas jadwal ujian tercapai.' }, { status: 429 })
+  }
+
   const { data, error } = await db
     .from('exam_schedules')
     .insert({
@@ -59,9 +82,9 @@ export async function POST(request: NextRequest) {
       type,
       exam_date: examDate,
       room: room || null,
-      notes: body.notes || null,
+      notes: notes || null,
       university: profile?.universitas ?? null,
-      is_public: isPublic,
+      is_public: Boolean(isPublic && profile?.universitas),
     })
     .select()
     .single()

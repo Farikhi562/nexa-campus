@@ -10,6 +10,7 @@ import {
   Copy,
   Hash,
   Lock,
+  MoreVertical,
   Plus,
   Search,
   Sparkles,
@@ -83,7 +84,7 @@ export default function StudyRoomListPage() {
   const activeRooms = rooms.filter((room) => room.is_active && new Date(room.expires_at) > new Date()).length
 
   async function handleCreateRoom() {
-    if (!newTitle.trim() || !docId || creating) return
+    if (!newTitle.trim() || creating) return
     setCreating(true)
 
     const res = await fetch('/api/study-rooms', {
@@ -161,7 +162,7 @@ export default function StudyRoomListPage() {
               Ujian bareng, kode room rapi, leaderboard langsung kebaca.
             </h1>
             <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-600 md:text-base">
-              Buat room dari dokumen yang sudah diproses AI, bagikan kode ke teman, lalu lihat peringkat berdasarkan skor dan waktu selesai.
+              Buat room dulu untuk kumpulin teman. Dokumen bisa dikosongkan, lalu leaderboard aktif saat room sudah terhubung ke materi ujian.
             </p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
               <Button onClick={() => setShowCreate(true)} disabled={!canCreateRoom}>
@@ -202,7 +203,7 @@ export default function StudyRoomListPage() {
                 <Lock className="h-5 w-5" />
               </div>
               <div>
-                <h2 className="font-black text-amber-950">Create room tersedia untuk Pro/Admin</h2>
+                <h2 className="font-black text-amber-950">Create room tersedia mulai Basic</h2>
                 <p className="mt-1 text-sm leading-6 text-amber-800">
                   Akun gratis tetap bisa gabung room dengan kode undangan.
                 </p>
@@ -264,7 +265,7 @@ export default function StudyRoomListPage() {
             <EmptyState
               variant="study"
               title="Belum ada room aktif. Buat room dan ajak temanmu!"
-              description="Pilih dokumen yang sudah selesai diproses, lalu bagikan kode room ke teman kelas."
+              description="Buat room tanpa dokumen dulu juga bisa. Bagikan kode room ke teman kelas, lalu hubungkan materi ujian saat sudah siap."
               actionLabel="Buat Room"
               onAction={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             />
@@ -318,7 +319,7 @@ export default function StudyRoomListPage() {
             <div className="mb-5 flex items-start justify-between gap-4">
               <div>
                 <h2 className="text-xl font-black text-slate-950">Buat Study Room</h2>
-                <p className="mt-1 text-sm text-slate-500">Pilih dokumen yang sudah selesai diproses AI.</p>
+                <p className="mt-1 text-sm text-slate-500">Dokumen opsional. Kamu bisa membuat room dulu tanpa upload materi.</p>
               </div>
               <Sparkles className="h-5 w-5 text-brand-600" />
             </div>
@@ -336,20 +337,20 @@ export default function StudyRoomListPage() {
               </label>
 
               <label className="block">
-                <span className="text-sm font-bold text-slate-700">Dokumen soal</span>
+                <span className="text-sm font-bold text-slate-700">Dokumen soal opsional</span>
                 <select
                   value={docId}
                   onChange={(event) => setDocId(event.target.value)}
                   className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                 >
-                  <option value="">Pilih dokumen siap ujian</option>
+                  <option value="">Tanpa dokumen dulu</option>
                   {myDocs.map((doc) => (
                     <option key={doc.id} value={doc.id}>{doc.title}</option>
                   ))}
                 </select>
                 {myDocs.length === 0 && (
                   <p className="mt-2 rounded-md bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-700">
-                    Belum ada dokumen selesai. Upload PDF dan tunggu AI memproses soal dulu.
+                    Belum ada dokumen selesai. Room tetap bisa dibuat, tapi tombol ujian aktif setelah ada dokumen.
                   </p>
                 )}
               </label>
@@ -434,13 +435,20 @@ export default function StudyRoomListPage() {
 
             <div className="mt-6 flex gap-3">
               <Button variant="outline" fullWidth onClick={() => setShowCreate(false)}>Batal</Button>
-              <Button fullWidth loading={creating} disabled={!newTitle.trim() || !docId} onClick={handleCreateRoom}>
+              <Button fullWidth loading={creating} disabled={!newTitle.trim()} onClick={handleCreateRoom}>
                 Buat Room
               </Button>
             </div>
           </div>
         </div>
       )}
+      <Link
+        href="/dashboard"
+        className="fixed right-4 top-4 z-40 inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-lg transition hover:border-brand-300 hover:text-brand-700 lg:hidden"
+        aria-label="Buka menu dashboard"
+      >
+        <MoreVertical className="h-5 w-5" />
+      </Link>
       <ProUpgradeModal open={Boolean(lockedFeature)} feature={lockedFeature || 'Study Room Pro'} onClose={() => setLockedFeature(null)} />
     </div>
   )

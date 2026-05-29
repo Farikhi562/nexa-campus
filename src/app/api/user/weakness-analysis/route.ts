@@ -3,6 +3,7 @@ import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { geminiGenerate, parseGeminiJson } from '@/lib/gemini'
 import { hasProAccess } from '@/lib/plans'
 import type { Profile } from '@/types'
+import { checkRateLimit } from '@/lib/server-security'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,6 +20,14 @@ export async function POST() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Login dulu.' }, { status: 401 })
+
+    const limit = checkRateLimit(`weakness-analysis:${user.id}`, 10, 60 * 60 * 1000)
+    if (!limit.ok) {
+      return NextResponse.json(
+        { error: 'Terlalu banyak request analisis. Coba lagi nanti.' },
+        { status: 429, headers: { 'Retry-After': String(limit.retryAfter) } }
+      )
+    }
 
     const service = createServiceClient()
     const { data: profile } = await service.from('profiles').select('plan, seat_owner_id, weakness_analysis').eq('id', user.id).single()

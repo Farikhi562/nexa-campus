@@ -1,11 +1,12 @@
 import Link from 'next/link'
 import { ArrowLeft, Mail, MessageCircle, ShieldCheck, Zap } from 'lucide-react'
+import { BRAND } from '@/lib/brand'
 
 export default function ContactPage() {
-  const adminTelegram = (process.env.NEXT_PUBLIC_ADMIN_TELEGRAM || 'NEXATchBot').replace(/^@/, '')
+  const adminWhatsapp = '6285697916845'
   const supportEmail = process.env.NEXT_PUBLIC_SUPPORT_EMAIL || 'nexatechlabs271@gmail.com'
-  const message = encodeURIComponent('Halo admin NEXA, saya ingin tanya support, aktivasi paket, paket kampus, atau bantuan checkout Midtrans.')
-  const telegramHref = adminTelegram ? `https://t.me/${adminTelegram}?start=${message}` : ''
+  const message = encodeURIComponent(`Halo admin ${BRAND.companyName}, saya ingin tanya support ${BRAND.productName}, aktivasi paket, paket kampus, atau bantuan checkout ${BRAND.paymentProvider}.`)
+  const whatsappHref = `https://wa.me/${adminWhatsapp}?text=${message}`
   const mailHref = supportEmail ? `mailto:${supportEmail}` : ''
 
   return (
@@ -20,17 +21,17 @@ export default function ContactPage() {
           <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-brand-600 text-white">
             <Zap className="h-6 w-6" />
           </div>
-          <h1 className="mt-6 text-4xl font-black tracking-tight">Kontak NEXA</h1>
+          <h1 className="mt-6 text-4xl font-black tracking-tight">Kontak {BRAND.companyName}</h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600">
-            Halaman ini dipakai untuk support, aktivasi paket, paket kampus, dan bantuan checkout Midtrans.
+            Halaman ini dipakai untuk support {BRAND.productName}, aktivasi paket, paket kampus, dan bantuan checkout {BRAND.paymentProvider}.
           </p>
 
           <div className="mt-8 grid gap-4 sm:grid-cols-2">
-            <a href={telegramHref || undefined} target="_blank" rel="noreferrer" className={`rounded-lg border border-slate-200 p-5 ${telegramHref ? 'hover:border-brand-300 hover:bg-brand-50' : 'pointer-events-none opacity-60'}`}>
+            <a href={whatsappHref} target="_blank" rel="noreferrer" className="rounded-lg border border-slate-200 p-5 hover:border-brand-300 hover:bg-brand-50">
               <MessageCircle className="h-6 w-6 text-brand-600" />
-              <h2 className="mt-4 font-black">Telegram Admin</h2>
+              <h2 className="mt-4 font-black">WhatsApp Admin</h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                {telegramHref ? `@${adminTelegram}` : 'Telegram admin belum dikonfigurasi.'}
+                085697916845
               </p>
             </a>
             <a href={mailHref || undefined} className={`rounded-lg border border-slate-200 p-5 ${mailHref ? 'hover:border-brand-300 hover:bg-brand-50' : 'pointer-events-none opacity-60'}`}>
@@ -47,7 +48,7 @@ export default function ContactPage() {
           <div className="flex gap-3">
             <ShieldCheck className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-700" />
             <p className="text-sm leading-6 text-emerald-900">
-              Gunakan kontak resmi ini untuk bantuan akun, aktivasi pembayaran Midtrans, kerja sama paket kampus, dan permintaan penghapusan akun atau data.
+              Gunakan kontak resmi {BRAND.companyName} untuk bantuan akun, aktivasi pembayaran {BRAND.paymentProvider}, kerja sama paket kampus, dan permintaan penghapusan akun atau data.
             </p>
           </div>
         </section>
