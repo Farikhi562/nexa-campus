@@ -288,8 +288,8 @@ export default function ResultsPage() {
             <button onClick={canExportPro ? handleExportWord : undefined} className={clsx('rounded-lg border px-3 py-2 text-sm font-bold', canExportPro ? 'border-slate-200 text-slate-700 hover:border-brand-300' : 'cursor-not-allowed border-red-200 bg-red-50 text-red-600')} title={canExportPro ? 'Export Word' : 'Khusus Pro'}>
               Word .doc
             </button>
-            <button onClick={canExportPro ? handleExportQuizlet : undefined} className={clsx('rounded-lg border px-3 py-2 text-sm font-bold', canExportPro ? 'border-slate-200 text-slate-700 hover:border-brand-300' : 'cursor-not-allowed border-red-200 bg-red-50 text-red-600')} title={canExportPro ? 'Export deck Anki sederhana' : 'Khusus Pro'}>
-              Anki deck
+            <button onClick={canExportPro ? handleExportQuizlet : undefined} className={clsx('rounded-lg border px-3 py-2 text-sm font-bold', canExportPro ? 'border-slate-200 text-slate-700 hover:border-brand-300' : 'cursor-not-allowed border-red-200 bg-red-50 text-red-600')} title={canExportPro ? 'Export flashcard text untuk Anki/Quizlet' : 'Khusus Pro'}>
+              Flashcard text
             </button>
           </div>
         </div>
