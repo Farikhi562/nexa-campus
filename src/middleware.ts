@@ -35,27 +35,20 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // Refresh session — JANGAN dihapus, ini yang bikin token tetap fresh
   const { data: { user } } = await supabase.auth.getUser()
 
   const path = request.nextUrl.pathname
 
-  // Protect routes
-  const protectedPaths = [
-    '/dashboard', '/exam', '/study-room', '/tim',
-    '/jadwal', '/leaderboard', '/pengaturan', '/marketplace',
-    '/readiness',
-  ]
+  const protectedPaths = ['/dashboard', '/onboarding', '/admin']
   const isProtected = protectedPaths.some(p => path.startsWith(p))
 
   if (isProtected && !user) {
     const url = request.nextUrl.clone()
-    url.pathname = '/auth/login'
+    url.pathname = '/login'
     return NextResponse.redirect(url)
   }
 
-  // Kalau sudah login dan buka halaman auth, redirect ke dashboard
-  if (user && path.startsWith('/auth/')) {
+  if (user && path === '/login') {
     const url = request.nextUrl.clone()
     url.pathname = '/dashboard'
     return NextResponse.redirect(url)

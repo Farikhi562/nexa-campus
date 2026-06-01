@@ -1,456 +1,222 @@
--- ================================================
--- DIKTAT.AI — Supabase Schema
--- Run this in Supabase SQL Editor (dashboard.supabase.com)
--- ================================================
+-- NEXA Campus MVP schema
+-- Run in Supabase SQL Editor.
 
--- Enable UUID extension
 create extension if not exists "uuid-ossp";
 
--- ──────────────────────────────────────────────
--- PROFILES (extends auth.users)
--- ──────────────────────────────────────────────
-create table public.profiles (
-  id            uuid references auth.users(id) on delete cascade primary key,
-  email         text not null,
-  full_name     text,
-  avatar_url    text,
-  jurusan       text,
-  universitas   text,
-  provinsi      text,
-  plan          text not null default 'free' check (plan in ('free','basic','pro','admin')),
-  telegram_number text,
+create table if not exists public.profiles (
+  id uuid references auth.users(id) on delete cascade primary key,
+  email text not null,
+  full_name text,
+  campus_name text,
+  major text,
+  semester integer check (semester between 1 and 14),
+  student_id text,
+  phone_number text,
   telegram_chat_id text,
-  profile_completed boolean default false,
-  onboarding_completed boolean not null default false,
-  badges jsonb not null default '[]'::jsonb,
-  is_public_profile boolean not null default false,
-  created_at    timestamptz default now(),
-  updated_at    timestamptz default now()
+  whatsapp_number text,
+  plan text not null default 'radar' check (plan in ('radar', 'pulse', 'command')),
+  profile_completed boolean not null default false,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
 );
 
--- ──────────────────────────────────────────────
--- DOCUMENTS
--- ──────────────────────────────────────────────
-create table public.documents (
-  id             uuid default uuid_generate_v4() primary key,
-  user_id        uuid references public.profiles(id) on delete cascade not null,
-  title          text not null,
-  file_path      text not null,        -- supabase storage path
-  file_url       text,                 -- public/signed url cached
-  status         text not null default 'pending'
-                   check (status in ('pending','processing','completed','error')),
-  error_message  text,
-  question_count integer default 0,
-  created_at     timestamptz default now()
-);
-
--- ──────────────────────────────────────────────
--- QUESTIONS
--- ──────────────────────────────────────────────
-create table public.questions (
-  id              uuid default uuid_generate_v4() primary key,
-  document_id     uuid references public.documents(id) on delete cascade not null,
-  user_id         uuid references public.profiles(id) on delete cascade not null,
-  question_text   text not null,
-  options         jsonb not null,   -- {"A":"...", "B":"...", "C":"...", "D":"..."}
-  correct_answer  text not null,    -- "A" | "B" | "C" | "D"
-  explanation     text,
-  order_index     integer,
-  created_at      timestamptz default now()
-);
-
--- ──────────────────────────────────────────────
--- EXAM SESSIONS
--- ──────────────────────────────────────────────
-create table public.exam_sessions (
-  id                   uuid default uuid_generate_v4() primary key,
-  user_id              uuid references public.profiles(id) on delete cascade not null,
-  document_id          uuid references public.documents(id) on delete set null,
-  study_room_id        uuid,          -- filled if part of a study room session
-  score                integer,       -- 0-100
-  total_questions      integer not null default 0,
-  correct_count        integer default 0,
-  time_taken_seconds   integer,
-  status               text not null default 'in_progress'
-                         check (status in ('in_progress','completed')),
-  started_at           timestamptz default now(),
-  completed_at         timestamptz
-);
-
--- ──────────────────────────────────────────────
--- SESSION ANSWERS
--- ──────────────────────────────────────────────
-create table public.session_answers (
-  id               uuid default uuid_generate_v4() primary key,
-  session_id       uuid references public.exam_sessions(id) on delete cascade not null,
-  question_id      uuid references public.questions(id) on delete cascade not null,
-  selected_answer  text,           -- null = skipped
-  is_correct       boolean,
-  created_at       timestamptz default now()
-);
-
--- ──────────────────────────────────────────────
--- STUDY ROOMS
--- ──────────────────────────────────────────────
-create table public.study_rooms (
-  id           uuid default uuid_generate_v4() primary key,
-  creator_id   uuid references public.profiles(id) on delete cascade not null,
-  document_id  uuid references public.documents(id) on delete set null,
-  room_code    text unique not null,   -- 6-char alphanumeric
-  title        text not null,
-  is_active    boolean default true,
-  created_at   timestamptz default now(),
-  expires_at   timestamptz default (now() + interval '24 hours')
-);
-
--- ──────────────────────────────────────────────
--- ROOM PARTICIPANTS
--- ──────────────────────────────────────────────
-create table public.room_participants (
-  id          uuid default uuid_generate_v4() primary key,
-  room_id     uuid references public.study_rooms(id) on delete cascade not null,
-  user_id     uuid references public.profiles(id) on delete cascade not null,
-  session_id  uuid references public.exam_sessions(id) on delete set null,
-  joined_at   timestamptz default now(),
-  unique (room_id, user_id)
-);
-
--- ──────────────────────────────────────────────
--- SCHEDULES (Telegram Reminder - Pro feature)
--- ──────────────────────────────────────────────
-create table public.schedules (
-  id                  uuid default uuid_generate_v4() primary key,
-  user_id             uuid references public.profiles(id) on delete cascade not null,
-  document_id         uuid references public.documents(id) on delete set null,
-  subject_name        text not null,
-  exam_date           date not null,
-  exam_time           time,
-  telegram_number     text,
-  telegram_chat_id    text,
-  reminder_sent_h3    boolean default false,
-  reminder_sent_h1    boolean default false,
-  reminder_sent_h0    boolean default false,
-  created_at          timestamptz default now()
-);
-
-create table if not exists public.error_logs (
-  id uuid default uuid_generate_v4() primary key,
-  user_id uuid references public.profiles(id) on delete set null,
-  error_type text not null,
-  message text not null,
-  created_at timestamptz default now()
-);
-
-create table if not exists public.learning_streaks (
-  user_id uuid references public.profiles(id) on delete cascade not null,
-  date date not null,
-  exams_completed integer not null default 0,
-  avg_score integer not null default 0,
-  primary key (user_id, date)
-);
-
-create table if not exists public.notifications (
+create table if not exists public.academic_deadlines (
   id uuid default uuid_generate_v4() primary key,
   user_id uuid references public.profiles(id) on delete cascade not null,
-  title text not null,
-  message text not null,
-  type text not null check (type in ('reminder','exam_result','badge_earned','system')),
-  is_read boolean not null default false,
-  created_at timestamptz default now()
-);
-
-create table if not exists public.exam_schedules (
-  id uuid default uuid_generate_v4() primary key,
-  user_id uuid references public.profiles(id) on delete cascade not null,
-  subject text not null,
-  type text not null default 'UTS',
-  exam_date timestamptz not null,
-  room text,
+  title text,
+  course_name text not null,
+  type text not null check (type in ('tugas', 'praktikum', 'kuis', 'ujian', 'presentasi', 'administrasi', 'pembayaran', 'organisasi', 'lainnya')),
+  source text not null check (source in ('vclass', 'ilab', 'dosen_langsung', 'grup_wa', 'praktikum', 'studentsite', 'baak', 'lepkom', 'lainnya')),
+  deadline_date date not null,
+  deadline_time time not null,
+  campus text not null,
+  room text not null,
+  location_note text,
   notes text,
-  university text,
-  is_public boolean not null default false,
-  created_at timestamptz default now()
+  status text not null default 'pending' check (status in ('pending', 'in_progress', 'completed', 'overdue')),
+  priority text not null default 'normal' check (priority in ('low', 'normal', 'high', 'urgent')),
+  reminder_enabled boolean not null default false,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
 );
 
-create table if not exists public.leaderboard_stats (
-  user_id uuid references public.profiles(id) on delete cascade primary key,
-  total_exams integer not null default 0,
-  avg_score integer not null default 0,
-  current_streak integer not null default 0,
-  last_session_id uuid references public.exam_sessions(id) on delete set null,
-  last_document_id uuid references public.documents(id) on delete set null,
-  updated_at timestamptz default now()
-);
-
--- ──────────────────────────────────────────────
--- MARKETPLACE LISTINGS
--- ──────────────────────────────────────────────
-create table if not exists public.marketplace_listings (
+create table if not exists public.reminder_preferences (
   id uuid default uuid_generate_v4() primary key,
-  seller_id uuid references public.profiles(id) on delete cascade not null,
-  type text not null check (type in ('barang', 'jasa')),
-  title text not null,
-  description text not null,
-  category text not null,
-  price_amount integer,
-  price_label text,
-  campus text,
-  location text,
-  contact_telegram text,
-  image_url text,
-  status text not null default 'active'
-    check (status in ('draft', 'pending', 'active', 'sold', 'archived', 'rejected')),
-  is_verified boolean not null default false,
-  created_at timestamptz default now(),
-  updated_at timestamptz default now()
+  user_id uuid references public.profiles(id) on delete cascade not null unique,
+  channel text not null default 'telegram' check (channel in ('telegram', 'whatsapp')),
+  h7_enabled boolean not null default false,
+  h3_enabled boolean not null default false,
+  h1_enabled boolean not null default true,
+  day_enabled boolean not null default true,
+  reminder_time time not null default '08:00',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
 );
 
-create index if not exists marketplace_listings_status_created_idx
-  on public.marketplace_listings (status, created_at desc);
-create index if not exists marketplace_listings_seller_idx
-  on public.marketplace_listings (seller_id);
-create index if not exists marketplace_listings_type_idx
-  on public.marketplace_listings (type);
-
--- ══════════════════════════════════════════════
--- ROW LEVEL SECURITY
--- ══════════════════════════════════════════════
-alter table public.profiles          enable row level security;
-alter table public.documents         enable row level security;
-alter table public.questions         enable row level security;
-alter table public.exam_sessions     enable row level security;
-alter table public.session_answers   enable row level security;
-alter table public.study_rooms       enable row level security;
-alter table public.room_participants enable row level security;
-alter table public.schedules         enable row level security;
-alter table public.error_logs        enable row level security;
-alter table public.learning_streaks  enable row level security;
-alter table public.notifications     enable row level security;
-alter table public.exam_schedules    enable row level security;
-alter table public.leaderboard_stats enable row level security;
-alter table public.marketplace_listings enable row level security;
-
--- profiles
-create policy "own profile select" on public.profiles for select using (auth.uid() = id);
-create policy "own profile update" on public.profiles for update using (auth.uid() = id);
-create policy "own profile insert" on public.profiles for insert with check (auth.uid() = id);
-
--- documents
-create policy "own docs select" on public.documents for select using (auth.uid() = user_id);
-create policy "own docs insert" on public.documents for insert with check (auth.uid() = user_id);
-create policy "own docs update" on public.documents for update using (auth.uid() = user_id);
-create policy "own docs delete" on public.documents for delete using (auth.uid() = user_id);
-
--- questions
-create policy "own questions select" on public.questions for select using (auth.uid() = user_id);
-create policy "own questions insert" on public.questions for insert with check (auth.uid() = user_id);
-
--- exam_sessions
-create policy "own sessions select" on public.exam_sessions for select using (auth.uid() = user_id);
-create policy "own sessions insert" on public.exam_sessions for insert with check (auth.uid() = user_id);
-create policy "own sessions update" on public.exam_sessions for update using (auth.uid() = user_id);
-
--- session_answers (via session ownership)
-create policy "own answers select" on public.session_answers for select using (
-  session_id in (select id from public.exam_sessions where user_id = auth.uid())
-);
-create policy "own answers insert" on public.session_answers for insert with check (
-  session_id in (select id from public.exam_sessions where user_id = auth.uid())
+create table if not exists public.beta_signups (
+  id uuid default uuid_generate_v4() primary key,
+  email text not null,
+  full_name text,
+  campus_name text,
+  source text,
+  created_at timestamptz not null default now()
 );
 
-create or replace function public.is_room_participant(p_room_id uuid)
-returns boolean
-language sql
-security definer
-set search_path = public
+create table if not exists public.subscription_intents (
+  id uuid default uuid_generate_v4() primary key,
+  user_id uuid references public.profiles(id) on delete cascade not null,
+  requested_plan text not null check (requested_plan in ('pulse', 'command')),
+  status text not null default 'pending' check (status in ('pending', 'confirmed', 'rejected', 'cancelled')),
+  payment_method text not null default 'qris' check (payment_method in ('manual_transfer', 'qris')),
+  contact_note text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.reminder_logs (
+  id uuid default uuid_generate_v4() primary key,
+  user_id uuid references public.profiles(id) on delete cascade not null,
+  deadline_id uuid references public.academic_deadlines(id) on delete cascade not null,
+  channel text not null check (channel in ('telegram', 'whatsapp')),
+  status text not null default 'pending' check (status in ('pending', 'sent', 'failed', 'skipped')),
+  provider_message text,
+  sent_at timestamptz,
+  created_at timestamptz not null default now()
+);
+
+create or replace function public.set_updated_at()
+returns trigger
+language plpgsql
 as $$
-  select exists (
-    select 1
-    from public.room_participants
-    where room_id = p_room_id
-      and user_id = auth.uid()
-  );
-$$;
-
-create or replace function public.is_room_creator(p_room_id uuid)
-returns boolean
-language sql
-security definer
-set search_path = public
-as $$
-  select exists (
-    select 1
-    from public.study_rooms
-    where id = p_room_id
-      and creator_id = auth.uid()
-  );
-$$;
-
--- study_rooms
-create policy "rooms read own or joined" on public.study_rooms for select using (
-  creator_id = auth.uid()
-  or public.is_room_participant(id)
-);
-create policy "rooms insert" on public.study_rooms for insert with check (auth.uid() = creator_id);
-create policy "rooms update" on public.study_rooms for update using (auth.uid() = creator_id);
-
--- room_participants
-create policy "participants read same room" on public.room_participants for select using (
-  user_id = auth.uid()
-  or public.is_room_creator(room_id)
-);
-create policy "participants insert" on public.room_participants for insert with check (auth.uid() = user_id);
-create policy "participants update" on public.room_participants for update using (auth.uid() = user_id);
-
--- schedules
-create policy "own schedules" on public.schedules for all using (auth.uid() = user_id);
-
-create policy "own error logs insert" on public.error_logs for insert with check (auth.uid() = user_id or user_id is null);
-create policy "own error logs read" on public.error_logs for select using (auth.uid() = user_id);
-
-create policy "own learning streaks" on public.learning_streaks for select using (auth.uid() = user_id);
-
-create policy "own notifications" on public.notifications for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
-
-create policy "own exam schedules" on public.exam_schedules for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
-create policy "public suggested exam schedules" on public.exam_schedules for select using (is_public = true);
-
-create policy "own leaderboard stats" on public.leaderboard_stats for select using (auth.uid() = user_id);
-create policy "public leaderboard stats" on public.leaderboard_stats for select using (
-  exists (
-    select 1 from public.profiles p
-    where p.id = user_id and p.is_public_profile = true
-  )
-);
-
--- marketplace_listings
-create policy "active listings readable by auth users"
-on public.marketplace_listings for select
-using (auth.role() = 'authenticated' and status = 'active');
-
-create policy "seller can read own listings"
-on public.marketplace_listings for select
-using (auth.uid() = seller_id);
-
-create policy "paid users can create listings"
-on public.marketplace_listings for insert
-with check (
-  auth.uid() = seller_id
-  and exists (
-    select 1
-    from public.profiles p
-    where p.id = auth.uid()
-      and p.plan in ('basic', 'pro', 'admin')
-  )
-);
-
-create policy "paid sellers can update own listings"
-on public.marketplace_listings for update
-using (
-  auth.uid() = seller_id
-  and exists (
-    select 1
-    from public.profiles p
-    where p.id = auth.uid()
-      and p.plan in ('basic', 'pro', 'admin')
-  )
-)
-with check (
-  auth.uid() = seller_id
-  and exists (
-    select 1
-    from public.profiles p
-    where p.id = auth.uid()
-      and p.plan in ('basic', 'pro', 'admin')
-  )
-);
-
-create policy "paid sellers can delete own listings"
-on public.marketplace_listings for delete
-using (
-  auth.uid() = seller_id
-  and exists (
-    select 1
-    from public.profiles p
-    where p.id = auth.uid()
-      and p.plan in ('basic', 'pro', 'admin')
-  )
-);
-
--- ══════════════════════════════════════════════
--- TRIGGER: auto-create profile on signup
--- ══════════════════════════════════════════════
-create or replace function public.handle_new_user()
-returns trigger as $$
 begin
-  insert into public.profiles (id, email, full_name, avatar_url)
-  values (
-    new.id,
-    new.email,
-    new.raw_user_meta_data->>'full_name',
-    new.raw_user_meta_data->>'avatar_url'
-  );
+  new.updated_at = now();
   return new;
 end;
-$$ language plpgsql security definer;
+$$;
+
+drop trigger if exists profiles_set_updated_at on public.profiles;
+create trigger profiles_set_updated_at before update on public.profiles
+for each row execute procedure public.set_updated_at();
+
+drop trigger if exists academic_deadlines_set_updated_at on public.academic_deadlines;
+create trigger academic_deadlines_set_updated_at before update on public.academic_deadlines
+for each row execute procedure public.set_updated_at();
+
+drop trigger if exists reminder_preferences_set_updated_at on public.reminder_preferences;
+create trigger reminder_preferences_set_updated_at before update on public.reminder_preferences
+for each row execute procedure public.set_updated_at();
+
+drop trigger if exists subscription_intents_set_updated_at on public.subscription_intents;
+create trigger subscription_intents_set_updated_at before update on public.subscription_intents
+for each row execute procedure public.set_updated_at();
+
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  insert into public.profiles (id, email, full_name, plan, profile_completed)
+  values (
+    new.id,
+    coalesce(new.email, ''),
+    coalesce(new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'name'),
+    'radar',
+    false
+  )
+  on conflict (id) do nothing;
+  return new;
+end;
+$$;
 
 drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
-  after insert on auth.users
-  for each row execute procedure public.handle_new_user();
+after insert on auth.users
+for each row execute procedure public.handle_new_user();
 
--- ══════════════════════════════════════════════
--- STORAGE BUCKET: documents (private)
--- ══════════════════════════════════════════════
--- Run in SQL Editor:
-insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-values (
-  'documents',
-  'documents',
-  false,
-  10485760,  -- 10 MB
-  array['application/pdf']
-)
-on conflict (id) do nothing;
+create or replace function public.enforce_radar_deadline_limit()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  user_plan text;
+  active_count integer;
+begin
+  select plan into user_plan from public.profiles where id = new.user_id;
 
--- Storage policies
-create policy "users upload own files" on storage.objects for insert with check (
-  bucket_id = 'documents' and auth.uid()::text = (storage.foldername(name))[1]
-);
-create policy "users read own files" on storage.objects for select using (
-  bucket_id = 'documents' and auth.uid()::text = (storage.foldername(name))[1]
-);
-create policy "users delete own files" on storage.objects for delete using (
-  bucket_id = 'documents' and auth.uid()::text = (storage.foldername(name))[1]
-);
+  if user_plan = 'radar' and new.status in ('pending', 'in_progress', 'overdue') then
+    select count(*) into active_count
+    from public.academic_deadlines
+    where user_id = new.user_id
+      and status in ('pending', 'in_progress', 'overdue')
+      and id <> coalesce(new.id, uuid_nil());
 
--- ══════════════════════════════════════════════════════════════
--- STORAGE BUCKET: avatars (public profile photos)
--- ══════════════════════════════════════════════════════════════
-insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-values (
-  'avatars',
-  'avatars',
-  true,
-  5242880, -- 5 MB
-  array['image/jpeg', 'image/png', 'image/webp']
-)
-on conflict (id) do update set
-  public = true,
-  file_size_limit = excluded.file_size_limit,
-  allowed_mime_types = excluded.allowed_mime_types;
+    if active_count >= 5 then
+      raise exception 'NEXA Radar maksimal 5 active deadlines';
+    end if;
+  end if;
 
-create policy "public read avatars" on storage.objects for select using (
-  bucket_id = 'avatars'
-);
-create policy "users upload own avatars" on storage.objects for insert with check (
-  bucket_id = 'avatars' and auth.uid()::text = (storage.foldername(name))[1]
-);
-create policy "users update own avatars" on storage.objects for update using (
-  bucket_id = 'avatars' and auth.uid()::text = (storage.foldername(name))[1]
-) with check (
-  bucket_id = 'avatars' and auth.uid()::text = (storage.foldername(name))[1]
-);
-create policy "users delete own avatars" on storage.objects for delete using (
-  bucket_id = 'avatars' and auth.uid()::text = (storage.foldername(name))[1]
-);
+  if user_plan = 'radar' and new.reminder_enabled then
+    raise exception 'Reminder tersedia mulai NEXA Pulse';
+  end if;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists academic_deadlines_radar_limit on public.academic_deadlines;
+create trigger academic_deadlines_radar_limit
+before insert or update on public.academic_deadlines
+for each row execute procedure public.enforce_radar_deadline_limit();
+
+alter table public.profiles enable row level security;
+alter table public.academic_deadlines enable row level security;
+alter table public.reminder_preferences enable row level security;
+alter table public.beta_signups enable row level security;
+alter table public.subscription_intents enable row level security;
+alter table public.reminder_logs enable row level security;
+
+drop policy if exists "profiles_select_own" on public.profiles;
+create policy "profiles_select_own" on public.profiles for select using (auth.uid() = id);
+
+drop policy if exists "profiles_insert_own" on public.profiles;
+create policy "profiles_insert_own" on public.profiles for insert with check (auth.uid() = id);
+
+drop policy if exists "profiles_update_own" on public.profiles;
+create policy "profiles_update_own" on public.profiles for update using (auth.uid() = id) with check (auth.uid() = id);
+
+drop policy if exists "deadlines_select_own" on public.academic_deadlines;
+create policy "deadlines_select_own" on public.academic_deadlines for select using (auth.uid() = user_id);
+
+drop policy if exists "deadlines_insert_own" on public.academic_deadlines;
+create policy "deadlines_insert_own" on public.academic_deadlines for insert with check (auth.uid() = user_id);
+
+drop policy if exists "deadlines_update_own" on public.academic_deadlines;
+create policy "deadlines_update_own" on public.academic_deadlines for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+drop policy if exists "deadlines_delete_own" on public.academic_deadlines;
+create policy "deadlines_delete_own" on public.academic_deadlines for delete using (auth.uid() = user_id);
+
+drop policy if exists "reminder_preferences_all_own" on public.reminder_preferences;
+create policy "reminder_preferences_all_own" on public.reminder_preferences for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+drop policy if exists "subscription_intents_select_own" on public.subscription_intents;
+create policy "subscription_intents_select_own" on public.subscription_intents for select using (auth.uid() = user_id);
+
+drop policy if exists "subscription_intents_insert_own" on public.subscription_intents;
+create policy "subscription_intents_insert_own" on public.subscription_intents for insert with check (auth.uid() = user_id);
+
+drop policy if exists "reminder_logs_select_own" on public.reminder_logs;
+create policy "reminder_logs_select_own" on public.reminder_logs for select using (auth.uid() = user_id);
+
+drop policy if exists "beta_signups_insert" on public.beta_signups;
+create policy "beta_signups_insert" on public.beta_signups for insert with check (true);
+
+create index if not exists academic_deadlines_user_due_idx
+on public.academic_deadlines (user_id, deadline_date, deadline_time);
+
+create index if not exists subscription_intents_user_created_idx
+on public.subscription_intents (user_id, created_at desc);

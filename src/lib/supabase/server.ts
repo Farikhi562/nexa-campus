@@ -26,22 +26,10 @@ export async function createClient() {
               cookieStore.set(name, value, options)
             )
           } catch {
-            // safe to ignore in Server Components
+            // Server Components cannot always persist refreshed cookies.
           }
         },
       },
     }
-  )
-}
-
-/** Service-role client — bypasses RLS. Use only in trusted API routes. */
-export function createServiceClient() {
-  const { createClient } = require('@supabase/supabase-js')
-  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    throw new Error('SUPABASE_SERVICE_ROLE_KEY is required for service client')
-  }
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
 }

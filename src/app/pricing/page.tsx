@@ -1,242 +1,62 @@
-'use client'
-
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import {
-  BadgeCheck,
-  BookOpen,
-  CheckCircle2,
-  CreditCard,
-  HelpCircle,
-  Lock,
-  MessageCircle,
-  ShieldCheck,
-  Sparkles,
-  Store,
-  Users,
-  XCircle,
-  Zap,
-} from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
-import type { Profile } from '@/types'
+import { CheckCircle2, LockKeyhole } from 'lucide-react'
+import Badge from '@/components/ui/Badge'
+import { Card, CardContent } from '@/components/ui/Card'
+import NexaLogo from '@/components/NexaLogo'
 import { BRAND } from '@/lib/brand'
-
-const PLANS = [
-  {
-    id: 'free',
-    name: 'Free',
-    price: 'Rp0',
-    note: 'Mulai belajar tanpa bayar.',
-    cta: 'Mulai Gratis',
-    href: '/auth/login',
-    featured: false,
-    features: [
-      '1 Dokumen belajar',
-      'Mock exam dasar',
-      'Campus Tools demo',
-      'Reminder agenda dasar',
-      'Akses marketplace sebagai buyer',
-    ],
-    missing: ['Buka lapak marketplace', 'Telegram reminder otomatis', 'Study Room Pro'],
-  },
-  {
-    id: 'basic',
-    name: 'Basic',
-    price: 'Rp19.000',
-    note: 'Untuk mahasiswa yang mulai serius.',
-    cta: `Bayar Basic via ${BRAND.paymentProvider}`,
-    href: '/checkout?plan=basic',
-    featured: true,
-    features: [
-      '5 Dokumen belajar',
-      'Bisa jual barang dan jasa kampus',
-      'Campus Tools Basic',
-      'Export hasil belajar',
-      'Priority support normal',
-    ],
-    missing: ['Dokumen unlimited', 'Telegram reminder otomatis'],
-  },
-  {
-    id: 'pro',
-    name: 'Pro',
-    price: 'Rp39.000',
-    note: 'Paket lengkap untuk power user.',
-    cta: `Bayar Pro via ${BRAND.paymentProvider}`,
-    href: '/checkout?plan=pro',
-    featured: false,
-    features: [
-      'Dokumen belajar unlimited',
-      'Marketplace seller lengkap',
-      'Telegram reminder otomatis',
-      'Study Room dan leaderboard',
-      'Campus Analytics dan AI Mentor',
-    ],
-    missing: [],
-  },
-]
-
-const FAQ = [
-  {
-    q: 'Pembayaran pakai apa?',
-    a: `${BRAND.productName} memakai ${BRAND.paymentProvider}. User diarahkan ke checkout request agar admin ${BRAND.companyName} bisa mengirim link pembayaran sesuai paket.`,
-  },
-  {
-    q: 'Siapa yang bisa jual barang dan jasa?',
-    a: 'Akun Basic dan Pro bisa membuka lapak. Akun Free tetap bisa melihat listing dan menghubungi seller.',
-  },
-  {
-    q: 'Setelah bayar, paket aktif kapan?',
-    a: `Untuk mode operasional awal, admin ${BRAND.companyName} mengaktifkan paket setelah pembayaran ${BRAND.paymentProvider} terkonfirmasi.`,
-  },
-]
+import { PLANS } from '@/lib/nexa-data'
 
 export default function PricingPage() {
-  const [profile, setProfile] = useState<Profile | null>(null)
-
-  useEffect(() => {
-    const supabase = createClient()
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
-      if (!user) return
-      const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single()
-      setProfile(data as Profile | null)
-    })
-  }, [])
-
-  function checkoutHref(plan: string) {
-    const params = new URLSearchParams({ plan })
-    if (profile?.email) params.set('email', profile.email)
-    if (profile?.full_name) params.set('name', profile.full_name)
-    return `/checkout?${params.toString()}`
-  }
-
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-950">
+    <main className="min-h-screen bg-slate-50">
       <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
           <Link href="/" className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-600 text-white">
-              <Zap className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-sm font-black">{BRAND.productName}</p>
-              <p className="text-xs font-semibold text-slate-500">{BRAND.companyName}</p>
-            </div>
+            <NexaLogo className="h-9 w-9" />
+            <span className="font-black">NEXA Campus</span>
           </Link>
-          <div className="flex items-center gap-2">
-            <Link href="/auth/login" className="rounded-lg px-4 py-2 text-sm font-bold text-slate-600 hover:bg-slate-100">
-              Login
-            </Link>
-            <Link href="/contact" className="rounded-lg bg-slate-950 px-4 py-2 text-sm font-bold text-white hover:bg-slate-800">
-              Kontak Sales
-            </Link>
-          </div>
+          <Link href="/login?mode=signup" className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-bold text-white">
+            Daftar
+          </Link>
         </div>
       </header>
-
-      <section className="mx-auto max-w-7xl px-6 py-12 md:py-16">
-        <div className="max-w-3xl">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-black text-brand-700">
-            <CreditCard className="h-3.5 w-3.5" />
-            {BRAND.paymentProvider} payment ready
-          </div>
-          <h1 className="text-4xl font-black tracking-tight md:text-6xl">
-            Harga jelas, fitur siap dipakai, upgrade gampang.
-          </h1>
-          <p className="mt-5 text-base leading-7 text-slate-600 md:text-lg">
-            {BRAND.productName} dibuat oleh {BRAND.companyName} untuk mahasiswa dengan model freemium. User bisa coba gratis, lalu upgrade saat butuh marketplace seller, reminder otomatis, Study Room, dan analytics.
-          </p>
-        </div>
-
-        <div className="mt-10 grid gap-5 lg:grid-cols-3">
+      <section className="mx-auto max-w-6xl px-4 py-12">
+        <Badge tone="brand">Pricing beta</Badge>
+        <h1 className="mt-4 max-w-2xl text-4xl font-black text-slate-950">Pilih seberapa keras deadline perlu ngejar kamu.</h1>
+        <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-600">
+          Payment gateway belum diaktifkan. Untuk MVP, upgrade dilakukan lewat manual transfer/QRIS dan admin confirm manual.
+        </p>
+        <div className="mt-8 grid gap-4 md:grid-cols-3">
           {PLANS.map((plan) => (
-            <div
-              key={plan.id}
-              className={`rounded-lg border bg-white p-6 shadow-sm ${plan.featured ? 'border-brand-300 ring-2 ring-brand-100' : 'border-slate-200'}`}
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h2 className="text-2xl font-black">{plan.name}</h2>
-                  <p className="mt-1 text-sm text-slate-500">{plan.note}</p>
-                </div>
-                {plan.featured && (
-                  <span className="rounded-full bg-brand-600 px-3 py-1 text-xs font-black text-white">
-                    Best value
-                  </span>
-                )}
-              </div>
-              <div className="mt-6">
-                <span className="text-4xl font-black">{plan.price}</span>
-                <span className="text-sm font-semibold text-slate-500"> / bulan</span>
-              </div>
-              <Link
-                href={plan.id === 'free' ? plan.href : checkoutHref(plan.id)}
-                className={`mt-6 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-black transition ${plan.featured ? 'bg-brand-600 text-white hover:bg-brand-700' : 'bg-slate-950 text-white hover:bg-slate-800'}`}
-              >
-                {plan.id === 'free' ? <BookOpen className="h-4 w-4" /> : <CreditCard className="h-4 w-4" />}
-                {plan.cta}
-              </Link>
-              <div className="mt-6 space-y-3">
-                {plan.features.map((feature) => (
-                  <div key={feature} className="flex gap-3 text-sm leading-6 text-slate-700">
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-600" />
-                    {feature}
-                  </div>
-                ))}
-                {plan.missing.map((feature) => (
-                  <div key={feature} className="flex gap-3 text-sm leading-6 text-slate-400">
-                    <XCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
-                    {feature}
-                  </div>
-                ))}
-              </div>
-            </div>
+            <Card key={plan.id} className={plan.highlighted ? 'border-brand-300 ring-2 ring-brand-100' : ''}>
+              <CardContent>
+                <h2 className="text-lg font-black text-slate-950">{plan.name}</h2>
+                <p className="mt-1 text-sm leading-6 text-slate-500">{plan.positioning}</p>
+                <p className="mt-5 text-3xl font-black text-slate-950">{plan.price}<span className="text-sm font-semibold text-slate-500">{plan.suffix}</span></p>
+                <ul className="mt-6 space-y-3">
+                  {plan.features.map((feature) => (
+                    <li key={feature} className="flex gap-2 text-sm leading-5 text-slate-700">
+                      <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-600" />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href={plan.id === 'radar' ? '/login?mode=signup' : '/dashboard/billing'}
+                  className={`mt-6 inline-flex w-full items-center justify-center rounded-lg px-4 py-3 text-sm font-bold ${
+                    plan.highlighted ? 'bg-brand-600 text-white hover:bg-brand-700' : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
+                  }`}
+                >
+                  {plan.id === 'radar' ? 'Mulai Radar' : 'Ajukan Upgrade'}
+                </Link>
+              </CardContent>
+            </Card>
           ))}
         </div>
-      </section>
-
-      <section className="border-y border-slate-200 bg-white">
-        <div className="mx-auto grid max-w-7xl gap-5 px-6 py-10 md:grid-cols-4">
-          {[
-            { icon: ShieldCheck, title: 'RLS-ready', desc: 'Akses data dipisah per user lewat Supabase policy.' },
-            { icon: Store, title: 'Monetizable', desc: 'Marketplace seller hanya untuk akun berbayar.' },
-            { icon: MessageCircle, title: `${BRAND.paymentProvider} flow`, desc: `Checkout diarahkan ke request pembayaran ${BRAND.paymentProvider}.` },
-            { icon: Lock, title: 'Freemium gate', desc: 'Free bisa coba, Basic/Pro membuka fitur bernilai.' },
-          ].map(({ icon: Icon, title, desc }) => (
-            <div key={title} className="rounded-lg border border-slate-200 bg-slate-50 p-5">
-              <Icon className="h-6 w-6 text-brand-600" />
-              <h3 className="mt-4 font-black">{title}</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{desc}</p>
-            </div>
-          ))}
+        <div className="mt-6 flex gap-3 rounded-lg border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-600">
+          <LockKeyhole className="mt-0.5 h-5 w-5 flex-shrink-0 text-brand-700" />
+          <p>AI Quick Add dan Ask NEXA masih locked preview. Copy-nya jujur: fitur ini roadmap, bukan klaim sudah jalan. {BRAND.disclaimer}</p>
         </div>
-      </section>
-
-      <section className="mx-auto grid max-w-7xl gap-8 px-6 py-12 lg:grid-cols-[1fr_360px]">
-        <div>
-          <h2 className="text-3xl font-black">FAQ sebelum bayar</h2>
-          <div className="mt-6 space-y-4">
-            {FAQ.map((item) => (
-              <div key={item.q} className="rounded-lg border border-slate-200 bg-white p-5">
-                <h3 className="flex items-center gap-2 font-black">
-                  <HelpCircle className="h-4 w-4 text-brand-600" />
-                  {item.q}
-                </h3>
-                <p className="mt-2 text-sm leading-6 text-slate-600">{item.a}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-        <aside className="rounded-lg border border-brand-200 bg-brand-50 p-6">
-          <Sparkles className="h-8 w-8 text-brand-700" />
-          <h2 className="mt-4 text-2xl font-black">Butuh paket kampus?</h2>
-          <p className="mt-3 text-sm leading-6 text-brand-900">
-            Untuk himpunan, kelas, atau komunitas mahasiswa, kamu bisa jual paket bulk manual dengan aktivasi admin.
-          </p>
-          <Link href="/contact" className="mt-5 inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-3 text-sm font-black text-white hover:bg-brand-700">
-            <Users className="h-4 w-4" />
-            Diskusi Paket
-          </Link>
-        </aside>
       </section>
     </main>
   )
