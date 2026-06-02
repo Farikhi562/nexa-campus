@@ -4,21 +4,19 @@ import { createClient } from '@/lib/supabase/server'
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
-  const errorDescription = searchParams.get('error_description')
-
-  if (errorDescription) {
-    return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(errorDescription)}`)
-  }
+  const nextParam = searchParams.get('next') || '/dashboard'
+  const next = nextParam.startsWith('/') && !nextParam.startsWith('//') ? nextParam : '/dashboard'
 
   if (!code) {
-    return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent('Kode OAuth tidak ditemukan.')}`)
+    return NextResponse.redirect(`${origin}/login?error=missing_code`)
   }
 
   const supabase = await createClient()
   const { error } = await supabase.auth.exchangeCodeForSession(code)
 
   if (error) {
-    return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(error.message)}`)
+    console.error('[Auth Callback] exchange error:', error)
+    return NextResponse.redirect(`${origin}/login?error=auth_callback_failed`)
   }
 
   const {
@@ -26,7 +24,7 @@ export async function GET(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent('Session user tidak ditemukan.')}`)
+    return NextResponse.redirect(`${origin}/login?error=auth_callback_failed`)
   }
 
   const { data: existing } = await supabase
@@ -45,5 +43,5 @@ export async function GET(request: NextRequest) {
     })
   }
 
-  return NextResponse.redirect(`${origin}${existing?.profile_completed ? '/dashboard' : '/onboarding'}`)
+  return NextResponse.redirect(`${origin}${next}`)
 }

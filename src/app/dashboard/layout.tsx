@@ -17,7 +17,22 @@ export default async function DashboardLayout({ children }: { children: React.Re
     .eq('id', user.id)
     .maybeSingle()
 
-  if (!profile || !profile.profile_completed) redirect('/onboarding')
+  const shellProfile = (profile ?? {
+    id: user.id,
+    email: user.email ?? '',
+    full_name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
+    campus_name: null,
+    major: null,
+    semester: null,
+    student_id: null,
+    phone_number: null,
+    telegram_chat_id: null,
+    whatsapp_number: null,
+    plan: 'radar',
+    profile_completed: false,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  }) as Profile
 
-  return <AppShell profile={profile as Profile}>{children}</AppShell>
+  return <AppShell profile={shellProfile}>{children}</AppShell>
 }

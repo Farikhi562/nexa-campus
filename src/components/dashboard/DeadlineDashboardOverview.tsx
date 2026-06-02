@@ -2,12 +2,10 @@
 
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
-import { AlertTriangle, BellOff, CalendarDays, Check, CheckCircle2, Clock, Flame, Plus, TimerReset } from 'lucide-react'
+import { AlertTriangle, BellOff, CalendarDays, Check, CheckCircle2, Clock, Flame, Pencil, Plus, RotateCcw, Trash2, TimerReset } from 'lucide-react'
 import Badge from '@/components/ui/Badge'
-import Button from '@/components/ui/Button'
 import { Card, CardContent } from '@/components/ui/Card'
 import AskNexaWidget from '@/components/dashboard/AskNexaWidget'
-import { createClient } from '@/lib/supabase/client'
 import {
   countDashboardStats,
   formatDeadlineDate,
@@ -25,6 +23,8 @@ type DeadlineDashboardOverviewProps = {
   initialDeadlines: AcademicDeadline[]
   userName?: string | null
   showCreatedMessage?: boolean
+  showUpdatedMessage?: boolean
+  showDeletedMessage?: boolean
 }
 
 const summaryMeta = [
@@ -62,11 +62,13 @@ export default function DeadlineDashboardOverview({
   initialDeadlines,
   userName,
   showCreatedMessage = false,
+  showUpdatedMessage = false,
+  showDeletedMessage = false,
 }: DeadlineDashboardOverviewProps) {
-  const supabase = useMemo(() => createClient(), [])
   const [deadlines, setDeadlines] = useState(() => [...initialDeadlines].sort(sortNearest))
   const [busyId, setBusyId] = useState<string | null>(null)
   const [actionError, setActionError] = useState('')
+  const [actionMessage, setActionMessage] = useState('')
 
   const stats = useMemo(() => countDashboardStats(deadlines), [deadlines])
   const activeDeadlines = deadlines.filter((deadline) => deadline.status !== 'completed')
@@ -75,26 +77,53 @@ export default function DeadlineDashboardOverview({
     deadline.priority === 'high' || deadline.priority === 'urgent'
   ).length
 
-  async function markComplete(deadline: AcademicDeadline) {
+  async function updateStatus(deadline: AcademicDeadline, status: 'completed' | 'pending') {
     setBusyId(deadline.id)
     setActionError('')
+    setActionMessage('')
 
-    const { error } = await supabase
-      .from('academic_deadlines')
-      .update({ status: 'completed' })
-      .eq('id', deadline.id)
+    const response = await fetch(`/api/deadlines/${deadline.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode: 'status', status }),
+    })
+    const result = (await response.json().catch(() => null)) as { data?: AcademicDeadline; error?: string } | null
 
-    if (error) {
-      setActionError(error.message)
+    if (!response.ok || !result?.data) {
+      setActionError(result?.error || 'Status deadline gagal diubah. Coba lagi sebentar.')
       setBusyId(null)
       return
     }
 
     setDeadlines((current) =>
       current
-        .map((item) => (item.id === deadline.id ? { ...item, status: 'completed' as const } : item))
+        .map((item) => (item.id === deadline.id ? result.data! : item))
         .sort(sortNearest)
     )
+    setActionMessage(status === 'completed' ? 'Deadline selesai. Satu beban hidup berkurang.' : 'Deadline dibalikin ke pending.')
+    setBusyId(null)
+  }
+
+  async function deleteDeadline(deadline: AcademicDeadline) {
+    if (!confirm('Yakin mau hapus deadline ini? Kalau sudah dihapus, NEXA nggak bisa nyelametin dia lagi.')) return
+
+    setBusyId(deadline.id)
+    setActionError('')
+    setActionMessage('')
+
+    const response = await fetch(`/api/deadlines/${deadline.id}`, {
+      method: 'DELETE',
+    })
+    const result = (await response.json().catch(() => null)) as { error?: string } | null
+
+    if (!response.ok) {
+      setActionError(result?.error || 'Deadline gagal dihapus. Coba lagi sebentar.')
+      setBusyId(null)
+      return
+    }
+
+    setDeadlines((current) => current.filter((item) => item.id !== deadline.id))
+    setActionMessage('Deadline dihapus. Dia sudah tidak bisa ganggu dashboard kamu.')
     setBusyId(null)
   }
 
@@ -104,6 +133,20 @@ export default function DeadlineDashboardOverview({
         <div className="flex gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-emerald-800">
           <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0" />
           <p>Deadline baru sudah masuk. Sekarang dia resmi kelihatan, jadi susah pura-pura lupa.</p>
+        </div>
+      )}
+
+      {showUpdatedMessage && (
+        <div className="flex gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-emerald-800">
+          <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0" />
+          <p>Deadline berhasil diupdate. Versi terbaru sudah nongol di dashboard.</p>
+        </div>
+      )}
+
+      {showDeletedMessage && (
+        <div className="flex gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-emerald-800">
+          <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0" />
+          <p>Deadline berhasil dihapus. Dashboard jadi sedikit lebih lega.</p>
         </div>
       )}
 
@@ -168,6 +211,12 @@ export default function DeadlineDashboardOverview({
         </div>
       )}
 
+      {actionMessage && (
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-emerald-800">
+          {actionMessage}
+        </div>
+      )}
+
       <section className="rounded-3xl border border-slate-200 bg-white shadow-sm">
         <div className="border-b border-slate-100 p-4 sm:p-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -209,14 +258,14 @@ export default function DeadlineDashboardOverview({
                   <div className="flex gap-3">
                     <button
                       type="button"
-                      onClick={() => markComplete(deadline)}
-                      disabled={busyId === deadline.id || isDone}
+                      onClick={() => updateStatus(deadline, isDone ? 'pending' : 'completed')}
+                      disabled={busyId === deadline.id}
                       className={`focus-ring mt-1 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-xl border transition ${
                         isDone
-                          ? 'border-emerald-500 bg-emerald-500 text-white'
+                          ? 'border-emerald-500 bg-emerald-500 text-white hover:bg-emerald-600'
                           : 'border-slate-300 bg-white text-transparent hover:border-teal-500 hover:text-teal-600'
                       }`}
-                      aria-label={`Tandai ${getDisplayTitle(deadline)} selesai`}
+                      aria-label={isDone ? `Balikin ${getDisplayTitle(deadline)} ke pending` : `Tandai ${getDisplayTitle(deadline)} selesai`}
                     >
                       <Check className="h-4 w-4" />
                     </button>
@@ -255,6 +304,34 @@ export default function DeadlineDashboardOverview({
                         Lokasi: <span className="font-bold text-slate-700">{deadline.campus} • {deadline.room}</span>
                         {deadline.location_note ? ` • ${deadline.location_note}` : ''}
                       </p>
+
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        <Link
+                          href={`/dashboard/deadlines/${deadline.id}/edit`}
+                          className="focus-ring inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 transition hover:bg-slate-50"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                          Edit
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => updateStatus(deadline, isDone ? 'pending' : 'completed')}
+                          disabled={busyId === deadline.id}
+                          className="focus-ring inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 transition hover:bg-slate-50 disabled:opacity-60"
+                        >
+                          {isDone ? <RotateCcw className="h-3.5 w-3.5" /> : <Check className="h-3.5 w-3.5" />}
+                          {isDone ? 'Balikin ke pending' : 'Tandai selesai'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => deleteDeadline(deadline)}
+                          disabled={busyId === deadline.id}
+                          className="focus-ring inline-flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-black text-red-700 transition hover:bg-red-100 disabled:opacity-60"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                          Hapus
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </article>

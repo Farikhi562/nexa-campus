@@ -6,7 +6,7 @@ import type { AcademicDeadline, Profile } from '@/types'
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams?: { created?: string }
+  searchParams?: { created?: string; updated?: string; deleted?: string }
 }) {
   const supabase = await createClient()
   const {
@@ -39,6 +39,8 @@ export default async function DashboardPage({
       initialDeadlines={((deadlines ?? []) as AcademicDeadline[]).sort(sortNearest)}
       userName={(profile as Pick<Profile, 'full_name'> | null)?.full_name}
       showCreatedMessage={searchParams?.created === 'deadline'}
+      showUpdatedMessage={searchParams?.updated === 'deadline'}
+      showDeletedMessage={searchParams?.deleted === 'deadline'}
     />
   )
 }

@@ -1,5 +1,6 @@
 import 'server-only'
 import { createServerClient } from '@supabase/ssr'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 
 type CookieStore = Awaited<ReturnType<typeof cookies>>
@@ -31,5 +32,16 @@ export async function createClient() {
         },
       },
     }
+  )
+}
+
+export function createServiceClient() {
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error('SUPABASE_SERVICE_ROLE_KEY is required for service client')
+  }
+
+  return createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
   )
 }

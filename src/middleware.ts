@@ -39,6 +39,19 @@ export async function middleware(request: NextRequest) {
 
   const path = request.nextUrl.pathname
 
+  const publicPaths = [
+    '/',
+    '/login',
+    '/register',
+    '/forgot-password',
+    '/reset-password',
+    '/auth/callback',
+    '/auth/update-password',
+    '/privacy',
+    '/terms',
+    '/pricing',
+  ]
+  const isPublic = publicPaths.some((p) => path === p || path.startsWith(`${p}/`))
   const protectedPaths = ['/dashboard', '/onboarding', '/admin']
   const isProtected = protectedPaths.some(p => path.startsWith(p))
 
@@ -52,6 +65,10 @@ export async function middleware(request: NextRequest) {
     const url = request.nextUrl.clone()
     url.pathname = '/dashboard'
     return NextResponse.redirect(url)
+  }
+
+  if (isPublic) {
+    return response
   }
 
   return response

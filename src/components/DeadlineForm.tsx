@@ -1,8 +1,7 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
 import Button from '@/components/ui/Button'
 import { DEADLINE_SOURCES, DEADLINE_STATUSES, DEADLINE_TYPES, PRIORITIES } from '@/lib/nexa-data'
 import type { AcademicDeadline, DeadlinePriority, DeadlineSource, DeadlineStatus, DeadlineType, Profile } from '@/types'
@@ -82,9 +81,9 @@ export default function DeadlineForm({
   activeCount: number
 }) {
   const router = useRouter()
-  const supabase = useMemo(() => createClient(), [])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const isEditing = Boolean(deadline)
 
   function validate(payload: {
@@ -165,19 +164,44 @@ export default function DeadlineForm({
       return
     }
 
-    const { error: saveError } = await supabase
-      .from('academic_deadlines')
-      .update(payload)
-      .eq('id', deadline!.id)
+    const response = await fetch(`/api/deadlines/${deadline!.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
 
+    const result = (await response.json().catch(() => null)) as { error?: string } | null
     setLoading(false)
 
-    if (saveError) {
-      setError(saveError.message)
+    if (!response.ok) {
+      setError(result?.error || 'Deadline gagal diupdate. Coba lagi sebentar.')
       return
     }
 
-    router.push('/dashboard/deadlines')
+    router.push('/dashboard?updated=deadline')
+    router.refresh()
+  }
+
+  async function deleteDeadline() {
+    if (!deadline) return
+    if (!confirm('Yakin mau hapus deadline ini? Kalau sudah dihapus, NEXA nggak bisa nyelametin dia lagi.')) return
+
+    setDeleting(true)
+    setError('')
+
+    const response = await fetch(`/api/deadlines/${deadline.id}`, {
+      method: 'DELETE',
+    })
+    const result = (await response.json().catch(() => null)) as { error?: string } | null
+
+    setDeleting(false)
+
+    if (!response.ok) {
+      setError(result?.error || 'Deadline gagal dihapus. Coba lagi sebentar.')
+      return
+    }
+
+    router.push('/dashboard?deleted=deadline')
     router.refresh()
   }
 
@@ -294,7 +318,29 @@ export default function DeadlineForm({
           <Button type="button" variant="outline" className="min-h-12 rounded-2xl" onClick={() => router.back()} disabled={loading}>
             Batal
           </Button>
+          {isEditing && (
+            <Button
+              type="button"
+              variant="danger"
+              className="hidden min-h-12 rounded-2xl sm:inline-flex"
+              onClick={deleteDeadline}
+              disabled={loading || deleting}
+            >
+              {deleting ? 'Hapus...' : 'Hapus'}
+            </Button>
+          )}
         </div>
+        {isEditing && (
+          <Button
+            type="button"
+            variant="danger"
+            className="mt-2 min-h-12 w-full rounded-2xl sm:hidden"
+            onClick={deleteDeadline}
+            disabled={loading || deleting}
+          >
+            {deleting ? 'Menghapus...' : 'Hapus Deadline'}
+          </Button>
+        )}
       </div>
     </form>
   )

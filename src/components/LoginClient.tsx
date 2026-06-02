@@ -1,7 +1,8 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import {
   ArrowRight,
   BellRing,
@@ -20,6 +21,7 @@ import NexaLogo from '@/components/NexaLogo'
 type Mode = 'login' | 'signup' | 'forgot'
 
 export default function LoginClient({ initialMode = 'login' }: { initialMode?: Mode }) {
+  const router = useRouter()
   const supabase = useMemo(() => createClient(), [])
   const [mode, setMode] = useState<Mode>(initialMode)
   const [email, setEmail] = useState('')
@@ -27,8 +29,24 @@ export default function LoginClient({ initialMode = 'login' }: { initialMode?: M
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
 
-  function getAppUrl() {
-    return process.env.NEXT_PUBLIC_APP_URL || window.location.origin
+  useEffect(() => {
+    const urlError = new URLSearchParams(window.location.search).get('error')
+    if (urlError) {
+      setError(getSafeAuthError(urlError))
+    }
+
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) {
+        router.replace('/dashboard')
+      }
+    })
+  }, [router, supabase])
+
+  function getSafeAuthError(value: string) {
+    if (value === 'missing_code') return 'Kode login tidak ditemukan. Coba login ulang.'
+    if (value === 'auth_callback_failed') return 'Login gagal diproses. Coba lagi sebentar.'
+    if (value === 'reset_success') return 'Password berhasil diubah. Kamu bisa lanjut masuk lagi.'
+    return 'Ada masalah saat autentikasi. Coba lagi sebentar.'
   }
 
   async function signInWithGoogle() {
@@ -36,10 +54,12 @@ export default function LoginClient({ initialMode = 'login' }: { initialMode?: M
     setError('')
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${getAppUrl()}/auth/callback` },
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+      },
     })
     if (oauthError) {
-      setError(oauthError.message)
+      setError('Google login gagal dimulai. Coba lagi sebentar.')
       setLoading(false)
     }
   }
@@ -51,12 +71,12 @@ export default function LoginClient({ initialMode = 'login' }: { initialMode?: M
     setMessage('')
 
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-      redirectTo: `${getAppUrl()}/login`,
+      redirectTo: `${window.location.origin}/auth/callback?next=/auth/update-password`,
     })
 
     setLoading(false)
     if (resetError) {
-      setError(resetError.message)
+      setError('Link reset gagal dikirim. Coba cek email dan ulangi sebentar lagi.')
       return
     }
     setMessage('Link reset dikirim kalau email ini terdaftar. Cek inbox atau spam ya.')
