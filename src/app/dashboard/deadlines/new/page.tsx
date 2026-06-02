@@ -1,6 +1,5 @@
-import DeadlineForm from '@/components/DeadlineForm'
-import { Card, CardContent } from '@/components/ui/Card'
 import { createClient } from '@/lib/supabase/server'
+import DeadlineForm from '@/components/DeadlineForm'
 import type { Profile } from '@/types'
 
 export default async function NewDeadlinePage() {
@@ -16,16 +15,20 @@ export default async function NewDeadlinePage() {
   ])
 
   return (
-    <div className="space-y-5">
-      <div>
-        <h1 className="text-2xl font-black text-slate-950">Quick Add Deadline</h1>
-        <p className="mt-1 text-sm text-slate-500">Manual dulu. Cepat, jelas, tidak perlu buka banyak tab lagi.</p>
+    <div className="mx-auto max-w-3xl space-y-5">
+      <div className="overflow-hidden rounded-3xl border border-slate-200 bg-slate-950 text-white shadow-xl shadow-slate-200">
+        <div className="relative p-5 sm:p-6">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_86%_18%,rgba(20,184,166,0.28),transparent_18rem)]" />
+          <div className="relative">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-teal-200">Quick Add Manual</p>
+            <h1 className="mt-2 text-2xl font-black tracking-tight sm:text-3xl">Tambah deadline tanpa drama.</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
+              Catat dari VClass, iLab, dosen, grup WA, Studentsite, BAAK, Lepkom, atau sumber lain. Password kampus? Nggak usah.
+            </p>
+          </div>
+        </div>
       </div>
-      <Card>
-        <CardContent>
-          <DeadlineForm profile={profile as Profile} activeCount={count ?? 0} />
-        </CardContent>
-      </Card>
+      <DeadlineForm profile={profile as Profile} activeCount={count ?? 0} />
     </div>
   )
 }

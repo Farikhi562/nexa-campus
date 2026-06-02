@@ -63,16 +63,16 @@ export default function LoginClient({ initialMode = 'login' }: { initialMode?: M
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#020617] text-white">
+    <main className="auth-page">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_14%,rgba(20,184,166,0.24),transparent_28rem),radial-gradient(circle_at_78%_22%,rgba(56,189,248,0.14),transparent_26rem),linear-gradient(135deg,#020617_0%,#07111f_42%,#0f172a_100%)]" />
-        <div className="absolute inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,0.7)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.7)_1px,transparent_1px)] [background-size:56px_56px]" />
+        <div className="auth-ambient absolute inset-0" />
+        <div className="auth-grid-pattern absolute inset-0 opacity-[0.08]" />
         <div className="absolute left-[-8rem] top-[-8rem] h-80 w-80 rounded-full border border-teal-300/10" />
         <div className="absolute left-[-3rem] top-[-3rem] h-56 w-56 rounded-full border border-cyan-200/10" />
       </div>
 
       <div className="relative mx-auto grid min-h-screen w-full max-w-7xl gap-6 px-4 py-5 sm:px-6 lg:grid-cols-[1.02fr_0.98fr] lg:gap-10 lg:px-8 lg:py-8">
-        <section className="order-2 flex flex-col justify-between rounded-[2rem] border border-white/10 bg-white/[0.035] p-5 shadow-2xl shadow-black/30 backdrop-blur-xl sm:p-8 lg:order-1">
+        <section className="auth-shell-panel auth-fade-up-delayed order-2 flex flex-col justify-between p-5 sm:p-8 lg:order-1">
           <div className="flex items-center justify-between gap-4">
             <Link href="/" className="flex items-center gap-3">
               <NexaLogo className="h-12 w-12" />
@@ -117,7 +117,7 @@ export default function LoginClient({ initialMode = 'login' }: { initialMode?: M
             <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-4 text-sm leading-6 text-slate-300">
               NEXA tidak meminta password VClass, iLab, Studentsite, atau platform kampus mana pun. Data yang disimpan hanya profil dan deadline yang kamu input sendiri.
             </div>
-            <div className="relative hidden h-28 w-28 overflow-hidden rounded-3xl border border-teal-200/10 bg-teal-100/5 lg:block">
+            <div className="auth-radar-tile">
               <Radar className="absolute left-1/2 top-1/2 h-20 w-20 -translate-x-1/2 -translate-y-1/2 text-teal-200/70" />
               <span className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-teal-200 shadow-[0_0_22px_rgba(94,234,212,0.9)]" />
             </div>
@@ -136,8 +136,8 @@ export default function LoginClient({ initialMode = 'login' }: { initialMode?: M
               </Link>
             </div>
 
-            <div className="rounded-[2rem] border border-white/15 bg-white/[0.08] p-2 shadow-2xl shadow-black/40 backdrop-blur-2xl">
-              <div className="rounded-[1.55rem] border border-white/10 bg-slate-950/80 p-5 sm:p-6">
+            <div className="auth-card-frame auth-fade-up">
+              <div className="auth-card-inner p-5 sm:p-6">
                 <div className="mb-6">
                   <div className="mb-4 flex items-center justify-between gap-3">
                     <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-slate-300">
@@ -220,7 +220,7 @@ export default function LoginClient({ initialMode = 'login' }: { initialMode?: M
                     <button
                       onClick={signInWithGoogle}
                       disabled={loading}
-                      className="group flex h-[52px] min-h-[52px] w-full items-center justify-center gap-3 rounded-2xl border border-white/10 bg-white px-4 py-3.5 text-sm font-black text-slate-950 shadow-xl shadow-black/25 transition duration-200 hover:-translate-y-0.5 hover:bg-teal-50 disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-70"
+                      className="group auth-premium-button"
                     >
                       {loading ? (
                         <span className="h-5 w-5 animate-spin rounded-full border-2 border-slate-300 border-t-slate-950" />

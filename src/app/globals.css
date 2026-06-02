@@ -37,4 +37,81 @@
   .app-shell {
     @apply min-h-screen bg-slate-50;
   }
+
+  .auth-page {
+    @apply relative min-h-screen overflow-hidden bg-[#020617] text-white;
+  }
+
+  .auth-ambient {
+    background:
+      radial-gradient(circle at 18% 14%, rgba(20, 184, 166, 0.24), transparent 28rem),
+      radial-gradient(circle at 78% 22%, rgba(56, 189, 248, 0.14), transparent 26rem),
+      linear-gradient(135deg, #020617 0%, #07111f 42%, #0f172a 100%);
+  }
+
+  .auth-grid-pattern {
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.7) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.7) 1px, transparent 1px);
+    background-size: 56px 56px;
+  }
+
+  .auth-shell-panel {
+    @apply rounded-[2rem] border border-white/10 bg-white/[0.035] shadow-2xl shadow-black/30 backdrop-blur-xl;
+  }
+
+  .auth-card-frame {
+    @apply rounded-[2rem] border border-white/15 bg-white/[0.08] p-2 shadow-2xl shadow-black/40 backdrop-blur-2xl;
+  }
+
+  .auth-card-inner {
+    @apply rounded-[1.55rem] border border-white/10 bg-slate-950/80;
+  }
+
+  .auth-premium-button {
+    @apply flex h-[52px] min-h-[52px] w-full items-center justify-center gap-3 rounded-2xl border border-white/10 bg-white px-4 py-3.5 text-sm font-black text-slate-950 shadow-xl shadow-black/25 transition duration-200 hover:-translate-y-0.5 hover:bg-teal-50 disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-70;
+  }
+
+  .auth-radar-tile {
+    @apply relative hidden h-28 w-28 overflow-hidden rounded-3xl border border-teal-200/10 bg-teal-100/5 lg:block;
+  }
+
+  .auth-radar-tile::after {
+    content: '';
+    position: absolute;
+    inset: 50% 50% auto auto;
+    width: 48%;
+    height: 1px;
+    transform-origin: left center;
+    background: linear-gradient(90deg, rgba(94, 234, 212, 0.85), transparent);
+    animation: auth-radar-sweep 4s linear infinite;
+  }
+
+  .auth-fade-up {
+    animation: auth-fade-up 520ms ease-out both;
+  }
+
+  .auth-fade-up-delayed {
+    animation: auth-fade-up 680ms ease-out both;
+  }
+
+  @keyframes auth-radar-sweep {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes auth-fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }

@@ -1,4 +1,4 @@
-import type { DeadlinePriority, DeadlineSource, DeadlineType, Plan } from '@/types'
+import type { DeadlinePriority, DeadlineSource, DeadlineStatus, DeadlineType, Plan } from '@/types'
 
 export const PLAN_LABELS: Record<Plan, string> = {
   radar: 'NEXA Radar',
@@ -85,6 +85,13 @@ export const PRIORITIES: Array<{ value: DeadlinePriority; label: string }> = [
   { value: 'normal', label: 'Normal' },
   { value: 'high', label: 'High' },
   { value: 'urgent', label: 'Urgent' },
+]
+
+export const DEADLINE_STATUSES: Array<{ value: DeadlineStatus; label: string }> = [
+  { value: 'pending', label: 'Pending' },
+  { value: 'in_progress', label: 'In progress' },
+  { value: 'completed', label: 'Completed' },
+  { value: 'overdue', label: 'Overdue' },
 ]
 
 export function getTypeLabel(type: DeadlineType) {
