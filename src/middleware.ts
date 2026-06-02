@@ -1,41 +1,50 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { createServerClient } from '@supabase/ssr'
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import type { ResponseCookie } from 'next/dist/compiled/@edge-runtime/cookies'
-
-type CookieToSet = {
-  name: string
-  value: string
-  options?: Partial<ResponseCookie>
-}
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({
     request: { headers: request.headers },
   })
 
+  const cookieMethods = {
+    getAll() {
+      return request.cookies.getAll()
+    },
+    setAll(cookiesToSet: Array<{ name: string; value: string; options: CookieOptions }>) {
+      cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+      response = NextResponse.next({ request })
+      cookiesToSet.forEach(({ name, value, options }) => {
+        response.cookies.set(name, value, options as Partial<ResponseCookie>)
+      })
+    },
+    get(name: string) {
+      return request.cookies.get(name)?.value
+    },
+    set(name: string, value: string, options: CookieOptions) {
+      request.cookies.set(name, value)
+      response = NextResponse.next({ request })
+      response.cookies.set(name, value, options as Partial<ResponseCookie>)
+    },
+    remove(name: string, options: CookieOptions) {
+      request.cookies.set(name, '')
+      response = NextResponse.next({ request })
+      response.cookies.set(name, '', { ...(options as Partial<ResponseCookie>), maxAge: 0 })
+    },
+  }
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll(cookiesToSet: CookieToSet[]) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
-          )
-          response = NextResponse.next({ request })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options)
-          )
-        },
-      },
+      cookies: cookieMethods,
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
   const path = request.nextUrl.pathname
 
@@ -52,8 +61,8 @@ export async function middleware(request: NextRequest) {
     '/pricing',
   ]
   const isPublic = publicPaths.some((p) => path === p || path.startsWith(`${p}/`))
-  const protectedPaths = ['/dashboard', '/onboarding', '/admin']
-  const isProtected = protectedPaths.some(p => path.startsWith(p))
+  const protectedPaths = ['/dashboard', '/onboarding', '/admin', '/profile']
+  const isProtected = protectedPaths.some((p) => path.startsWith(p))
 
   if (isProtected && !user) {
     const url = request.nextUrl.clone()
