@@ -59,6 +59,7 @@ export async function middleware(request: NextRequest) {
     '/privacy',
     '/terms',
     '/pricing',
+    '/support',
   ]
   const isPublic = publicPaths.some((p) => path === p || path.startsWith(`${p}/`))
   const protectedPaths = ['/dashboard', '/onboarding', '/admin', '/profile']

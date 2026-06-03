@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { LogOut } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
-export default function AuthStatusActions() {
+export default function AuthStatusActions({ variant = 'light' }: { variant?: 'light' | 'dark' }) {
   const [isAuthed, setIsAuthed] = useState(false)
   const supabase = useMemo(() => createClient(), [])
 
@@ -21,12 +21,19 @@ export default function AuthStatusActions() {
   if (isAuthed) {
     return (
       <div className="flex items-center gap-2">
-        <Link href="/dashboard" className="hidden text-sm font-bold text-slate-600 hover:text-brand-700 sm:inline">
+        <Link
+          href="/dashboard"
+          className={`hidden text-sm font-bold sm:inline ${variant === 'dark' ? 'text-slate-200 hover:text-teal-100' : 'text-slate-600 hover:text-brand-700'}`}
+        >
           Dashboard
         </Link>
         <button
           onClick={signOut}
-          className="focus-ring inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50"
+          className={`focus-ring inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-bold ${
+            variant === 'dark'
+              ? 'border border-white/15 bg-white/5 text-white hover:bg-white/10'
+              : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
+          }`}
         >
           <LogOut className="h-4 w-4" />
           Logout
@@ -37,12 +44,19 @@ export default function AuthStatusActions() {
 
   return (
     <div className="flex items-center gap-2">
-      <Link href="/login" className="text-sm font-bold text-slate-600 hover:text-brand-700">
+      <Link
+        href="/login"
+        className={`text-sm font-bold ${variant === 'dark' ? 'text-slate-200 hover:text-teal-100' : 'text-slate-600 hover:text-brand-700'}`}
+      >
         Login
       </Link>
       <Link
         href="/login?mode=signup"
-        className="rounded-lg bg-brand-600 px-3 py-2 text-sm font-bold text-white hover:bg-brand-700"
+        className={`rounded-lg px-3 py-2 text-sm font-bold ${
+          variant === 'dark'
+            ? 'bg-teal-400 text-slate-950 hover:bg-teal-300'
+            : 'bg-brand-600 text-white hover:bg-brand-700'
+        }`}
       >
         Daftar
       </Link>

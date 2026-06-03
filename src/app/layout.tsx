@@ -3,15 +3,17 @@ import { BRAND } from '@/lib/brand'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: `${BRAND.productName} - Anti Lupa Deadline Kampus`,
+  title: 'NEXA Campus - Platform Anti-Lupa Deadline Kampus',
   description:
-    `${BRAND.productName} by ${BRAND.companyName}: dashboard deadline tugas dan praktikum untuk mahasiswa, dengan reminder privacy-first.`,
+    'Dashboard deadline dan reminder akademik untuk mahasiswa. Catat tugas, praktikum, ujian, dan deadline kampus tanpa meminta password kampus.',
   keywords: ['deadline mahasiswa', 'reminder tugas', 'praktikum', 'kampus', 'NEXA Campus'],
   metadataBase: new URL(BRAND.siteUrl),
   openGraph: {
-    title: BRAND.productName,
-    description: 'Platform anti-lupa deadline untuk mahasiswa.',
+    title: 'NEXA Campus - Platform Anti-Lupa Deadline Kampus',
+    description:
+      'Dashboard deadline dan reminder akademik untuk mahasiswa. Catat tugas, praktikum, ujian, dan deadline kampus tanpa meminta password kampus.',
     url: BRAND.siteUrl,
+    siteName: `${BRAND.productName} by ${BRAND.companyName}`,
     type: 'website',
   },
 }

@@ -58,6 +58,26 @@ const summaryMeta = [
   },
 ] as const
 
+const urgencyGroups = [
+  { key: 'overdue', label: 'Overdue', copy: 'Yang ini sudah lewat. Mode beresin satu-satu.' },
+  { key: 'today', label: 'Today', copy: 'Deadline jangan diajak bercanda hari ini.' },
+  { key: 'tomorrow', label: 'Tomorrow', copy: 'Besok sudah nunggu. Santai, tapi jangan hilang.' },
+  { key: 'week', label: 'This week', copy: 'Masih minggu ini, tetap perlu kelihatan.' },
+  { key: 'later', label: 'Later', copy: 'Belum dekat, tapi sudah aman karena tercatat.' },
+] as const
+
+type UrgencyGroupKey = (typeof urgencyGroups)[number]['key']
+
+function getUrgencyGroup(deadline: AcademicDeadline): UrgencyGroupKey {
+  const urgency = getUrgency(deadline)
+  if (deadline.status !== 'completed' && urgency.label === 'Terlambat') return 'overdue'
+  if (deadline.status === 'completed') return 'later'
+  if (urgency.days === 0) return 'today'
+  if (urgency.days === 1) return 'tomorrow'
+  if (urgency.days > 1 && urgency.days <= 7) return 'week'
+  return 'later'
+}
+
 export default function DeadlineDashboardOverview({
   initialDeadlines,
   userName,
@@ -71,6 +91,12 @@ export default function DeadlineDashboardOverview({
   const [actionMessage, setActionMessage] = useState('')
 
   const stats = useMemo(() => countDashboardStats(deadlines), [deadlines])
+  const groupedDeadlines = useMemo(() => {
+    return urgencyGroups.map((group) => ({
+      ...group,
+      items: deadlines.filter((deadline) => getUrgencyGroup(deadline) === group.key),
+    }))
+  }, [deadlines])
   const activeDeadlines = deadlines.filter((deadline) => deadline.status !== 'completed')
   const nearestDeadline = activeDeadlines[0]
   const highPriorityCount = activeDeadlines.filter((deadline) =>
@@ -249,92 +275,106 @@ export default function DeadlineDashboardOverview({
           </div>
         ) : (
           <div className="divide-y divide-slate-100">
-            {deadlines.slice(0, 12).map((deadline) => {
-              const urgency = getUrgency(deadline)
-              const isDone = deadline.status === 'completed'
+            {groupedDeadlines.map((group) => {
+              if (group.items.length === 0) return null
 
               return (
-                <article key={deadline.id} className="p-4 transition hover:bg-slate-50/80 sm:p-5">
-                  <div className="flex gap-3">
-                    <button
-                      type="button"
-                      onClick={() => updateStatus(deadline, isDone ? 'pending' : 'completed')}
-                      disabled={busyId === deadline.id}
-                      className={`focus-ring mt-1 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-xl border transition ${
-                        isDone
-                          ? 'border-emerald-500 bg-emerald-500 text-white hover:bg-emerald-600'
-                          : 'border-slate-300 bg-white text-transparent hover:border-teal-500 hover:text-teal-600'
-                      }`}
-                      aria-label={isDone ? `Balikin ${getDisplayTitle(deadline)} ke pending` : `Tandai ${getDisplayTitle(deadline)} selesai`}
-                    >
-                      <Check className="h-4 w-4" />
-                    </button>
-
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
-                        <div className="min-w-0">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <h3 className={`text-base font-black text-slate-950 ${isDone ? 'line-through decoration-slate-400' : ''}`}>
-                              {getDisplayTitle(deadline)}
-                            </h3>
-                            <Badge tone={urgency.tone}>{urgency.label}</Badge>
-                            <Badge tone={getPriorityTone(deadline.priority)}>{deadline.priority}</Badge>
-                          </div>
-                          <p className="mt-1 text-sm font-semibold text-slate-600">{deadline.course_name}</p>
-                        </div>
-
-                        <div className="flex items-center gap-2 text-sm font-bold text-slate-700 lg:flex-shrink-0">
-                          <Clock className="h-4 w-4 text-slate-400" />
-                          <span>{formatDeadlineDate(deadline)}</span>
-                          <span className="text-slate-300">•</span>
-                          <span>{formatDeadlineTime(deadline)}</span>
-                        </div>
-                      </div>
-
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        <Badge tone="brand">{getTypeLabel(deadline.type)}</Badge>
-                        <Badge>{getSourceLabel(deadline.source)}</Badge>
-                        <Badge tone={getStatusTone(deadline.status)}>{deadline.status}</Badge>
-                        <Badge tone={deadline.reminder_enabled ? 'success' : 'danger'}>
-                          {deadline.reminder_enabled ? 'Reminder on' : 'Belum ada reminder'}
-                        </Badge>
-                      </div>
-
-                      <p className="mt-3 text-sm leading-6 text-slate-500">
-                        Lokasi: <span className="font-bold text-slate-700">{deadline.campus} • {deadline.room}</span>
-                        {deadline.location_note ? ` • ${deadline.location_note}` : ''}
-                      </p>
-
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        <Link
-                          href={`/dashboard/deadlines/${deadline.id}/edit`}
-                          className="focus-ring inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 transition hover:bg-slate-50"
-                        >
-                          <Pencil className="h-3.5 w-3.5" />
-                          Edit
-                        </Link>
-                        <button
-                          type="button"
-                          onClick={() => updateStatus(deadline, isDone ? 'pending' : 'completed')}
-                          disabled={busyId === deadline.id}
-                          className="focus-ring inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 transition hover:bg-slate-50 disabled:opacity-60"
-                        >
-                          {isDone ? <RotateCcw className="h-3.5 w-3.5" /> : <Check className="h-3.5 w-3.5" />}
-                          {isDone ? 'Balikin ke pending' : 'Tandai selesai'}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => deleteDeadline(deadline)}
-                          disabled={busyId === deadline.id}
-                          className="focus-ring inline-flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-black text-red-700 transition hover:bg-red-100 disabled:opacity-60"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                          Hapus
-                        </button>
-                      </div>
+                <div key={group.key}>
+                  <div className="bg-slate-50/70 px-4 py-3 sm:px-5">
+                    <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                      <h3 className="text-sm font-black uppercase tracking-wide text-slate-700">{group.label}</h3>
+                      <p className="text-xs leading-5 text-slate-500">{group.copy}</p>
                     </div>
                   </div>
-                </article>
+                  {group.items.map((deadline) => {
+                    const urgency = getUrgency(deadline)
+                    const isDone = deadline.status === 'completed'
+
+                    return (
+                      <article key={deadline.id} className="p-4 transition hover:bg-slate-50/80 sm:p-5">
+                        <div className="flex gap-3">
+                          <button
+                            type="button"
+                            onClick={() => updateStatus(deadline, isDone ? 'pending' : 'completed')}
+                            disabled={busyId === deadline.id}
+                            className={`focus-ring mt-1 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-xl border transition ${
+                              isDone
+                                ? 'border-emerald-500 bg-emerald-500 text-white hover:bg-emerald-600'
+                                : 'border-slate-300 bg-white text-transparent hover:border-teal-500 hover:text-teal-600'
+                            }`}
+                            aria-label={isDone ? `Balikin ${getDisplayTitle(deadline)} ke pending` : `Tandai ${getDisplayTitle(deadline)} selesai`}
+                          >
+                            <Check className="h-4 w-4" />
+                          </button>
+
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
+                              <div className="min-w-0">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <h3 className={`text-base font-black text-slate-950 ${isDone ? 'line-through decoration-slate-400' : ''}`}>
+                                    {getDisplayTitle(deadline)}
+                                  </h3>
+                                  <Badge tone={urgency.tone}>{urgency.label}</Badge>
+                                  <Badge tone={getPriorityTone(deadline.priority)}>{deadline.priority}</Badge>
+                                </div>
+                                <p className="mt-1 text-sm font-semibold text-slate-600">{deadline.course_name}</p>
+                              </div>
+
+                              <div className="flex items-center gap-2 text-sm font-bold text-slate-700 lg:flex-shrink-0">
+                                <Clock className="h-4 w-4 text-slate-400" />
+                                <span>{formatDeadlineDate(deadline)}</span>
+                                <span className="text-slate-300">•</span>
+                                <span>{formatDeadlineTime(deadline)}</span>
+                              </div>
+                            </div>
+
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              <Badge tone="brand">{getTypeLabel(deadline.type)}</Badge>
+                              <Badge>{getSourceLabel(deadline.source)}</Badge>
+                              <Badge tone={getStatusTone(deadline.status)}>{deadline.status}</Badge>
+                              <Badge tone={deadline.reminder_enabled ? 'success' : 'danger'}>
+                                {deadline.reminder_enabled ? 'Reminder scheduled' : 'No reminder'}
+                              </Badge>
+                            </div>
+
+                            <p className="mt-3 text-sm leading-6 text-slate-500">
+                              Lokasi: <span className="font-bold text-slate-700">{deadline.campus} • {deadline.room}</span>
+                              {deadline.location_note ? ` • ${deadline.location_note}` : ''}
+                            </p>
+
+                            <div className="mt-4 flex flex-wrap gap-2">
+                              <Link
+                                href={`/dashboard/deadlines/${deadline.id}/edit`}
+                                className="focus-ring inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 transition hover:bg-slate-50"
+                              >
+                                <Pencil className="h-3.5 w-3.5" />
+                                Edit
+                              </Link>
+                              <button
+                                type="button"
+                                onClick={() => updateStatus(deadline, isDone ? 'pending' : 'completed')}
+                                disabled={busyId === deadline.id}
+                                className="focus-ring inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 transition hover:bg-slate-50 disabled:opacity-60"
+                              >
+                                {isDone ? <RotateCcw className="h-3.5 w-3.5" /> : <Check className="h-3.5 w-3.5" />}
+                                {isDone ? 'Balikin ke pending' : 'Tandai selesai'}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => deleteDeadline(deadline)}
+                                disabled={busyId === deadline.id}
+                                className="focus-ring inline-flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-black text-red-700 transition hover:bg-red-100 disabled:opacity-60"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                                Hapus
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </article>
+                    )
+                  })}
+                </div>
               )
             })}
           </div>

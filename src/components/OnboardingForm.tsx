@@ -47,6 +47,12 @@ export default function OnboardingForm({ profile }: { profile: Partial<Profile> 
 
   return (
     <form onSubmit={submit} className="space-y-4">
+      <div className="rounded-2xl border border-brand-100 bg-brand-50 p-4">
+        <p className="text-sm font-black text-brand-800">Step 1 · Confirm profile</p>
+        <p className="mt-1 text-xs leading-5 text-brand-700">
+          Data minimum dulu: nama, kampus, jurusan, dan semester.
+        </p>
+      </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="block">
           <span className="mb-1.5 block text-sm font-bold text-slate-700">Nama lengkap</span>
@@ -80,6 +86,18 @@ export default function OnboardingForm({ profile }: { profile: Partial<Profile> 
           <span className="mb-1.5 block text-sm font-bold text-slate-700">WhatsApp opsional</span>
           <input name="whatsapp_number" defaultValue={profile.whatsapp_number ?? ''} className="focus-ring w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm" />
         </label>
+      </div>
+      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+        <p className="text-sm font-black text-slate-950">Step 2 · Reminder preference</p>
+        <p className="mt-1 text-xs leading-5 text-slate-600">
+          Telegram bisa diisi untuk testing. WhatsApp masih roadmap/coming soon, jadi opsional dulu.
+        </p>
+      </div>
+      <div className="rounded-2xl border border-slate-200 bg-white p-4">
+        <p className="text-sm font-black text-slate-950">Step 3 · Add first deadline</p>
+        <p className="mt-1 text-xs leading-5 text-slate-600">
+          Setelah onboarding, kamu bisa langsung tambah deadline pertama dari dashboard. Password kampus tetap nggak diminta.
+        </p>
       </div>
       {error && <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
       <Button type="submit" disabled={loading}>{loading ? 'Menyimpan...' : 'Masuk Dashboard'}</Button>
