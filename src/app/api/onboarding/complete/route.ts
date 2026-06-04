@@ -139,74 +139,36 @@ async function insertDeadline(
   userId: string,
   deadline: { title: string; category: string; due_date: string; priority: string },
 ) {
-  const createdAt = new Date().toISOString()
-  const attempts = [
-    {
-      table: 'schedules',
-      payload: {
-        user_id: userId,
-        title: deadline.title,
-        category: deadline.category,
-        due_date: deadline.due_date,
-        priority: deadline.priority,
-        source: 'onboarding',
-        created_at: createdAt,
-        updated_at: createdAt,
-      },
-    },
-    {
-      table: 'exam_schedules',
-      payload: {
-        user_id: userId,
-        title: deadline.title,
-        category: deadline.category,
-        due_date: deadline.due_date,
-        priority: deadline.priority,
-        source: 'onboarding',
-        created_at: createdAt,
-        updated_at: createdAt,
-      },
-    },
-    {
-      table: 'exam_schedules',
-      payload: {
-        user_id: userId,
-        exam_title: deadline.title,
-        exam_type: deadline.category,
-        exam_date: deadline.due_date,
-        priority: deadline.priority,
-        created_at: createdAt,
-        updated_at: createdAt,
-      },
-    },
-    {
-      table: 'schedules',
-      payload: {
-        user_id: userId,
-        exam_title: deadline.title,
-        exam_type: deadline.category,
-        exam_date: deadline.due_date,
-        priority: deadline.priority,
-        created_at: createdAt,
-        updated_at: createdAt,
-      },
-    },
-  ]
-
-  let lastError = 'Gagal menyimpan deadline pertama.'
-  const db = supabase as unknown as {
-    from(table: string): {
-      insert(payload: Record<string, unknown>): Promise<{ error: { message: string } | null }>
-    }
+  const typeMap: Record<string, string> = {
+    UTS: 'ujian',
+    UAS: 'ujian',
+    Tugas: 'tugas',
+    Quiz: 'kuis',
+    Praktikum: 'praktikum',
+    Lainnya: 'lainnya',
+  }
+  const priorityMap: Record<string, string> = {
+    low: 'low',
+    medium: 'normal',
+    high: 'high',
   }
 
-  for (const attempt of attempts) {
-    const { error } = await db.from(attempt.table).insert(attempt.payload)
-    if (!error) return null
-    lastError = error.message
-  }
+  const { error } = await supabase.from('academic_deadlines').insert({
+    user_id: userId,
+    title: deadline.title,
+    course_name: deadline.title,
+    type: typeMap[deadline.category] ?? 'lainnya',
+    source: 'lainnya',
+    deadline_date: deadline.due_date,
+    deadline_time: '23:59',
+    campus: '-',
+    room: '-',
+    status: 'pending',
+    priority: priorityMap[deadline.priority] ?? 'normal',
+    reminder_enabled: false,
+  })
 
-  return lastError
+  return error?.message ?? null
 }
 
 function normalizeTelegramUsername(value: string) {

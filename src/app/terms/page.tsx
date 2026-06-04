@@ -1,5 +1,6 @@
-import Link from 'next/link'
-import NexaLogo from '@/components/NexaLogo'
+import { AlertTriangle, CheckCircle2 } from 'lucide-react'
+import PublicPageShell from '@/components/layout/PublicPageShell'
+import { Card, CardContent } from '@/components/ui/Card'
 
 const TERMS = [
   'NEXA Campus bukan platform resmi universitas atau kampus mana pun.',
@@ -12,28 +13,34 @@ const TERMS = [
 
 export default function TermsPage() {
   return (
-    <main className="min-h-screen bg-slate-50">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-4">
-          <Link href="/" className="flex items-center gap-3">
-            <NexaLogo className="h-9 w-9" />
-            <span className="font-black">NEXA Campus</span>
-          </Link>
-        </div>
-      </header>
-      <article className="mx-auto max-w-3xl px-4 py-10">
-        <h1 className="text-3xl font-black text-slate-950">Terms of Service</h1>
-        <p className="mt-4 text-sm leading-6 text-slate-600">
-          Dengan menggunakan NEXA Campus, user memahami bahwa produk ini adalah alat bantu pribadi untuk mencatat dan mengingat deadline.
-        </p>
-        <ul className="mt-6 space-y-3">
-          {TERMS.map((item) => (
-            <li key={item} className="rounded-lg border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-700">
-              {item}
-            </li>
-          ))}
-        </ul>
-      </article>
-    </main>
+    <PublicPageShell
+      badge="Terms of Service"
+      title="Aturan main yang singkat, jelas, dan fair."
+      description="Dengan menggunakan NEXA Campus, user memahami bahwa produk ini adalah alat bantu pribadi untuk mencatat dan mengingat deadline."
+      primaryCta={{ label: 'Mulai Pakai NEXA', href: '/login?mode=signup' }}
+      secondaryCta={{ label: 'Baca Privacy', href: '/privacy' }}
+    >
+      <Card className="border-slate-200 bg-white">
+        <CardContent>
+          <div className="flex gap-3">
+            <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600" />
+            <div>
+              <h2 className="font-black text-slate-950">Poin penting</h2>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
+                NEXA membantu mengelola deadline, tapi informasi akademik final tetap dari kanal resmi kampus.
+              </p>
+            </div>
+          </div>
+          <ul className="mt-6 grid gap-3 md:grid-cols-2">
+            {TERMS.map((item) => (
+              <li key={item} className="flex gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-700">
+                <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-600" />
+                {item}
+              </li>
+            ))}
+          </ul>
+        </CardContent>
+      </Card>
+    </PublicPageShell>
   )
 }

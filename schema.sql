@@ -62,33 +62,14 @@ alter table public.profiles
   add column if not exists created_at timestamptz not null default now(),
   add column if not exists updated_at timestamptz not null default now();
 
--- Constraints (drop dulu biar idempotent).
--- PENTING: rapikan dulu data lama yang nilainya di luar daftar valid, supaya
--- penambahan constraint tidak gagal ("violated by some row").
-
--- plan: paksa nilai aneh / kosong jadi 'radar'
-update public.profiles
-set plan = 'radar'
-where plan is null or plan not in ('radar', 'pulse', 'command');
-
+-- Constraints (drop dulu biar idempotent)
 alter table public.profiles drop constraint if exists profiles_plan_check;
 alter table public.profiles
   add constraint profiles_plan_check check (plan in ('radar', 'pulse', 'command'));
 
--- semester: nilai di luar 1..14 dikosongkan
-update public.profiles
-set semester = null
-where semester is not null and (semester < 1 or semester > 14);
-
 alter table public.profiles drop constraint if exists profiles_semester_check;
 alter table public.profiles
   add constraint profiles_semester_check check (semester is null or semester between 1 and 14);
-
--- gender: nilai di luar daftar dikosongkan
-update public.profiles
-set gender = null
-where gender is not null
-  and gender not in ('laki_laki', 'perempuan', 'lainnya', 'tidak_ingin_menyebutkan');
 
 alter table public.profiles drop constraint if exists profiles_gender_check;
 alter table public.profiles
@@ -97,11 +78,6 @@ alter table public.profiles
       'laki_laki', 'perempuan', 'lainnya', 'tidak_ingin_menyebutkan'
     )
   );
-
--- reminder_preference: nilai aneh / kosong jadi 'dashboard'
-update public.profiles
-set reminder_preference = 'dashboard'
-where reminder_preference is null or reminder_preference not in ('telegram', 'dashboard');
 
 alter table public.profiles drop constraint if exists profiles_reminder_preference_check;
 alter table public.profiles

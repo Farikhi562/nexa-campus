@@ -6,6 +6,16 @@ import { createClient } from '@/lib/supabase/client'
 import Button from '@/components/ui/Button'
 import type { Profile } from '@/types'
 
+function isSchemaError(error: { code?: string; message?: string }) {
+  const message = error.message?.toLowerCase() ?? ''
+  return (
+    error.code === 'PGRST204' ||
+    error.code === '42703' ||
+    message.includes('column') ||
+    message.includes('schema cache')
+  )
+}
+
 export default function OnboardingForm({
   profile,
   referralCode,
@@ -24,16 +34,14 @@ export default function OnboardingForm({
     setError('')
 
     const form = new FormData(event.currentTarget)
-    const payload = {
+
+    const corePayload = {
       id: profile.id,
       email: profile.email,
       full_name: String(form.get('full_name') || '').trim(),
       campus_name: String(form.get('campus_name') || '').trim(),
       major: String(form.get('major') || '').trim(),
       semester: Number(form.get('semester') || 1),
-      province: String(form.get('province') || '').trim() || null,
-      gender: String(form.get('gender') || '').trim() || null,
-      avatar_icon: null,
       student_id: String(form.get('student_id') || '').trim() || null,
       phone_number: String(form.get('phone_number') || '').trim() || null,
       telegram_chat_id: String(form.get('telegram_chat_id') || '').trim() || null,
@@ -42,11 +50,29 @@ export default function OnboardingForm({
       profile_completed: true,
     }
 
-    const { error: upsertError } = await supabase.from('profiles').upsert(payload)
+    const fullPayload = {
+      ...corePayload,
+      province: String(form.get('province') || '').trim() || null,
+      gender: String(form.get('gender') || '').trim() || null,
+      avatar_icon: null,
+    }
+
+    // Coba simpan semua field. Kalau kolom opsional (province/gender/avatar_icon)
+    // belum ada di database, jangan gagalkan onboarding — simpan field inti dulu.
+    let upsertError = (await supabase.from('profiles').upsert(fullPayload)).error
+
+    if (upsertError && isSchemaError(upsertError)) {
+      upsertError = (await supabase.from('profiles').upsert(corePayload)).error
+    }
+
     setLoading(false)
 
     if (upsertError) {
-      setError(upsertError.message)
+      setError(
+        isSchemaError(upsertError)
+          ? 'Profil gagal disimpan karena struktur database belum lengkap. Minta admin menjalankan supabase/schema.sql di Supabase SQL Editor, lalu coba lagi.'
+          : upsertError.message
+      )
       return
     }
 
