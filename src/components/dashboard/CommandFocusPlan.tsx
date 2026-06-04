@@ -5,7 +5,7 @@ import { formatDeadlineDate, formatDeadlineTime, getDisplayTitle, getUrgency, so
 import type { AcademicDeadline, Plan } from '@/types'
 
 type CommandFocusPlanProps = {
-  deadlines: AcademicDeadline[]
+  deadlines?: AcademicDeadline[]
   userTier: Plan
 }
 
@@ -36,8 +36,9 @@ function scoreDeadline(deadline: AcademicDeadline) {
 }
 
 export default function CommandFocusPlan({ deadlines, userTier }: CommandFocusPlanProps) {
-  const isCommand = userTier === 'command'
-  const activeDeadlines = deadlines
+  const safeTier = userTier === 'command' || userTier === 'pulse' || userTier === 'radar' ? userTier : 'radar'
+  const isCommand = safeTier === 'command'
+  const activeDeadlines = (deadlines ?? [])
     .filter((deadline) => deadline.status !== 'completed')
     .sort((a, b) => scoreDeadline(b) - scoreDeadline(a) || sortNearest(a, b))
     .slice(0, 3)

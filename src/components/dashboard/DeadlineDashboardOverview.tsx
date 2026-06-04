@@ -109,7 +109,7 @@ export default function DeadlineDashboardOverview({
   profileCompleted = false,
   hasTelegramChatId = false,
 }: DeadlineDashboardOverviewProps) {
-  const [deadlines, setDeadlines] = useState(() => [...initialDeadlines].sort(sortNearest))
+  const [deadlines, setDeadlines] = useState(() => [...(initialDeadlines ?? [])].sort(sortNearest))
   const [busyId, setBusyId] = useState<string | null>(null)
   const [actionError, setActionError] = useState('')
   const [actionMessage, setActionMessage] = useState('')

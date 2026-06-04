@@ -52,7 +52,15 @@ const quickActions = [
   },
 ]
 
+function normalizePlan(value: Plan | string | null | undefined): Plan {
+  if (value === 'pulse' || value === 'command' || value === 'radar') return value
+  return 'radar'
+}
+
 export default function DashboardSidePanel({ userTier }: { userTier: Plan }) {
+  const safeTier = normalizePlan(userTier)
+  const features = planFeatures[safeTier] ?? planFeatures.radar
+
   return (
     <aside className="space-y-4 lg:sticky lg:top-20">
       <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -75,13 +83,13 @@ export default function DashboardSidePanel({ userTier }: { userTier: Plan }) {
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-700">Plan aktif</p>
-            <h2 className="mt-1 text-lg font-black text-slate-950">{PLAN_LABELS[userTier]}</h2>
+            <h2 className="mt-1 text-lg font-black text-slate-950">{PLAN_LABELS[safeTier]}</h2>
           </div>
-          <Badge tone="brand">{userTier.toUpperCase()}</Badge>
+          <Badge tone="brand">{safeTier.toUpperCase()}</Badge>
         </div>
 
         <ul className="mt-4 space-y-2">
-          {planFeatures[userTier].map((feature) => (
+          {features.map((feature) => (
             <li key={feature} className="flex gap-2 text-xs leading-5 text-slate-700">
               <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-600" />
               <span>{feature}</span>
@@ -89,7 +97,7 @@ export default function DashboardSidePanel({ userTier }: { userTier: Plan }) {
           ))}
         </ul>
 
-        {userTier === 'radar' && (
+        {safeTier === 'radar' && (
           <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-900">
             <div className="flex gap-2">
               <LockKeyhole className="mt-0.5 h-4 w-4 flex-shrink-0" />
