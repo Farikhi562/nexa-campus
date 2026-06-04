@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { BellRing, CalendarDays, CreditCard, HelpCircle, Home, Plus, Settings, ShieldCheck, Sparkles, UserRound } from 'lucide-react'
+import { BellRing, CalendarDays, CreditCard, HelpCircle, Home, Plus, Rocket, Settings, ShieldCheck, Sparkles, UserRound } from 'lucide-react'
 
 const navItems = [
   { label: 'Dashboard', href: '/dashboard', icon: Home },
@@ -11,6 +11,7 @@ const navItems = [
   { label: 'Billing', href: '/dashboard/billing', icon: CreditCard },
   { label: 'Pengaturan', href: '/dashboard/settings', icon: Settings },
   { label: 'Support', href: '/support', icon: HelpCircle },
+  { label: 'Release v1.0.0', href: '/release-notes', icon: Rocket },
   { label: 'Admin Beta', href: '/admin', icon: ShieldCheck },
 ]
 
