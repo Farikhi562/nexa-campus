@@ -1,10 +1,10 @@
 import Link from 'next/link'
-import { Bug, Database, LifeBuoy, Mail, ReceiptText } from 'lucide-react'
-import NexaCampusLogo from '@/components/brand/NexaCampusLogo'
+import { Bug, Database, LifeBuoy, Mail, MessageCircle, ReceiptText } from 'lucide-react'
 import Badge from '@/components/ui/Badge'
 import { Card, CardContent } from '@/components/ui/Card'
+import NexaLogo from '@/components/NexaLogo'
 
-const adminWhatsApp = '6285811211505'
+const adminWhatsApp = '085811211505'
 const supportEmail = 'nexatechlabs271@gmail.com'
 const secondarySupportEmail = 'fauzanalfa36@gmail.com'
 
@@ -12,13 +12,13 @@ const actions = [
   {
     title: 'Minta hapus data',
     desc: 'Kirim request penghapusan data akun NEXA Campus.',
-    href: `mailto:${supportEmail},${secondarySupportEmail}?subject=Request%20hapus%20data%20NEXA%20Campus`,
+    href: `mailto:${supportEmail}?subject=Request%20hapus%20data%20NEXA%20Campus`,
     icon: Database,
   },
   {
     title: 'Laporkan bug',
     desc: 'Ada halaman error atau flow yang nyangkut? Kirim detailnya.',
-    href: `mailto:${supportEmail},${secondarySupportEmail}?subject=Bug%20report%20NEXA%20Campus`,
+    href: `mailto:${secondarySupportEmail}?subject=Bug%20report%20NEXA%20Campus`,
     icon: Bug,
   },
   {
@@ -35,7 +35,8 @@ export default function SupportPage() {
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
           <Link href="/" className="flex items-center gap-3">
-            <NexaCampusLogo imageClassName="h-9 w-9" />
+            <NexaLogo className="h-9 w-9" />
+            <span className="font-black">NEXA Campus</span>
           </Link>
           <Link href="/privacy" className="text-sm font-black text-slate-600 hover:text-brand-700">
             Privacy
@@ -49,7 +50,7 @@ export default function SupportPage() {
           Butuh bantuan? Kirim sinyal ke NEXA.
         </h1>
         <p className="mt-4 max-w-3xl text-sm leading-6 text-slate-600">
-          Untuk MVP beta, support masih sederhana lewat email dan flow billing manual. Tidak ada chatbot palsu, tidak ada nomor ajaib.
+          Untuk MVP beta, support masih sederhana lewat email, WhatsApp admin, dan flow billing manual.
         </p>
 
         <div className="mt-8 grid gap-4 md:grid-cols-3">
@@ -70,32 +71,40 @@ export default function SupportPage() {
           ))}
         </div>
 
-        <div className="mt-6 grid gap-4 lg:grid-cols-[0.8fr_1.2fr]">
+        <div className="mt-6 grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
           <div className="rounded-2xl border border-slate-200 bg-white p-5">
             <Mail className="mb-4 h-5 w-5 text-brand-700" />
-            <p className="font-black text-slate-950">Kontak support</p>
+            <p className="font-black text-slate-950">Email support</p>
             <a className="mt-2 block text-sm font-bold text-brand-700" href={`mailto:${supportEmail}`}>
-              {supportEmail}
+              Support 1: {supportEmail}
             </a>
-            <a className="mt-1 block text-sm font-bold text-brand-700" href={`mailto:${secondarySupportEmail}`}>
-              {secondarySupportEmail}
-            </a>
-            <a className="mt-3 block text-sm font-bold text-emerald-700" href={`https://wa.me/${adminWhatsApp}`}>
-              WhatsApp admin: 085811211505
+            <a className="mt-2 block text-sm font-bold text-brand-700" href={`mailto:${secondarySupportEmail}`}>
+              Support 2: {secondarySupportEmail}
             </a>
           </div>
           <div className="rounded-2xl border border-slate-200 bg-white p-5">
-            <LifeBuoy className="mb-4 h-5 w-5 text-brand-700" />
-            <p className="font-black text-slate-950">FAQ quick links</p>
-            <div className="mt-3 flex flex-wrap gap-2 text-sm font-bold">
-              <Link href="/#cara-kerja" className="rounded-full bg-slate-100 px-3 py-2 text-slate-700 hover:bg-slate-200">Cara kerja</Link>
-              <Link href="/pricing" className="rounded-full bg-slate-100 px-3 py-2 text-slate-700 hover:bg-slate-200">Pricing</Link>
-              <Link href="/privacy" className="rounded-full bg-slate-100 px-3 py-2 text-slate-700 hover:bg-slate-200">Privacy</Link>
-            </div>
+            <MessageCircle className="mb-4 h-5 w-5 text-brand-700" />
+            <p className="font-black text-slate-950">WhatsApp admin</p>
+            <a className="mt-2 block text-sm font-bold text-brand-700" href={`https://wa.me/62${adminWhatsApp.slice(1)}`}>
+              {adminWhatsApp}
+            </a>
+            <p className="mt-3 text-xs leading-5 text-slate-500">
+              Gunakan untuk support beta, request upgrade manual, atau koordinasi penting terkait akun.
+            </p>
           </div>
         </div>
 
-        {/* TODO: Replace mailto actions with server-validated support forms when the beta support backend is ready. */}
+        <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
+          <LifeBuoy className="mb-4 h-5 w-5 text-brand-700" />
+          <p className="font-black text-slate-950">FAQ quick links</p>
+          <div className="mt-3 flex flex-wrap gap-2 text-sm font-bold">
+            <Link href="/#cara-kerja" className="rounded-full bg-slate-100 px-3 py-2 text-slate-700 hover:bg-slate-200">Cara kerja</Link>
+            <Link href="/pricing" className="rounded-full bg-slate-100 px-3 py-2 text-slate-700 hover:bg-slate-200">Pricing</Link>
+            <Link href="/privacy" className="rounded-full bg-slate-100 px-3 py-2 text-slate-700 hover:bg-slate-200">Privacy</Link>
+          </div>
+        </div>
+
+        {/* TODO: Replace mailto/WhatsApp actions with server-validated support forms when the beta support backend is ready. */}
       </section>
     </main>
   )

@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
-import { AlertTriangle, BellOff, CalendarDays, Check, CheckCircle2, Clock, Flame, Pencil, Plus, RotateCcw, Trash2, TimerReset } from 'lucide-react'
+import { AlertTriangle, BellOff, CalendarDays, Check, CheckCircle2, Clock, Flame, Pencil, Plus, RotateCcw, Sparkles, Trash2, TimerReset } from 'lucide-react'
 import Badge from '@/components/ui/Badge'
 import { Card, CardContent } from '@/components/ui/Card'
 import AskNexaWidget from '@/components/dashboard/AskNexaWidget'
@@ -200,6 +200,13 @@ export default function DeadlineDashboardOverview({
                   {highPriorityCount} prioritas tinggi
                 </div>
               )}
+              <Link
+                href="/dashboard/deadlines/quick-add"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-teal-300/30 bg-white/10 px-4 py-3 text-sm font-black text-teal-50 transition hover:bg-white/15"
+              >
+                <Sparkles className="h-4 w-4" />
+                AI Quick Add
+              </Link>
               <Link
                 href="/dashboard/deadlines/new"
                 className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-teal-400 px-4 py-3 text-sm font-black text-slate-950 shadow-lg shadow-teal-950/30 transition hover:bg-teal-300"
