@@ -19,5 +19,40 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${origin}/login?error=auth_callback_failed`)
   }
 
+  if (next !== '/auth/update-password') {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (user) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id, profile_completed')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      if (!profile) {
+        await supabase.from('profiles').insert({
+          id: user.id,
+          email: user.email ?? '',
+          full_name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
+          plan: 'radar',
+          profile_completed: false,
+        })
+      }
+
+      if (!profile?.profile_completed) {
+        const referralCode = next.startsWith('/onboarding?ref=')
+          ? next.split('ref=')[1]
+          : ''
+        const onboardingPath = referralCode
+          ? `/onboarding?ref=${encodeURIComponent(decodeURIComponent(referralCode))}`
+          : '/onboarding'
+
+        return NextResponse.redirect(`${origin}${onboardingPath}`)
+      }
+    }
+  }
+
   return NextResponse.redirect(`${origin}${next}`)
 }

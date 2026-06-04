@@ -180,6 +180,14 @@ export default function ProfileSettingsForm({ profile }: { profile: Profile }) {
     setError('')
     setMessage('')
 
+    if (photoFile) {
+      const uploaded = await uploadPhoto()
+      if (!uploaded) {
+        setLoading(false)
+        return
+      }
+    }
+
     const parsedSemester = Number(semester)
     if (!fullName.trim()) {
       setLoading(false)
@@ -231,7 +239,7 @@ export default function ProfileSettingsForm({ profile }: { profile: Profile }) {
   async function uploadPhoto() {
     if (!photoFile) {
       setError('Pilih foto dulu.')
-      return
+      return false
     }
 
     setUploadingPhoto(true)
@@ -251,13 +259,14 @@ export default function ProfileSettingsForm({ profile }: { profile: Profile }) {
 
     if (!response.ok || !result?.avatar_url) {
       setError(result?.error || 'Foto gagal diupload. Coba lagi sebentar.')
-      return
+      return false
     }
 
     setAvatarUrl(result.avatar_url)
     setPhotoFile(null)
     setPhotoPreview('')
     setMessage('Foto profil berhasil diupload.')
+    return true
   }
 
   return (

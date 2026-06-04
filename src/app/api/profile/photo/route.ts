@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { createServiceClient } from '@/lib/supabase/service'
 
 const BUCKET = 'profile-photos'
 const MAX_FILE_SIZE = 2 * 1024 * 1024
@@ -10,6 +9,8 @@ const allowedTypes = new Map([
   ['image/webp', 'webp'],
   ['image/gif', 'gif'],
 ])
+
+export const runtime = 'nodejs'
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
@@ -28,8 +29,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Upload tidak valid.' }, { status: 400 })
   }
 
-  const file = formData.get('photo')
-  if (!(file instanceof File)) {
+  const file = formData.get('photo') as File | null
+  if (!file || typeof file.arrayBuffer !== 'function') {
     return NextResponse.json({ error: 'Pilih file foto dulu.' }, { status: 400 })
   }
 
@@ -42,13 +43,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Format foto harus JPG, PNG, WebP, atau GIF.' }, { status: 400 })
   }
 
-  const service = createServiceClient()
-  await service.storage.createBucket(BUCKET, { public: true }).catch(() => null)
-
   const path = `${user.id}/avatar-${Date.now()}.${extension}`
   const bytes = await file.arrayBuffer()
 
-  const { error: uploadError } = await service.storage
+  const { error: uploadError } = await supabase.storage
     .from(BUCKET)
     .upload(path, bytes, {
       contentType: file.type,
@@ -58,17 +56,16 @@ export async function POST(request: NextRequest) {
   if (uploadError) {
     return NextResponse.json(
       {
-        error:
-          'Foto gagal diupload. Pastikan bucket profile-photos ada dan SUPABASE_SERVICE_ROLE_KEY sudah benar.',
+        error: `Foto gagal diupload: ${uploadError.message}. Pastikan bucket profile-photos dan Storage policy sudah dibuat.`,
       },
       { status: 500 }
     )
   }
 
-  const { data: publicUrlData } = service.storage.from(BUCKET).getPublicUrl(path)
+  const { data: publicUrlData } = supabase.storage.from(BUCKET).getPublicUrl(path)
   const avatarUrl = publicUrlData.publicUrl
 
-  const { error: updateError } = await service
+  const { error: updateError } = await supabase
     .from('profiles')
     .update({
       avatar_url: avatarUrl,

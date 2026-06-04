@@ -45,9 +45,15 @@ export default function LoginClient({ initialMode = 'login' }: { initialMode?: M
       setReferralCode(window.sessionStorage.getItem('nexa_referral_code') || '')
     }
 
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) {
-        router.replace('/dashboard')
+    supabase.auth.getSession().then(async ({ data }) => {
+      if (data.session?.user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('profile_completed')
+          .eq('id', data.session.user.id)
+          .maybeSingle()
+
+        router.replace(profile?.profile_completed ? '/dashboard' : '/onboarding')
       }
     })
   }, [router, supabase])

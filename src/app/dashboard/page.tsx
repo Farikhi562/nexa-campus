@@ -1,6 +1,7 @@
 import DeadlineDashboardOverview from '@/components/dashboard/DeadlineDashboardOverview'
 import { createClient } from '@/lib/supabase/server'
 import { sortNearest } from '@/lib/deadline-utils'
+import { redirect } from 'next/navigation'
 import type { AcademicDeadline, Profile } from '@/types'
 
 type DashboardProfile = Pick<
@@ -18,18 +19,29 @@ export default async function DashboardPage({
     data: { user },
   } = await supabase.auth.getUser()
 
-  const [{ data: profile }, { data: deadlines, error }, referralStats] = await Promise.all([
-    supabase.from('profiles').select('full_name, plan, referral_code, profile_completed, telegram_chat_id').eq('id', user!.id).single(),
+  if (!user) redirect('/login')
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('full_name, plan, referral_code, profile_completed, telegram_chat_id')
+    .eq('id', user.id)
+    .maybeSingle()
+
+  if (!profile?.profile_completed) {
+    redirect('/onboarding')
+  }
+
+  const [{ data: deadlines, error }, referralStats] = await Promise.all([
     supabase
       .from('academic_deadlines')
       .select('*')
-      .eq('user_id', user!.id)
+      .eq('user_id', user.id)
       .order('deadline_date', { ascending: true })
       .order('deadline_time', { ascending: true }),
     supabase
       .from('referrals')
       .select('id', { count: 'exact', head: true })
-      .eq('referrer_id', user!.id),
+      .eq('referrer_id', user.id),
   ])
 
   if (error) {

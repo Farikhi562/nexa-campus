@@ -13,7 +13,13 @@ const mobileNavItems = [
   { label: 'Profil', href: '/dashboard/settings/profile', icon: UserRound },
 ]
 
-export default function AppShell({ children }: { children: React.ReactNode }) {
+export default function AppShell({
+  children,
+  profile: _profile,
+}: {
+  children: React.ReactNode
+  profile?: unknown
+}) {
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-xl">

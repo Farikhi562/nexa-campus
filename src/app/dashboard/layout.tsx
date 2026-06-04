@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation'
 import AppShell from '@/components/AppShell'
 import DashboardSuccessToast from '@/components/DashboardSuccessToast'
-import FirstTimeOnboarding from '@/components/FirstTimeOnboarding'
 import PwaInstallBanner from '@/components/PwaInstallBanner'
 import { createClient } from '@/lib/supabase/server'
 import type { Profile } from '@/types'
@@ -14,12 +13,12 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect('/auth/login')
+    redirect('/login')
   }
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('full_name, plan, onboarding_completed')
+    .select('full_name, plan, profile_completed')
     .eq('id', user.id)
     .maybeSingle()
 
@@ -37,9 +36,6 @@ export default async function DashboardLayout({ children }: { children: ReactNod
         <DashboardSuccessToast />
       </Suspense>
       <PwaInstallBanner />
-      {!profile?.onboarding_completed && (
-        <FirstTimeOnboarding userId={user.id} userName={userName} />
-      )}
     </AppShell>
   )
 }
