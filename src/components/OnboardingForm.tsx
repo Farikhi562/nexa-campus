@@ -33,7 +33,7 @@ export default function OnboardingForm({
       semester: Number(form.get('semester') || 1),
       province: String(form.get('province') || '').trim() || null,
       gender: String(form.get('gender') || '').trim() || null,
-      avatar_icon: String(form.get('avatar_icon') || '').trim() || 'graduation',
+      avatar_icon: null,
       student_id: String(form.get('student_id') || '').trim() || null,
       phone_number: String(form.get('phone_number') || '').trim() || null,
       telegram_chat_id: String(form.get('telegram_chat_id') || '').trim() || null,
@@ -90,7 +90,26 @@ export default function OnboardingForm({
         </label>
         <label className="block">
           <span className="mb-1.5 block text-sm font-bold text-slate-700">Jurusan</span>
-          <input name="major" defaultValue={profile.major ?? ''} required className="focus-ring w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm" />
+          <select name="major" defaultValue={profile.major ?? ''} required className="focus-ring w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm">
+            <option value="">Pilih jurusan</option>
+            {[
+              'Akuntansi',
+              'Arsitektur',
+              'Bisnis Digital',
+              'Desain Komunikasi Visual',
+              'Hukum',
+              'Ilmu Komunikasi',
+              'Ilmu Komputer',
+              'Manajemen',
+              'Psikologi',
+              'Sistem Informasi',
+              'Teknik Industri',
+              'Teknik Informatika',
+              'Teknik Mesin',
+              'Teknik Sipil',
+              'Lainnya',
+            ].map((major) => <option key={major} value={major}>{major}</option>)}
+          </select>
         </label>
         <label className="block">
           <span className="mb-1.5 block text-sm font-bold text-slate-700">Semester</span>
@@ -120,18 +139,6 @@ export default function OnboardingForm({
             <option value="perempuan">Perempuan</option>
             <option value="lainnya">Lainnya</option>
             <option value="tidak_ingin_menyebutkan">Tidak ingin menyebutkan</option>
-          </select>
-        </label>
-        <label className="block">
-          <span className="mb-1.5 block text-sm font-bold text-slate-700">Icon profil</span>
-          <select name="avatar_icon" defaultValue={profile.avatar_icon ?? 'graduation'} className="focus-ring w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm">
-            <option value="graduation">Kampus</option>
-            <option value="user">User</option>
-            <option value="book">Book</option>
-            <option value="rocket">Rocket</option>
-            <option value="radar">Radar</option>
-            <option value="bell">Bell</option>
-            <option value="sparkles">Spark</option>
           </select>
         </label>
       </div>

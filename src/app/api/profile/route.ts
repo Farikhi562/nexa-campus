@@ -9,16 +9,6 @@ const allowedGenders = new Set([
   'tidak_ingin_menyebutkan',
 ])
 
-const allowedAvatarIcons = new Set([
-  'user',
-  'graduation',
-  'book',
-  'rocket',
-  'radar',
-  'bell',
-  'sparkles',
-])
-
 function text(value: unknown) {
   return typeof value === 'string' ? value.trim() : ''
 }
@@ -47,7 +37,7 @@ export async function PATCH(request: NextRequest) {
   const semester = Number(body.semester)
   const studentId = text(body.student_id)
   const gender = text(body.gender)
-  const avatarIcon = text(body.avatar_icon) || 'graduation'
+  const avatarIcon = text(body.avatar_icon)
 
   if (!fullName) return NextResponse.json({ error: 'Nama wajib diisi.' }, { status: 400 })
   if (!campusName) return NextResponse.json({ error: 'Nama kampus wajib diisi.' }, { status: 400 })
@@ -57,9 +47,6 @@ export async function PATCH(request: NextRequest) {
   }
   if (!allowedGenders.has(gender)) {
     return NextResponse.json({ error: 'Gender tidak valid.' }, { status: 400 })
-  }
-  if (!allowedAvatarIcons.has(avatarIcon)) {
-    return NextResponse.json({ error: 'Icon profil tidak valid.' }, { status: 400 })
   }
 
   const { data, error } = await supabase
@@ -72,14 +59,20 @@ export async function PATCH(request: NextRequest) {
       semester,
       student_id: studentId || null,
       gender: gender || null,
-      avatar_icon: avatarIcon,
+      avatar_icon: avatarIcon || null,
     })
     .eq('id', user.id)
     .select('*')
     .single()
 
   if (error) {
-    return NextResponse.json({ error: 'Profil gagal disimpan. Coba lagi sebentar.' }, { status: 500 })
+    return NextResponse.json(
+      {
+        error:
+          'Profil gagal disimpan. Pastikan migration profile terbaru sudah jalan di Supabase.',
+      },
+      { status: 500 }
+    )
   }
 
   return NextResponse.json({ data })

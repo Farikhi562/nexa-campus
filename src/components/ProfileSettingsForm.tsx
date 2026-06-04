@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { BellRing, BookOpen, Camera, CheckCircle2, GraduationCap, Radar, Rocket, Sparkles, Upload, UserRound } from 'lucide-react'
+import { Camera, CheckCircle2, Info, Upload, UserRound } from 'lucide-react'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import type { Profile } from '@/types'
@@ -115,14 +115,39 @@ const universityOptions = [
   'Politeknik Negeri Malang',
 ]
 
-const avatarOptions = [
-  { value: 'user', label: 'User', icon: UserRound },
-  { value: 'graduation', label: 'Kampus', icon: GraduationCap },
-  { value: 'book', label: 'Book', icon: BookOpen },
-  { value: 'rocket', label: 'Rocket', icon: Rocket },
-  { value: 'radar', label: 'Radar', icon: Radar },
-  { value: 'bell', label: 'Bell', icon: BellRing },
-  { value: 'sparkles', label: 'Spark', icon: Sparkles },
+const majorOptions = [
+  'Akuntansi',
+  'Arsitektur',
+  'Biologi',
+  'Bisnis Digital',
+  'Desain Komunikasi Visual',
+  'Ekonomi Pembangunan',
+  'Farmasi',
+  'Fisika',
+  'Hubungan Internasional',
+  'Hukum',
+  'Ilmu Administrasi',
+  'Ilmu Komunikasi',
+  'Ilmu Komputer',
+  'Ilmu Politik',
+  'Kedokteran',
+  'Keperawatan',
+  'Kimia',
+  'Manajemen',
+  'Matematika',
+  'Pendidikan',
+  'Psikologi',
+  'Sastra Inggris',
+  'Sistem Informasi',
+  'Statistika',
+  'Teknik Elektro',
+  'Teknik Industri',
+  'Teknik Informatika',
+  'Teknik Kimia',
+  'Teknik Mesin',
+  'Teknik Sipil',
+  'Teknologi Informasi',
+  'Lainnya',
 ]
 
 const genderOptions = [
@@ -141,7 +166,6 @@ export default function ProfileSettingsForm({ profile }: { profile: Profile }) {
   const [semester, setSemester] = useState(String(profile.semester ?? 1))
   const [studentId, setStudentId] = useState(profile.student_id ?? '')
   const [gender, setGender] = useState(profile.gender ?? '')
-  const [avatarIcon, setAvatarIcon] = useState(profile.avatar_icon ?? 'graduation')
   const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url ?? '')
   const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [photoPreview, setPhotoPreview] = useState('')
@@ -189,7 +213,7 @@ export default function ProfileSettingsForm({ profile }: { profile: Profile }) {
         semester: parsedSemester,
         student_id: studentId.trim() || null,
         gender: gender || null,
-        avatar_icon: avatarIcon,
+        avatar_icon: null,
       }),
     })
     const result = (await response.json().catch(() => null)) as { error?: string } | null
@@ -239,6 +263,16 @@ export default function ProfileSettingsForm({ profile }: { profile: Profile }) {
   return (
     <form onSubmit={submit} className="space-y-5">
       <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="mb-5 flex gap-3 rounded-2xl border border-cyan-200 bg-cyan-50 p-4 text-sm leading-6 text-cyan-900">
+          <Info className="mt-0.5 h-5 w-5 flex-shrink-0" />
+          <div>
+            <p className="font-black">Panduan isi profil</p>
+            <p className="mt-1">
+              Isi nama asli, pilih kampus dari saran atau ketik manual kalau belum ada, pilih provinsi, lalu pilih jurusan dari daftar.
+              Foto profil bersifat opsional, format JPG/PNG/WebP/GIF maksimal 2MB. NEXA tidak meminta password kampus.
+            </p>
+          </div>
+        </div>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <Badge tone="brand" className="mb-3">Profile</Badge>
@@ -266,7 +300,7 @@ export default function ProfileSettingsForm({ profile }: { profile: Profile }) {
               <div className="min-w-0 flex-1">
                 <p className="font-black text-slate-950">Upload foto profil</p>
                 <p className="mt-1 text-xs leading-5 text-slate-500">
-                  JPG, PNG, WebP, atau GIF. Maksimal 2MB. Kalau belum upload, icon profil tetap dipakai.
+                  JPG, PNG, WebP, atau GIF. Maksimal 2MB. Kalau upload gagal, cek migration dan bucket Supabase Storage.
                 </p>
                 <div className="mt-3 flex flex-col gap-2 sm:flex-row">
                   <label className="focus-ring inline-flex min-h-11 cursor-pointer items-center justify-center rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm font-black text-slate-700 hover:bg-slate-50">
@@ -319,7 +353,10 @@ export default function ProfileSettingsForm({ profile }: { profile: Profile }) {
           </label>
           <label className="block">
             <span className="mb-1.5 block text-sm font-black text-slate-700">Jurusan</span>
-            <input value={major} onChange={(event) => setMajor(event.target.value)} className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm" />
+            <select value={major} onChange={(event) => setMajor(event.target.value)} className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm">
+              <option value="">Pilih jurusan</option>
+              {majorOptions.map((item) => <option key={item} value={item}>{item}</option>)}
+            </select>
           </label>
           <label className="block">
             <span className="mb-1.5 block text-sm font-black text-slate-700">Semester</span>
@@ -335,30 +372,6 @@ export default function ProfileSettingsForm({ profile }: { profile: Profile }) {
               {genderOptions.map((item) => <option key={item.value || 'empty'} value={item.value}>{item.label}</option>)}
             </select>
           </label>
-        </div>
-      </section>
-
-      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 className="text-lg font-black text-slate-950">Foto profil icon</h2>
-        <p className="mt-1 text-sm leading-6 text-slate-600">
-          Upload foto asli belum dibuat dulu. Untuk MVP, pilih icon biar profil tetap punya wajah kecil yang rapi.
-        </p>
-        <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-7">
-          {avatarOptions.map(({ value, label, icon: Icon }) => (
-            <button
-              key={value}
-              type="button"
-              onClick={() => setAvatarIcon(value)}
-              className={`focus-ring flex min-h-20 flex-col items-center justify-center gap-2 rounded-2xl border text-xs font-black transition ${
-                avatarIcon === value
-                  ? 'border-brand-500 bg-brand-50 text-brand-800'
-                  : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-              }`}
-            >
-              <Icon className="h-5 w-5" />
-              {label}
-            </button>
-          ))}
         </div>
       </section>
 

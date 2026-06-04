@@ -43,6 +43,8 @@ export async function POST(request: NextRequest) {
   }
 
   const service = createServiceClient()
+  await service.storage.createBucket(BUCKET, { public: true }).catch(() => null)
+
   const path = `${user.id}/avatar-${Date.now()}.${extension}`
   const bytes = await file.arrayBuffer()
 
@@ -54,7 +56,13 @@ export async function POST(request: NextRequest) {
     })
 
   if (uploadError) {
-    return NextResponse.json({ error: 'Foto gagal diupload. Cek bucket profile-photos di Supabase.' }, { status: 500 })
+    return NextResponse.json(
+      {
+        error:
+          'Foto gagal diupload. Pastikan bucket profile-photos ada dan SUPABASE_SERVICE_ROLE_KEY sudah benar.',
+      },
+      { status: 500 }
+    )
   }
 
   const { data: publicUrlData } = service.storage.from(BUCKET).getPublicUrl(path)
@@ -68,7 +76,13 @@ export async function POST(request: NextRequest) {
     .eq('id', user.id)
 
   if (updateError) {
-    return NextResponse.json({ error: 'Foto terupload, tapi profil gagal diupdate.' }, { status: 500 })
+    return NextResponse.json(
+      {
+        error:
+          'Foto terupload, tapi profil gagal diupdate. Pastikan kolom avatar_url sudah ada di tabel profiles.',
+      },
+      { status: 500 }
+    )
   }
 
   return NextResponse.json({ avatar_url: avatarUrl })
