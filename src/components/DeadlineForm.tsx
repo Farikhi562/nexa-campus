@@ -67,7 +67,7 @@ function Section({
   children: React.ReactNode
 }) {
   return (
-    <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+    <section className="rounded-3xl border border-white/80 bg-white/90 p-5 shadow-xl shadow-slate-200/70 ring-1 ring-slate-950/[0.03] sm:p-6">
       <div className="mb-4">
         <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-700">{eyebrow}</p>
         <h2 className="mt-1 text-lg font-black text-slate-950">{title}</h2>
@@ -316,7 +316,7 @@ export default function DeadlineForm({
 
       {error && <p className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700">{error}</p>}
 
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 p-3 backdrop-blur sm:static sm:border-0 sm:bg-transparent sm:p-0">
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-white/80 bg-white/95 p-3 shadow-2xl shadow-slate-900/10 backdrop-blur-xl sm:static sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none">
         <div className="mx-auto flex max-w-3xl gap-3 sm:mx-0">
           <Button type="submit" disabled={loading} className="min-h-12 flex-1 rounded-2xl">
             {loading ? 'Menyimpan...' : isEditing ? 'Simpan Deadline' : 'Tambah Deadline'}

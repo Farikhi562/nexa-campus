@@ -17,13 +17,13 @@ export default async function BillingPage() {
 
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-2xl font-black text-slate-950">Billing</h1>
-        <p className="mt-1 text-sm text-slate-500">Manual dulu. Tidak ada auto-upgrade sebelum admin confirm.</p>
+      <div className="rounded-3xl border border-white/80 bg-slate-950 p-5 text-white shadow-2xl shadow-slate-900/20 sm:p-6">
+        <Badge tone="info" className="mb-3">Plan aktif: {PLAN_LABELS[typedProfile.plan]}</Badge>
+        <h1 className="text-2xl font-black tracking-tight sm:text-3xl">Billing</h1>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">Upgrade plan tetap manual dan transparan. Tidak ada auto-upgrade sebelum admin confirm.</p>
       </div>
       <Card>
         <CardContent>
-          <Badge tone="brand" className="mb-3">Plan aktif: {PLAN_LABELS[typedProfile.plan]}</Badge>
           <BillingIntentForm profile={typedProfile} />
         </CardContent>
       </Card>
@@ -35,7 +35,7 @@ export default async function BillingPage() {
               <p className="text-sm text-slate-500">Belum ada intent upgrade.</p>
             ) : (
               ((intents ?? []) as SubscriptionIntent[]).map((intent) => (
-                <div key={intent.id} className="flex items-center justify-between rounded-lg bg-slate-50 p-3 text-sm">
+                <div key={intent.id} className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50/80 p-3 text-sm">
                   <span className="font-bold text-slate-700">{PLAN_LABELS[intent.requested_plan]}</span>
                   <Badge tone={intent.status === 'confirmed' ? 'success' : 'warning'}>{intent.status}</Badge>
                 </div>

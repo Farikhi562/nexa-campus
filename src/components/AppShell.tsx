@@ -23,49 +23,66 @@ export default function AppShell({
   const activePlan = profile?.plan ?? 'radar'
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 border-r border-slate-200 bg-white lg:block">
+    <div className="min-h-screen bg-[#f5f7fb] text-slate-950">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-72 border-r border-white/10 bg-slate-950 text-white shadow-2xl shadow-slate-950/20 lg:block">
         <div className="flex h-full flex-col">
-          <div className="border-b border-slate-200 p-4">
-            <Link href="/dashboard" className="flex items-center gap-3">
-              <NexaLogo className="h-10 w-10" />
+          <div className="border-b border-white/10 p-5">
+            <Link href="/dashboard" className="flex items-center gap-3 rounded-2xl p-2 transition hover:bg-white/5">
+              <NexaLogo className="h-11 w-11" />
               <div>
-                <p className="font-black leading-5">NEXA Campus</p>
-                <p className="text-xs font-bold text-brand-700">{PLAN_LABELS[activePlan]}</p>
+                <p className="font-black leading-5 tracking-tight">NEXA Campus</p>
+                <p className="text-xs font-bold text-cyan-200">{PLAN_LABELS[activePlan]}</p>
               </div>
             </Link>
           </div>
-          <nav className="flex-1 space-y-1 p-3">
+          <nav className="flex-1 space-y-2 p-4">
             {NAV.map(({ href, label, icon: Icon }) => (
-              <Link key={href} href={href} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-bold text-slate-600 hover:bg-brand-50 hover:text-brand-800">
-                <Icon className="h-4 w-4" />
-                {label}
+              <Link
+                key={href}
+                href={href}
+                className="group flex items-center gap-3 rounded-2xl px-3.5 py-3 text-sm font-bold text-slate-300 transition duration-200 hover:-translate-y-0.5 hover:bg-white/10 hover:text-white"
+              >
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 text-cyan-100 ring-1 ring-white/10 transition group-hover:bg-cyan-300 group-hover:text-slate-950">
+                  <Icon className="h-4 w-4" />
+                </span>
+                <span>{label}</span>
               </Link>
             ))}
           </nav>
-          <div className="border-t border-slate-200 p-4">
-            <div className="mb-3">
-              <AuthStatusActions />
+          <div className="p-4">
+            <div className="mb-4 rounded-3xl border border-cyan-200/15 bg-white/[0.06] p-4 shadow-xl shadow-black/10">
+              <div className="flex items-center gap-3">
+                <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-cyan-300 text-slate-950">
+                  <BellRing className="h-4 w-4" />
+                </span>
+                <div>
+                  <p className="text-sm font-black">Study flow aktif</p>
+                  <p className="mt-0.5 text-xs leading-5 text-slate-300">Pantau deadline, reminder, dan upgrade dari satu tempat.</p>
+                </div>
+              </div>
             </div>
-            <div className="rounded-lg bg-slate-50 p-3 text-xs leading-5 text-slate-600">{BRAND.disclaimer}</div>
+            <div className="mb-3">
+              <AuthStatusActions variant="dark" />
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-3 text-xs leading-5 text-slate-400">{BRAND.disclaimer}</div>
           </div>
         </div>
       </aside>
 
-      <div className="lg:pl-64">
-        <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur lg:hidden">
+      <div className="lg:pl-72">
+        <header className="sticky top-0 z-30 border-b border-white/70 bg-white/80 shadow-sm shadow-slate-200/60 backdrop-blur-xl lg:hidden">
           <div className="flex items-center justify-between px-4 py-3">
             <Link href="/dashboard" className="flex items-center gap-2">
               <NexaLogo className="h-9 w-9" />
-              <span className="font-black">NEXA</span>
+              <span className="font-black tracking-tight">NEXA</span>
             </Link>
             <AuthStatusActions />
           </div>
         </header>
-        <main className="mx-auto max-w-6xl px-4 py-6 pb-24 sm:px-6 lg:py-8">{children}</main>
-        <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-slate-200 bg-white lg:hidden">
+        <main className="mx-auto max-w-7xl px-4 py-5 pb-28 sm:px-6 lg:px-8 lg:py-8">{children}</main>
+        <nav className="fixed inset-x-3 bottom-3 z-40 grid grid-cols-4 rounded-3xl border border-white/80 bg-white/90 p-2 shadow-2xl shadow-slate-900/15 backdrop-blur-xl lg:hidden">
           {NAV.map(({ href, label, icon: Icon }) => (
-            <Link key={href} href={href} className="flex flex-col items-center gap-1 px-2 py-2 text-[11px] font-bold text-slate-500">
+            <Link key={href} href={href} className="flex flex-col items-center gap-1 rounded-2xl px-2 py-2 text-[11px] font-black text-slate-500 transition hover:bg-brand-50 hover:text-brand-700">
               <Icon className="h-4 w-4" />
               {label}
             </Link>

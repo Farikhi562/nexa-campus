@@ -6,7 +6,9 @@ import { AlertTriangle, BellOff, CalendarDays, Check, CheckCircle2, Clock, Flame
 import Badge from '@/components/ui/Badge'
 import { Card, CardContent } from '@/components/ui/Card'
 import AskNexaWidget from '@/components/dashboard/AskNexaWidget'
+import DashboardSidePanel from '@/components/dashboard/DashboardSidePanel'
 import ReferralCard from '@/components/dashboard/ReferralCard'
+import SetupChecklist from '@/components/dashboard/SetupChecklist'
 import ShareDeadlineModal from '@/components/dashboard/ShareDeadlineModal'
 import { AllDone, EmptyAll, EmptyOverdue, EmptyToday } from '@/components/dashboard/DeadlineEmptyStates'
 import {
@@ -31,6 +33,8 @@ type DeadlineDashboardOverviewProps = {
   userTier?: Plan
   referralCode?: string | null
   referralCount?: number
+  profileCompleted?: boolean
+  hasTelegramChatId?: boolean
 }
 
 const summaryMeta = [
@@ -101,6 +105,8 @@ export default function DeadlineDashboardOverview({
   userTier = 'radar',
   referralCode,
   referralCount = 0,
+  profileCompleted = false,
+  hasTelegramChatId = false,
 }: DeadlineDashboardOverviewProps) {
   const [deadlines, setDeadlines] = useState(() => [...initialDeadlines].sort(sortNearest))
   const [busyId, setBusyId] = useState<string | null>(null)
@@ -198,13 +204,12 @@ export default function DeadlineDashboardOverview({
         </div>
       )}
 
-      <section className="overflow-hidden rounded-3xl border border-slate-200 bg-slate-950 text-white shadow-xl shadow-slate-200">
-        <div className="relative p-5 sm:p-6">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_82%_18%,rgba(20,184,166,0.26),transparent_20rem)]" />
+      <section className="overflow-hidden rounded-3xl border border-white/10 bg-slate-950 text-white shadow-2xl shadow-slate-900/20">
+        <div className="relative bg-gradient-to-br from-slate-950 via-slate-900 to-brand-950 p-5 sm:p-6">
           <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <Badge tone="info" className="mb-3">Deadline Radar</Badge>
-              <h1 className="text-2xl font-black tracking-tight sm:text-3xl">
+              <h1 className="max-w-3xl text-2xl font-black tracking-tight sm:text-4xl">
                 {nearestDeadline
                   ? `${getDisplayTitle(nearestDeadline)} paling dekat.`
                   : `Halo${userName ? `, ${userName}` : ''}. Deadline aman dulu.`}
@@ -217,7 +222,7 @@ export default function DeadlineDashboardOverview({
             </div>
             <div className="flex flex-col gap-3 sm:flex-row lg:items-center">
               {highPriorityCount > 0 && (
-                <div className="inline-flex items-center gap-2 rounded-2xl border border-amber-300/20 bg-amber-300/10 px-4 py-3 text-sm font-bold text-amber-100">
+                <div className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-amber-300/20 bg-amber-300/10 px-4 py-3 text-sm font-black text-amber-100">
                   <Flame className="h-4 w-4" />
                   {highPriorityCount} prioritas tinggi
                 </div>
@@ -225,46 +230,44 @@ export default function DeadlineDashboardOverview({
               <button
                 type="button"
                 onClick={() => setShowExportModal(true)}
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm font-black text-white transition hover:bg-white/15"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm font-black text-white shadow-lg shadow-black/10 transition hover:-translate-y-0.5 hover:bg-white/15"
               >
                 <Share2 className="h-4 w-4" />
                 Export
               </button>
               <Link
-                href="/dashboard/deadlines/quick-add"
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-teal-300/30 bg-white/10 px-4 py-3 text-sm font-black text-teal-50 transition hover:bg-white/15"
-              >
-                <Sparkles className="h-4 w-4" />
-                AI Quick Add
-              </Link>
-              <Link
                 href="/dashboard/deadlines/new"
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-teal-400 px-4 py-3 text-sm font-black text-slate-950 shadow-lg shadow-teal-950/30 transition hover:bg-teal-300"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-cyan-300 px-4 py-3 text-sm font-black text-slate-950 shadow-lg shadow-cyan-950/30 transition hover:-translate-y-0.5 hover:bg-cyan-200"
               >
                 <Plus className="h-4 w-4" />
                 Tambah Deadline
-              </Link>
-              <Link
-                href="/dashboard/settings"
-                className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm font-black text-white transition hover:bg-white/15"
-              >
-                Pengaturan
               </Link>
             </div>
           </div>
         </div>
       </section>
 
+      <SetupChecklist
+        profileCompleted={profileCompleted}
+        hasDeadline={deadlines.length > 0}
+        hasTelegramChatId={hasTelegramChatId}
+        referralCode={referralCode}
+        userTier={userTier}
+      />
+
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="sm:col-span-2 xl:col-span-1">
+          <DashboardSidePanel userTier={userTier} />
+        </div>
         {summaryMeta.map(({ key, label, icon: Icon, copy, tone }) => (
-          <Card key={key} className="border-slate-200/80">
-            <CardContent className="p-4">
+          <Card key={key}>
+            <CardContent>
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-3xl font-black text-slate-950">{stats[key]}</p>
                   <p className="mt-1 text-sm font-black text-slate-800">{label}</p>
                 </div>
-                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-50">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-50 ring-1 ring-slate-100">
                   <Icon className={`h-5 w-5 ${tone}`} />
                 </div>
               </div>
@@ -297,8 +300,8 @@ export default function DeadlineDashboardOverview({
         </div>
       )}
 
-      <section className="rounded-3xl border border-slate-200 bg-white shadow-sm">
-        <div className="border-b border-slate-100 p-4 sm:p-5">
+      <section className="overflow-hidden rounded-3xl border border-white/80 bg-white/90 shadow-xl shadow-slate-200/70 ring-1 ring-slate-950/[0.03]">
+        <div className="border-b border-slate-100/80 bg-white/60 p-4 sm:p-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-lg font-black text-slate-950">Deadline terdekat</h2>
@@ -364,7 +367,7 @@ export default function DeadlineDashboardOverview({
                               <div className="flex items-center gap-2 text-sm font-bold text-slate-700 lg:flex-shrink-0">
                                 <Clock className="h-4 w-4 text-slate-400" />
                                 <span>{formatDeadlineDate(deadline)}</span>
-                                <span className="text-slate-300">•</span>
+                                <span className="text-slate-300">/</span>
                                 <span>{formatDeadlineTime(deadline)}</span>
                               </div>
                             </div>
@@ -379,14 +382,14 @@ export default function DeadlineDashboardOverview({
                             </div>
 
                             <p className="mt-3 text-sm leading-6 text-slate-500">
-                              Lokasi: <span className="font-bold text-slate-700">{deadline.campus} • {deadline.room}</span>
-                              {deadline.location_note ? ` • ${deadline.location_note}` : ''}
+                              Lokasi: <span className="font-bold text-slate-700">{deadline.campus} / {deadline.room}</span>
+                              {deadline.location_note ? ` / ${deadline.location_note}` : ''}
                             </p>
 
                             <div className="mt-4 flex flex-wrap gap-2">
                               <Link
                                 href={`/dashboard/deadlines/${deadline.id}/edit`}
-                                className="focus-ring inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 transition hover:bg-slate-50"
+                                className="focus-ring inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 transition hover:-translate-y-0.5 hover:border-brand-200 hover:bg-brand-50 hover:text-brand-800"
                               >
                                 <Pencil className="h-3.5 w-3.5" />
                                 Edit
@@ -395,7 +398,7 @@ export default function DeadlineDashboardOverview({
                                 type="button"
                                 onClick={() => updateStatus(deadline, isDone ? 'pending' : 'completed')}
                                 disabled={busyId === deadline.id}
-                                className="focus-ring inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 transition hover:bg-slate-50 disabled:opacity-60"
+                                className="focus-ring inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 transition hover:-translate-y-0.5 hover:border-brand-200 hover:bg-brand-50 hover:text-brand-800 disabled:opacity-60"
                               >
                                 {isDone ? <RotateCcw className="h-3.5 w-3.5" /> : <Check className="h-3.5 w-3.5" />}
                                 {isDone ? 'Balikin ke pending' : 'Tandai selesai'}
@@ -404,7 +407,7 @@ export default function DeadlineDashboardOverview({
                                 type="button"
                                 onClick={() => deleteDeadline(deadline)}
                                 disabled={busyId === deadline.id}
-                                className="focus-ring inline-flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-black text-red-700 transition hover:bg-red-100 disabled:opacity-60"
+                                className="focus-ring inline-flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-black text-red-700 transition hover:-translate-y-0.5 hover:bg-red-100 disabled:opacity-60"
                               >
                                 <Trash2 className="h-3.5 w-3.5" />
                                 Hapus
@@ -423,7 +426,7 @@ export default function DeadlineDashboardOverview({
       </section>
 
       <section className="grid gap-4 lg:grid-cols-[minmax(0,0.78fr)_minmax(280px,0.42fr)]">
-        <div className="rounded-3xl border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-600 shadow-sm sm:p-5">
+        <div className="rounded-3xl border border-white/80 bg-white/90 p-5 text-sm leading-6 text-slate-600 shadow-xl shadow-slate-200/70">
           <p className="font-black text-slate-950">Catatan kecil</p>
           <p className="mt-2">
             NEXA Campus bukan sistem resmi kampus. Selalu cek informasi final dari kanal resmi kampus.

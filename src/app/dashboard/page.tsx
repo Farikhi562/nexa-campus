@@ -3,6 +3,11 @@ import { createClient } from '@/lib/supabase/server'
 import { sortNearest } from '@/lib/deadline-utils'
 import type { AcademicDeadline, Profile } from '@/types'
 
+type DashboardProfile = Pick<
+  Profile,
+  'full_name' | 'plan' | 'referral_code' | 'profile_completed' | 'telegram_chat_id'
+>
+
 export default async function DashboardPage({
   searchParams,
 }: {
@@ -14,7 +19,7 @@ export default async function DashboardPage({
   } = await supabase.auth.getUser()
 
   const [{ data: profile }, { data: deadlines, error }, referralStats] = await Promise.all([
-    supabase.from('profiles').select('full_name, plan, referral_code').eq('id', user!.id).single(),
+    supabase.from('profiles').select('full_name, plan, referral_code, profile_completed, telegram_chat_id').eq('id', user!.id).single(),
     supabase
       .from('academic_deadlines')
       .select('*')
@@ -38,13 +43,17 @@ export default async function DashboardPage({
     )
   }
 
+  const dashboardProfile = profile as DashboardProfile | null
+
   return (
     <DeadlineDashboardOverview
       initialDeadlines={((deadlines ?? []) as AcademicDeadline[]).sort(sortNearest)}
-      userName={(profile as Pick<Profile, 'full_name' | 'plan' | 'referral_code'> | null)?.full_name}
-      userTier={(profile as Pick<Profile, 'full_name' | 'plan' | 'referral_code'> | null)?.plan ?? 'radar'}
-      referralCode={(profile as Pick<Profile, 'full_name' | 'plan' | 'referral_code'> | null)?.referral_code}
+      userName={dashboardProfile?.full_name}
+      userTier={dashboardProfile?.plan ?? 'radar'}
+      referralCode={dashboardProfile?.referral_code}
       referralCount={referralStats.count ?? 0}
+      profileCompleted={Boolean(dashboardProfile?.profile_completed)}
+      hasTelegramChatId={Boolean(dashboardProfile?.telegram_chat_id)}
       showCreatedMessage={searchParams?.created === 'deadline'}
       showUpdatedMessage={searchParams?.updated === 'deadline'}
       showDeletedMessage={searchParams?.deleted === 'deadline'}
