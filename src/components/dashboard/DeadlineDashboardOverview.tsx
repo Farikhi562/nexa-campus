@@ -258,8 +258,8 @@ export default function DeadlineDashboardOverview({
 
       <CommandFocusPlan deadlines={deadlines} userTier={userTier} />
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <div className="sm:col-span-2 xl:col-span-1">
+      <section className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+        <div className="hidden sm:col-span-2 lg:block xl:col-span-1">
           <DashboardSidePanel userTier={userTier} />
         </div>
         {summaryMeta.map(({ key, label, icon: Icon, copy, tone }) => (
