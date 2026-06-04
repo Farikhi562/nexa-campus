@@ -7,6 +7,7 @@ import Badge from '@/components/ui/Badge'
 import { Card, CardContent } from '@/components/ui/Card'
 import AskNexaWidget from '@/components/dashboard/AskNexaWidget'
 import DashboardSidePanel from '@/components/dashboard/DashboardSidePanel'
+import CommandFocusPlan from '@/components/dashboard/CommandFocusPlan'
 import ReferralCard from '@/components/dashboard/ReferralCard'
 import SetupChecklist from '@/components/dashboard/SetupChecklist'
 import ShareDeadlineModal from '@/components/dashboard/ShareDeadlineModal'
@@ -254,6 +255,8 @@ export default function DeadlineDashboardOverview({
         referralCode={referralCode}
         userTier={userTier}
       />
+
+      <CommandFocusPlan deadlines={deadlines} userTier={userTier} />
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <div className="sm:col-span-2 xl:col-span-1">

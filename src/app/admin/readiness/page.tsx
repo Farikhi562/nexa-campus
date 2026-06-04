@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { AlertTriangle, CheckCircle2, Database, KeyRound, UsersRound } from 'lucide-react'
+import { AlertTriangle, CheckCircle2, Database, KeyRound, UsersRound, type LucideIcon } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import { createClient } from '@/lib/supabase/server'
@@ -24,6 +24,12 @@ function EnvStatus({ label, ok, note }: { label: string; ok: boolean; note: stri
   )
 }
 
+type StatItem = {
+  label: string
+  value: number
+  icon: LucideIcon
+}
+
 export default async function AdminReadinessPage() {
   const supabase = await createClient()
   const {
@@ -44,6 +50,13 @@ export default async function AdminReadinessPage() {
       supabase.from('subscription_intents').select('id', { count: 'exact', head: true }),
       supabase.from('referrals').select('id', { count: 'exact', head: true }),
     ])
+
+  const stats: StatItem[] = [
+    { label: 'Users', value: userCount ?? 0, icon: UsersRound },
+    { label: 'Deadlines', value: deadlineCount ?? 0, icon: Database },
+    { label: 'Upgrade intents', value: intentCount ?? 0, icon: KeyRound },
+    { label: 'Referrals', value: referralCount ?? 0, icon: CheckCircle2 },
+  ]
 
   const envs = [
     {
@@ -98,20 +111,19 @@ export default async function AdminReadinessPage() {
         </div>
 
         <section className="grid gap-4 md:grid-cols-4">
-          {[
-            ['Users', userCount ?? 0, UsersRound],
-            ['Deadlines', deadlineCount ?? 0, Database],
-            ['Upgrade intents', intentCount ?? 0, KeyRound],
-            ['Referrals', referralCount ?? 0, CheckCircle2],
-          ].map(([label, value, Icon]) => (
-            <Card key={String(label)}>
-              <CardContent>
-                <Icon className="mb-4 h-5 w-5 text-brand-700" />
-                <p className="text-3xl font-black text-slate-950">{String(value)}</p>
-                <p className="mt-1 text-sm font-bold text-slate-600">{String(label)}</p>
-              </CardContent>
-            </Card>
-          ))}
+          {stats.map((stat) => {
+            const Icon: LucideIcon = stat.icon
+
+            return (
+              <Card key={stat.label}>
+                <CardContent>
+                  <Icon className="mb-4 h-5 w-5 text-brand-700" />
+                  <p className="text-3xl font-black text-slate-950">{stat.value}</p>
+                  <p className="mt-1 text-sm font-bold text-slate-600">{stat.label}</p>
+                </CardContent>
+              </Card>
+            )
+          })}
         </section>
 
         <Card>
