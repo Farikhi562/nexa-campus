@@ -1,8 +1,8 @@
 import Link from 'next/link'
 import { Database, LockKeyhole, Mail, ShieldCheck, Trash2 } from 'lucide-react'
+import NexaCampusLogo from '@/components/brand/NexaCampusLogo'
 import Badge from '@/components/ui/Badge'
 import { Card, CardContent } from '@/components/ui/Card'
-import NexaLogo from '@/components/NexaLogo'
 
 const sections = [
   {
@@ -53,8 +53,7 @@ export default function PrivacyPage() {
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
           <Link href="/" className="flex items-center gap-3">
-            <NexaLogo className="h-9 w-9" />
-            <span className="font-black">NEXA Campus</span>
+            <NexaCampusLogo imageClassName="h-9 w-9" />
           </Link>
           <Link href="/support" className="rounded-2xl border border-slate-300 px-4 py-2 text-sm font-black text-slate-700 hover:bg-slate-50">
             Support

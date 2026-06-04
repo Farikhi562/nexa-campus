@@ -16,7 +16,7 @@ import {
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import Button from '@/components/ui/Button'
-import NexaLogo from '@/components/NexaLogo'
+import NexaCampusLogo from '@/components/brand/NexaCampusLogo'
 
 type Mode = 'login' | 'signup' | 'forgot'
 
@@ -95,11 +95,7 @@ export default function LoginClient({ initialMode = 'login' }: { initialMode?: M
         <section className="auth-shell-panel auth-fade-up-delayed order-2 flex flex-col justify-between p-5 sm:p-8 lg:order-1">
           <div className="flex items-center justify-between gap-4">
             <Link href="/" className="flex items-center gap-3">
-              <NexaLogo className="h-12 w-12" />
-              <div>
-                <p className="text-xl font-black tracking-tight">NEXA Campus</p>
-                <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-teal-200">Deadline Radar</p>
-              </div>
+              <NexaCampusLogo tone="dark" imageClassName="h-12 w-12" />
             </Link>
             <div className="hidden rounded-full border border-teal-200/15 bg-teal-200/10 px-3 py-1.5 text-xs font-bold text-teal-100 sm:inline-flex">
               Beta access
@@ -148,11 +144,7 @@ export default function LoginClient({ initialMode = 'login' }: { initialMode?: M
           <div className="w-full max-w-[460px]">
             <div className="mb-5 flex items-center justify-between lg:hidden">
               <Link href="/" className="flex items-center gap-3">
-                <NexaLogo className="h-11 w-11" />
-                <div>
-                  <p className="text-lg font-black">NEXA Campus</p>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-teal-200">Deadline Radar</p>
-                </div>
+                <NexaCampusLogo tone="dark" imageClassName="h-11 w-11" />
               </Link>
             </div>
 

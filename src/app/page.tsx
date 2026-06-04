@@ -13,9 +13,10 @@ import {
   TimerReset,
 } from 'lucide-react'
 import AuthStatusActions from '@/components/AuthStatusActions'
+import NexaCampusLogo from '@/components/brand/NexaCampusLogo'
+import ProductPreviewCard from '@/components/marketing/ProductPreviewCard'
 import Badge from '@/components/ui/Badge'
 import { Card, CardContent } from '@/components/ui/Card'
-import NexaLogo from '@/components/NexaLogo'
 import { BRAND } from '@/lib/brand'
 
 const sampleDeadlines = [
@@ -39,6 +40,30 @@ const features = [
   ['Privacy-first manual input', 'Tidak minta password kampus dan tidak scraping sistem kampus tanpa izin.'],
 ]
 
+const previewCards = [
+  {
+    title: 'Dashboard Preview',
+    description: 'Tampilan ringkas untuk melihat deadline hari ini, minggu ini, overdue, dan prioritas tugas.',
+    imageSrc: '/screenshots/nexa-campus-dashboard.png',
+    placeholderLabel: 'Dashboard Screenshot Placeholder',
+    alt: 'Preview dashboard NEXA Campus',
+  },
+  {
+    title: 'Add Deadline Preview',
+    description: 'Flow input manual untuk mencatat tugas, praktikum, ujian, pembayaran UKT, dan deadline akademik lainnya.',
+    imageSrc: '/screenshots/nexa-campus-add-deadline.png',
+    placeholderLabel: 'Add Deadline Screenshot Placeholder',
+    alt: 'Preview tambah deadline NEXA Campus',
+  },
+  {
+    title: 'Reminder Preview',
+    description: 'Konsep reminder akademik untuk membantu mahasiswa mengingat deadline penting.',
+    imageSrc: '/screenshots/nexa-campus-reminder.png',
+    placeholderLabel: 'Reminder Screenshot Placeholder',
+    alt: 'Preview reminder NEXA Campus',
+  },
+]
+
 const faqs = [
   ['Apakah NEXA Campus sistem resmi kampus?', 'Bukan. NEXA Campus adalah produk independen dari NEXA Tech Labs. Info final tetap wajib dicek di kanal resmi kampus.'],
   ['Apakah NEXA meminta password kampus?', 'Tidak. NEXA tidak meminta password VClass, iLab, Studentsite, NPM, atau platform kampus mana pun.'],
@@ -54,11 +79,7 @@ export default function LandingPage() {
       <header className="sticky top-0 z-50 border-b border-white/10 bg-slate-950/85 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
           <Link href="/" className="flex items-center gap-3">
-            <NexaLogo className="h-10 w-10" />
-            <div>
-              <p className="text-lg font-black leading-5">NEXA Campus</p>
-              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-teal-200">Deadline Radar</p>
-            </div>
+            <NexaCampusLogo tone="dark" imageClassName="h-10 w-10" />
           </Link>
           <nav className="hidden items-center gap-6 text-sm font-bold text-slate-300 md:flex">
             <a href="#cara-kerja" className="hover:text-teal-200">Cara Kerja</a>
@@ -146,6 +167,23 @@ export default function LandingPage() {
                   <Badge tone="info">AI Locked Preview</Badge>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-slate-50 text-slate-950">
+          <div className="mx-auto max-w-7xl px-4 py-14">
+            <div className="mb-8 max-w-2xl">
+              <p className="text-sm font-bold uppercase tracking-wide text-brand-700">Preview NEXA Campus</p>
+              <h2 className="mt-2 text-3xl font-black">Beberapa tampilan produk sedang disiapkan.</h2>
+              <p className="mt-3 text-sm leading-6 text-slate-600">
+                Screenshot final akan ditambahkan setelah UI beta selesai.
+              </p>
+            </div>
+            <div className="grid gap-4 lg:grid-cols-3">
+              {previewCards.map((card) => (
+                <ProductPreviewCard key={card.title} {...card} />
+              ))}
             </div>
           </div>
         </section>

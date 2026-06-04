@@ -1,8 +1,8 @@
 import Link from 'next/link'
 import { ArrowRight, CheckCircle2, LockKeyhole, ReceiptText, ShieldCheck } from 'lucide-react'
+import NexaCampusLogo from '@/components/brand/NexaCampusLogo'
 import Badge from '@/components/ui/Badge'
 import { Card, CardContent } from '@/components/ui/Card'
-import NexaLogo from '@/components/NexaLogo'
 import { BRAND } from '@/lib/brand'
 import { PLANS } from '@/lib/nexa-data'
 
@@ -12,11 +12,7 @@ export default function PricingPage() {
       <header className="border-b border-slate-200 bg-white/90 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
           <Link href="/" className="flex items-center gap-3">
-            <NexaLogo className="h-9 w-9" />
-            <div>
-              <span className="block font-black leading-4">NEXA Campus</span>
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-700">Pricing beta</span>
-            </div>
+            <NexaCampusLogo imageClassName="h-9 w-9" />
           </Link>
           <Link href="/login?mode=signup" className="rounded-2xl bg-brand-600 px-4 py-2 text-sm font-black text-white hover:bg-brand-700">
             Daftar

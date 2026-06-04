@@ -388,7 +388,7 @@ export default function DeadlineDashboardOverview({
             NEXA Campus bukan sistem resmi kampus. Selalu cek informasi final dari kanal resmi kampus.
           </p>
         </div>
-        <AskNexaWidget />
+        <AskNexaWidget deadlines={deadlines} />
       </section>
     </div>
   )

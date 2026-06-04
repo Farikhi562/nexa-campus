@@ -1,22 +1,24 @@
 import Link from 'next/link'
 import { Bug, Database, LifeBuoy, Mail, ReceiptText } from 'lucide-react'
+import NexaCampusLogo from '@/components/brand/NexaCampusLogo'
 import Badge from '@/components/ui/Badge'
 import { Card, CardContent } from '@/components/ui/Card'
-import NexaLogo from '@/components/NexaLogo'
 
-const supportEmail = 'support@nexatechlabs.my.id'
+const adminWhatsApp = '6285811211505'
+const supportEmail = 'nexatechlabs271@gmail.com'
+const secondarySupportEmail = 'fauzanalfa36@gmail.com'
 
 const actions = [
   {
     title: 'Minta hapus data',
     desc: 'Kirim request penghapusan data akun NEXA Campus.',
-    href: `mailto:${supportEmail}?subject=Request%20hapus%20data%20NEXA%20Campus`,
+    href: `mailto:${supportEmail},${secondarySupportEmail}?subject=Request%20hapus%20data%20NEXA%20Campus`,
     icon: Database,
   },
   {
     title: 'Laporkan bug',
     desc: 'Ada halaman error atau flow yang nyangkut? Kirim detailnya.',
-    href: `mailto:${supportEmail}?subject=Bug%20report%20NEXA%20Campus`,
+    href: `mailto:${supportEmail},${secondarySupportEmail}?subject=Bug%20report%20NEXA%20Campus`,
     icon: Bug,
   },
   {
@@ -33,8 +35,7 @@ export default function SupportPage() {
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
           <Link href="/" className="flex items-center gap-3">
-            <NexaLogo className="h-9 w-9" />
-            <span className="font-black">NEXA Campus</span>
+            <NexaCampusLogo imageClassName="h-9 w-9" />
           </Link>
           <Link href="/privacy" className="text-sm font-black text-slate-600 hover:text-brand-700">
             Privacy
@@ -72,9 +73,15 @@ export default function SupportPage() {
         <div className="mt-6 grid gap-4 lg:grid-cols-[0.8fr_1.2fr]">
           <div className="rounded-2xl border border-slate-200 bg-white p-5">
             <Mail className="mb-4 h-5 w-5 text-brand-700" />
-            <p className="font-black text-slate-950">Email support</p>
+            <p className="font-black text-slate-950">Kontak support</p>
             <a className="mt-2 block text-sm font-bold text-brand-700" href={`mailto:${supportEmail}`}>
               {supportEmail}
+            </a>
+            <a className="mt-1 block text-sm font-bold text-brand-700" href={`mailto:${secondarySupportEmail}`}>
+              {secondarySupportEmail}
+            </a>
+            <a className="mt-3 block text-sm font-bold text-emerald-700" href={`https://wa.me/${adminWhatsApp}`}>
+              WhatsApp admin: 085811211505
             </a>
           </div>
           <div className="rounded-2xl border border-slate-200 bg-white p-5">
