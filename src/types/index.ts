@@ -37,6 +37,7 @@ export interface Profile {
   semester: number | null
   gender: 'laki_laki' | 'perempuan' | 'lainnya' | 'tidak_ingin_menyebutkan' | null
   avatar_icon: string | null
+  avatar_url: string | null
   student_id: string | null
   phone_number: string | null
   telegram_chat_id: string | null
