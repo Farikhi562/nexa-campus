@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import { BellRing, CheckCircle2, LockKeyhole, Plus, Settings, Sparkles } from 'lucide-react'
 import Badge from '@/components/ui/Badge'
-import DashboardNavigation from '@/components/dashboard/DashboardNavigation'
 import { PLAN_LABELS } from '@/lib/nexa-data'
 import type { Plan } from '@/types'
 
@@ -56,8 +55,6 @@ const quickActions = [
 export default function DashboardSidePanel({ userTier }: { userTier: Plan }) {
   return (
     <aside className="space-y-4 lg:sticky lg:top-20">
-      <DashboardNavigation />
-
       <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
         <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-700">Shortcut</p>
         <div className="mt-4 grid gap-2">
