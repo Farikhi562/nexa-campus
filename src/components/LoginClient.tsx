@@ -176,7 +176,7 @@ export default function LoginClient({ initialMode = 'login' }: { initialMode?: M
                     </span>
                   </div>
                   <h2 className="text-2xl font-black tracking-tight text-white sm:text-3xl">
-                    {mode === 'forgot' ? 'Pulihkan akses NEXA' : mode === 'signup' ? 'Daftar akun NEXA' : 'Masuk ke NEXA'}
+                    {mode === 'forgot' ? 'Pulihkan akses NEXA' : 'Masuk ke NEXA'}
                   </h2>
                   <p className="mt-2 text-sm leading-6 text-slate-400">
                     {mode === 'forgot'
@@ -184,32 +184,6 @@ export default function LoginClient({ initialMode = 'login' }: { initialMode?: M
                       : 'Pakai Google OAuth. Praktis, aman, dan tidak menyentuh password kampus.'}
                   </p>
                 </div>
-
-                {mode !== 'forgot' && (
-                  <div className="mb-5 grid grid-cols-2 rounded-2xl border border-white/10 bg-white/5 p-1 text-sm font-bold">
-                    {[
-                      ['login', 'Login'],
-                      ['signup', 'Daftar'],
-                    ].map(([id, label]) => (
-                      <button
-                        key={id}
-                        onClick={() => {
-                          setMode(id as Mode)
-                          setError('')
-                          setMessage('')
-                        }}
-                        className={`rounded-xl px-3 py-2.5 transition ${
-                          mode === id
-                            ? 'bg-white text-slate-950 shadow-lg shadow-black/20'
-                            : 'text-slate-400 hover:text-white'
-                        }`}
-                        type="button"
-                      >
-                        {label}
-                      </button>
-                    ))}
-                  </div>
-                )}
 
                 {mode === 'forgot' ? (
                   <form onSubmit={sendResetLink} className="space-y-4">
@@ -256,7 +230,7 @@ export default function LoginClient({ initialMode = 'login' }: { initialMode?: M
                           G
                         </span>
                       )}
-                      {loading ? 'Menghubungkan...' : mode === 'signup' ? 'Daftar dengan Google' : 'Masuk dengan Google'}
+                      {loading ? 'Menghubungkan...' : 'Lanjut dengan Google'}
                       {!loading && <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />}
                     </button>
 

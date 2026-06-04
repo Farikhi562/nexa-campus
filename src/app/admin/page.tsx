@@ -34,9 +34,9 @@ export default async function AdminPage() {
     supabase.from('referrals').select('*').order('created_at', { ascending: false }).limit(20),
   ])
 
-  const typedProfiles = (profiles ?? []) as Profile[]
-  const typedIntents = (intents ?? []) as SubscriptionIntent[]
-  const typedReferrals = (referrals ?? []) as Referral[]
+  const typedProfiles = (Array.isArray(profiles) ? profiles : []) as Profile[]
+  const typedIntents = (Array.isArray(intents) ? intents : []) as SubscriptionIntent[]
+  const typedReferrals = (Array.isArray(referrals) ? referrals : []) as Referral[]
 
   const pendingIntents = typedIntents.filter((intent) => intent.status === 'pending').length
   const confirmedReferrals = typedReferrals.filter((referral) => referral.rewarded).length
@@ -89,14 +89,16 @@ export default async function AdminPage() {
             <CardContent>
               <h2 className="text-lg font-black text-slate-950">Beta users terbaru</h2>
               <div className="mt-4 space-y-2">
-                {typedProfiles.map((profile) => (
+                {typedProfiles.length === 0 ? (
+                  <p className="text-sm text-slate-500">Belum ada beta user yang kebaca.</p>
+                ) : typedProfiles.map((profile) => (
                   <div key={profile.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-3 text-sm">
                     <div className="flex items-center justify-between gap-3">
                       <div className="min-w-0">
                         <p className="truncate font-black text-slate-950">{profile.full_name || profile.email}</p>
                         <p className="truncate text-xs text-slate-500">{profile.campus_name || 'Kampus belum diisi'}</p>
                       </div>
-                      <Badge tone="brand">{PLAN_LABELS[profile.plan]}</Badge>
+                      <Badge tone="brand">{PLAN_LABELS[profile.plan] ?? 'NEXA Radar'}</Badge>
                     </div>
                   </div>
                 ))}
@@ -114,7 +116,7 @@ export default async function AdminPage() {
                   typedIntents.map((intent) => (
                     <div key={intent.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-3 text-sm">
                       <div className="flex items-center justify-between gap-3">
-                        <p className="font-black text-slate-950">{PLAN_LABELS[intent.requested_plan]}</p>
+                        <p className="font-black text-slate-950">{PLAN_LABELS[intent.requested_plan] ?? intent.requested_plan}</p>
                         <Badge tone={intent.status === 'confirmed' ? 'success' : 'warning'}>{intent.status}</Badge>
                       </div>
                       <p className="mt-1 text-xs text-slate-500">{intent.payment_method}</p>

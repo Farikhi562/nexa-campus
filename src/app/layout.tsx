@@ -1,8 +1,11 @@
 import type { Metadata } from 'next'
+import InstallAppPrompt from '@/components/InstallAppPrompt'
 import { BRAND } from '@/lib/brand'
 import './globals.css'
 
 export const metadata: Metadata = {
+  applicationName: 'NEXA Campus',
+  category: 'productivity',
   manifest: '/manifest.json',
   themeColor: '#2563eb',
   appleWebApp: {
@@ -33,6 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="id">
       <body className="font-body bg-slate-50 text-slate-900 antialiased">
         {children}
+        <InstallAppPrompt />
       </body>
     </html>
   )

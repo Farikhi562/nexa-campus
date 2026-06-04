@@ -58,7 +58,7 @@ export default function AuthStatusActions({ variant = 'light' }: { variant?: 'li
             : 'bg-brand-600 text-white hover:bg-brand-700'
         }`}
       >
-        Daftar
+        Mulai
       </Link>
     </div>
   )
