@@ -6,6 +6,7 @@ import { AlertTriangle, BellOff, CalendarDays, Check, CheckCircle2, Clock, Flame
 import Badge from '@/components/ui/Badge'
 import { Card, CardContent } from '@/components/ui/Card'
 import AskNexaWidget from '@/components/dashboard/AskNexaWidget'
+import { AllDone, EmptyAll, EmptyOverdue, EmptyToday } from '@/components/dashboard/DeadlineEmptyStates'
 import {
   countDashboardStats,
   formatDeadlineDate,
@@ -17,7 +18,7 @@ import {
   sortNearest,
 } from '@/lib/deadline-utils'
 import { getSourceLabel, getTypeLabel } from '@/lib/nexa-data'
-import type { AcademicDeadline } from '@/types'
+import type { AcademicDeadline, Plan } from '@/types'
 
 type DeadlineDashboardOverviewProps = {
   initialDeadlines: AcademicDeadline[]
@@ -25,6 +26,7 @@ type DeadlineDashboardOverviewProps = {
   showCreatedMessage?: boolean
   showUpdatedMessage?: boolean
   showDeletedMessage?: boolean
+  userTier?: Plan
 }
 
 const summaryMeta = [
@@ -78,12 +80,21 @@ function getUrgencyGroup(deadline: AcademicDeadline): UrgencyGroupKey {
   return 'later'
 }
 
+function getLocalDateValue(date = new Date()) {
+  return [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, '0'),
+    String(date.getDate()).padStart(2, '0'),
+  ].join('-')
+}
+
 export default function DeadlineDashboardOverview({
   initialDeadlines,
   userName,
   showCreatedMessage = false,
   showUpdatedMessage = false,
   showDeletedMessage = false,
+  userTier = 'radar',
 }: DeadlineDashboardOverviewProps) {
   const [deadlines, setDeadlines] = useState(() => [...initialDeadlines].sort(sortNearest))
   const [busyId, setBusyId] = useState<string | null>(null)
@@ -98,6 +109,10 @@ export default function DeadlineDashboardOverview({
     }))
   }, [deadlines])
   const activeDeadlines = deadlines.filter((deadline) => deadline.status !== 'completed')
+  const todayValue = getLocalDateValue()
+  const todayDeadlines = deadlines.filter((deadline) => deadline.deadline_date === todayValue)
+  const todayActiveDeadlines = todayDeadlines.filter((deadline) => deadline.status !== 'completed')
+  const allTodayDone = todayDeadlines.length > 0 && todayActiveDeadlines.length === 0
   const nearestDeadline = activeDeadlines[0]
   const highPriorityCount = activeDeadlines.filter((deadline) =>
     deadline.priority === 'high' || deadline.priority === 'urgent'
@@ -238,6 +253,17 @@ export default function DeadlineDashboardOverview({
         ))}
       </section>
 
+      {deadlines.length > 0 && (
+        <section id="deadline-week" className="grid gap-3 lg:grid-cols-2">
+          {allTodayDone ? (
+            <AllDone userTier={userTier} />
+          ) : todayActiveDeadlines.length === 0 ? (
+            <EmptyToday userTier={userTier} />
+          ) : null}
+          {stats.overdue === 0 && <EmptyOverdue userTier={userTier} />}
+        </section>
+      )}
+
       {actionError && (
         <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700">
           {actionError}
@@ -264,21 +290,8 @@ export default function DeadlineDashboardOverview({
         </div>
 
         {deadlines.length === 0 ? (
-          <div className="p-6 text-center sm:p-10">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-50 text-teal-700">
-              <CalendarDays className="h-6 w-6" />
-            </div>
-            <h3 className="mt-4 text-lg font-black text-slate-950">Belum ada deadline.</h3>
-            <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-slate-500">
-              Entah hidupmu damai atau kamu belum nyatet.
-            </p>
-            <Link
-              href="/dashboard/deadlines/new"
-              className="mt-5 inline-flex items-center justify-center gap-2 rounded-2xl bg-brand-600 px-4 py-3 text-sm font-bold text-white hover:bg-brand-700"
-            >
-              <Plus className="h-4 w-4" />
-              Tambah Deadline Pertama
-            </Link>
+          <div className="p-4 sm:p-5">
+            <EmptyAll userTier={userTier} />
           </div>
         ) : (
           <div className="divide-y divide-slate-100">

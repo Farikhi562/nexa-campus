@@ -14,7 +14,7 @@ export default async function DashboardPage({
   } = await supabase.auth.getUser()
 
   const [{ data: profile }, { data: deadlines, error }] = await Promise.all([
-    supabase.from('profiles').select('full_name').eq('id', user!.id).single(),
+    supabase.from('profiles').select('full_name, plan').eq('id', user!.id).single(),
     supabase
       .from('academic_deadlines')
       .select('*')
@@ -37,7 +37,8 @@ export default async function DashboardPage({
   return (
     <DeadlineDashboardOverview
       initialDeadlines={((deadlines ?? []) as AcademicDeadline[]).sort(sortNearest)}
-      userName={(profile as Pick<Profile, 'full_name'> | null)?.full_name}
+      userName={(profile as Pick<Profile, 'full_name' | 'plan'> | null)?.full_name}
+      userTier={(profile as Pick<Profile, 'full_name' | 'plan'> | null)?.plan ?? 'radar'}
       showCreatedMessage={searchParams?.created === 'deadline'}
       showUpdatedMessage={searchParams?.updated === 'deadline'}
       showDeletedMessage={searchParams?.deleted === 'deadline'}
