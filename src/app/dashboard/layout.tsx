@@ -1,8 +1,10 @@
 import { redirect } from 'next/navigation'
+import AppShell from '@/components/AppShell'
 import DashboardSuccessToast from '@/components/DashboardSuccessToast'
 import FirstTimeOnboarding from '@/components/FirstTimeOnboarding'
 import PwaInstallBanner from '@/components/PwaInstallBanner'
 import { createClient } from '@/lib/supabase/server'
+import type { Profile } from '@/types'
 import { Suspense, type ReactNode } from 'react'
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
@@ -17,7 +19,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('full_name, onboarding_completed')
+    .select('full_name, plan, onboarding_completed')
     .eq('id', user.id)
     .maybeSingle()
 
@@ -29,7 +31,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
     null
 
   return (
-    <>
+    <AppShell profile={profile as Pick<Profile, 'plan'> | null}>
       {children}
       <Suspense fallback={null}>
         <DashboardSuccessToast />
@@ -38,6 +40,6 @@ export default async function DashboardLayout({ children }: { children: ReactNod
       {!profile?.onboarding_completed && (
         <FirstTimeOnboarding userId={user.id} userName={userName} />
       )}
-    </>
+    </AppShell>
   )
 }

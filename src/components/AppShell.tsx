@@ -13,7 +13,15 @@ const NAV = [
   { href: '/dashboard/billing', label: 'Billing', icon: CreditCard },
 ]
 
-export default function AppShell({ profile, children }: { profile: Profile; children: React.ReactNode }) {
+export default function AppShell({
+  profile,
+  children,
+}: {
+  profile: Pick<Profile, 'plan'> | null
+  children: React.ReactNode
+}) {
+  const activePlan = profile?.plan ?? 'radar'
+
   return (
     <div className="min-h-screen bg-slate-50">
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 border-r border-slate-200 bg-white lg:block">
@@ -23,7 +31,7 @@ export default function AppShell({ profile, children }: { profile: Profile; chil
               <NexaLogo className="h-10 w-10" />
               <div>
                 <p className="font-black leading-5">NEXA Campus</p>
-                <p className="text-xs font-bold text-brand-700">{PLAN_LABELS[profile.plan]}</p>
+                <p className="text-xs font-bold text-brand-700">{PLAN_LABELS[activePlan]}</p>
               </div>
             </Link>
           </div>
