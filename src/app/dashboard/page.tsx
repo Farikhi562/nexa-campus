@@ -13,14 +13,18 @@ export default async function DashboardPage({
     data: { user },
   } = await supabase.auth.getUser()
 
-  const [{ data: profile }, { data: deadlines, error }] = await Promise.all([
-    supabase.from('profiles').select('full_name, plan').eq('id', user!.id).single(),
+  const [{ data: profile }, { data: deadlines, error }, referralStats] = await Promise.all([
+    supabase.from('profiles').select('full_name, plan, referral_code').eq('id', user!.id).single(),
     supabase
       .from('academic_deadlines')
       .select('*')
       .eq('user_id', user!.id)
       .order('deadline_date', { ascending: true })
       .order('deadline_time', { ascending: true }),
+    supabase
+      .from('referrals')
+      .select('id', { count: 'exact', head: true })
+      .eq('referrer_id', user!.id),
   ])
 
   if (error) {
@@ -37,8 +41,10 @@ export default async function DashboardPage({
   return (
     <DeadlineDashboardOverview
       initialDeadlines={((deadlines ?? []) as AcademicDeadline[]).sort(sortNearest)}
-      userName={(profile as Pick<Profile, 'full_name' | 'plan'> | null)?.full_name}
-      userTier={(profile as Pick<Profile, 'full_name' | 'plan'> | null)?.plan ?? 'radar'}
+      userName={(profile as Pick<Profile, 'full_name' | 'plan' | 'referral_code'> | null)?.full_name}
+      userTier={(profile as Pick<Profile, 'full_name' | 'plan' | 'referral_code'> | null)?.plan ?? 'radar'}
+      referralCode={(profile as Pick<Profile, 'full_name' | 'plan' | 'referral_code'> | null)?.referral_code}
+      referralCount={referralStats.count ?? 0}
       showCreatedMessage={searchParams?.created === 'deadline'}
       showUpdatedMessage={searchParams?.updated === 'deadline'}
       showDeletedMessage={searchParams?.deleted === 'deadline'}

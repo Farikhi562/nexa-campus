@@ -39,9 +39,19 @@ export interface Profile {
   telegram_chat_id: string | null
   whatsapp_number: string | null
   plan: Plan
+  referral_code: string | null
+  pulse_trial_until: string | null
   profile_completed: boolean
   created_at: string
   updated_at: string
+}
+
+export interface Referral {
+  id: string
+  referrer_id: string
+  referred_id: string
+  created_at: string
+  rewarded: boolean
 }
 
 export interface AcademicDeadline {

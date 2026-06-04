@@ -6,7 +6,13 @@ import { createClient } from '@/lib/supabase/client'
 import Button from '@/components/ui/Button'
 import type { Profile } from '@/types'
 
-export default function OnboardingForm({ profile }: { profile: Partial<Profile> }) {
+export default function OnboardingForm({
+  profile,
+  referralCode,
+}: {
+  profile: Partial<Profile>
+  referralCode?: string
+}) {
   const router = useRouter()
   const supabase = useMemo(() => createClient(), [])
   const [loading, setLoading] = useState(false)
@@ -39,6 +45,19 @@ export default function OnboardingForm({ profile }: { profile: Partial<Profile> 
     if (upsertError) {
       setError(upsertError.message)
       return
+    }
+
+    const storedReferralCode =
+      referralCode ||
+      (typeof window !== 'undefined' ? window.sessionStorage.getItem('nexa_referral_code') || '' : '')
+
+    if (storedReferralCode) {
+      await fetch('/api/referrals/complete-onboarding', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ referralCode: storedReferralCode }),
+      }).catch(() => null)
+      window.sessionStorage.removeItem('nexa_referral_code')
     }
 
     router.push('/dashboard')

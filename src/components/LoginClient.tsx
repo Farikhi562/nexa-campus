@@ -28,11 +28,21 @@ export default function LoginClient({ initialMode = 'login' }: { initialMode?: M
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+  const [referralCode, setReferralCode] = useState('')
 
   useEffect(() => {
-    const urlError = new URLSearchParams(window.location.search).get('error')
+    const params = new URLSearchParams(window.location.search)
+    const urlError = params.get('error')
     if (urlError) {
       setError(getSafeAuthError(urlError))
+    }
+
+    const ref = params.get('ref')?.trim().toUpperCase()
+    if (ref) {
+      window.sessionStorage.setItem('nexa_referral_code', ref)
+      setReferralCode(ref)
+    } else {
+      setReferralCode(window.sessionStorage.getItem('nexa_referral_code') || '')
     }
 
     supabase.auth.getSession().then(({ data }) => {
@@ -52,10 +62,15 @@ export default function LoginClient({ initialMode = 'login' }: { initialMode?: M
   async function signInWithGoogle() {
     setLoading(true)
     setError('')
+    const storedReferralCode = referralCode || window.sessionStorage.getItem('nexa_referral_code') || ''
+    const nextPath =
+      mode === 'signup' && storedReferralCode
+        ? `/onboarding?ref=${encodeURIComponent(storedReferralCode)}`
+        : '/dashboard'
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`,
       },
     })
     if (oauthError) {

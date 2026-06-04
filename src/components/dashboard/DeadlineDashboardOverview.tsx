@@ -2,10 +2,12 @@
 
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
-import { AlertTriangle, BellOff, CalendarDays, Check, CheckCircle2, Clock, Flame, Pencil, Plus, RotateCcw, Sparkles, Trash2, TimerReset } from 'lucide-react'
+import { AlertTriangle, BellOff, CalendarDays, Check, CheckCircle2, Clock, Flame, Pencil, Plus, RotateCcw, Share2, Sparkles, Trash2, TimerReset } from 'lucide-react'
 import Badge from '@/components/ui/Badge'
 import { Card, CardContent } from '@/components/ui/Card'
 import AskNexaWidget from '@/components/dashboard/AskNexaWidget'
+import ReferralCard from '@/components/dashboard/ReferralCard'
+import ShareDeadlineModal from '@/components/dashboard/ShareDeadlineModal'
 import { AllDone, EmptyAll, EmptyOverdue, EmptyToday } from '@/components/dashboard/DeadlineEmptyStates'
 import {
   countDashboardStats,
@@ -27,6 +29,8 @@ type DeadlineDashboardOverviewProps = {
   showUpdatedMessage?: boolean
   showDeletedMessage?: boolean
   userTier?: Plan
+  referralCode?: string | null
+  referralCount?: number
 }
 
 const summaryMeta = [
@@ -95,11 +99,14 @@ export default function DeadlineDashboardOverview({
   showUpdatedMessage = false,
   showDeletedMessage = false,
   userTier = 'radar',
+  referralCode,
+  referralCount = 0,
 }: DeadlineDashboardOverviewProps) {
   const [deadlines, setDeadlines] = useState(() => [...initialDeadlines].sort(sortNearest))
   const [busyId, setBusyId] = useState<string | null>(null)
   const [actionError, setActionError] = useState('')
   const [actionMessage, setActionMessage] = useState('')
+  const [showExportModal, setShowExportModal] = useState(false)
 
   const stats = useMemo(() => countDashboardStats(deadlines), [deadlines])
   const groupedDeadlines = useMemo(() => {
@@ -215,6 +222,14 @@ export default function DeadlineDashboardOverview({
                   {highPriorityCount} prioritas tinggi
                 </div>
               )}
+              <button
+                type="button"
+                onClick={() => setShowExportModal(true)}
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm font-black text-white transition hover:bg-white/15"
+              >
+                <Share2 className="h-4 w-4" />
+                Export
+              </button>
               <Link
                 href="/dashboard/deadlines/quick-add"
                 className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-teal-300/30 bg-white/10 px-4 py-3 text-sm font-black text-teal-50 transition hover:bg-white/15"
@@ -410,6 +425,16 @@ export default function DeadlineDashboardOverview({
         </div>
         <AskNexaWidget deadlines={deadlines} />
       </section>
+
+      {showExportModal && (
+        <ShareDeadlineModal
+          deadlines={deadlines}
+          userName={userName}
+          userTier={userTier}
+          onClose={() => setShowExportModal(false)}
+        />
+      )}
+      <ReferralCard referralCode={referralCode} referralCount={referralCount} userTier={userTier} />
     </div>
   )
 }

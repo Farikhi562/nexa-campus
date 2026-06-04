@@ -4,7 +4,11 @@ import NexaLogo from '@/components/NexaLogo'
 import { createClient } from '@/lib/supabase/server'
 import type { Profile } from '@/types'
 
-export default async function OnboardingPage() {
+export default async function OnboardingPage({
+  searchParams,
+}: {
+  searchParams?: { ref?: string }
+}) {
   const supabase = await createClient()
   const {
     data: { user },
@@ -43,7 +47,10 @@ export default async function OnboardingPage() {
             NEXA butuh profil dasar untuk label kampus, reminder, dan batas paket. Password platform kampus tidak pernah diminta.
           </p>
           <div className="mt-6">
-            <OnboardingForm profile={(profile as Partial<Profile>) ?? fallbackProfile} />
+            <OnboardingForm
+              profile={(profile as Partial<Profile>) ?? fallbackProfile}
+              referralCode={searchParams?.ref}
+            />
           </div>
         </div>
       </div>

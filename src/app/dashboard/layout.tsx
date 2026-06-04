@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import DashboardSuccessToast from '@/components/DashboardSuccessToast'
 import FirstTimeOnboarding from '@/components/FirstTimeOnboarding'
+import PwaInstallBanner from '@/components/PwaInstallBanner'
 import { createClient } from '@/lib/supabase/server'
 import { Suspense, type ReactNode } from 'react'
 
@@ -33,6 +34,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
       <Suspense fallback={null}>
         <DashboardSuccessToast />
       </Suspense>
+      <PwaInstallBanner />
       {!profile?.onboarding_completed && (
         <FirstTimeOnboarding userId={user.id} userName={userName} />
       )}

@@ -77,7 +77,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: profileError }, { status: 500 })
   }
 
-  if (body.deadline !== null) {
+  if (body.deadline !== null && body.deadline !== undefined) {
     const deadline = parseDeadline(body.deadline)
     if (!deadline.ok) {
       return NextResponse.json({ error: deadline.error }, { status: 400 })
@@ -194,8 +194,14 @@ async function insertDeadline(
   ]
 
   let lastError = 'Gagal menyimpan deadline pertama.'
+  const db = supabase as unknown as {
+    from(table: string): {
+      insert(payload: Record<string, unknown>): Promise<{ error: { message: string } | null }>
+    }
+  }
+
   for (const attempt of attempts) {
-    const { error } = await supabase.from(attempt.table).insert(attempt.payload)
+    const { error } = await db.from(attempt.table).insert(attempt.payload)
     if (!error) return null
     lastError = error.message
   }

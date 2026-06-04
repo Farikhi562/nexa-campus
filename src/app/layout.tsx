@@ -3,6 +3,13 @@ import { BRAND } from '@/lib/brand'
 import './globals.css'
 
 export const metadata: Metadata = {
+  manifest: '/manifest.json',
+  themeColor: '#2563eb',
+  appleWebApp: {
+    capable: true,
+    title: 'NEXA Campus',
+    statusBarStyle: 'default',
+  },
   title: 'NEXA Campus - Platform Anti-Lupa Deadline Kampus',
   description:
     'Dashboard deadline dan reminder akademik untuk mahasiswa. Catat tugas, praktikum, ujian, dan deadline kampus tanpa meminta password kampus.',
