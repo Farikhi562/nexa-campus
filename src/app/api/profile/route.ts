@@ -13,6 +13,16 @@ function text(value: unknown) {
   return typeof value === 'string' ? value.trim() : ''
 }
 
+function isSchemaError(error: { code?: string; message?: string }) {
+  const message = error.message?.toLowerCase() ?? ''
+  return (
+    error.code === 'PGRST204' ||
+    error.code === '42703' ||
+    message.includes('column') ||
+    message.includes('schema cache')
+  )
+}
+
 export async function PATCH(request: NextRequest) {
   const supabase = await createClient()
   const {
@@ -49,27 +59,53 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: 'Gender tidak valid.' }, { status: 400 })
   }
 
+  const corePayload = {
+    full_name: fullName,
+    campus_name: campusName,
+    major,
+    semester,
+    student_id: studentId || null,
+  }
+
+  const fullPayload = {
+    ...corePayload,
+    province: province || null,
+    gender: gender || null,
+    avatar_icon: avatarIcon || null,
+  }
+
   const { data, error } = await supabase
     .from('profiles')
-    .update({
-      full_name: fullName,
-      campus_name: campusName,
-      province: province || null,
-      major,
-      semester,
-      student_id: studentId || null,
-      gender: gender || null,
-      avatar_icon: avatarIcon || null,
-    })
+    .update(fullPayload)
     .eq('id', user.id)
     .select('*')
     .single()
 
   if (error) {
+    console.error('[Profile Update] full update failed:', error)
+
+    if (isSchemaError(error)) {
+      const { data: fallbackData, error: fallbackError } = await supabase
+        .from('profiles')
+        .update(corePayload)
+        .eq('id', user.id)
+        .select('*')
+        .single()
+
+      if (!fallbackError) {
+        return NextResponse.json({
+          data: fallbackData,
+          warning:
+            'Profil inti tersimpan, tapi field province/gender/avatar belum tersimpan karena migration profile terbaru belum jalan di Supabase production.',
+        })
+      }
+
+      console.error('[Profile Update] fallback update failed:', fallbackError)
+    }
+
     return NextResponse.json(
       {
-        error:
-          'Profil gagal disimpan. Pastikan migration profile terbaru sudah jalan di Supabase.',
+        error: `Profil gagal disimpan: ${error.message}. Pastikan migration profile terbaru sudah jalan di Supabase.`,
       },
       { status: 500 }
     )

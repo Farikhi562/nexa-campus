@@ -224,7 +224,7 @@ export default function ProfileSettingsForm({ profile }: { profile: Profile }) {
         avatar_icon: null,
       }),
     })
-    const result = (await response.json().catch(() => null)) as { error?: string } | null
+    const result = (await response.json().catch(() => null)) as { error?: string; warning?: string } | null
 
     setLoading(false)
 
@@ -233,7 +233,7 @@ export default function ProfileSettingsForm({ profile }: { profile: Profile }) {
       return
     }
 
-    setMessage('Profil berhasil diupdate. Identitas kampusmu sekarang lebih rapi.')
+    setMessage(result?.warning || 'Profil berhasil diupdate. Identitas kampusmu sekarang lebih rapi.')
   }
 
   async function uploadPhoto() {
