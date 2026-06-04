@@ -32,8 +32,11 @@ export interface Profile {
   email: string
   full_name: string | null
   campus_name: string | null
+  province: string | null
   major: string | null
   semester: number | null
+  gender: 'laki_laki' | 'perempuan' | 'lainnya' | 'tidak_ingin_menyebutkan' | null
+  avatar_icon: string | null
   student_id: string | null
   phone_number: string | null
   telegram_chat_id: string | null

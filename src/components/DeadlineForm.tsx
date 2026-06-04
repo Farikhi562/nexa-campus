@@ -299,7 +299,7 @@ export default function DeadlineForm({
         </Field>
         <Field span helper="NEXA cuma nyimpen deadline yang kamu input. Password kampus? Nggak usah, hidup udah cukup ribet.">
           <label className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-bold text-slate-700">
-            <input type="checkbox" name="reminder_enabled" defaultChecked={deadline?.reminder_enabled ?? false} className="mt-0.5" />
+            <input type="checkbox" name="reminder_enabled" defaultChecked={deadline?.reminder_enabled ?? Boolean(profile.telegram_chat_id)} className="mt-0.5" />
             <span>
               Tandai butuh reminder
               <span className="mt-1 block text-xs font-medium leading-5 text-slate-500">Ini baru status di deadline. Integrasi bot tidak dikerjakan di fitur ini.</span>

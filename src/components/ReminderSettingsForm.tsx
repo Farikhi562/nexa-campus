@@ -1,97 +1,229 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { BellRing, CheckCircle2, Send, ShieldCheck } from 'lucide-react'
 import Button from '@/components/ui/Button'
+import Badge from '@/components/ui/Badge'
+import { createClient } from '@/lib/supabase/client'
 import type { Profile, ReminderPreferences } from '@/types'
+
+type ReminderSettingsFormProps = {
+  profile: Profile
+  preferences?: Partial<ReminderPreferences> | null
+  telegramConfigured: boolean
+}
 
 export default function ReminderSettingsForm({
   profile,
   preferences,
-}: {
-  profile: Profile
-  preferences?: ReminderPreferences | null
-}) {
+  telegramConfigured,
+}: ReminderSettingsFormProps) {
   const supabase = useMemo(() => createClient(), [])
+  const [telegramChatId, setTelegramChatId] = useState(profile.telegram_chat_id ?? '')
+  const [phoneNumber, setPhoneNumber] = useState(profile.phone_number ?? '')
+  const [whatsappNumber, setWhatsappNumber] = useState(profile.whatsapp_number ?? '')
+  const [h7, setH7] = useState(preferences?.h7_enabled ?? false)
+  const [h3, setH3] = useState(preferences?.h3_enabled ?? false)
+  const [h1, setH1] = useState(preferences?.h1_enabled ?? true)
+  const [day, setDay] = useState(preferences?.day_enabled ?? true)
+  const [reminderTime, setReminderTime] = useState(preferences?.reminder_time?.slice(0, 5) ?? '08:00')
+  const [loading, setLoading] = useState(false)
+  const [testing, setTesting] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
-  const locked = profile.plan === 'radar'
 
-  async function submit(event: React.FormEvent<HTMLFormElement>) {
+  async function saveSettings(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    setMessage('')
+    setLoading(true)
     setError('')
+    setMessage('')
 
-    if (locked) {
-      setError('Reminder aktif mulai dari NEXA Pulse. Radar tetap bisa pakai dashboard dan countdown.')
+    const cleanedTelegramChatId = telegramChatId.trim()
+
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update({
+        telegram_chat_id: cleanedTelegramChatId || null,
+        phone_number: phoneNumber.trim() || null,
+        whatsapp_number: whatsappNumber.trim() || null,
+      })
+      .eq('id', profile.id)
+
+    if (profileError) {
+      setLoading(false)
+      setError('Kontak reminder gagal disimpan. Coba lagi sebentar.')
       return
     }
 
-    setLoading(true)
-    const form = new FormData(event.currentTarget)
-    const payload = {
-      user_id: profile.id,
-      channel: String(form.get('channel') || 'telegram'),
-      h7_enabled: form.get('h7_enabled') === 'on' && profile.plan === 'command',
-      h3_enabled: form.get('h3_enabled') === 'on' && profile.plan === 'command',
-      h1_enabled: form.get('h1_enabled') === 'on',
-      day_enabled: form.get('day_enabled') === 'on',
-      reminder_time: String(form.get('reminder_time') || '08:00'),
-    }
-
-    const { error: saveError } = await supabase.from('reminder_preferences').upsert(payload, {
-      onConflict: 'user_id',
-    })
+    const { error: preferenceError } = await supabase
+      .from('reminder_preferences')
+      .upsert({
+        id: preferences?.id,
+        user_id: profile.id,
+        channel: 'telegram',
+        h7_enabled: h7,
+        h3_enabled: h3,
+        h1_enabled: h1,
+        day_enabled: day,
+        reminder_time: reminderTime,
+      })
 
     setLoading(false)
-    if (saveError) {
-      setError(saveError.message)
+
+    if (preferenceError) {
+      setError('Preferensi reminder gagal disimpan. Coba lagi sebentar.')
       return
     }
-    setMessage('Reminder settings tersimpan. Kalau token Telegram belum diset, app tetap aman dan tidak crash.')
+
+    setMessage('Pengaturan Telegram tersimpan. NEXA sudah siap ngingetin, asal chat ID benar.')
+  }
+
+  async function sendTestMessage() {
+    setTesting(true)
+    setError('')
+    setMessage('')
+
+    const response = await fetch('/api/reminders/telegram/test', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ telegramChatId: telegramChatId.trim() }),
+    })
+    const result = (await response.json().catch(() => null)) as { error?: string; message?: string } | null
+
+    setTesting(false)
+
+    if (!response.ok) {
+      setError(result?.error || 'Test Telegram gagal dikirim.')
+      return
+    }
+
+    setMessage(result?.message || 'Test Telegram terkirim. Cek chat kamu.')
   }
 
   return (
-    <form onSubmit={submit} className="space-y-5">
-      <div className={locked ? 'pointer-events-none opacity-50' : ''}>
-        <div className="grid gap-4 sm:grid-cols-2">
+    <form onSubmit={saveSettings} className="space-y-5">
+      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <Badge tone={telegramConfigured ? 'success' : 'warning'} className="mb-3">
+              {telegramConfigured ? 'Telegram bot configured' : 'Telegram token belum kebaca'}
+            </Badge>
+            <h2 className="text-xl font-black text-slate-950">Telegram reminder</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+              Masukkan Telegram chat ID kamu. NEXA tidak butuh password kampus, cuma butuh chat ID untuk kirim reminder.
+            </p>
+          </div>
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-50 text-teal-700">
+            <BellRing className="h-6 w-6" />
+          </div>
+        </div>
+
+        <div className="mt-5 grid gap-4 md:grid-cols-2">
           <label className="block">
-            <span className="mb-1.5 block text-sm font-bold text-slate-700">Channel</span>
-            <select name="channel" defaultValue={preferences?.channel ?? 'telegram'} className="focus-ring w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm">
-              <option value="telegram">Telegram</option>
-              <option value="whatsapp">WhatsApp (future Wablas)</option>
-            </select>
+            <span className="mb-1.5 block text-sm font-black text-slate-700">Telegram chat ID</span>
+            <input
+              value={telegramChatId}
+              onChange={(event) => setTelegramChatId(event.target.value)}
+              placeholder="Contoh: 123456789"
+              className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm"
+            />
+            <span className="mt-1.5 block text-xs leading-5 text-slate-500">
+              Chat ID bisa didapat dari bot seperti @userinfobot, lalu mulai chat dengan bot NEXA.
+            </span>
           </label>
+
           <label className="block">
-            <span className="mb-1.5 block text-sm font-bold text-slate-700">Jam reminder</span>
-            <input name="reminder_time" type="time" defaultValue={preferences?.reminder_time?.slice(0, 5) ?? '08:00'} className="focus-ring w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm" />
+            <span className="mb-1.5 block text-sm font-black text-slate-700">Jam reminder default</span>
+            <input
+              type="time"
+              value={reminderTime}
+              onChange={(event) => setReminderTime(event.target.value)}
+              className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm"
+            />
           </label>
         </div>
+      </section>
+
+      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+        <h2 className="text-lg font-black text-slate-950">Kapan NEXA harus ngingetin?</h2>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {[
-            ['h7_enabled', 'H-7', profile.plan === 'command'],
-            ['h3_enabled', 'H-3', profile.plan === 'command'],
-            ['h1_enabled', 'H-1', true],
-            ['day_enabled', 'Hari-H', true],
-          ].map(([name, label, enabled]) => (
-            <label key={String(name)} className={`flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold text-slate-700 ${enabled ? '' : 'opacity-50'}`}>
+            ['H-7', h7, setH7],
+            ['H-3', h3, setH3],
+            ['H-1', h1, setH1],
+            ['Hari-H', day, setDay],
+          ].map(([label, checked, setter]) => (
+            <label key={String(label)} className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-black text-slate-700">
               <input
                 type="checkbox"
-                name={String(name)}
-                disabled={!enabled}
-                defaultChecked={Boolean(preferences?.[name as keyof ReminderPreferences])}
+                checked={Boolean(checked)}
+                onChange={(event) => (setter as (value: boolean) => void)(event.target.checked)}
               />
               {String(label)}
-              {!enabled && <span className="ml-auto text-xs text-slate-500">Command</span>}
             </label>
           ))}
         </div>
+      </section>
+
+      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+        <h2 className="text-lg font-black text-slate-950">Kontak opsional</h2>
+        <p className="mt-1 text-sm leading-6 text-slate-600">
+          WhatsApp masih roadmap. Nomor ini disimpan opsional untuk persiapan reminder produksi nanti.
+        </p>
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
+          <label className="block">
+            <span className="mb-1.5 block text-sm font-black text-slate-700">Nomor HP</span>
+            <input
+              value={phoneNumber}
+              onChange={(event) => setPhoneNumber(event.target.value)}
+              className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm"
+            />
+          </label>
+          <label className="block">
+            <span className="mb-1.5 block text-sm font-black text-slate-700">WhatsApp</span>
+            <input
+              value={whatsappNumber}
+              onChange={(event) => setWhatsappNumber(event.target.value)}
+              className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm"
+            />
+          </label>
+        </div>
+      </section>
+
+      {error && (
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700">
+          {error}
+        </div>
+      )}
+      {message && (
+        <div className="flex gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-emerald-800">
+          <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0" />
+          {message}
+        </div>
+      )}
+
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <Button type="submit" disabled={loading} className="min-h-12 rounded-2xl">
+          {loading ? 'Menyimpan...' : 'Simpan Pengaturan'}
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          disabled={testing || !telegramChatId.trim()}
+          onClick={sendTestMessage}
+          className="min-h-12 rounded-2xl"
+        >
+          {testing ? 'Mengirim...' : 'Kirim Test Telegram'}
+          <Send className="h-4 w-4" />
+        </Button>
       </div>
-      {locked && <p className="rounded-lg bg-amber-50 p-3 text-sm text-amber-800">Radar belum termasuk reminder. Upgrade ke Pulse kalau deadline perlu ngejar kamu.</p>}
-      {error && <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
-      {message && <p className="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-700">{message}</p>}
-      <Button type="submit" disabled={loading}>{loading ? 'Menyimpan...' : 'Simpan Reminder'}</Button>
+
+      <div className="flex gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-xs leading-5 text-slate-600">
+        <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-teal-700" />
+        <p>
+          NEXA Campus bukan sistem resmi kampus. Reminder membantu, tapi info final tetap harus dicek dari kanal resmi kampus.
+        </p>
+      </div>
     </form>
   )
 }

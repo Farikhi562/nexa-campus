@@ -31,6 +31,9 @@ export default function OnboardingForm({
       campus_name: String(form.get('campus_name') || '').trim(),
       major: String(form.get('major') || '').trim(),
       semester: Number(form.get('semester') || 1),
+      province: String(form.get('province') || '').trim() || null,
+      gender: String(form.get('gender') || '').trim() || null,
+      avatar_icon: String(form.get('avatar_icon') || '').trim() || 'graduation',
       student_id: String(form.get('student_id') || '').trim() || null,
       phone_number: String(form.get('phone_number') || '').trim() || null,
       telegram_chat_id: String(form.get('telegram_chat_id') || '').trim() || null,
@@ -82,6 +85,10 @@ export default function OnboardingForm({
           <input name="campus_name" defaultValue={profile.campus_name ?? ''} required className="focus-ring w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm" />
         </label>
         <label className="block">
+          <span className="mb-1.5 block text-sm font-bold text-slate-700">Provinsi opsional</span>
+          <input name="province" defaultValue={profile.province ?? ''} placeholder="Contoh: Jawa Barat" className="focus-ring w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm" />
+        </label>
+        <label className="block">
           <span className="mb-1.5 block text-sm font-bold text-slate-700">Jurusan</span>
           <input name="major" defaultValue={profile.major ?? ''} required className="focus-ring w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm" />
         </label>
@@ -104,6 +111,28 @@ export default function OnboardingForm({
         <label className="block">
           <span className="mb-1.5 block text-sm font-bold text-slate-700">WhatsApp opsional</span>
           <input name="whatsapp_number" defaultValue={profile.whatsapp_number ?? ''} className="focus-ring w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm" />
+        </label>
+        <label className="block">
+          <span className="mb-1.5 block text-sm font-bold text-slate-700">Gender opsional</span>
+          <select name="gender" defaultValue={profile.gender ?? ''} className="focus-ring w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm">
+            <option value="">Tidak diisi</option>
+            <option value="laki_laki">Laki-laki</option>
+            <option value="perempuan">Perempuan</option>
+            <option value="lainnya">Lainnya</option>
+            <option value="tidak_ingin_menyebutkan">Tidak ingin menyebutkan</option>
+          </select>
+        </label>
+        <label className="block">
+          <span className="mb-1.5 block text-sm font-bold text-slate-700">Icon profil</span>
+          <select name="avatar_icon" defaultValue={profile.avatar_icon ?? 'graduation'} className="focus-ring w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm">
+            <option value="graduation">Kampus</option>
+            <option value="user">User</option>
+            <option value="book">Book</option>
+            <option value="rocket">Rocket</option>
+            <option value="radar">Radar</option>
+            <option value="bell">Bell</option>
+            <option value="sparkles">Spark</option>
+          </select>
         </label>
       </div>
       <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">

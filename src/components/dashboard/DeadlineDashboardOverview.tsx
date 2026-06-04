@@ -244,6 +244,12 @@ export default function DeadlineDashboardOverview({
                 <Plus className="h-4 w-4" />
                 Tambah Deadline
               </Link>
+              <Link
+                href="/dashboard/settings"
+                className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm font-black text-white transition hover:bg-white/15"
+              >
+                Pengaturan
+              </Link>
             </div>
           </div>
         </div>
