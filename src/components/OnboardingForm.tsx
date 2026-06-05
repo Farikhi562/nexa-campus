@@ -1,9 +1,8 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Camera, CheckCircle2, GraduationCap, Info, MapPin, ShieldCheck, Upload, UserRound } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
 import Button from '@/components/ui/Button'
 import {
   GENDER_OPTIONS,
@@ -12,20 +11,6 @@ import {
   UNIVERSITY_OPTIONS,
 } from '@/lib/profile-options'
 import type { Profile } from '@/types'
-
-function isSchemaError(error: { code?: string; message?: string }) {
-  const message = error.message?.toLowerCase() ?? ''
-  return (
-    error.code === 'PGRST204' ||
-    error.code === '42703' ||
-    message.includes('column') ||
-    message.includes('schema cache')
-  )
-}
-
-function isPlanConstraintError(error: { message?: string }) {
-  return (error.message ?? '').toLowerCase().includes('profiles_plan_check')
-}
 
 const inputClass =
   'focus-ring w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 transition placeholder:text-slate-400 hover:border-slate-400'
@@ -39,7 +24,6 @@ export default function OnboardingForm({
   referralCode?: string
 }) {
   const router = useRouter()
-  const supabase = useMemo(() => createClient(), [])
 
   const [fullName, setFullName] = useState(profile.full_name ?? '')
   const [campusName, setCampusName] = useState(profile.campus_name ?? '')
@@ -112,45 +96,32 @@ export default function OnboardingForm({
       resolvedAvatarUrl = uploaded.url ?? avatarUrl
     }
 
-    const corePayload: Record<string, unknown> = {
-      id: profile.id,
-      email: profile.email,
-      plan: profile.plan === 'pulse' || profile.plan === 'command' ? profile.plan : 'radar',
+    const profilePayload: Record<string, unknown> = {
       full_name: fullName.trim(),
       campus_name: campusName.trim(),
       major: major.trim(),
       semester: parsedSemester,
+      province: province.trim(),
+      gender: gender || null,
+      avatar_url: resolvedAvatarUrl || null,
       student_id: studentId.trim() || null,
       phone_number: phoneNumber.trim() || null,
       telegram_chat_id: telegramChatId.trim() || null,
       whatsapp_number: whatsappNumber.trim() || null,
-      profile_completed: true,
     }
 
-    const fullPayload: Record<string, unknown> = {
-      ...corePayload,
-      province: province.trim() || null,
-      gender: gender || null,
-      avatar_url: resolvedAvatarUrl || null,
-    }
-
-    // Coba simpan lengkap. Kalau ada kolom opsional yang belum ada di DB,
-    // jangan gagalkan onboarding — simpan field inti dulu.
-    let upsertError = (await supabase.from('profiles').upsert(fullPayload)).error
-    if (upsertError && isSchemaError(upsertError)) {
-      upsertError = (await supabase.from('profiles').upsert(corePayload)).error
-    }
+    // Simpan lewat API supaya error database bisa dikembalikan dengan detail yang jelas.
+    const response = await fetch('/api/onboarding/profile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(profilePayload),
+    })
+    const result = (await response.json().catch(() => null)) as { error?: string; detail?: string } | null
 
     setLoading(false)
 
-    if (upsertError) {
-      setError(
-        isSchemaError(upsertError)
-          ? 'Profil gagal disimpan karena struktur database belum lengkap. Minta admin menjalankan supabase/schema.sql, lalu coba lagi.'
-          : isPlanConstraintError(upsertError)
-            ? 'Profil gagal disimpan karena constraint plan di Supabase masih versi lama. Jalankan migration 202606050001_fix_profile_schema_cache.sql, lalu coba lagi.'
-          : upsertError.message
-      )
+    if (!response.ok) {
+      setError(result?.detail ? `${result.error} Detail: ${result.detail}` : result?.error || 'Profil gagal disimpan. Coba lagi sebentar.')
       return
     }
 
