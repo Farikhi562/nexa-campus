@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
-const MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash'
+const MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash-lite'
 const MAX_TEXT_LENGTH = 6000
 
 const SYSTEM_PROMPT =
@@ -209,7 +209,17 @@ export async function POST(request: NextRequest) {
     )
 
     if (!response.ok) {
-      return jsonResponse({ error: 'AI Quick Add sedang tidak bisa dipakai. Coba lagi nanti.' }, 502)
+      const detail = await response.text().catch(() => '')
+      console.error('[AI Quick Add] Gemini error', response.status, MODEL, detail.slice(0, 500))
+      const data = fallbackExtract(text)
+      return jsonResponse({
+        data,
+        provider: 'fallback',
+        status: 'fallback',
+        notice:
+          `Gemini menolak permintaan (HTTP ${response.status}). Memakai parser sederhana — cek hasilnya. ` +
+          'Cek GEMINI_API_KEY & GEMINI_MODEL kamu.',
+      })
     }
 
     const result = (await response.json()) as GeminiResponse
@@ -244,7 +254,14 @@ export async function POST(request: NextRequest) {
       model: MODEL,
       status: 'success',
     })
-  } catch {
-    return jsonResponse({ error: 'AI Quick Add sedang tidak bisa dipakai. Coba lagi nanti.' }, 500)
+  } catch (err) {
+    console.error('[AI Quick Add] request failed', err)
+    const data = fallbackExtract(text)
+    return jsonResponse({
+      data,
+      provider: 'fallback',
+      status: 'fallback',
+      notice: 'AI sedang tidak bisa dihubungi. Memakai parser sederhana — cek & rapikan hasilnya sebelum simpan.',
+    })
   }
 }
