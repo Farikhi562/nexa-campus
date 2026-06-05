@@ -132,10 +132,19 @@ export default function OnboardingForm({
     }
 
     // Coba simpan lengkap. Kalau ada kolom opsional yang belum ada di DB,
-    // jangan gagalkan onboarding — simpan field inti dulu.
+    // jangan gagalkan onboarding — turun bertahap ke field inti, lalu minimal.
     let upsertError = (await supabase.from('profiles').upsert(fullPayload)).error
     if (upsertError && isSchemaError(upsertError)) {
       upsertError = (await supabase.from('profiles').upsert(corePayload)).error
+    }
+    if (upsertError && isSchemaError(upsertError)) {
+      const minimalPayload = {
+        id: profile.id,
+        email: profile.email,
+        full_name: fullName.trim(),
+        profile_completed: true,
+      }
+      upsertError = (await supabase.from('profiles').upsert(minimalPayload)).error
     }
 
     setLoading(false)
@@ -143,8 +152,8 @@ export default function OnboardingForm({
     if (upsertError) {
       setError(
         isSchemaError(upsertError)
-          ? 'Profil gagal disimpan karena struktur database belum lengkap. Minta admin menjalankan supabase/schema.sql, lalu coba lagi.'
-          : upsertError.message
+          ? 'Profil gagal disimpan karena struktur database belum lengkap. Minta admin menjalankan supabase/setup_all.sql di Supabase, lalu coba lagi.'
+          : `Profil gagal disimpan: ${upsertError.message}`
       )
       return
     }

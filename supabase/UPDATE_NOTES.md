@@ -100,3 +100,19 @@ Daftar menu sekarang satu sumber di `components/dashboard/nav-items.ts`.
 - Menyelesaikan sesi fokus pertama tiap hari memberi **+5 poin** (dibatasi 1x/hari via
   `award_points('focus_session', ..., 'focus-<tanggal>')` → anti-spam). Poin masuk ke
   leaderboard. Tidak perlu tabel baru.
+
+---
+
+## PENTING: kalau masih kena error 500/400 (leaderboard, profil, dll.)
+
+Itu tandanya migration belum jalan penuh. **Solusi paling gampang:** buka Supabase →
+SQL Editor → paste seluruh isi **`supabase/setup_all.sql`** → Run (sekali, idempotent).
+Satu file ini memastikan SEMUA tabel, kolom (`is_public_profile`, dll.), fungsi
+leaderboard (`get_leaderboard`, `get_my_rank`, `award_points`), `payment_orders`,
+trigger user-baru, dan storage bucket benar-benar ada.
+
+Setelah itu:
+- `GET /api/leaderboard` tidak 500 lagi (sekarang juga turun anggun, bukan crash).
+- `POST /rest/v1/profiles` tidak 400 lagi (kolom lengkap).
+- `POST /api/ask-nexa` tidak 500 lagi — kalau Gemini bermasalah, balas pesan ramah
+  (cek `GEMINI_API_KEY` / `GEMINI_MODEL`).

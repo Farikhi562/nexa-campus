@@ -4,7 +4,6 @@ import type { GeminiDeadlineContext } from '@/lib/ai/gemini'
 import { createClient } from '@/lib/supabase/server'
 
 const MAX_QUESTION_LENGTH = 1000
-const SAFE_ERROR = 'Tanya NEXA sedang tidak bisa menjawab. Coba lagi nanti.'
 
 type AskNexaBody = {
   question?: unknown
@@ -72,7 +71,15 @@ export async function POST(request: NextRequest) {
     })
 
     return NextResponse.json(result)
-  } catch {
-    return NextResponse.json({ error: SAFE_ERROR }, { status: 500 })
+  } catch (err) {
+    console.error('[Ask NEXA] failed', err)
+    // Jangan 500 ke user — kasih jawaban ramah, fitur lain tetap jalan.
+    return NextResponse.json({
+      answer:
+        'Tanya NEXA lagi tidak bisa menjawab sekarang (kemungkinan konfigurasi AI/GEMINI_API_KEY atau model belum benar). Kamu tetap bisa mencatat & mengelola deadline manual.',
+      provider: 'none' as const,
+      model: process.env.GEMINI_MODEL || 'gemini-2.5-flash-lite',
+      status: 'error' as const,
+    })
   }
 }

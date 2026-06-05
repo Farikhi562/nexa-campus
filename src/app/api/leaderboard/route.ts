@@ -8,9 +8,6 @@ function parseScope(value: string | null): LeaderboardScope {
   return SCOPES.includes(value as LeaderboardScope) ? (value as LeaderboardScope) : 'all_time'
 }
 
-const SETUP_HINT =
-  'Leaderboard belum aktif. Jalankan supabase/migrations/20260605_leaderboard_referral_profile.sql di Supabase.'
-
 export async function GET(request: NextRequest) {
   const supabase = await createClient()
   const {
@@ -29,7 +26,9 @@ export async function GET(request: NextRequest) {
   ])
 
   if (listError || rankError) {
-    return NextResponse.json({ error: SETUP_HINT }, { status: 500 })
+    console.error('[Leaderboard] rpc error', listError?.message, rankError?.message)
+    // Jangan 500 — fitur belum di-setup. Kembalikan kosong + flag setup.
+    return NextResponse.json({ scope, entries: [], me: null, setup: true })
   }
 
   const me = Array.isArray(rankRows) && rankRows.length > 0 ? rankRows[0] : null

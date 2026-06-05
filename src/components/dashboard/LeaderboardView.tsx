@@ -11,6 +11,7 @@ type ApiResponse = {
   scope: LeaderboardScope
   entries: LeaderboardEntry[]
   me: LeaderboardMe | null
+  setup?: boolean
   error?: string
 }
 
@@ -181,6 +182,13 @@ export default function LeaderboardView({ currentUserId }: { currentUserId: stri
         <div className="flex items-center justify-center rounded-3xl border border-slate-200 bg-white p-10 text-slate-400">
           <Loader2 className="h-6 w-6 animate-spin" />
         </div>
+      ) : data?.setup ? (
+        <Card className="border-amber-200 bg-amber-50">
+          <CardContent className="p-6 text-center text-sm leading-6 text-amber-900">
+            Leaderboard belum aktif. Minta admin menjalankan <span className="font-black">supabase/setup_all.sql</span> di
+            Supabase SQL Editor, lalu coba lagi.
+          </CardContent>
+        </Card>
       ) : entries.length === 0 && !error ? (
         <Card>
           <CardContent className="p-6 text-center text-sm leading-6 text-slate-600">
