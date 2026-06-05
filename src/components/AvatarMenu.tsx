@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { LogOut, Settings, Trophy, UserRound } from 'lucide-react'
+import { Award, LogOut, Settings, Trophy, UserRound } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 function initials(name?: string | null) {
@@ -48,6 +48,7 @@ export default function AvatarMenu({
   const items = [
     { label: 'Lihat Profil', href: '/dashboard/settings/profile', icon: UserRound },
     { label: 'Leaderboard', href: '/dashboard/leaderboard', icon: Trophy },
+    { label: 'Pencapaian', href: '/dashboard/achievements', icon: Award },
     { label: 'Pengaturan', href: '/dashboard/settings', icon: Settings },
   ]
 

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { BellRing, Home, Plus, Sparkles, Trophy, UserRound } from 'lucide-react'
 import AvatarMenu from '@/components/AvatarMenu'
+import MobileNavMenu from '@/components/MobileNavMenu'
 import DashboardNavigation from '@/components/dashboard/DashboardNavigation'
 import NexaLogo from '@/components/NexaLogo'
 import { BRAND } from '@/lib/brand'
@@ -31,15 +32,18 @@ export default function AppShell({
     <div className="min-h-screen bg-slate-50">
       <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-3 py-2.5 sm:px-4 sm:py-3">
-          <Link href="/dashboard" className="flex min-w-0 items-center gap-2.5">
-            <NexaLogo className="h-9 w-9 flex-shrink-0 sm:h-10 sm:w-10" />
-            <div className="min-w-0">
-              <p className="truncate text-sm font-black leading-5 text-slate-950 sm:text-base">NEXA Campus</p>
-              <p className="truncate text-[9px] font-bold uppercase tracking-[0.18em] text-brand-700 sm:text-[10px]">
-                Deadline Radar · v{BRAND.version}
-              </p>
-            </div>
-          </Link>
+          <div className="flex min-w-0 items-center gap-2.5">
+            <MobileNavMenu />
+            <Link href="/dashboard" className="flex min-w-0 items-center gap-2.5">
+              <NexaLogo className="h-9 w-9 flex-shrink-0 sm:h-10 sm:w-10" />
+              <div className="min-w-0">
+                <p className="truncate text-sm font-black leading-5 text-slate-950 sm:text-base">NEXA Campus</p>
+                <p className="truncate text-[9px] font-bold uppercase tracking-[0.18em] text-brand-700 sm:text-[10px]">
+                  Deadline Radar · v{BRAND.version}
+                </p>
+              </div>
+            </Link>
+          </div>
           <AvatarMenu
             avatarUrl={profile?.avatar_url ?? null}
             fullName={profile?.full_name ?? null}

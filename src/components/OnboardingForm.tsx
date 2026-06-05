@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Camera, CheckCircle2, GraduationCap, Info, MapPin, ShieldCheck, Upload, UserRound } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 import Button from '@/components/ui/Button'
 import {
   GENDER_OPTIONS,
@@ -11,6 +12,16 @@ import {
   UNIVERSITY_OPTIONS,
 } from '@/lib/profile-options'
 import type { Profile } from '@/types'
+
+function isSchemaError(error: { code?: string; message?: string }) {
+  const message = error.message?.toLowerCase() ?? ''
+  return (
+    error.code === 'PGRST204' ||
+    error.code === '42703' ||
+    message.includes('column') ||
+    message.includes('schema cache')
+  )
+}
 
 const inputClass =
   'focus-ring w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 transition placeholder:text-slate-400 hover:border-slate-400'
@@ -24,6 +35,7 @@ export default function OnboardingForm({
   referralCode?: string
 }) {
   const router = useRouter()
+  const supabase = useMemo(() => createClient(), [])
 
   const [fullName, setFullName] = useState(profile.full_name ?? '')
   const [campusName, setCampusName] = useState(profile.campus_name ?? '')
@@ -96,32 +108,44 @@ export default function OnboardingForm({
       resolvedAvatarUrl = uploaded.url ?? avatarUrl
     }
 
-    const profilePayload: Record<string, unknown> = {
+    // PENTING: jangan kirim "plan" dari sini. Plan dikelola server (trigger/admin/
+    // referral). Mengirim plan lama bisa melanggar constraint profiles_plan_check.
+    const corePayload: Record<string, unknown> = {
+      id: profile.id,
+      email: profile.email,
       full_name: fullName.trim(),
       campus_name: campusName.trim(),
       major: major.trim(),
       semester: parsedSemester,
-      province: province.trim(),
-      gender: gender || null,
-      avatar_url: resolvedAvatarUrl || null,
       student_id: studentId.trim() || null,
       phone_number: phoneNumber.trim() || null,
       telegram_chat_id: telegramChatId.trim() || null,
       whatsapp_number: whatsappNumber.trim() || null,
+      profile_completed: true,
     }
 
-    // Simpan lewat API supaya error database bisa dikembalikan dengan detail yang jelas.
-    const response = await fetch('/api/onboarding/profile', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(profilePayload),
-    })
-    const result = (await response.json().catch(() => null)) as { error?: string; detail?: string } | null
+    const fullPayload: Record<string, unknown> = {
+      ...corePayload,
+      province: province.trim() || null,
+      gender: gender || null,
+      avatar_url: resolvedAvatarUrl || null,
+    }
+
+    // Coba simpan lengkap. Kalau ada kolom opsional yang belum ada di DB,
+    // jangan gagalkan onboarding — simpan field inti dulu.
+    let upsertError = (await supabase.from('profiles').upsert(fullPayload)).error
+    if (upsertError && isSchemaError(upsertError)) {
+      upsertError = (await supabase.from('profiles').upsert(corePayload)).error
+    }
 
     setLoading(false)
 
-    if (!response.ok) {
-      setError(result?.detail ? `${result.error} Detail: ${result.detail}` : result?.error || 'Profil gagal disimpan. Coba lagi sebentar.')
+    if (upsertError) {
+      setError(
+        isSchemaError(upsertError)
+          ? 'Profil gagal disimpan karena struktur database belum lengkap. Minta admin menjalankan supabase/schema.sql, lalu coba lagi.'
+          : upsertError.message
+      )
       return
     }
 

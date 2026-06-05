@@ -57,3 +57,46 @@ npm run lint     # jika tersedia
 > Catatan: arsip ini berisi folder `src/` + `supabase/`. Pasang ke project Next.js
 > kamu yang sudah punya package.json/next.config/tailwind.config. Verifikasi tipe:
 > seluruh `src/**` lulus `tsc --noEmit` (0 error).
+
+---
+
+## Update lanjutan: Badges & AI dari Foto
+
+### Badges / Achievement
+- Halaman baru `/dashboard/achievements` + link di sidebar & menu avatar.
+- 13 lencana (bronze/silver/gold/special) yang terbuka otomatis dari data yang
+  sudah ada: jumlah deadline dicatat & diselesaikan, selesai tepat waktu, streak,
+  total poin, dan jumlah referral. Lencana terkunci tampil dengan gembok + progress bar.
+- **Tidak butuh tabel baru** — dihitung dari `academic_deadlines`, `points_events`,
+  dan `referrals`. Endpoint: `GET /api/achievements`.
+
+### AI Quick Add dari Foto (Gemini Vision)
+- Di halaman AI Quick Add ada tombol **"Upload Foto Jadwal"** (selain input teks).
+  Foto papan tulis / screenshot jadwal → otomatis jadi draft deadline.
+- Endpoint baru: `POST /api/deadlines/ai-extract-image` (gated Pulse/Command,
+  maks 5MB, JPG/PNG/WebP). Wajib `GEMINI_API_KEY` (foto tidak bisa diparse offline).
+- Env opsional `GEMINI_VISION_MODEL` (default ikut `GEMINI_MODEL` → `gemini-2.5-flash`).
+- Catatan: AI Quick Add teks sekarang **fallback ke parser sederhana** saat Gemini
+  gagal, jadi tidak lagi buntu dengan pesan "tidak bisa dipakai".
+
+---
+
+## Update lanjutan 2: Fix plan + Menu titik-tiga + Focus Mode
+
+### Fix `profiles_plan_check` (user baru gagal)
+Jalankan **`supabase/migrations/20260606_fix_new_user_plan.sql`** sekali di SQL Editor.
+Ini mengganti trigger `handle_new_user` (penyebabnya) supaya user baru selalu dibuat
+dengan `plan = 'radar'`, merapikan data lama, dan set default kolom. Setelah ini,
+signup user baru tidak akan error lagi.
+
+### Menu titik-tiga (☰/⋮) di kiri header
+Di mobile, ada tombol titik-tiga di kiri header → drawer berisi **semua halaman**
+(Dashboard, Leaderboard, Pencapaian, Focus, Deadline, Reminder, Profil, Billing, dll.).
+Daftar menu sekarang satu sumber di `components/dashboard/nav-items.ts`.
+
+### Fitur baru: Focus Mode (Pomodoro)
+- Halaman `/dashboard/focus`: timer Pomodoro (25/5, 45/10, 15/3) dengan ring progress,
+  start/jeda/reset, dan hitungan sesi.
+- Menyelesaikan sesi fokus pertama tiap hari memberi **+5 poin** (dibatasi 1x/hari via
+  `award_points('focus_session', ..., 'focus-<tanggal>')` → anti-spam). Poin masuk ke
+  leaderboard. Tidak perlu tabel baru.

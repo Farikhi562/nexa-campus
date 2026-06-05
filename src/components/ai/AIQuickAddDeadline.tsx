@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
-import { ArrowRight, LockKeyhole, Sparkles, Wand2 } from 'lucide-react'
+import { ArrowRight, ImageUp, LockKeyhole, Sparkles, Wand2 } from 'lucide-react'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import { DEADLINE_SOURCES, DEADLINE_TYPES, PRIORITIES } from '@/lib/nexa-data'
@@ -139,6 +139,7 @@ export default function AIQuickAddDeadline({
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
   const [extracting, setExtracting] = useState(false)
+  const [extractingImage, setExtractingImage] = useState(false)
   const [saving, setSaving] = useState(false)
 
   const canSave = useMemo(
@@ -154,6 +155,59 @@ export default function AIQuickAddDeadline({
       ),
     [items]
   )
+
+  function applyExtractResult(result: ExtractResponse | null, ok: boolean) {
+    if (!ok || !result) {
+      setError(result?.error || 'AI gagal membaca. Coba lagi sebentar.')
+      if (result?.rawResponse) setRawResponse(result.rawResponse)
+      return false
+    }
+    if (result.status === 'locked') {
+      setError(result.error || result.answer || 'Fitur AI belum aktif.')
+      return false
+    }
+    if (!result.data?.length) {
+      setError('Belum ada deadline yang bisa diekstrak. Coba teks/foto yang lebih jelas, atau tambah manual.')
+      if (result.rawResponse) setRawResponse(result.rawResponse)
+      return false
+    }
+    setItems(result.data.map((item) => makeEditableDeadline(item, fallbackCampus)))
+    setMessage('Hasil AI sudah jadi preview. Cek dulu sebelum disimpan, karena keputusan final tetap di kamu.')
+    return true
+  }
+
+  async function extractFromImage(file: File) {
+    setError('')
+    setMessage('')
+    setRawResponse('')
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Gambar terlalu besar. Maksimal 5MB.')
+      return
+    }
+
+    setExtractingImage(true)
+    try {
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(String(reader.result))
+        reader.onerror = () => reject(new Error('read_failed'))
+        reader.readAsDataURL(file)
+      })
+
+      const response = await fetch('/api/deadlines/ai-extract-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: base64, mimeType: file.type || 'image/jpeg' }),
+      })
+      const result = (await response.json().catch(() => null)) as ExtractResponse | null
+      applyExtractResult(result, response.ok)
+    } catch {
+      setError('Gagal memproses gambar. Coba foto lain.')
+    } finally {
+      setExtractingImage(false)
+    }
+  }
 
   async function extractDeadlines() {
     setError('')
@@ -246,9 +300,9 @@ export default function AIQuickAddDeadline({
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <Badge tone="brand" className="mb-3">AI Quick Add</Badge>
-              <h1 className="text-2xl font-black tracking-tight text-slate-950">Paste info, jadi draft deadline.</h1>
+              <h1 className="text-2xl font-black tracking-tight text-slate-950">Paste teks atau foto, jadi draft deadline.</h1>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-                NEXA hanya membaca teks yang kamu paste manual. Tidak login ke VClass, iLab, Studentsite, atau sistem kampus mana pun.
+                Tempel teks dari grup WA/VClass, atau upload foto papan tulis & screenshot jadwal — NEXA ubah jadi draft. NEXA tidak login ke sistem kampus mana pun.
               </p>
             </div>
             <Badge tone="info">Gemini Beta</Badge>
@@ -270,14 +324,33 @@ export default function AIQuickAddDeadline({
           </label>
 
           <div className="flex flex-col gap-3 sm:flex-row">
-            <Button type="button" onClick={extractDeadlines} disabled={extracting || saving} className="min-h-12 rounded-2xl">
+            <Button type="button" onClick={extractDeadlines} disabled={extracting || extractingImage || saving} className="min-h-12 rounded-2xl">
               {extracting ? (
                 <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/50 border-t-white" />
               ) : (
                 <Wand2 className="h-4 w-4" />
               )}
-              {extracting ? 'NEXA lagi baca...' : 'Extract Deadline'}
+              {extracting ? 'NEXA lagi baca...' : 'Extract dari Teks'}
             </Button>
+            <label className="focus-ring inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm font-black text-slate-700 transition hover:bg-slate-50">
+              {extractingImage ? (
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-slate-700" />
+              ) : (
+                <ImageUp className="h-4 w-4 text-teal-700" />
+              )}
+              {extractingImage ? 'Membaca foto...' : 'Upload Foto Jadwal'}
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="sr-only"
+                disabled={extracting || extractingImage || saving}
+                onChange={(event) => {
+                  const file = event.target.files?.[0]
+                  if (file) extractFromImage(file)
+                  event.target.value = ''
+                }}
+              />
+            </label>
             <Link
               href="/dashboard/deadlines/new"
               className="focus-ring inline-flex min-h-12 items-center justify-center rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm font-black text-slate-700 hover:bg-slate-50"
