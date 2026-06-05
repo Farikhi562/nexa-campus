@@ -116,3 +116,30 @@ Setelah itu:
 - `POST /rest/v1/profiles` tidak 400 lagi (kolom lengkap).
 - `POST /api/ask-nexa` tidak 500 lagi — kalau Gemini bermasalah, balas pesan ramah
   (cek `GEMINI_API_KEY` / `GEMINI_MODEL`).
+
+---
+
+## Kalau user baru TETAP kena profiles_plan_check + leaderboard belum aktif
+
+Akar masalah: (a) baris profil lama punya `plan='user'` (invalid) — constraint dicek ke
+seluruh baris saat UPDATE; (b) `setup_all.sql` kemungkinan gagal di tengah sehingga
+ter-rollback semua (fungsi leaderboard tidak terbuat).
+
+**Lakukan dua hal:**
+
+1. **Deploy build terbaru.** Form onboarding sekarang pakai **sistem 3 lapis** dan
+   mengirim `plan:'radar'`, jadi nilai `plan` lama yang invalid otomatis tertimpa jadi
+   valid (lapis 1). Kalau ada kolom belum ada → turun ke lapis 2 (inti) → lapis 3 (minimal).
+   Ini bikin user baru bisa bikin profil **walau SQL belum sempurna**.
+
+2. **Jalankan `supabase/fix_now.sql`** (bukan setup_all dulu). File ini minimal &
+   anti-gagal (tanpa bagian storage yang sering bikin rollback). Setelah ini:
+   leaderboard aktif + semua baris `plan` lama dirapikan.
+
+> `setup_all.sql` tetap bisa dipakai untuk setup lengkap; bagian storage-nya kini
+> dibungkus exception agar tidak membatalkan seluruh script.
+
+### Ask NEXA masih "tidak bisa menjawab"
+Itu murni `GEMINI_API_KEY`/model. Cek key valid di Google AI Studio; hapus env
+`GEMINI_MODEL` agar pakai default `gemini-2.5-flash-lite`. Lihat log server `[Ask NEXA]`
+untuk alasan persis.

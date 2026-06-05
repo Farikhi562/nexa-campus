@@ -23,6 +23,11 @@ function isSchemaError(error: { code?: string; message?: string }) {
   )
 }
 
+function isPlanError(error: { code?: string; message?: string }) {
+  const message = error.message?.toLowerCase() ?? ''
+  return message.includes('profiles_plan_check') || message.includes('plan_check')
+}
+
 const inputClass =
   'focus-ring w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 transition placeholder:text-slate-400 hover:border-slate-400'
 const labelClass = 'mb-1.5 block text-sm font-black text-slate-700'
@@ -110,6 +115,9 @@ export default function OnboardingForm({
 
     // PENTING: jangan kirim "plan" dari sini. Plan dikelola server (trigger/admin/
     // referral). Mengirim plan lama bisa melanggar constraint profiles_plan_check.
+    // plan: 'radar' SENGAJA dikirim. Saat onboarding, user pasti tier radar, dan
+    // ini menimpa nilai 'plan' lama yang invalid (mis. 'user') sehingga constraint
+    // profiles_plan_check tidak menolak baris hasil update.
     const corePayload: Record<string, unknown> = {
       id: profile.id,
       email: profile.email,
@@ -121,6 +129,7 @@ export default function OnboardingForm({
       phone_number: phoneNumber.trim() || null,
       telegram_chat_id: telegramChatId.trim() || null,
       whatsapp_number: whatsappNumber.trim() || null,
+      plan: 'radar',
       profile_completed: true,
     }
 
@@ -131,32 +140,49 @@ export default function OnboardingForm({
       avatar_url: resolvedAvatarUrl || null,
     }
 
-    // Coba simpan lengkap. Kalau ada kolom opsional yang belum ada di DB,
-    // jangan gagalkan onboarding — turun bertahap ke field inti, lalu minimal.
-    let upsertError = (await supabase.from('profiles').upsert(fullPayload)).error
-    if (upsertError && isSchemaError(upsertError)) {
-      upsertError = (await supabase.from('profiles').upsert(corePayload)).error
+    const minimalPayload: Record<string, unknown> = {
+      id: profile.id,
+      email: profile.email,
+      full_name: fullName.trim(),
+      plan: 'radar',
+      profile_completed: true,
     }
-    if (upsertError && isSchemaError(upsertError)) {
-      const minimalPayload = {
-        id: profile.id,
-        email: profile.email,
-        full_name: fullName.trim(),
-        profile_completed: true,
+
+    // SISTEM 3 LAPIS: kalau lapis 1 gagal karena kolom/plan, coba lapis 2, lalu 3.
+    const layers = [
+      { name: 'lengkap', payload: fullPayload },
+      { name: 'inti', payload: corePayload },
+      { name: 'minimal', payload: minimalPayload },
+    ]
+
+    let upsertError: { code?: string; message?: string } | null = null
+    let savedLayer = ''
+    for (const layer of layers) {
+      const { error: layerError } = await supabase.from('profiles').upsert(layer.payload)
+      if (!layerError) {
+        upsertError = null
+        savedLayer = layer.name
+        break
       }
-      upsertError = (await supabase.from('profiles').upsert(minimalPayload)).error
+      upsertError = layerError
+      // Lanjut ke lapis berikutnya hanya kalau errornya soal kolom/plan.
+      if (!isSchemaError(layerError) && !isPlanError(layerError)) break
     }
 
     setLoading(false)
 
     if (upsertError) {
       setError(
-        isSchemaError(upsertError)
-          ? 'Profil gagal disimpan karena struktur database belum lengkap. Minta admin menjalankan supabase/setup_all.sql di Supabase, lalu coba lagi.'
-          : `Profil gagal disimpan: ${upsertError.message}`
+        isPlanError(upsertError)
+          ? 'Profil gagal disimpan karena data plan akunmu tidak valid di database. Minta admin menjalankan supabase/fix_now.sql (sekali), lalu coba lagi.'
+          : isSchemaError(upsertError)
+            ? 'Profil gagal disimpan karena struktur database belum lengkap. Minta admin menjalankan supabase/fix_now.sql, lalu coba lagi.'
+            : `Profil gagal disimpan: ${upsertError.message}`
       )
       return
     }
+
+    void savedLayer
 
     const storedReferralCode =
       referralCode ||
