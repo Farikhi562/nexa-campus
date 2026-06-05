@@ -31,6 +31,9 @@ update public.profiles
 set plan = 'radar'
 where plan is null or plan not in ('radar', 'pulse', 'command');
 
+alter table public.profiles alter column plan set default 'radar';
+alter table public.profiles alter column plan set not null;
+
 alter table public.profiles drop constraint if exists profiles_plan_check;
 alter table public.profiles
   add constraint profiles_plan_check check (plan in ('radar', 'pulse', 'command'));

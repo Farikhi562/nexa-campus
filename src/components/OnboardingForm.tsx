@@ -23,6 +23,10 @@ function isSchemaError(error: { code?: string; message?: string }) {
   )
 }
 
+function isPlanConstraintError(error: { message?: string }) {
+  return (error.message ?? '').toLowerCase().includes('profiles_plan_check')
+}
+
 const inputClass =
   'focus-ring w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 transition placeholder:text-slate-400 hover:border-slate-400'
 const labelClass = 'mb-1.5 block text-sm font-black text-slate-700'
@@ -108,11 +112,10 @@ export default function OnboardingForm({
       resolvedAvatarUrl = uploaded.url ?? avatarUrl
     }
 
-    // PENTING: jangan kirim "plan" dari sini. Plan dikelola server (trigger/admin/
-    // referral). Mengirim plan lama bisa melanggar constraint profiles_plan_check.
     const corePayload: Record<string, unknown> = {
       id: profile.id,
       email: profile.email,
+      plan: profile.plan === 'pulse' || profile.plan === 'command' ? profile.plan : 'radar',
       full_name: fullName.trim(),
       campus_name: campusName.trim(),
       major: major.trim(),
@@ -144,6 +147,8 @@ export default function OnboardingForm({
       setError(
         isSchemaError(upsertError)
           ? 'Profil gagal disimpan karena struktur database belum lengkap. Minta admin menjalankan supabase/schema.sql, lalu coba lagi.'
+          : isPlanConstraintError(upsertError)
+            ? 'Profil gagal disimpan karena constraint plan di Supabase masih versi lama. Jalankan migration 202606050001_fix_profile_schema_cache.sql, lalu coba lagi.'
           : upsertError.message
       )
       return
