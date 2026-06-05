@@ -39,5 +39,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
+  // Poin leaderboard: catat deadline (+2). Idempotent per deadline. Diabaikan
+  // kalau fitur leaderboard belum di-setup.
+  if (data?.id) {
+    await supabase.rpc('award_points', { p_kind: 'create_deadline', p_points: 2, p_ref: data.id }).then(undefined, () => null)
+  }
+
   return NextResponse.json({ data }, { status: 201 })
 }

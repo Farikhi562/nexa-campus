@@ -72,6 +72,7 @@ export async function PATCH(request: NextRequest) {
     province: province || null,
     gender: gender || null,
     avatar_icon: avatarIcon || null,
+    is_public_profile: typeof body.is_public_profile === 'boolean' ? body.is_public_profile : true,
   }
 
   const { data, error } = await supabase

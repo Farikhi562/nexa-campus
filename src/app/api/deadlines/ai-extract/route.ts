@@ -19,6 +19,90 @@ function jsonResponse(body: unknown, status = 200) {
   return NextResponse.json(body, { status })
 }
 
+const MONTHS_ID: Record<string, number> = {
+  januari: 1, jan: 1, februari: 2, feb: 2, maret: 3, mar: 3, april: 4, apr: 4,
+  mei: 5, juni: 6, jun: 6, juli: 7, jul: 7, agustus: 8, agu: 8, ags: 8,
+  september: 9, sep: 9, oktober: 10, okt: 10, november: 11, nov: 11, desember: 12, des: 12,
+}
+
+function pad(n: number) {
+  return String(n).padStart(2, '0')
+}
+
+// Parser sederhana untuk fallback tanpa Gemini. Tidak sepintar AI, tapi cukup
+// untuk menarik tanggal & kategori dasar dari teks yang ditempel user.
+function fallbackExtract(text: string): Array<Record<string, unknown>> {
+  const today = new Date()
+  const year = today.getFullYear()
+  const lines = text
+    .split(/\r?\n|(?<=[.!?])\s+/)
+    .map((line) => line.trim())
+    .filter((line) => line.length >= 3)
+    .slice(0, 20)
+
+  const results: Array<Record<string, unknown>> = []
+
+  for (const line of lines) {
+    const lower = line.toLowerCase()
+    let due: string | null = null
+
+    const iso = lower.match(/(\d{4})-(\d{2})-(\d{2})/)
+    const dmy = lower.match(/\b(\d{1,2})[/\-.](\d{1,2})(?:[/\-.](\d{2,4}))?\b/)
+    const named = lower.match(/\b(\d{1,2})\s+([a-z]+)\b/)
+
+    if (iso) {
+      due = `${iso[1]}-${iso[2]}-${iso[3]}`
+    } else if (dmy) {
+      const d = Number(dmy[1])
+      const m = Number(dmy[2])
+      let y = dmy[3] ? Number(dmy[3]) : year
+      if (y < 100) y += 2000
+      if (d >= 1 && d <= 31 && m >= 1 && m <= 12) due = `${y}-${pad(m)}-${pad(d)}`
+    } else if (named && MONTHS_ID[named[2]]) {
+      const d = Number(named[1])
+      const m = MONTHS_ID[named[2]]
+      if (d >= 1 && d <= 31) due = `${year}-${pad(m)}-${pad(d)}`
+    } else if (/\bbesok\b/.test(lower)) {
+      const t = new Date(today.getTime() + 86400000)
+      due = `${t.getFullYear()}-${pad(t.getMonth() + 1)}-${pad(t.getDate())}`
+    } else if (/\blusa\b/.test(lower)) {
+      const t = new Date(today.getTime() + 2 * 86400000)
+      due = `${t.getFullYear()}-${pad(t.getMonth() + 1)}-${pad(t.getDate())}`
+    } else if (/\bhari ini\b/.test(lower)) {
+      due = `${year}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`
+    }
+
+    let category = 'lainnya'
+    if (/\b(uts|uas|ujian)\b/.test(lower)) category = 'ujian'
+    else if (/\b(praktikum|lab)\b/.test(lower)) category = 'praktikum'
+    else if (/\b(kuis|quiz)\b/.test(lower)) category = 'kuis'
+    else if (/\b(bayar|pembayaran|spp|ukt)\b/.test(lower)) category = 'pembayaran'
+    else if (/\b(tugas|laporan|makalah|essay|paper)\b/.test(lower)) category = 'tugas'
+
+    const priority = /\b(urgent|penting|deadline|terakhir|hari ini|besok)\b/.test(lower) ? 'high' : 'normal'
+
+    // Buang potongan tanggal dari judul biar lebih rapi.
+    const title = line
+      .replace(/(\d{4})-(\d{2})-(\d{2})/, '')
+      .replace(/\b\d{1,2}[/\-.]\d{1,2}(?:[/\-.]\d{2,4})?\b/, '')
+      .replace(/[-–—:]\s*$/, '')
+      .trim()
+
+    if (!due && category === 'lainnya') continue
+
+    results.push({
+      title: title || line,
+      category,
+      due_date: due,
+      priority,
+      source: 'lainnya',
+      notes: null,
+    })
+  }
+
+  return results
+}
+
 function extractJsonArray(raw: string) {
   const cleaned = raw
     .trim()
@@ -89,11 +173,13 @@ export async function POST(request: NextRequest) {
 
   const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) {
+    // Fallback parser sederhana tanpa Gemini: tetap bisa ekstrak deadline kasar.
+    const data = fallbackExtract(text)
     return jsonResponse({
-      answer:
-        'AI Quick Add belum aktif karena konfigurasi AI belum tersedia. Kamu tetap bisa menambah deadline manual.',
-      provider: 'none',
-      status: 'locked',
+      data,
+      provider: 'fallback',
+      status: data.length > 0 ? 'fallback' : 'fallback_empty',
+      notice: 'AI feature is not configured yet. Memakai parser sederhana — cek & rapikan hasilnya sebelum simpan.',
     })
   }
 

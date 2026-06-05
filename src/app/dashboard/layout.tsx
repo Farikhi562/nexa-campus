@@ -18,7 +18,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('full_name, plan, profile_completed')
+    .select('full_name, plan, profile_completed, avatar_url')
     .eq('id', user.id)
     .maybeSingle()
 
@@ -30,7 +30,14 @@ export default async function DashboardLayout({ children }: { children: ReactNod
     null
 
   return (
-    <AppShell profile={profile as Pick<Profile, 'plan'> | null}>
+    <AppShell
+      profile={{
+        plan: (profile?.plan as Profile['plan']) ?? 'radar',
+        full_name: userName,
+        avatar_url: (profile as { avatar_url?: string | null } | null)?.avatar_url ?? null,
+        email: user.email ?? null,
+      }}
+    >
       {children}
       <Suspense fallback={null}>
         <DashboardSuccessToast />

@@ -1,8 +1,9 @@
 import Link from 'next/link'
-import { BellRing, CalendarDays, CreditCard, HelpCircle, Home, Plus, Rocket, Settings, ShieldCheck, Sparkles, UserRound } from 'lucide-react'
+import { BellRing, CalendarDays, CreditCard, HelpCircle, Home, Plus, Rocket, Settings, ShieldCheck, Sparkles, Trophy, UserRound } from 'lucide-react'
 
 const navItems = [
   { label: 'Dashboard', href: '/dashboard', icon: Home },
+  { label: 'Leaderboard', href: '/dashboard/leaderboard', icon: Trophy, hot: true },
   { label: 'Tambah Deadline', href: '/dashboard/deadlines/new', icon: Plus },
   { label: 'AI Quick Add', href: '/dashboard/deadlines/quick-add', icon: Sparkles },
   { label: 'Semua Deadline', href: '/dashboard/deadlines', icon: CalendarDays },
@@ -20,7 +21,7 @@ export default function DashboardNavigation() {
     <nav className="rounded-3xl border border-white/80 bg-white/90 p-3 shadow-xl shadow-slate-200/70 ring-1 ring-slate-950/[0.03] backdrop-blur">
       <p className="px-2 pb-2 text-xs font-black uppercase tracking-[0.18em] text-brand-700">Navigasi</p>
       <div className="grid gap-1.5">
-        {navItems.map(({ label, href, icon: Icon }) => (
+        {navItems.map(({ label, href, icon: Icon, hot }) => (
           <Link
             key={href}
             href={href}
@@ -30,6 +31,11 @@ export default function DashboardNavigation() {
               <Icon className="h-4 w-4" />
             </span>
             {label}
+            {hot && (
+              <span className="ml-auto rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-amber-700">
+                Baru
+              </span>
+            )}
           </Link>
         ))}
       </div>

@@ -9,6 +9,8 @@ import AskNexaWidget from '@/components/dashboard/AskNexaWidget'
 import DashboardSidePanel from '@/components/dashboard/DashboardSidePanel'
 import CommandFocusPlan from '@/components/dashboard/CommandFocusPlan'
 import ReferralCard from '@/components/dashboard/ReferralCard'
+import LeaderboardTeaser from '@/components/dashboard/LeaderboardTeaser'
+import UpgradeCountdownCard from '@/components/dashboard/UpgradeCountdownCard'
 import SetupChecklist from '@/components/dashboard/SetupChecklist'
 import ShareDeadlineModal from '@/components/dashboard/ShareDeadlineModal'
 import { AllDone, EmptyAll, EmptyOverdue, EmptyToday } from '@/components/dashboard/DeadlineEmptyStates'
@@ -248,6 +250,8 @@ export default function DeadlineDashboardOverview({
         </div>
       </section>
 
+      <LeaderboardTeaser />
+
       <SetupChecklist
         profileCompleted={profileCompleted}
         hasDeadline={deadlines.length > 0}
@@ -255,6 +259,8 @@ export default function DeadlineDashboardOverview({
         referralCode={referralCode}
         userTier={userTier}
       />
+
+      <UpgradeCountdownCard userTier={userTier} />
 
       <CommandFocusPlan deadlines={deadlines} userTier={userTier} />
 

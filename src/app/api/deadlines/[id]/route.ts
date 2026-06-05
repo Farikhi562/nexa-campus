@@ -60,6 +60,16 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   if (!data) return NextResponse.json({ error: 'Deadline tidak ditemukan.' }, { status: 404 })
 
+  // Poin leaderboard saat deadline ditandai selesai (idempotent per deadline).
+  // Diabaikan kalau fitur leaderboard belum di-setup.
+  if (data?.status === 'completed') {
+    await supabase.rpc('award_points', { p_kind: 'complete_deadline', p_points: 10, p_ref: data.id }).then(undefined, () => null)
+    const today = new Date().toISOString().slice(0, 10)
+    if (typeof data.deadline_date === 'string' && today <= data.deadline_date) {
+      await supabase.rpc('award_points', { p_kind: 'ontime_bonus', p_points: 5, p_ref: data.id }).then(undefined, () => null)
+    }
+  }
+
   return NextResponse.json({ data })
 }
 

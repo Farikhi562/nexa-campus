@@ -49,8 +49,7 @@ export async function askGemini(input: AskGeminiInput) {
 
   if (!apiKey) {
     return {
-      answer:
-        'Tanya NEXA belum aktif karena konfigurasi AI belum tersedia. Kamu tetap bisa mencatat dan mengelola deadline secara manual.',
+      answer: 'AI feature is not configured yet. Kamu tetap bisa mencatat dan mengelola deadline secara manual.',
       provider: 'none' as const,
       model,
       status: 'locked' as const,

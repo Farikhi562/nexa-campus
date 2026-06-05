@@ -1,24 +1,31 @@
 import Link from 'next/link'
-import { BellRing, CalendarDays, Home, Plus, Settings, Sparkles, UserRound } from 'lucide-react'
-import AuthStatusActions from '@/components/AuthStatusActions'
+import { BellRing, Home, Plus, Sparkles, Trophy, UserRound } from 'lucide-react'
+import AvatarMenu from '@/components/AvatarMenu'
 import DashboardNavigation from '@/components/dashboard/DashboardNavigation'
 import NexaLogo from '@/components/NexaLogo'
 import { BRAND } from '@/lib/brand'
 
+type ShellProfile = {
+  plan?: string | null
+  full_name?: string | null
+  avatar_url?: string | null
+  email?: string | null
+}
+
 const mobileNavItems = [
   { label: 'Home', href: '/dashboard', icon: Home },
   { label: 'Tambah', href: '/dashboard/deadlines/new', icon: Plus },
+  { label: 'Ranking', href: '/dashboard/leaderboard', icon: Trophy },
   { label: 'AI', href: '/dashboard/deadlines/quick-add', icon: Sparkles },
-  { label: 'Reminder', href: '/dashboard/settings/reminders', icon: BellRing },
   { label: 'Profil', href: '/dashboard/settings/profile', icon: UserRound },
 ]
 
 export default function AppShell({
   children,
-  profile: _profile,
+  profile,
 }: {
   children: React.ReactNode
-  profile?: unknown
+  profile?: ShellProfile | null
 }) {
   return (
     <div className="min-h-screen bg-slate-50">
@@ -33,9 +40,11 @@ export default function AppShell({
               </p>
             </div>
           </Link>
-          <div className="scale-90 origin-right sm:scale-100">
-            <AuthStatusActions />
-          </div>
+          <AvatarMenu
+            avatarUrl={profile?.avatar_url ?? null}
+            fullName={profile?.full_name ?? null}
+            email={profile?.email ?? null}
+          />
         </div>
       </header>
 

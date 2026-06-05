@@ -45,10 +45,31 @@ export interface Profile {
   plan: Plan
   referral_code: string | null
   pulse_trial_until: string | null
+  is_public_profile: boolean | null
   profile_completed: boolean
   created_at: string
   updated_at: string
 }
+
+export interface LeaderboardEntry {
+  user_id: string
+  display_name: string | null
+  avatar_url: string | null
+  campus_name: string | null
+  plan: Plan
+  points: number
+  rank: number
+}
+
+export interface LeaderboardMe {
+  points: number
+  rank: number | null
+  total_players: number
+  current_streak: number
+  is_public: boolean
+}
+
+export type LeaderboardScope = 'weekly' | 'monthly' | 'all_time'
 
 export interface Referral {
   id: string

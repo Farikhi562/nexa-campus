@@ -166,6 +166,7 @@ export default function ProfileSettingsForm({ profile }: { profile: Profile }) {
   const [semester, setSemester] = useState(String(profile.semester ?? 1))
   const [studentId, setStudentId] = useState(profile.student_id ?? '')
   const [gender, setGender] = useState(profile.gender ?? '')
+  const [isPublicProfile, setIsPublicProfile] = useState(profile.is_public_profile ?? true)
   const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url ?? '')
   const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [photoPreview, setPhotoPreview] = useState('')
@@ -222,6 +223,7 @@ export default function ProfileSettingsForm({ profile }: { profile: Profile }) {
         student_id: studentId.trim() || null,
         gender: gender || null,
         avatar_icon: null,
+        is_public_profile: isPublicProfile,
       }),
     })
     const result = (await response.json().catch(() => null)) as { error?: string; warning?: string } | null
@@ -381,6 +383,32 @@ export default function ProfileSettingsForm({ profile }: { profile: Profile }) {
               {genderOptions.map((item) => <option key={item.value || 'empty'} value={item.value}>{item.label}</option>)}
             </select>
           </label>
+
+          <div className="md:col-span-2">
+            <button
+              type="button"
+              onClick={() => setIsPublicProfile((value) => !value)}
+              className="focus-ring flex w-full items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:border-teal-200"
+            >
+              <span>
+                <span className="block text-sm font-black text-slate-950">Tampil di leaderboard</span>
+                <span className="mt-0.5 block text-xs leading-5 text-slate-500">
+                  Kalau aktif, nama, foto, dan poinmu muncul di papan peringkat publik.
+                </span>
+              </span>
+              <span
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition ${
+                  isPublicProfile ? 'bg-teal-500' : 'bg-slate-300'
+                }`}
+              >
+                <span
+                  className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition ${
+                    isPublicProfile ? 'translate-x-5' : 'translate-x-0.5'
+                  }`}
+                />
+              </span>
+            </button>
+          </div>
         </div>
       </section>
 
