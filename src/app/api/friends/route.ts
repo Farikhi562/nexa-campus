@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
 
   // Collect IDs of other users to fetch their public profiles
   const otherIds = rows.map((r) => r.requester_id === user.id ? r.receiver_id : r.requester_id)
-  const uniqueIds = [...new Set(otherIds)]
+  const uniqueIds = Array.from(new Set(otherIds))
   let profileMap: Record<string, unknown> = {}
   if (uniqueIds.length > 0) {
     const { data: profiles } = await supabase
