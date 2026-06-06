@@ -18,6 +18,8 @@ gitleaks-report.json
 !.env.example
 gitleaks-report.json
 gitleaks-report.*
+playwright-report/
+test-results/
 
 # Environment — NEVER commit secrets
 .env
@@ -50,3 +52,10 @@ next-env.d.ts
 
 # Local logs
 *.log
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
