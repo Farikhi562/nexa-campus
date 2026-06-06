@@ -68,7 +68,8 @@ export default function LoginClient({ initialMode = 'login' }: { initialMode?: M
   async function signInWithGoogle() {
     setLoading(true)
     setError('')
-    const storedReferralCode = referralCode || window.sessionStorage.getItem('nexa_referral_code') || ''
+    const storedReferralCode =
+      referralCode || window.sessionStorage.getItem('nexa_referral_code') || ''
     const nextPath =
       mode === 'signup' && storedReferralCode
         ? `/onboarding?ref=${encodeURIComponent(storedReferralCode)}`
@@ -132,16 +133,28 @@ export default function LoginClient({ initialMode = 'login' }: { initialMode?: M
               Deadline kampus, akhirnya kelihatan jelas.
             </h1>
             <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
-              NEXA bantu kamu mencatat, melihat, dan mengingat deadline tugas/praktikum tanpa minta password kampus.
+              NEXA bantu kamu mencatat, melihat, dan mengingat deadline tugas/praktikum tanpa minta
+              password kampus.
             </p>
 
             <div className="mt-8 grid gap-3 sm:grid-cols-3">
               {[
-                { icon: CalendarCheck2, title: 'Dashboard cepat', desc: 'Hari ini, minggu ini, terlambat.' },
+                {
+                  icon: CalendarCheck2,
+                  title: 'Dashboard cepat',
+                  desc: 'Hari ini, minggu ini, terlambat.',
+                },
                 { icon: BellRing, title: 'Reminder-ready', desc: 'Telegram dulu, Wablas nanti.' },
-                { icon: LockKeyhole, title: 'Data minimum', desc: 'Profil dan deadline input sendiri.' },
+                {
+                  icon: LockKeyhole,
+                  title: 'Data minimum',
+                  desc: 'Profil dan deadline input sendiri.',
+                },
               ].map(({ icon: Icon, title, desc }) => (
-                <div key={title} className="rounded-2xl border border-white/10 bg-white/[0.055] p-4 backdrop-blur">
+                <div
+                  key={title}
+                  className="rounded-2xl border border-white/10 bg-white/[0.055] p-4 backdrop-blur"
+                >
                   <Icon className="mb-4 h-5 w-5 text-teal-200" />
                   <p className="text-sm font-black text-white">{title}</p>
                   <p className="mt-1 text-xs leading-5 text-slate-400">{desc}</p>
@@ -152,7 +165,8 @@ export default function LoginClient({ initialMode = 'login' }: { initialMode?: M
 
           <div className="grid gap-3 lg:grid-cols-[1fr_auto] lg:items-end">
             <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-4 text-sm leading-6 text-slate-300">
-              NEXA tidak meminta password VClass, iLab, Studentsite, atau platform kampus mana pun. Data yang disimpan hanya profil dan deadline yang kamu input sendiri.
+              NEXA tidak meminta password VClass, iLab, Studentsite, atau platform kampus mana pun.
+              Data yang disimpan hanya profil dan deadline yang kamu input sendiri.
             </div>
             <div className="auth-radar-tile">
               <Radar className="absolute left-1/2 top-1/2 h-20 w-20 -translate-x-1/2 -translate-y-1/2 text-teal-200/70" />
@@ -207,7 +221,10 @@ export default function LoginClient({ initialMode = 'login' }: { initialMode?: M
                         />
                       </span>
                     </label>
-                    <Button className="h-12 w-full rounded-2xl bg-teal-500 text-slate-950 hover:bg-teal-300" disabled={loading}>
+                    <Button
+                      className="h-12 w-full rounded-2xl bg-teal-500 text-slate-950 hover:bg-teal-300"
+                      disabled={loading}
+                    >
                       {loading ? 'Mengirim...' : 'Kirim Link Reset'}
                     </Button>
                     <button
@@ -237,12 +254,17 @@ export default function LoginClient({ initialMode = 'login' }: { initialMode?: M
                         </span>
                       )}
                       {loading ? 'Menghubungkan...' : 'Lanjut dengan Google'}
-                      {!loading && <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />}
+                      {!loading && (
+                        <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+                      )}
                     </button>
 
                     <div className="flex items-start gap-2 rounded-2xl border border-teal-200/10 bg-teal-200/[0.06] p-3 text-xs leading-5 text-teal-50/80">
                       <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-teal-200" />
-                      <p>Login ini tidak meminta password kampus. NEXA hanya memakai Google OAuth untuk akun beta.</p>
+                      <p>
+                        Login ini tidak meminta password kampus. NEXA hanya memakai Google OAuth
+                        untuk akun beta.
+                      </p>
                     </div>
 
                     {mode === 'login' && (
@@ -277,7 +299,10 @@ export default function LoginClient({ initialMode = 'login' }: { initialMode?: M
 
                 <div className="mt-5 flex gap-3 rounded-2xl border border-white/10 bg-white/[0.045] p-3 text-xs leading-5 text-slate-400">
                   <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-teal-200" />
-                  <p>NEXA Campus bukan sistem resmi kampus. Selalu cek informasi final dari kanal resmi kampus.</p>
+                  <p>
+                    NEXA Campus bukan sistem resmi kampus. Selalu cek informasi final dari kanal
+                    resmi kampus.
+                  </p>
                 </div>
               </div>
             </div>

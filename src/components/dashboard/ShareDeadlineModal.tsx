@@ -172,7 +172,10 @@ function formatIcsDate(date: Date) {
 function upcoming(deadlines: AcademicDeadline[]) {
   const now = new Date()
   return deadlines
-    .filter((deadline) => deadline.status !== 'completed' && getDeadlineDateTime(deadline).getTime() >= now.getTime())
+    .filter(
+      (deadline) =>
+        deadline.status !== 'completed' && getDeadlineDateTime(deadline).getTime() >= now.getTime()
+    )
     .sort(sortNearest)
 }
 
@@ -186,7 +189,12 @@ function nextSevenDays(deadlines: AcademicDeadline[]) {
   })
 }
 
-export default function ShareDeadlineModal({ deadlines, userName, userTier, onClose }: ShareDeadlineModalProps) {
+export default function ShareDeadlineModal({
+  deadlines,
+  userName,
+  userTier,
+  onClose,
+}: ShareDeadlineModalProps) {
   const [activeTab, setActiveTab] = useState<TabId>('image')
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
@@ -248,7 +256,11 @@ export default function ShareDeadlineModal({ deadlines, userName, userTier, onCl
       doc.setFont('helvetica', 'bold')
       doc.setFontSize(13)
       doc.setTextColor(15, 23, 42)
-      doc.text(`NEXA Campus — Deadline Summary ${userName || 'Mahasiswa'} — ${humanDate()}`, margin, 14)
+      doc.text(
+        `NEXA Campus — Deadline Summary ${userName || 'Mahasiswa'} — ${humanDate()}`,
+        margin,
+        14
+      )
       doc.setDrawColor(226, 232, 240)
       doc.line(margin, 18, pageWidth - margin, 18)
       y = 28
@@ -298,7 +310,8 @@ export default function ShareDeadlineModal({ deadlines, userName, userTier, onCl
       doc.setFontSize(8)
       doc.rect(margin, y - 5, pageWidth - margin * 2, rowHeight, 'S')
       row.forEach((item, cellIndex) => {
-        const text = cellIndex === 1 ? wrappedTitle : doc.splitTextToSize(item, widths[cellIndex] - 3)
+        const text =
+          cellIndex === 1 ? wrappedTitle : doc.splitTextToSize(item, widths[cellIndex] - 3)
         doc.text(text, x + 1.5, y)
         x += widths[cellIndex]
       })
@@ -351,7 +364,10 @@ export default function ShareDeadlineModal({ deadlines, userName, userTier, onCl
     })
 
     lines.push('END:VCALENDAR')
-    downloadBlob(new Blob([lines.join('\r\n')], { type: 'text/calendar;charset=utf-8' }), 'nexa-deadlines.ics')
+    downloadBlob(
+      new Blob([lines.join('\r\n')], { type: 'text/calendar;charset=utf-8' }),
+      'nexa-deadlines.ics'
+    )
     setMessage('File kalender berhasil diunduh.')
     setBusy(false)
   }
@@ -364,10 +380,13 @@ export default function ShareDeadlineModal({ deadlines, userName, userTier, onCl
           <div>
             <p className="font-black">Export ini tersedia mulai NEXA Pulse.</p>
             <p className="mt-2 text-sm leading-6 text-amber-900">
-              Radar tetap bisa download gambar. Upgrade ke Pulse atau Command untuk PDF summary dan file kalender.
+              Radar tetap bisa download gambar. Upgrade ke Pulse atau Command untuk PDF summary dan
+              file kalender.
             </p>
             <Link href="/dashboard/billing" className="mt-4 inline-flex">
-              <Button type="button" variant="outline">Lihat Upgrade</Button>
+              <Button type="button" variant="outline">
+                Lihat Upgrade
+              </Button>
             </Link>
           </div>
         </div>
@@ -376,15 +395,28 @@ export default function ShareDeadlineModal({ deadlines, userName, userTier, onCl
   }
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/70 p-3 backdrop-blur-sm sm:p-6" role="dialog" aria-modal="true">
+    <div
+      className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/70 p-3 backdrop-blur-sm sm:p-6"
+      role="dialog"
+      aria-modal="true"
+    >
       <div className="mx-auto max-w-4xl rounded-3xl bg-white shadow-2xl">
         <div className="flex items-start justify-between gap-4 border-b border-slate-100 p-5">
           <div>
-            <p className="text-xs font-black uppercase tracking-wide text-brand-700">Share Deadline</p>
+            <p className="text-xs font-black uppercase tracking-wide text-brand-700">
+              Share Deadline
+            </p>
             <h2 className="mt-1 text-xl font-black text-slate-950">Export deadline kamu</h2>
-            <p className="mt-1 text-sm leading-6 text-slate-500">Buat story, rangkuman PDF, atau file kalender dari deadline aktif.</p>
+            <p className="mt-1 text-sm leading-6 text-slate-500">
+              Buat story, rangkuman PDF, atau file kalender dari deadline aktif.
+            </p>
           </div>
-          <button type="button" onClick={onClose} className="focus-ring rounded-2xl p-2 text-slate-500 hover:bg-slate-100" aria-label="Tutup modal export">
+          <button
+            type="button"
+            onClick={onClose}
+            className="focus-ring rounded-2xl p-2 text-slate-500 hover:bg-slate-100"
+            aria-label="Tutup modal export"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -419,13 +451,21 @@ export default function ShareDeadlineModal({ deadlines, userName, userTier, onCl
               >
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-xs font-black uppercase tracking-[0.28em] text-teal-300">NEXA Campus</p>
-                    <h3 className="mt-3 text-3xl font-black tracking-tight">Deadline 7 Hari Ke Depan</h3>
-                    <p className="mt-2 text-sm font-semibold text-slate-300">{userName || 'Mahasiswa'} · {humanDate()}</p>
+                    <p className="text-xs font-black uppercase tracking-[0.28em] text-teal-300">
+                      NEXA Campus
+                    </p>
+                    <h3 className="mt-3 text-3xl font-black tracking-tight">
+                      Deadline 7 Hari Ke Depan
+                    </h3>
+                    <p className="mt-2 text-sm font-semibold text-slate-300">
+                      {userName || 'Mahasiswa'} · {humanDate()}
+                    </p>
                   </div>
                   <div className="rounded-2xl border border-white/10 bg-white/10 px-3 py-2 text-right">
                     <p className="text-2xl font-black text-teal-300">{imageDeadlines.length}</p>
-                    <p className="text-[10px] font-bold uppercase tracking-wide text-slate-300">deadline</p>
+                    <p className="text-[10px] font-bold uppercase tracking-wide text-slate-300">
+                      deadline
+                    </p>
                   </div>
                 </div>
 
@@ -434,7 +474,9 @@ export default function ShareDeadlineModal({ deadlines, userName, userTier, onCl
                     <div className="rounded-3xl border border-white/10 bg-white/[0.06] p-6">
                       <CheckCircle2 className="h-8 w-8 text-emerald-300" />
                       <p className="mt-4 text-xl font-black">7 hari ke depan aman.</p>
-                      <p className="mt-2 text-sm leading-6 text-slate-300">Tetap cek kanal resmi kampus ya.</p>
+                      <p className="mt-2 text-sm leading-6 text-slate-300">
+                        Tetap cek kanal resmi kampus ya.
+                      </p>
                     </div>
                   ) : (
                     imageDeadlines.slice(0, 7).map((deadline) => {
@@ -442,19 +484,29 @@ export default function ShareDeadlineModal({ deadlines, userName, userTier, onCl
                       const urgency = getUrgency(deadline)
 
                       return (
-                        <div key={deadline.id} className="rounded-3xl border border-white/10 bg-white/[0.06] p-4">
+                        <div
+                          key={deadline.id}
+                          className="rounded-3xl border border-white/10 bg-white/[0.06] p-4"
+                        >
                           <div className="flex gap-3">
                             <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-teal-300 text-slate-950">
                               <Icon className="h-5 w-5" />
                             </div>
                             <div className="min-w-0 flex-1">
                               <div className="flex flex-wrap items-center gap-2">
-                                <p className="min-w-0 flex-1 text-base font-black leading-6">{getDisplayTitle(deadline)}</p>
-                                <span className="rounded-full bg-white/10 px-2.5 py-1 text-xs font-black text-teal-100">{urgency.label}</span>
+                                <p className="min-w-0 flex-1 text-base font-black leading-6">
+                                  {getDisplayTitle(deadline)}
+                                </p>
+                                <span className="rounded-full bg-white/10 px-2.5 py-1 text-xs font-black text-teal-100">
+                                  {urgency.label}
+                                </span>
                               </div>
-                              <p className="mt-1 text-sm font-semibold text-slate-300">{deadline.course_name}</p>
+                              <p className="mt-1 text-sm font-semibold text-slate-300">
+                                {deadline.course_name}
+                              </p>
                               <p className="mt-2 text-xs font-bold text-slate-400">
-                                {formatDeadlineDate(deadline)} · {formatDeadlineTime(deadline)} · {getTypeLabel(deadline.type)} · {deadline.priority}
+                                {formatDeadlineDate(deadline)} · {formatDeadlineTime(deadline)} ·{' '}
+                                {getTypeLabel(deadline.type)} · {deadline.priority}
                               </p>
                             </div>
                           </div>
@@ -472,7 +524,10 @@ export default function ShareDeadlineModal({ deadlines, userName, userTier, onCl
 
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                 <p className="font-black text-slate-950">Siap untuk story/status.</p>
-                <p className="mt-2 text-sm leading-6 text-slate-600">Gambar menangkap kartu gelap di sebelah kiri dan otomatis bernama `nexa-deadline-{today}.png`.</p>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  Gambar menangkap kartu gelap di sebelah kiri dan otomatis bernama `nexa-deadline-
+                  {today}.png`.
+                </p>
                 <Button type="button" className="mt-4 w-full" onClick={exportImage} disabled={busy}>
                   <Download className="h-4 w-4" />
                   {busy ? 'Membuat...' : 'Download PNG'}
@@ -481,35 +536,39 @@ export default function ShareDeadlineModal({ deadlines, userName, userTier, onCl
             </div>
           )}
 
-          {activeTab === 'pdf' && (
-            canUsePremiumExport ? (
+          {activeTab === 'pdf' &&
+            (canUsePremiumExport ? (
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
                 <p className="font-black text-slate-950">PDF Summary</p>
                 <p className="mt-2 text-sm leading-6 text-slate-600">
-                  Berisi tabel deadline aktif: No, Deadline, Kategori, Due Date, Prioritas, dan Status.
+                  Berisi tabel deadline aktif: No, Deadline, Kategori, Due Date, Prioritas, dan
+                  Status.
                 </p>
                 <Button type="button" className="mt-4" onClick={exportPdf} disabled={busy}>
                   <Download className="h-4 w-4" />
                   {busy ? 'Membuat PDF...' : 'Download PDF'}
                 </Button>
               </div>
-            ) : <PremiumGate />
-          )}
+            ) : (
+              <PremiumGate />
+            ))}
 
-          {activeTab === 'calendar' && (
-            canUsePremiumExport ? (
+          {activeTab === 'calendar' &&
+            (canUsePremiumExport ? (
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
                 <p className="font-black text-slate-950">File Kalender (.ics)</p>
                 <p className="mt-2 text-sm leading-6 text-slate-600">
-                  Setiap deadline menjadi event kalender dengan alarm H-1. Import ke Google Calendar, Apple Calendar, atau kalender HP.
+                  Setiap deadline menjadi event kalender dengan alarm H-1. Import ke Google
+                  Calendar, Apple Calendar, atau kalender HP.
                 </p>
                 <Button type="button" className="mt-4" onClick={exportCalendar} disabled={busy}>
                   <Download className="h-4 w-4" />
                   {busy ? 'Membuat kalender...' : 'Download .ics'}
                 </Button>
               </div>
-            ) : <PremiumGate />
-          )}
+            ) : (
+              <PremiumGate />
+            ))}
 
           {message && (
             <div className="mt-4 rounded-2xl border border-cyan-200 bg-cyan-50 p-3 text-sm font-bold text-cyan-800">

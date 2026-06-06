@@ -94,7 +94,9 @@ export async function GET(request: NextRequest) {
 
   const { data: deadlines, error } = await supabase
     .from('academic_deadlines')
-    .select('id,user_id,title,course_name,type,source,deadline_date,deadline_time,priority,status,reminder_enabled')
+    .select(
+      'id,user_id,title,course_name,type,source,deadline_date,deadline_time,priority,status,reminder_enabled'
+    )
     .eq('reminder_enabled', true)
     .neq('status', 'completed')
     .in('deadline_date', [today, tomorrow])
@@ -127,7 +129,10 @@ export async function GET(request: NextRequest) {
   for (const deadline of typedDeadlines) {
     const profile = profileMap.get(deadline.user_id)
     const label = deadline.deadline_date === today ? 'Hari ini' : 'H-1'
-    const result = await sendTelegramMessage(profile?.telegram_chat_id, buildMessage(deadline, label))
+    const result = await sendTelegramMessage(
+      profile?.telegram_chat_id,
+      buildMessage(deadline, label)
+    )
 
     if (result.ok) sent += 1
     else skipped += 1

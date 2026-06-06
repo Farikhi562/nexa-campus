@@ -57,7 +57,8 @@ export default function PrivacyPage() {
       </div>
 
       <div className="mt-5 rounded-3xl border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-900">
-        NEXA Campus bukan sistem resmi kampus. Selalu cek informasi final dari kanal resmi kampus sebelum mengambil keputusan akademik.
+        NEXA Campus bukan sistem resmi kampus. Selalu cek informasi final dari kanal resmi kampus
+        sebelum mengambil keputusan akademik.
       </div>
     </PublicPageShell>
   )

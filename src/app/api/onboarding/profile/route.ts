@@ -111,7 +111,10 @@ export async function POST(request: Request) {
     .maybeSingle()
 
   if (selectError && !isSchemaError(selectError)) {
-    return NextResponse.json({ error: getSafeError(selectError), detail: selectError.message }, { status: 400 })
+    return NextResponse.json(
+      { error: getSafeError(selectError), detail: selectError.message },
+      { status: 400 }
+    )
   }
 
   if (existingProfile?.id) {
@@ -120,11 +123,21 @@ export async function POST(request: Request) {
 
     if (isSchemaError(firstUpdate.error)) {
       const fallbackUpdate = await supabase.from('profiles').update(corePayload).eq('id', user.id)
-      if (!fallbackUpdate.error) return NextResponse.json({ ok: true, warning: 'Kolom profil opsional belum lengkap di database.' })
-      return NextResponse.json({ error: getSafeError(fallbackUpdate.error), detail: fallbackUpdate.error.message }, { status: 400 })
+      if (!fallbackUpdate.error)
+        return NextResponse.json({
+          ok: true,
+          warning: 'Kolom profil opsional belum lengkap di database.',
+        })
+      return NextResponse.json(
+        { error: getSafeError(fallbackUpdate.error), detail: fallbackUpdate.error.message },
+        { status: 400 }
+      )
     }
 
-    return NextResponse.json({ error: getSafeError(firstUpdate.error), detail: firstUpdate.error.message }, { status: 400 })
+    return NextResponse.json(
+      { error: getSafeError(firstUpdate.error), detail: firstUpdate.error.message },
+      { status: 400 }
+    )
   }
 
   const insertAttempts = [
@@ -157,6 +170,6 @@ export async function POST(request: Request) {
       error: lastError ? getSafeError(lastError) : 'Profil gagal disimpan.',
       detail: lastError?.message,
     },
-    { status: 400 },
+    { status: 400 }
   )
 }

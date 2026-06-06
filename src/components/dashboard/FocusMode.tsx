@@ -32,7 +32,9 @@ export default function FocusMode() {
 
   const completeFocus = useCallback(async () => {
     setSessions((value) => value + 1)
-    setMessage('Sesi fokus selesai! Saatnya istirahat sebentar. (+poin harian kalau ini sesi pertamamu hari ini)')
+    setMessage(
+      'Sesi fokus selesai! Saatnya istirahat sebentar. (+poin harian kalau ini sesi pertamamu hari ini)'
+    )
     fetch('/api/focus/complete', { method: 'POST' }).catch(() => null)
   }, [])
 
@@ -77,7 +79,8 @@ export default function FocusMode() {
           </div>
           <h1 className="text-2xl font-black tracking-tight sm:text-3xl">Fokus tanpa distraksi.</h1>
           <p className="mt-2 max-w-xl text-sm leading-6 text-slate-300">
-            Teknik Pomodoro: kerja fokus, lalu istirahat singkat. Selesaikan sesi fokus pertama tiap hari untuk poin harian.
+            Teknik Pomodoro: kerja fokus, lalu istirahat singkat. Selesaikan sesi fokus pertama tiap
+            hari untuk poin harian.
           </p>
         </div>
       </section>
@@ -93,7 +96,9 @@ export default function FocusMode() {
                   reset('focus', item)
                 }}
                 className={`focus-ring rounded-2xl px-3 py-1.5 text-sm font-black transition ${
-                  preset.label === item.label ? 'bg-slate-950 text-white' : 'border border-slate-200 bg-white text-slate-600'
+                  preset.label === item.label
+                    ? 'bg-slate-950 text-white'
+                    : 'border border-slate-200 bg-white text-slate-600'
                 }`}
               >
                 {item.label}
@@ -118,11 +123,19 @@ export default function FocusMode() {
               />
             </svg>
             <div className="text-center">
-              <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-black ${mode === 'focus' ? 'bg-teal-50 text-teal-700' : 'bg-amber-50 text-amber-700'}`}>
-                {mode === 'focus' ? <Timer className="h-3.5 w-3.5" /> : <Coffee className="h-3.5 w-3.5" />}
+              <span
+                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-black ${mode === 'focus' ? 'bg-teal-50 text-teal-700' : 'bg-amber-50 text-amber-700'}`}
+              >
+                {mode === 'focus' ? (
+                  <Timer className="h-3.5 w-3.5" />
+                ) : (
+                  <Coffee className="h-3.5 w-3.5" />
+                )}
                 {mode === 'focus' ? 'Fokus' : 'Istirahat'}
               </span>
-              <p className="mt-2 text-5xl font-black tabular-nums text-slate-950">{format(remaining)}</p>
+              <p className="mt-2 text-5xl font-black tabular-nums text-slate-950">
+                {format(remaining)}
+              </p>
             </div>
           </div>
 
@@ -143,13 +156,18 @@ export default function FocusMode() {
             </button>
           </div>
 
-          <p className="mt-5 text-sm font-bold text-slate-500">Sesi fokus selesai hari ini: {sessions}</p>
-          {message && <p className="mt-2 max-w-sm text-center text-sm leading-6 text-teal-700">{message}</p>}
+          <p className="mt-5 text-sm font-bold text-slate-500">
+            Sesi fokus selesai hari ini: {sessions}
+          </p>
+          {message && (
+            <p className="mt-2 max-w-sm text-center text-sm leading-6 text-teal-700">{message}</p>
+          )}
         </CardContent>
       </Card>
 
       <p className="px-1 text-center text-xs leading-5 text-slate-400">
-        Tip: tutup notifikasi lain selama sesi fokus. Poin fokus dibatasi sekali per hari supaya adil.
+        Tip: tutup notifikasi lain selama sesi fokus. Poin fokus dibatasi sekali per hari supaya
+        adil.
       </p>
     </div>
   )

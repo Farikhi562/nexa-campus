@@ -14,7 +14,10 @@ export default function NexaLogo({ className }: { className?: string }) {
       <svg viewBox="0 0 64 64" className="h-[80%] w-[80%]" role="img" aria-hidden="true">
         {/* Topi wisuda */}
         <path d="M32 8 L58 18 L32 28 L6 18 Z" fill="#0d9488" />
-        <path d="M14 23 L14 35 C14 40 22 44 32 44 C42 44 50 40 50 35 L50 23 L32 31 Z" fill="#0f766e" />
+        <path
+          d="M14 23 L14 35 C14 40 22 44 32 44 C42 44 50 40 50 35 L50 23 L32 31 Z"
+          fill="#0f766e"
+        />
         {/* Tassel */}
         <path d="M58 18 L58 30" stroke="#0d9488" strokeWidth="2" strokeLinecap="round" />
         <circle cx="58" cy="32" r="2.6" fill="#14b8a6" />

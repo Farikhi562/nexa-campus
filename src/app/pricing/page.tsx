@@ -61,7 +61,10 @@ export default function PricingPage() {
       <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_0.85fr]">
         <div className="flex gap-3 rounded-3xl border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-900">
           <ReceiptText className="mt-0.5 h-5 w-5 flex-shrink-0" />
-          <p>Payment gateway belum aktif. Untuk MVP beta, upgrade dilakukan melalui request manual dan konfirmasi admin.</p>
+          <p>
+            Payment gateway belum aktif. Untuk MVP beta, upgrade dilakukan melalui request manual
+            dan konfirmasi admin.
+          </p>
         </div>
         <div className="flex gap-3 rounded-3xl border border-slate-200 bg-white p-5 text-sm leading-6 text-slate-600">
           <LockKeyhole className="mt-0.5 h-5 w-5 flex-shrink-0 text-brand-700" />

@@ -47,11 +47,17 @@ export default function MobileNavMenu() {
           />
           <div className="absolute inset-y-0 left-0 flex w-[82%] max-w-xs flex-col bg-white shadow-2xl">
             <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
-              <Link href="/dashboard" onClick={() => setOpen(false)} className="flex items-center gap-2.5">
+              <Link
+                href="/dashboard"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2.5"
+              >
                 <NexaLogo className="h-9 w-9" />
                 <div>
                   <p className="text-sm font-black leading-5 text-slate-950">NEXA Campus</p>
-                  <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-brand-700">Semua Halaman</p>
+                  <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-brand-700">
+                    Semua Halaman
+                  </p>
                 </div>
               </Link>
               <button

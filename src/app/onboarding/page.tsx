@@ -40,7 +40,9 @@ export default async function OnboardingPage({
         <div className="mb-6 flex items-center gap-3">
           <NexaLogo className="h-10 w-10" />
           <div>
-            <p className="text-sm font-black uppercase tracking-[0.18em] text-teal-300">Setup profil</p>
+            <p className="text-sm font-black uppercase tracking-[0.18em] text-teal-300">
+              Setup profil
+            </p>
             <p className="text-sm text-slate-300">Data minimum dulu, biar dashboard nyambung.</p>
           </div>
         </div>
@@ -50,9 +52,12 @@ export default async function OnboardingPage({
             <span className="inline-flex items-center rounded-full bg-teal-100 px-3 py-1 text-xs font-black text-teal-800">
               Langkah terakhir
             </span>
-            <h1 className="mt-3 text-2xl font-black text-slate-950 sm:text-3xl">Kenalan sebentar.</h1>
+            <h1 className="mt-3 text-2xl font-black text-slate-950 sm:text-3xl">
+              Kenalan sebentar.
+            </h1>
             <p className="mt-2 max-w-xl text-sm leading-6 text-slate-600">
-              NEXA butuh profil dasar untuk label kampus, reminder, dan batas paket. Password platform kampus tidak pernah diminta.
+              NEXA butuh profil dasar untuk label kampus, reminder, dan batas paket. Password
+              platform kampus tidak pernah diminta.
             </p>
           </div>
           <div className="p-5 sm:p-7">

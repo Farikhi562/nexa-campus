@@ -226,7 +226,10 @@ export default function ProfileSettingsForm({ profile }: { profile: Profile }) {
         is_public_profile: isPublicProfile,
       }),
     })
-    const result = (await response.json().catch(() => null)) as { error?: string; warning?: string } | null
+    const result = (await response.json().catch(() => null)) as {
+      error?: string
+      warning?: string
+    } | null
 
     setLoading(false)
 
@@ -235,7 +238,9 @@ export default function ProfileSettingsForm({ profile }: { profile: Profile }) {
       return
     }
 
-    setMessage(result?.warning || 'Profil berhasil diupdate. Identitas kampusmu sekarang lebih rapi.')
+    setMessage(
+      result?.warning || 'Profil berhasil diupdate. Identitas kampusmu sekarang lebih rapi.'
+    )
   }
 
   async function uploadPhoto() {
@@ -255,7 +260,10 @@ export default function ProfileSettingsForm({ profile }: { profile: Profile }) {
       method: 'POST',
       body: formData,
     })
-    const result = (await response.json().catch(() => null)) as { avatar_url?: string; error?: string } | null
+    const result = (await response.json().catch(() => null)) as {
+      avatar_url?: string
+      error?: string
+    } | null
 
     setUploadingPhoto(false)
 
@@ -279,17 +287,21 @@ export default function ProfileSettingsForm({ profile }: { profile: Profile }) {
           <div>
             <p className="font-black">Panduan isi profil</p>
             <p className="mt-1">
-              Isi nama asli, pilih kampus dari saran atau ketik manual kalau belum ada, pilih provinsi, lalu pilih jurusan dari daftar.
-              Foto profil bersifat opsional, format JPG/PNG/WebP/GIF maksimal 2MB. NEXA tidak meminta password kampus.
+              Isi nama asli, pilih kampus dari saran atau ketik manual kalau belum ada, pilih
+              provinsi, lalu pilih jurusan dari daftar. Foto profil bersifat opsional, format
+              JPG/PNG/WebP/GIF maksimal 2MB. NEXA tidak meminta password kampus.
             </p>
           </div>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <Badge tone="brand" className="mb-3">Profile</Badge>
+            <Badge tone="brand" className="mb-3">
+              Profile
+            </Badge>
             <h2 className="text-xl font-black text-slate-950">Identitas akun</h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-              Kampus pakai input bebas dulu, jadi semua universitas di Indonesia tetap bisa masuk tanpa nunggu daftar resmi.
+              Kampus pakai input bebas dulu, jadi semua universitas di Indonesia tetap bisa masuk
+              tanpa nunggu daftar resmi.
             </p>
           </div>
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-50 text-teal-700">
@@ -303,7 +315,11 @@ export default function ProfileSettingsForm({ profile }: { profile: Profile }) {
               <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-3xl border border-slate-200 bg-white text-slate-400">
                 {photoPreview || avatarUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={photoPreview || avatarUrl} alt="Foto profil" className="h-full w-full object-cover" />
+                  <img
+                    src={photoPreview || avatarUrl}
+                    alt="Foto profil"
+                    className="h-full w-full object-cover"
+                  />
                 ) : (
                   <Camera className="h-9 w-9" />
                 )}
@@ -311,7 +327,8 @@ export default function ProfileSettingsForm({ profile }: { profile: Profile }) {
               <div className="min-w-0 flex-1">
                 <p className="font-black text-slate-950">Upload foto profil</p>
                 <p className="mt-1 text-xs leading-5 text-slate-500">
-                  JPG, PNG, WebP, atau GIF. Maksimal 2MB. Kalau upload gagal, cek migration dan bucket Supabase Storage.
+                  JPG, PNG, WebP, atau GIF. Maksimal 2MB. Kalau upload gagal, cek migration dan
+                  bucket Supabase Storage.
                 </p>
                 <div className="mt-3 flex flex-col gap-2 sm:flex-row">
                   <label className="focus-ring inline-flex min-h-11 cursor-pointer items-center justify-center rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm font-black text-slate-700 hover:bg-slate-50">
@@ -327,7 +344,13 @@ export default function ProfileSettingsForm({ profile }: { profile: Profile }) {
                       }}
                     />
                   </label>
-                  <Button type="button" variant="outline" disabled={!photoFile || uploadingPhoto} onClick={uploadPhoto} className="min-h-11 rounded-2xl">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={!photoFile || uploadingPhoto}
+                    onClick={uploadPhoto}
+                    className="min-h-11 rounded-2xl"
+                  >
                     {uploadingPhoto ? 'Uploading...' : 'Upload Foto'}
                     <Upload className="h-4 w-4" />
                   </Button>
@@ -337,10 +360,16 @@ export default function ProfileSettingsForm({ profile }: { profile: Profile }) {
           </div>
           <label className="block">
             <span className="mb-1.5 block text-sm font-black text-slate-700">Nama lengkap</span>
-            <input value={fullName} onChange={(event) => setFullName(event.target.value)} className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm" />
+            <input
+              value={fullName}
+              onChange={(event) => setFullName(event.target.value)}
+              className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm"
+            />
           </label>
           <label className="block">
-            <span className="mb-1.5 block text-sm font-black text-slate-700">Nama kampus / universitas</span>
+            <span className="mb-1.5 block text-sm font-black text-slate-700">
+              Nama kampus / universitas
+            </span>
             <input
               value={campusName}
               onChange={(event) => setCampusName(event.target.value)}
@@ -349,7 +378,9 @@ export default function ProfileSettingsForm({ profile }: { profile: Profile }) {
               className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm"
             />
             <datalist id="university-options">
-              {universityOptions.map((item) => <option key={item} value={item} />)}
+              {universityOptions.map((item) => (
+                <option key={item} value={item} />
+              ))}
             </datalist>
             <span className="mt-1.5 block text-xs leading-5 text-slate-500">
               Pilih dari saran, atau ketik manual kalau kampusmu belum ada.
@@ -357,30 +388,67 @@ export default function ProfileSettingsForm({ profile }: { profile: Profile }) {
           </label>
           <label className="block">
             <span className="mb-1.5 block text-sm font-black text-slate-700">Provinsi</span>
-            <select value={province} onChange={(event) => setProvince(event.target.value)} className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm">
+            <select
+              value={province}
+              onChange={(event) => setProvince(event.target.value)}
+              className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm"
+            >
               <option value="">Pilih provinsi</option>
-              {provinces.map((item) => <option key={item} value={item}>{item}</option>)}
+              {provinces.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
             </select>
           </label>
           <label className="block">
             <span className="mb-1.5 block text-sm font-black text-slate-700">Jurusan</span>
-            <select value={major} onChange={(event) => setMajor(event.target.value)} className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm">
+            <select
+              value={major}
+              onChange={(event) => setMajor(event.target.value)}
+              className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm"
+            >
               <option value="">Pilih jurusan</option>
-              {majorOptions.map((item) => <option key={item} value={item}>{item}</option>)}
+              {majorOptions.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
             </select>
           </label>
           <label className="block">
             <span className="mb-1.5 block text-sm font-black text-slate-700">Semester</span>
-            <input type="number" min="1" max="14" value={semester} onChange={(event) => setSemester(event.target.value)} className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm" />
+            <input
+              type="number"
+              min="1"
+              max="14"
+              value={semester}
+              onChange={(event) => setSemester(event.target.value)}
+              className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm"
+            />
           </label>
           <label className="block">
-            <span className="mb-1.5 block text-sm font-black text-slate-700">NPM / student ID opsional</span>
-            <input value={studentId} onChange={(event) => setStudentId(event.target.value)} className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm" />
+            <span className="mb-1.5 block text-sm font-black text-slate-700">
+              NPM / student ID opsional
+            </span>
+            <input
+              value={studentId}
+              onChange={(event) => setStudentId(event.target.value)}
+              className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm"
+            />
           </label>
           <label className="block md:col-span-2">
             <span className="mb-1.5 block text-sm font-black text-slate-700">Gender opsional</span>
-            <select value={gender} onChange={(event) => setGender(event.target.value)} className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm">
-              {genderOptions.map((item) => <option key={item.value || 'empty'} value={item.value}>{item.label}</option>)}
+            <select
+              value={gender}
+              onChange={(event) => setGender(event.target.value)}
+              className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm"
+            >
+              {genderOptions.map((item) => (
+                <option key={item.value || 'empty'} value={item.value}>
+                  {item.label}
+                </option>
+              ))}
             </select>
           </label>
 
@@ -391,7 +459,9 @@ export default function ProfileSettingsForm({ profile }: { profile: Profile }) {
               className="focus-ring flex w-full items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:border-teal-200"
             >
               <span>
-                <span className="block text-sm font-black text-slate-950">Tampil di leaderboard</span>
+                <span className="block text-sm font-black text-slate-950">
+                  Tampil di leaderboard
+                </span>
                 <span className="mt-0.5 block text-xs leading-5 text-slate-500">
                   Kalau aktif, nama, foto, dan poinmu muncul di papan peringkat publik.
                 </span>
@@ -412,7 +482,11 @@ export default function ProfileSettingsForm({ profile }: { profile: Profile }) {
         </div>
       </section>
 
-      {error && <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700">{error}</div>}
+      {error && (
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700">
+          {error}
+        </div>
+      )}
       {message && (
         <div className="flex gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-emerald-800">
           <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0" />

@@ -28,11 +28,11 @@ dengan pesan tersebut. File SQL di atas:
 
 ## Environment variables yang wajib diisi (Vercel / hosting kamu)
 
-| Variable | Dipakai untuk |
-| --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | Koneksi Supabase (client & server) |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Koneksi Supabase (client & server) |
-| `SUPABASE_SERVICE_ROLE_KEY` | **Wajib agar fitur referral memberi reward.** Tanpa ini, referral tetap tercatat di sesi tapi reward 30 hari Pulse tidak akan diproses. |
+| Variable                        | Dipakai untuk                                                                                                                           |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`      | Koneksi Supabase (client & server)                                                                                                      |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Koneksi Supabase (client & server)                                                                                                      |
+| `SUPABASE_SERVICE_ROLE_KEY`     | **Wajib agar fitur referral memberi reward.** Tanpa ini, referral tetap tercatat di sesi tapi reward 30 hari Pulse tidak akan diproses. |
 
 > `SUPABASE_SERVICE_ROLE_KEY` bersifat rahasia. Simpan hanya sebagai server-side
 > env (jangan diberi prefix `NEXT_PUBLIC_`).
@@ -73,4 +73,3 @@ where plan is null or plan not in ('radar', 'pulse', 'command');
 
 Hal yang sama berlaku untuk `semester`, `gender`, dan `reminder_preference` —
 nilai di luar rentang yang valid akan dirapikan otomatis.
-

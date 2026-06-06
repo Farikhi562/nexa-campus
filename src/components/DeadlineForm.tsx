@@ -4,7 +4,14 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Button from '@/components/ui/Button'
 import { DEADLINE_SOURCES, DEADLINE_STATUSES, DEADLINE_TYPES, PRIORITIES } from '@/lib/nexa-data'
-import type { AcademicDeadline, DeadlinePriority, DeadlineSource, DeadlineStatus, DeadlineType, Profile } from '@/types'
+import type {
+  AcademicDeadline,
+  DeadlinePriority,
+  DeadlineSource,
+  DeadlineStatus,
+  DeadlineType,
+  Profile,
+} from '@/types'
 
 const typeValues = new Set(DEADLINE_TYPES.map((item) => item.value))
 const sourceValues = new Set(DEADLINE_SOURCES.map((item) => item.value))
@@ -120,7 +127,9 @@ export default function DeadlineForm({
     setError('')
 
     if (!isEditing && profile.plan === 'radar' && activeCount >= 5) {
-      setError('Paket Radar maksimal 5 active deadlines. Upgrade dulu kalau deadline-mu sudah mulai ramai.')
+      setError(
+        'Paket Radar maksimal 5 active deadlines. Upgrade dulu kalau deadline-mu sudah mulai ramai.'
+      )
       return
     }
 
@@ -190,7 +199,12 @@ export default function DeadlineForm({
 
   async function deleteDeadline() {
     if (!deadline) return
-    if (!confirm('Yakin mau hapus deadline ini? Kalau sudah dihapus, NEXA nggak bisa nyelametin dia lagi.')) return
+    if (
+      !confirm(
+        'Yakin mau hapus deadline ini? Kalau sudah dihapus, NEXA nggak bisa nyelametin dia lagi.'
+      )
+    )
+      return
 
     setDeleting(true)
     setError('')
@@ -214,31 +228,65 @@ export default function DeadlineForm({
   return (
     <form onSubmit={submit} className="space-y-4 pb-24 sm:pb-0">
       <Section eyebrow="01" title="Info deadline">
-        <Field span helper="Opsional. Kalau kosong, NEXA akan tampilkan otomatis seperti Tugas Algoritma.">
+        <Field
+          span
+          helper="Opsional. Kalau kosong, NEXA akan tampilkan otomatis seperti Tugas Algoritma."
+        >
           <label className="block">
             <span className="mb-1.5 block text-sm font-bold text-slate-700">Judul</span>
-            <input name="title" defaultValue={deadline?.title ?? ''} placeholder="Contoh: Laporan bab 3" className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm" />
+            <input
+              name="title"
+              defaultValue={deadline?.title ?? ''}
+              placeholder="Contoh: Laporan bab 3"
+              className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm"
+            />
           </label>
         </Field>
         <Field>
           <label className="block">
-            <span className="mb-1.5 block text-sm font-bold text-slate-700">Mata kuliah / kegiatan</span>
-            <input name="course_name" defaultValue={deadline?.course_name ?? ''} placeholder="Algoritma, AOA, BAAK..." required className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm" />
+            <span className="mb-1.5 block text-sm font-bold text-slate-700">
+              Mata kuliah / kegiatan
+            </span>
+            <input
+              name="course_name"
+              defaultValue={deadline?.course_name ?? ''}
+              placeholder="Algoritma, AOA, BAAK..."
+              required
+              className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm"
+            />
           </label>
         </Field>
         <Field>
           <label className="block">
             <span className="mb-1.5 block text-sm font-bold text-slate-700">Tipe</span>
-            <select name="type" defaultValue={deadline?.type ?? 'tugas'} required className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm">
-              {DEADLINE_TYPES.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+            <select
+              name="type"
+              defaultValue={deadline?.type ?? 'tugas'}
+              required
+              className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm"
+            >
+              {DEADLINE_TYPES.map((item) => (
+                <option key={item.value} value={item.value}>
+                  {item.label}
+                </option>
+              ))}
             </select>
           </label>
         </Field>
         <Field span helper="Masukin sumber deadline biar nanti gampang dicek ulang.">
           <label className="block">
             <span className="mb-1.5 block text-sm font-bold text-slate-700">Sumber</span>
-            <select name="source" defaultValue={deadline?.source ?? 'vclass'} required className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm">
-              {DEADLINE_SOURCES.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+            <select
+              name="source"
+              defaultValue={deadline?.source ?? 'vclass'}
+              required
+              className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm"
+            >
+              {DEADLINE_SOURCES.map((item) => (
+                <option key={item.value} value={item.value}>
+                  {item.label}
+                </option>
+              ))}
             </select>
           </label>
         </Field>
@@ -248,13 +296,25 @@ export default function DeadlineForm({
         <Field>
           <label className="block">
             <span className="mb-1.5 block text-sm font-bold text-slate-700">Tanggal</span>
-            <input type="date" name="deadline_date" defaultValue={deadline?.deadline_date ?? todayValue()} required className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm" />
+            <input
+              type="date"
+              name="deadline_date"
+              defaultValue={deadline?.deadline_date ?? todayValue()}
+              required
+              className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm"
+            />
           </label>
         </Field>
         <Field>
           <label className="block">
             <span className="mb-1.5 block text-sm font-bold text-slate-700">Jam</span>
-            <input type="time" name="deadline_time" defaultValue={deadline?.deadline_time?.slice(0, 5) ?? '23:59'} required className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm" />
+            <input
+              type="time"
+              name="deadline_time"
+              defaultValue={deadline?.deadline_time?.slice(0, 5) ?? '23:59'}
+              required
+              className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm"
+            />
           </label>
         </Field>
       </Section>
@@ -263,19 +323,38 @@ export default function DeadlineForm({
         <Field helper="Kalau online, isi ruangan dengan Online. Simpel aja.">
           <label className="block">
             <span className="mb-1.5 block text-sm font-bold text-slate-700">Kampus</span>
-            <input name="campus" defaultValue={deadline?.campus ?? profile.campus_name ?? ''} placeholder="Kampus D, Kampus E, Online..." required className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm" />
+            <input
+              name="campus"
+              defaultValue={deadline?.campus ?? profile.campus_name ?? ''}
+              placeholder="Kampus D, Kampus E, Online..."
+              required
+              className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm"
+            />
           </label>
         </Field>
         <Field>
           <label className="block">
             <span className="mb-1.5 block text-sm font-bold text-slate-700">Ruangan</span>
-            <input name="room" defaultValue={deadline?.room ?? ''} placeholder="D441, Lab, Online" required className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm" />
+            <input
+              name="room"
+              defaultValue={deadline?.room ?? ''}
+              placeholder="D441, Lab, Online"
+              required
+              className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm"
+            />
           </label>
         </Field>
         <Field span>
           <label className="block">
-            <span className="mb-1.5 block text-sm font-bold text-slate-700">Catatan lokasi opsional</span>
-            <input name="location_note" defaultValue={deadline?.location_note ?? ''} placeholder="Link meet, lantai, atau instruksi kecil lainnya" className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm" />
+            <span className="mb-1.5 block text-sm font-bold text-slate-700">
+              Catatan lokasi opsional
+            </span>
+            <input
+              name="location_note"
+              defaultValue={deadline?.location_note ?? ''}
+              placeholder="Link meet, lantai, atau instruksi kecil lainnya"
+              className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm"
+            />
           </label>
         </Field>
       </Section>
@@ -284,44 +363,87 @@ export default function DeadlineForm({
         <Field>
           <label className="block">
             <span className="mb-1.5 block text-sm font-bold text-slate-700">Prioritas</span>
-            <select name="priority" defaultValue={deadline?.priority ?? 'normal'} required className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm">
-              {PRIORITIES.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+            <select
+              name="priority"
+              defaultValue={deadline?.priority ?? 'normal'}
+              required
+              className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm"
+            >
+              {PRIORITIES.map((item) => (
+                <option key={item.value} value={item.value}>
+                  {item.label}
+                </option>
+              ))}
             </select>
           </label>
         </Field>
         <Field>
           <label className="block">
             <span className="mb-1.5 block text-sm font-bold text-slate-700">Status</span>
-            <select name="status" defaultValue={deadline?.status ?? 'pending'} className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm">
-              {DEADLINE_STATUSES.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+            <select
+              name="status"
+              defaultValue={deadline?.status ?? 'pending'}
+              className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm"
+            >
+              {DEADLINE_STATUSES.map((item) => (
+                <option key={item.value} value={item.value}>
+                  {item.label}
+                </option>
+              ))}
             </select>
           </label>
         </Field>
-        <Field span helper="NEXA cuma nyimpen deadline yang kamu input. Password kampus? Nggak usah, hidup udah cukup ribet.">
+        <Field
+          span
+          helper="NEXA cuma nyimpen deadline yang kamu input. Password kampus? Nggak usah, hidup udah cukup ribet."
+        >
           <label className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-bold text-slate-700">
-            <input type="checkbox" name="reminder_enabled" defaultChecked={deadline?.reminder_enabled ?? Boolean(profile.telegram_chat_id)} className="mt-0.5" />
+            <input
+              type="checkbox"
+              name="reminder_enabled"
+              defaultChecked={deadline?.reminder_enabled ?? Boolean(profile.telegram_chat_id)}
+              className="mt-0.5"
+            />
             <span>
               Tandai butuh reminder
-              <span className="mt-1 block text-xs font-medium leading-5 text-slate-500">Ini baru status di deadline. Integrasi bot tidak dikerjakan di fitur ini.</span>
+              <span className="mt-1 block text-xs font-medium leading-5 text-slate-500">
+                Ini baru status di deadline. Integrasi bot tidak dikerjakan di fitur ini.
+              </span>
             </span>
           </label>
         </Field>
         <Field span>
           <label className="block">
             <span className="mb-1.5 block text-sm font-bold text-slate-700">Notes opsional</span>
-            <textarea name="notes" defaultValue={deadline?.notes ?? ''} rows={4} placeholder="Instruksi dosen, format file, link sumber, atau catatan kecil lainnya" className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm" />
+            <textarea
+              name="notes"
+              defaultValue={deadline?.notes ?? ''}
+              rows={4}
+              placeholder="Instruksi dosen, format file, link sumber, atau catatan kecil lainnya"
+              className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm"
+            />
           </label>
         </Field>
       </Section>
 
-      {error && <p className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700">{error}</p>}
+      {error && (
+        <p className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700">
+          {error}
+        </p>
+      )}
 
       <div className="fixed inset-x-0 bottom-[4.5rem] z-[60] border-t border-white/80 bg-white/95 p-3 shadow-2xl shadow-slate-900/10 backdrop-blur-xl sm:static sm:bottom-auto sm:z-auto sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none">
         <div className="mx-auto flex max-w-3xl gap-3 sm:mx-0">
           <Button type="submit" disabled={loading} className="min-h-12 flex-1 rounded-2xl">
             {loading ? 'Menyimpan...' : isEditing ? 'Simpan Deadline' : 'Tambah Deadline'}
           </Button>
-          <Button type="button" variant="outline" className="min-h-12 rounded-2xl" onClick={() => router.back()} disabled={loading}>
+          <Button
+            type="button"
+            variant="outline"
+            className="min-h-12 rounded-2xl"
+            onClick={() => router.back()}
+            disabled={loading}
+          >
             Batal
           </Button>
           {isEditing && (

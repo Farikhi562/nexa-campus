@@ -1,4 +1,7 @@
-const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://campus.nexatechlabs.my.id').replace(/\/$/, '')
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://campus.nexatechlabs.my.id').replace(
+  /\/$/,
+  ''
+)
 
 export const BRAND = {
   companyName: 'NEXA Tech Labs',

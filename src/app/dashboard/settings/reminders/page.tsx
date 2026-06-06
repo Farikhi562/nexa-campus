@@ -24,10 +24,15 @@ export default async function ReminderSettingsPage() {
       <div className="rounded-3xl border border-white/80 bg-white/90 p-5 shadow-xl shadow-slate-200/70 sm:p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm font-black uppercase tracking-wide text-brand-700">Reminder Settings</p>
-            <h1 className="mt-1 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">Pengaturan Telegram</h1>
+            <p className="text-sm font-black uppercase tracking-wide text-brand-700">
+              Reminder Settings
+            </p>
+            <h1 className="mt-1 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">
+              Pengaturan Telegram
+            </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-              Aktifkan reminder Telegram untuk deadline yang kamu input manual. Kalau token sudah ada di env, restart server dev/deploy supaya kebaca.
+              Aktifkan reminder Telegram untuk deadline yang kamu input manual. Kalau token sudah
+              ada di env, restart server dev/deploy supaya kebaca.
             </p>
           </div>
           <Link

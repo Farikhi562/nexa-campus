@@ -12,19 +12,19 @@ Di **Supabase → SQL Editor**, jalankan berurutan (semua idempotent):
 
 ## 2) Environment variables
 
-| Variable | Wajib | Fungsi |
-| --- | --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | ya | Koneksi Supabase |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ya | Koneksi Supabase |
-| `SUPABASE_SERVICE_ROLE_KEY` | ya | Admin lihat semua data, referral reward, upgrade plan via webhook (server-only) |
-| `GEMINI_API_KEY` | opsional | Aktifkan Tanya NEXA & AI Quick Add. Tanpa ini → fallback "AI feature is not configured yet." + parser sederhana |
-| `GEMINI_MODEL` | opsional | Default `gemini-2.5-flash-lite` / `gemini-2.5-flash` |
-| `ADMIN_EMAILS` | ya (admin) | Email admin, pisah koma. Kosong → halaman /admin tampilkan pesan setup |
-| `NEXT_PUBLIC_SITE_URL` | disarankan | Base URL untuk SEO (canonical, sitemap, OG) & finish-URL pembayaran |
-| `MIDTRANS_SERVER_KEY` | untuk bayar | Server key Midtrans (server-only) |
-| `NEXT_PUBLIC_MIDTRANS_CLIENT_KEY` | untuk bayar | Client key Midtrans (Snap.js) |
-| `MIDTRANS_IS_PRODUCTION` | opsional | `true` untuk production, default sandbox |
-| `NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION` | opsional | Sama, untuk memilih URL snap.js di client |
+| Variable                             | Wajib       | Fungsi                                                                                                          |
+| ------------------------------------ | ----------- | --------------------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`           | ya          | Koneksi Supabase                                                                                                |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY`      | ya          | Koneksi Supabase                                                                                                |
+| `SUPABASE_SERVICE_ROLE_KEY`          | ya          | Admin lihat semua data, referral reward, upgrade plan via webhook (server-only)                                 |
+| `GEMINI_API_KEY`                     | opsional    | Aktifkan Tanya NEXA & AI Quick Add. Tanpa ini → fallback "AI feature is not configured yet." + parser sederhana |
+| `GEMINI_MODEL`                       | opsional    | Default `gemini-2.5-flash-lite` / `gemini-2.5-flash`                                                            |
+| `ADMIN_EMAILS`                       | ya (admin)  | Email admin, pisah koma. Kosong → halaman /admin tampilkan pesan setup                                          |
+| `NEXT_PUBLIC_SITE_URL`               | disarankan  | Base URL untuk SEO (canonical, sitemap, OG) & finish-URL pembayaran                                             |
+| `MIDTRANS_SERVER_KEY`                | untuk bayar | Server key Midtrans (server-only)                                                                               |
+| `NEXT_PUBLIC_MIDTRANS_CLIENT_KEY`    | untuk bayar | Client key Midtrans (Snap.js)                                                                                   |
+| `MIDTRANS_IS_PRODUCTION`             | opsional    | `true` untuk production, default sandbox                                                                        |
+| `NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION` | opsional    | Sama, untuk memilih URL snap.js di client                                                                       |
 
 > Set **Payment Notification URL** di dashboard Midtrans ke:
 > `https://<domain>/api/payments/midtrans/notification`

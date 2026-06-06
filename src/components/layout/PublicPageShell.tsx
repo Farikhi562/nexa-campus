@@ -35,10 +35,18 @@ export default function PublicPageShell({
             <NexaCampusLogo tone="dark" imageClassName="h-10 w-10" />
           </Link>
           <nav className="hidden items-center gap-5 text-sm font-black text-slate-300 md:flex">
-            <Link href="/pricing" className="hover:text-teal-200">Pricing</Link>
-            <Link href="/privacy" className="hover:text-teal-200">Privacy</Link>
-            <Link href="/support" className="hover:text-teal-200">Support</Link>
-            <Link href="/release-notes" className="hover:text-teal-200">v{BRAND.version}</Link>
+            <Link href="/pricing" className="hover:text-teal-200">
+              Pricing
+            </Link>
+            <Link href="/privacy" className="hover:text-teal-200">
+              Privacy
+            </Link>
+            <Link href="/support" className="hover:text-teal-200">
+              Support
+            </Link>
+            <Link href="/release-notes" className="hover:text-teal-200">
+              v{BRAND.version}
+            </Link>
           </nav>
           <Link
             href="/login"
@@ -58,7 +66,9 @@ export default function PublicPageShell({
               {badge}
             </Badge>
             <h1 className="text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">{title}</h1>
-            <p className="mt-5 max-w-2xl text-sm leading-6 text-slate-300 sm:text-base">{description}</p>
+            <p className="mt-5 max-w-2xl text-sm leading-6 text-slate-300 sm:text-base">
+              {description}
+            </p>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
               <Link
                 href={primaryCta.href}
@@ -84,9 +94,7 @@ export default function PublicPageShell({
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-8 sm:py-10">
-        {children}
-      </section>
+      <section className="mx-auto max-w-7xl px-4 py-8 sm:py-10">{children}</section>
     </main>
   )
 }

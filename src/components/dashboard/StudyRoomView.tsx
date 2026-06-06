@@ -35,11 +35,21 @@ function statusLabel(status: string) {
   return 'Ditutup'
 }
 
-function Avatar({ url, name, size = 'sm' }: { url?: string | null; name?: string | null; size?: 'sm' | 'md' }) {
+function Avatar({
+  url,
+  name,
+  size = 'sm',
+}: {
+  url?: string | null
+  name?: string | null
+  size?: 'sm' | 'md'
+}) {
   const s = size === 'md' ? 'h-10 w-10 text-sm' : 'h-7 w-7 text-xs'
   const init = (name ?? 'N').slice(0, 1).toUpperCase()
   return (
-    <span className={`flex ${s} flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-100 font-black text-slate-600`}>
+    <span
+      className={`flex ${s} flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-100 font-black text-slate-600`}
+    >
       {url ? <img src={url} alt="" className="h-full w-full object-cover" /> : init}
     </span>
   )
@@ -63,20 +73,29 @@ export default function StudyRoomView({ userId }: { userId: string }) {
       if (category) params.set('category', category)
       const res = await fetch(`/api/study-rooms?${params}`, { cache: 'no-store' })
       const json = await res.json()
-      if (!res.ok) { setError(json.error ?? 'Gagal memuat room.'); return }
+      if (!res.ok) {
+        setError(json.error ?? 'Gagal memuat room.')
+        return
+      }
       setRooms((json.data ?? []) as StudyRoom[])
-    } catch { setError('Gagal memuat room.') }
-    finally { setLoading(false) }
+    } catch {
+      setError('Gagal memuat room.')
+    } finally {
+      setLoading(false)
+    }
   }, [q, category])
 
-  useEffect(() => { void load() }, [load])
+  useEffect(() => {
+    void load()
+  }, [load])
 
   async function handleJoin(roomId: string) {
     setActionId(roomId)
     const res = await fetch(`/api/study-rooms/${roomId}/join`, { method: 'POST' })
     const json = await res.json()
-    if (!res.ok) { alert(json.error ?? 'Gagal join.') }
-    else await load()
+    if (!res.ok) {
+      alert(json.error ?? 'Gagal join.')
+    } else await load()
     setActionId(null)
   }
 
@@ -85,8 +104,9 @@ export default function StudyRoomView({ userId }: { userId: string }) {
     setActionId(roomId)
     const res = await fetch(`/api/study-rooms/${roomId}/leave`, { method: 'POST' })
     const json = await res.json()
-    if (!res.ok) { alert(json.error ?? 'Gagal keluar.') }
-    else await load()
+    if (!res.ok) {
+      alert(json.error ?? 'Gagal keluar.')
+    } else await load()
     setActionId(null)
   }
 
@@ -95,7 +115,10 @@ export default function StudyRoomView({ userId }: { userId: string }) {
       {showCreate && (
         <CreateRoomModal
           onClose={() => setShowCreate(false)}
-          onCreated={() => { setShowCreate(false); void load() }}
+          onCreated={() => {
+            setShowCreate(false)
+            void load()
+          }}
         />
       )}
 
@@ -109,12 +132,18 @@ export default function StudyRoomView({ userId }: { userId: string }) {
                 <Users className="h-3.5 w-3.5" />
                 Study Room
               </div>
-              <h1 className="text-2xl font-black tracking-tight sm:text-3xl">Belajar bareng, lebih masuk.</h1>
+              <h1 className="text-2xl font-black tracking-tight sm:text-3xl">
+                Belajar bareng, lebih masuk.
+              </h1>
               <p className="mt-2 max-w-lg text-sm leading-6 text-slate-300">
-                Buat atau gabung ruang belajar bersama teman. Fokus, diskusi, selesaikan deadline bareng.
+                Buat atau gabung ruang belajar bersama teman. Fokus, diskusi, selesaikan deadline
+                bareng.
               </p>
             </div>
-            <Button onClick={() => setShowCreate(true)} className="min-h-12 flex-shrink-0 rounded-2xl bg-teal-400 text-slate-950 hover:bg-teal-300">
+            <Button
+              onClick={() => setShowCreate(true)}
+              className="min-h-12 flex-shrink-0 rounded-2xl bg-teal-400 text-slate-950 hover:bg-teal-300"
+            >
               <Plus className="h-4 w-4" />
               Buat Study Room
             </Button>
@@ -138,7 +167,9 @@ export default function StudyRoomView({ userId }: { userId: string }) {
                 key={value}
                 onClick={() => setCategory(value)}
                 className={`focus-ring flex-shrink-0 rounded-2xl px-3 py-2.5 text-sm font-black transition ${
-                  category === value ? 'bg-slate-950 text-white' : 'border border-slate-200 bg-white text-slate-600'
+                  category === value
+                    ? 'bg-slate-950 text-white'
+                    : 'border border-slate-200 bg-white text-slate-600'
                 }`}
               >
                 {label}
@@ -147,7 +178,11 @@ export default function StudyRoomView({ userId }: { userId: string }) {
           </div>
         </div>
 
-        {error && <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
+        {error && (
+          <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            {error}
+          </div>
+        )}
 
         {loading ? (
           <div className="flex items-center justify-center rounded-3xl border border-slate-200 bg-white p-12 text-slate-400">
@@ -183,9 +218,13 @@ export default function StudyRoomView({ userId }: { userId: string }) {
                           {room.category}
                         </span>
                       </div>
-                      <h3 className="mt-2 text-base font-black text-slate-950 line-clamp-1">{room.title}</h3>
+                      <h3 className="mt-2 text-base font-black text-slate-950 line-clamp-1">
+                        {room.title}
+                      </h3>
                       {room.description && (
-                        <p className="mt-1 text-sm leading-5 text-slate-500 line-clamp-2">{room.description}</p>
+                        <p className="mt-1 text-sm leading-5 text-slate-500 line-clamp-2">
+                          {room.description}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -198,7 +237,11 @@ export default function StudyRoomView({ userId }: { userId: string }) {
                     {room.scheduled_at && (
                       <span className="flex items-center gap-1.5">
                         <Clock className="h-3.5 w-3.5" />
-                        {new Date(room.scheduled_at).toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' })}
+                        {new Date(room.scheduled_at).toLocaleDateString('id-ID', {
+                          weekday: 'short',
+                          day: 'numeric',
+                          month: 'short',
+                        })}
                       </span>
                     )}
                     {room.topic && <span className="text-teal-700">#{room.topic}</span>}
@@ -218,17 +261,23 @@ export default function StudyRoomView({ userId }: { userId: string }) {
                           variant="outline"
                           className="rounded-2xl text-sm"
                         >
-                          {actionId === room.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+                          {actionId === room.id ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : null}
                           Keluar
                         </Button>
                       </>
                     ) : (
                       <Button
                         onClick={() => handleJoin(room.id)}
-                        disabled={actionId === room.id || room.status !== 'open' || room.owner_id === userId}
+                        disabled={
+                          actionId === room.id || room.status !== 'open' || room.owner_id === userId
+                        }
                         className="rounded-2xl text-sm"
                       >
-                        {actionId === room.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+                        {actionId === room.id ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : null}
                         {room.status !== 'open' ? statusLabel(room.status) : 'Join'}
                       </Button>
                     )}

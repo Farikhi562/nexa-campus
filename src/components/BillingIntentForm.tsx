@@ -68,9 +68,11 @@ export default function BillingIntentForm({ profile }: { profile: Profile }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ plan }),
       })
-      const data = (await res.json().catch(() => null)) as
-        | { token?: string; redirectUrl?: string; error?: string }
-        | null
+      const data = (await res.json().catch(() => null)) as {
+        token?: string
+        redirectUrl?: string
+        error?: string
+      } | null
 
       if (!res.ok || !data?.token) {
         setError(data?.error || 'Pembayaran online belum tersedia. Coba metode manual.')
@@ -80,15 +82,19 @@ export default function BillingIntentForm({ profile }: { profile: Profile }) {
       const ready = await loadSnapScript()
       if (ready && window.snap) {
         window.snap.pay(data.token, {
-          onSuccess: () => setMessage('Pembayaran berhasil! Plan kamu akan aktif otomatis dalam beberapa saat.'),
-          onPending: () => setMessage('Pembayaran tertunda. Selesaikan pembayaran agar plan aktif.'),
+          onSuccess: () =>
+            setMessage('Pembayaran berhasil! Plan kamu akan aktif otomatis dalam beberapa saat.'),
+          onPending: () =>
+            setMessage('Pembayaran tertunda. Selesaikan pembayaran agar plan aktif.'),
           onError: () => setError('Pembayaran gagal. Coba lagi atau pakai metode manual.'),
           onClose: () => setMessage('Jendela pembayaran ditutup sebelum selesai.'),
         })
       } else if (data.redirectUrl) {
         window.location.href = data.redirectUrl
       } else {
-        setError('Tidak bisa membuka halaman pembayaran. Pastikan NEXT_PUBLIC_MIDTRANS_CLIENT_KEY diset.')
+        setError(
+          'Tidak bisa membuka halaman pembayaran. Pastikan NEXT_PUBLIC_MIDTRANS_CLIENT_KEY diset.'
+        )
       }
     } catch {
       setError('Pembayaran gagal diproses. Coba lagi sebentar.')
@@ -125,12 +131,18 @@ export default function BillingIntentForm({ profile }: { profile: Profile }) {
             type="button"
             onClick={() => setPlan(id)}
             className={`focus-ring rounded-2xl border p-4 text-left transition ${
-              plan === id ? 'border-brand-500 bg-brand-50 ring-2 ring-brand-200' : 'border-slate-200 bg-white hover:border-slate-300'
+              plan === id
+                ? 'border-brand-500 bg-brand-50 ring-2 ring-brand-200'
+                : 'border-slate-200 bg-white hover:border-slate-300'
             }`}
           >
-            <p className="font-black text-slate-950">{id === 'pulse' ? 'NEXA Pulse' : 'NEXA Command'}</p>
+            <p className="font-black text-slate-950">
+              {id === 'pulse' ? 'NEXA Pulse' : 'NEXA Command'}
+            </p>
             <p className="mt-1 text-sm text-slate-500">{PLAN_PRICE[id]}/bulan</p>
-            {profile.plan === id && <p className="mt-1 text-xs font-black text-emerald-600">Plan aktif kamu</p>}
+            {profile.plan === id && (
+              <p className="mt-1 text-xs font-black text-emerald-600">Plan aktif kamu</p>
+            )}
           </button>
         ))}
       </div>
@@ -144,7 +156,8 @@ export default function BillingIntentForm({ profile }: { profile: Profile }) {
           <div className="min-w-0">
             <p className="text-base font-black">Bayar otomatis & instan</p>
             <p className="mt-1 text-sm leading-6 text-slate-300">
-              Bayar via QRIS, e-wallet, atau transfer bank lewat Midtrans. Plan aktif otomatis setelah pembayaran terkonfirmasi.
+              Bayar via QRIS, e-wallet, atau transfer bank lewat Midtrans. Plan aktif otomatis
+              setelah pembayaran terkonfirmasi.
             </p>
           </div>
         </div>
@@ -153,21 +166,33 @@ export default function BillingIntentForm({ profile }: { profile: Profile }) {
           disabled={paying || profile.plan === plan}
           className="mt-4 min-h-12 w-full rounded-2xl bg-teal-400 text-slate-950 hover:bg-teal-300"
         >
-          {paying ? <Loader2 className="h-4 w-4 animate-spin" /> : <CreditCard className="h-4 w-4" />}
+          {paying ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <CreditCard className="h-4 w-4" />
+          )}
           {paying ? 'Menyiapkan pembayaran...' : `Bayar ${PLAN_PRICE[plan]} sekarang`}
         </Button>
       </div>
 
       {/* Manual fallback */}
       <details className="rounded-2xl border border-slate-200 bg-white p-4">
-        <summary className="cursor-pointer text-sm font-black text-slate-700">Atau ajukan upgrade manual</summary>
+        <summary className="cursor-pointer text-sm font-black text-slate-700">
+          Atau ajukan upgrade manual
+        </summary>
         <div className="mt-4 space-y-3">
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-3 text-sm font-bold">
-              <input type="radio" checked={method === 'qris'} onChange={() => setMethod('qris')} /> QRIS
+              <input type="radio" checked={method === 'qris'} onChange={() => setMethod('qris')} />{' '}
+              QRIS
             </label>
             <label className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-3 text-sm font-bold">
-              <input type="radio" checked={method === 'manual_transfer'} onChange={() => setMethod('manual_transfer')} /> Manual transfer
+              <input
+                type="radio"
+                checked={method === 'manual_transfer'}
+                onChange={() => setMethod('manual_transfer')}
+              />{' '}
+              Manual transfer
             </label>
           </div>
           <textarea
@@ -177,7 +202,12 @@ export default function BillingIntentForm({ profile }: { profile: Profile }) {
             className="focus-ring w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm"
             placeholder="Misal: sudah transfer, hubungi WA ini..."
           />
-          <Button onClick={submitManual} disabled={loading || profile.plan === plan} variant="outline" className="rounded-2xl">
+          <Button
+            onClick={submitManual}
+            disabled={loading || profile.plan === plan}
+            variant="outline"
+            className="rounded-2xl"
+          >
             {loading ? 'Mengirim...' : 'Ajukan Upgrade Manual'}
           </Button>
         </div>
@@ -189,7 +219,9 @@ export default function BillingIntentForm({ profile }: { profile: Profile }) {
       </p>
 
       {error && <p className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
-      {message && <p className="rounded-xl bg-emerald-50 p-3 text-sm text-emerald-700">{message}</p>}
+      {message && (
+        <p className="rounded-xl bg-emerald-50 p-3 text-sm text-emerald-700">{message}</p>
+      )}
     </div>
   )
 }

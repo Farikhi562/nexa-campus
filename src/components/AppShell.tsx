@@ -37,7 +37,9 @@ export default function AppShell({
             <Link href="/dashboard" className="flex min-w-0 items-center gap-2.5">
               <NexaLogo className="h-9 w-9 flex-shrink-0 sm:h-10 sm:w-10" />
               <div className="min-w-0">
-                <p className="truncate text-sm font-black leading-5 text-slate-950 sm:text-base">NEXA Campus</p>
+                <p className="truncate text-sm font-black leading-5 text-slate-950 sm:text-base">
+                  NEXA Campus
+                </p>
                 <p className="truncate text-[9px] font-bold uppercase tracking-[0.18em] text-brand-700 sm:text-[10px]">
                   Deadline Radar · v{BRAND.version}
                 </p>
@@ -55,9 +57,7 @@ export default function AppShell({
       {/* Content: flex so CollapsibleSidebar can change width dynamically */}
       <div className="mx-auto flex max-w-7xl gap-5 px-3 py-4 pb-28 sm:px-4 sm:py-5 lg:pb-8">
         <CollapsibleSidebar />
-        <main className="min-w-0 flex-1 space-y-4 sm:space-y-5">
-          {children}
-        </main>
+        <main className="min-w-0 flex-1 space-y-4 sm:space-y-5">{children}</main>
       </div>
 
       {/* Mobile bottom nav */}

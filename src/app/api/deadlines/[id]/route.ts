@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { parseDeadlinePayload, parseStatusPatch, type DeadlinePayload } from '@/lib/deadline-validation'
+import {
+  parseDeadlinePayload,
+  parseStatusPatch,
+  type DeadlinePayload,
+} from '@/lib/deadline-validation'
 import { createClient } from '@/lib/supabase/server'
 
 function badRequest(message: string) {
@@ -42,9 +46,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     return badRequest('Request tidak valid.')
   }
 
-  const parsed = body.mode === 'status'
-    ? parseStatusPatch(body.status)
-    : parseDeadlinePayload(body)
+  const parsed = body.mode === 'status' ? parseStatusPatch(body.status) : parseDeadlinePayload(body)
 
   if (parsed.error) return badRequest(parsed.error)
   if (!parsed.data) return badRequest('Request tidak valid.')
@@ -63,10 +65,14 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
   // Poin leaderboard saat deadline ditandai selesai (idempotent per deadline).
   // Diabaikan kalau fitur leaderboard belum di-setup.
   if (data?.status === 'completed') {
-    await supabase.rpc('award_points', { p_kind: 'complete_deadline', p_points: 10, p_ref: data.id }).then(undefined, () => null)
+    await supabase
+      .rpc('award_points', { p_kind: 'complete_deadline', p_points: 10, p_ref: data.id })
+      .then(undefined, () => null)
     const today = new Date().toISOString().slice(0, 10)
     if (typeof data.deadline_date === 'string' && today <= data.deadline_date) {
-      await supabase.rpc('award_points', { p_kind: 'ontime_bonus', p_points: 5, p_ref: data.id }).then(undefined, () => null)
+      await supabase
+        .rpc('award_points', { p_kind: 'ontime_bonus', p_points: 5, p_ref: data.id })
+        .then(undefined, () => null)
     }
   }
 

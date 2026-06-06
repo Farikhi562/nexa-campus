@@ -40,7 +40,10 @@ export default function ReleaseNotesPage() {
               </span>
             </div>
           </Link>
-          <Link href="/dashboard" className="rounded-2xl border border-slate-300 bg-white px-4 py-2 text-sm font-black text-slate-700 hover:bg-slate-50">
+          <Link
+            href="/dashboard"
+            className="rounded-2xl border border-slate-300 bg-white px-4 py-2 text-sm font-black text-slate-700 hover:bg-slate-50"
+          >
             Dashboard
           </Link>
         </div>
@@ -52,7 +55,8 @@ export default function ReleaseNotesPage() {
           NEXA Campus MVP beta sudah siap diuji kecil-kecilan.
         </h1>
         <p className="mt-4 max-w-3xl text-sm leading-6 text-slate-600">
-          Versi ini fokus ke satu janji utama: bantu mahasiswa mencatat, melihat, dan mengingat deadline akademik tanpa meminta password kampus.
+          Versi ini fokus ke satu janji utama: bantu mahasiswa mencatat, melihat, dan mengingat
+          deadline akademik tanpa meminta password kampus.
         </p>
 
         <div className="mt-8 grid gap-4 lg:grid-cols-[1fr_0.9fr]">

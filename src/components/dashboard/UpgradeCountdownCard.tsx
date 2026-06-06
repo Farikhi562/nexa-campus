@@ -2,7 +2,15 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight, BellRing, Infinity as InfinityIcon, LockKeyhole, Sparkles, Timer, Zap } from 'lucide-react'
+import {
+  ArrowRight,
+  BellRing,
+  Infinity as InfinityIcon,
+  LockKeyhole,
+  Sparkles,
+  Timer,
+  Zap,
+} from 'lucide-react'
 import type { Plan } from '@/types'
 
 function nextWeeklyDeadline() {
@@ -38,7 +46,9 @@ function Segment({ value, label }: { value: number; label: string }) {
       <span className="min-w-[2.6rem] rounded-xl bg-white/10 px-2 py-1.5 text-center text-lg font-black tabular-nums text-white">
         {String(value).padStart(2, '0')}
       </span>
-      <span className="mt-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">{label}</span>
+      <span className="mt-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">
+        {label}
+      </span>
     </div>
   )
 }
@@ -93,7 +103,10 @@ export default function UpgradeCountdownCard({ userTier }: { userTier: Plan }) {
 
         <ul className="mt-5 grid gap-2.5 sm:grid-cols-3">
           {lockedItems.map(({ icon: Icon, text }) => (
-            <li key={text} className="flex items-start gap-2.5 rounded-2xl border border-white/10 bg-white/[0.05] p-3">
+            <li
+              key={text}
+              className="flex items-start gap-2.5 rounded-2xl border border-white/10 bg-white/[0.05] p-3"
+            >
               <span className="relative flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-white/10">
                 <Icon className="h-4 w-4 text-slate-300" />
                 <LockKeyhole className="absolute -bottom-1 -right-1 h-3.5 w-3.5 rounded-full bg-slate-950 p-0.5 text-amber-300" />

@@ -6,11 +6,17 @@ type Params = { params: Promise<{ id: string }> }
 export async function PATCH(request: NextRequest, { params }: Params) {
   const { id } = await params
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Login required.' }, { status: 401 })
 
   let body: { action?: unknown }
-  try { body = await request.json() } catch { return NextResponse.json({ error: 'Invalid request.' }, { status: 400 }) }
+  try {
+    body = await request.json()
+  } catch {
+    return NextResponse.json({ error: 'Invalid request.' }, { status: 400 })
+  }
 
   const action = typeof body.action === 'string' ? body.action : ''
   if (!['accept', 'reject'].includes(action))
@@ -31,7 +37,9 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 export async function DELETE(_request: NextRequest, { params }: Params) {
   const { id } = await params
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Login required.' }, { status: 401 })
 
   const { error } = await supabase

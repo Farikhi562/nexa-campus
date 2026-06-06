@@ -74,8 +74,18 @@ export type LeaderboardScope = 'weekly' | 'monthly' | 'all_time'
 
 // ---------- Study Room -------------------------------------------------------
 export type StudyRoomCategory =
-  | 'umum' | 'matematika' | 'fisika' | 'kimia' | 'biologi'
-  | 'informatika' | 'ekonomi' | 'hukum' | 'kedokteran' | 'bahasa' | 'seni' | 'lainnya'
+  | 'umum'
+  | 'matematika'
+  | 'fisika'
+  | 'kimia'
+  | 'biologi'
+  | 'informatika'
+  | 'ekonomi'
+  | 'hukum'
+  | 'kedokteran'
+  | 'bahasa'
+  | 'seni'
+  | 'lainnya'
 
 export interface StudyRoom {
   id: string

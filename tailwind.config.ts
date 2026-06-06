@@ -10,7 +10,7 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          50:  '#f0f7ff',
+          50: '#f0f7ff',
           100: '#e0f2fe',
           200: '#bae6fd',
           300: '#7dd3fc',
@@ -27,7 +27,7 @@ const config: Config = {
           amber: '#f59e0b',
           rose: '#f43f5e',
           cyan: '#06b6d4',
-        }
+        },
       },
       fontFamily: {
         sans: ['var(--font-sora)', 'system-ui', 'sans-serif'],
@@ -38,7 +38,7 @@ const config: Config = {
         'fade-in': 'fadeIn 0.4s ease-out forwards',
         'slide-up': 'slideUp 0.4s ease-out forwards',
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'glow': 'glow 2s ease-in-out infinite',
+        glow: 'glow 2s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: {

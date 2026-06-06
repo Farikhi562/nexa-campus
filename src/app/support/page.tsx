@@ -56,29 +56,27 @@ const quickStart = [
   },
 ]
 
-const tierMeta: Record<
-  string,
-  { icon: typeof Radar; tagline: string; who: string; tone: string }
-> = {
-  radar: {
-    icon: Radar,
-    tagline: 'Gratis. Cocok buat mulai rapi.',
-    who: 'Mahasiswa yang baru mau nyatet deadline tanpa ribet.',
-    tone: 'border-slate-200',
-  },
-  pulse: {
-    icon: Zap,
-    tagline: 'Buat deadline yang harus ngejar kamu.',
-    who: 'Kamu yang sering lupa dan butuh diingatkan otomatis.',
-    tone: 'border-cyan-200',
-  },
-  command: {
-    icon: Target,
-    tagline: 'Kontrol penuh + akses fitur beta.',
-    who: 'Power user yang mau atur reminder detail dan coba fitur AI.',
-    tone: 'border-teal-300 ring-2 ring-teal-200',
-  },
-}
+const tierMeta: Record<string, { icon: typeof Radar; tagline: string; who: string; tone: string }> =
+  {
+    radar: {
+      icon: Radar,
+      tagline: 'Gratis. Cocok buat mulai rapi.',
+      who: 'Mahasiswa yang baru mau nyatet deadline tanpa ribet.',
+      tone: 'border-slate-200',
+    },
+    pulse: {
+      icon: Zap,
+      tagline: 'Buat deadline yang harus ngejar kamu.',
+      who: 'Kamu yang sering lupa dan butuh diingatkan otomatis.',
+      tone: 'border-cyan-200',
+    },
+    command: {
+      icon: Target,
+      tagline: 'Kontrol penuh + akses fitur beta.',
+      who: 'Power user yang mau atur reminder detail dan coba fitur AI.',
+      tone: 'border-teal-300 ring-2 ring-teal-200',
+    },
+  }
 
 const featureGuides = [
   {
@@ -158,7 +156,9 @@ export default function SupportPage() {
       <div className="mb-12">
         <div className="mb-5 flex items-center gap-3">
           <Badge tone="brand">Mulai cepat</Badge>
-          <h2 className="text-xl font-black text-slate-950 sm:text-2xl">4 langkah biar NEXA siap dipakai</h2>
+          <h2 className="text-xl font-black text-slate-950 sm:text-2xl">
+            4 langkah biar NEXA siap dipakai
+          </h2>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {quickStart.map(({ icon: Icon, title, desc, href, cta }, index) => (
@@ -189,7 +189,9 @@ export default function SupportPage() {
       <div className="mb-12">
         <div className="mb-5 flex items-center gap-3">
           <Badge tone="info">3 paket</Badge>
-          <h2 className="text-xl font-black text-slate-950 sm:text-2xl">Apa yang bisa dilakukan tiap paket</h2>
+          <h2 className="text-xl font-black text-slate-950 sm:text-2xl">
+            Apa yang bisa dilakukan tiap paket
+          </h2>
         </div>
         <div className="grid gap-4 md:grid-cols-3">
           {PLANS.map((plan) => {
@@ -278,9 +280,12 @@ export default function SupportPage() {
               <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-600 text-white">
                 <Gift className="h-6 w-6" />
               </span>
-              <h2 className="mt-4 text-2xl font-black text-slate-950">Ajak teman, dapat Pulse gratis</h2>
+              <h2 className="mt-4 text-2xl font-black text-slate-950">
+                Ajak teman, dapat Pulse gratis
+              </h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                Referral NEXA dibuat sederhana: bagikan link, teman join, reward langsung jalan. Tidak ada syarat ribet.
+                Referral NEXA dibuat sederhana: bagikan link, teman join, reward langsung jalan.
+                Tidak ada syarat ribet.
               </p>
               <div className="mt-4 inline-flex items-center gap-2 rounded-2xl border border-teal-100 bg-teal-50 px-4 py-2.5 text-sm font-black text-teal-900">
                 <Sparkles className="h-4 w-4" />
@@ -289,7 +294,10 @@ export default function SupportPage() {
             </div>
             <ol className="space-y-3">
               {referralSteps.map((step, index) => (
-                <li key={step} className="flex gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <li
+                  key={step}
+                  className="flex gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                >
                   <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-slate-950 text-sm font-black text-white">
                     {index + 1}
                   </span>
@@ -305,7 +313,9 @@ export default function SupportPage() {
       <div className="mb-10">
         <div className="mb-5 flex items-center gap-3">
           <Badge tone="info">FAQ</Badge>
-          <h2 className="text-xl font-black text-slate-950 sm:text-2xl">Pertanyaan yang sering muncul</h2>
+          <h2 className="text-xl font-black text-slate-950 sm:text-2xl">
+            Pertanyaan yang sering muncul
+          </h2>
         </div>
         <div className="grid gap-3">
           {faqs.map(({ q, a }) => (
@@ -323,9 +333,9 @@ export default function SupportPage() {
       <div className="flex gap-3 rounded-3xl border border-slate-200 bg-slate-950 p-5 text-sm leading-6 text-slate-300">
         <LockKeyhole className="mt-0.5 h-5 w-5 flex-shrink-0 text-teal-300" />
         <p>
-          NEXA Campus tidak meminta password VClass, iLab, Studentsite, atau platform kampus mana pun. Yang disimpan hanya
-          profil dan deadline yang kamu input sendiri. NEXA Campus bukan sistem resmi kampus — selalu cek informasi final dari
-          kanal resmi.
+          NEXA Campus tidak meminta password VClass, iLab, Studentsite, atau platform kampus mana
+          pun. Yang disimpan hanya profil dan deadline yang kamu input sendiri. NEXA Campus bukan
+          sistem resmi kampus — selalu cek informasi final dari kanal resmi.
         </p>
       </div>
 

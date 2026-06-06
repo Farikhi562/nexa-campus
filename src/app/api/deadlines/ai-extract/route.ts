@@ -20,9 +20,30 @@ function jsonResponse(body: unknown, status = 200) {
 }
 
 const MONTHS_ID: Record<string, number> = {
-  januari: 1, jan: 1, februari: 2, feb: 2, maret: 3, mar: 3, april: 4, apr: 4,
-  mei: 5, juni: 6, jun: 6, juli: 7, jul: 7, agustus: 8, agu: 8, ags: 8,
-  september: 9, sep: 9, oktober: 10, okt: 10, november: 11, nov: 11, desember: 12, des: 12,
+  januari: 1,
+  jan: 1,
+  februari: 2,
+  feb: 2,
+  maret: 3,
+  mar: 3,
+  april: 4,
+  apr: 4,
+  mei: 5,
+  juni: 6,
+  jun: 6,
+  juli: 7,
+  jul: 7,
+  agustus: 8,
+  agu: 8,
+  ags: 8,
+  september: 9,
+  sep: 9,
+  oktober: 10,
+  okt: 10,
+  november: 11,
+  nov: 11,
+  desember: 12,
+  des: 12,
 }
 
 function pad(n: number) {
@@ -79,7 +100,9 @@ function fallbackExtract(text: string): Array<Record<string, unknown>> {
     else if (/\b(bayar|pembayaran|spp|ukt)\b/.test(lower)) category = 'pembayaran'
     else if (/\b(tugas|laporan|makalah|essay|paper)\b/.test(lower)) category = 'tugas'
 
-    const priority = /\b(urgent|penting|deadline|terakhir|hari ini|besok)\b/.test(lower) ? 'high' : 'normal'
+    const priority = /\b(urgent|penting|deadline|terakhir|hari ini|besok)\b/.test(lower)
+      ? 'high'
+      : 'normal'
 
     // Buang potongan tanggal dari judul biar lebih rapi.
     const title = line
@@ -168,7 +191,10 @@ export async function POST(request: NextRequest) {
   const text = typeof body.text === 'string' ? body.text.trim() : ''
   if (!text) return jsonResponse({ error: 'Paste info deadline dulu ya.' }, 400)
   if (text.length > MAX_TEXT_LENGTH) {
-    return jsonResponse({ error: `Teks terlalu panjang. Maksimal ${MAX_TEXT_LENGTH} karakter.` }, 400)
+    return jsonResponse(
+      { error: `Teks terlalu panjang. Maksimal ${MAX_TEXT_LENGTH} karakter.` },
+      400
+    )
   }
 
   const apiKey = process.env.GEMINI_API_KEY
@@ -179,7 +205,8 @@ export async function POST(request: NextRequest) {
       data,
       provider: 'fallback',
       status: data.length > 0 ? 'fallback' : 'fallback_empty',
-      notice: 'AI feature is not configured yet. Memakai parser sederhana — cek & rapikan hasilnya sebelum simpan.',
+      notice:
+        'AI feature is not configured yet. Memakai parser sederhana — cek & rapikan hasilnya sebelum simpan.',
     })
   }
 
@@ -231,7 +258,10 @@ export async function POST(request: NextRequest) {
         .trim() || ''
 
     if (!rawResponse) {
-      return jsonResponse({ error: 'AI tidak mengembalikan hasil. Coba paste teks yang lebih jelas.' }, 502)
+      return jsonResponse(
+        { error: 'AI tidak mengembalikan hasil. Coba paste teks yang lebih jelas.' },
+        502
+      )
     }
 
     const parsed = extractJsonArray(rawResponse)
@@ -261,7 +291,8 @@ export async function POST(request: NextRequest) {
       data,
       provider: 'fallback',
       status: 'fallback',
-      notice: 'AI sedang tidak bisa dihubungi. Memakai parser sederhana — cek & rapikan hasilnya sebelum simpan.',
+      notice:
+        'AI sedang tidak bisa dihubungi. Memakai parser sederhana — cek & rapikan hasilnya sebelum simpan.',
     })
   }
 }

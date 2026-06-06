@@ -57,10 +57,17 @@ export default async function AdminPage() {
           </div>
           <h1 className="text-xl font-black text-slate-950">Admin belum dikonfigurasi</h1>
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            Set environment variable <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs font-bold">ADMIN_EMAILS</code> (pisahkan
-            dengan koma) berisi email admin, lalu redeploy. Contoh: <span className="font-bold">admin@email.com,owner@email.com</span>
+            Set environment variable{' '}
+            <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs font-bold">
+              ADMIN_EMAILS
+            </code>{' '}
+            (pisahkan dengan koma) berisi email admin, lalu redeploy. Contoh:{' '}
+            <span className="font-bold">admin@email.com,owner@email.com</span>
           </p>
-          <Link href="/dashboard" className="mt-5 inline-flex rounded-2xl bg-slate-950 px-4 py-2.5 text-sm font-black text-white hover:bg-slate-800">
+          <Link
+            href="/dashboard"
+            className="mt-5 inline-flex rounded-2xl bg-slate-950 px-4 py-2.5 text-sm font-black text-white hover:bg-slate-800"
+          >
             Kembali ke Dashboard
           </Link>
         </div>
@@ -98,8 +105,15 @@ export default async function AdminPage() {
     )
   )
   if (missingIds.length > 0) {
-    const { data: extra } = await db.from('profiles').select('id, full_name, email').in('id', missingIds)
-    for (const p of (extra ?? []) as Array<{ id: string; full_name: string | null; email: string | null }>) {
+    const { data: extra } = await db
+      .from('profiles')
+      .select('id, full_name, email')
+      .in('id', missingIds)
+    for (const p of (extra ?? []) as Array<{
+      id: string
+      full_name: string | null
+      email: string | null
+    }>) {
       nameById.set(p.id, p.full_name || p.email || p.id.slice(0, 8))
     }
   }
@@ -124,14 +138,21 @@ export default async function AdminPage() {
                 Operasional NEXA Campus, rapi dalam satu radar.
               </h1>
               <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-300">
-                Pantau beta users, request upgrade manual, dan referral reward. Panel ini membaca data lintas user.
+                Pantau beta users, request upgrade manual, dan referral reward. Panel ini membaca
+                data lintas user.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Link href="/dashboard" className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm font-black text-white hover:bg-white/15">
+              <Link
+                href="/dashboard"
+                className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm font-black text-white hover:bg-white/15"
+              >
                 Dashboard
               </Link>
-              <Link href="/admin/readiness" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-teal-400 px-4 py-3 text-sm font-black text-slate-950 hover:bg-teal-300">
+              <Link
+                href="/admin/readiness"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-teal-400 px-4 py-3 text-sm font-black text-slate-950 hover:bg-teal-300"
+              >
                 Readiness
                 <ArrowUpRight className="h-4 w-4" />
               </Link>
@@ -143,10 +164,30 @@ export default async function AdminPage() {
       <div className="mx-auto max-w-7xl space-y-5 px-4 py-5 sm:py-6">
         <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {[
-            { label: 'Beta users', value: typedProfiles.length, icon: UsersRound, copy: '50 user terbaru' },
-            { label: 'Pending upgrades', value: pendingIntents, icon: CreditCard, copy: 'Butuh follow-up admin' },
-            { label: 'Rewarded referrals', value: rewardedReferrals, icon: CheckCircle2, copy: 'Referral yang sudah reward' },
-            { label: 'Command users', value: commandUsers, icon: ShieldCheck, copy: 'User paket tertinggi' },
+            {
+              label: 'Beta users',
+              value: typedProfiles.length,
+              icon: UsersRound,
+              copy: '50 user terbaru',
+            },
+            {
+              label: 'Pending upgrades',
+              value: pendingIntents,
+              icon: CreditCard,
+              copy: 'Butuh follow-up admin',
+            },
+            {
+              label: 'Rewarded referrals',
+              value: rewardedReferrals,
+              icon: CheckCircle2,
+              copy: 'Referral yang sudah reward',
+            },
+            {
+              label: 'Command users',
+              value: commandUsers,
+              icon: ShieldCheck,
+              copy: 'User paket tertinggi',
+            },
           ].map(({ label, value, icon: Icon, copy }) => (
             <Card key={label} className="overflow-hidden border-slate-200 bg-white">
               <CardContent className="p-4 sm:p-5">
@@ -170,32 +211,55 @@ export default async function AdminPage() {
             <CardContent className="p-0">
               <div className="border-b border-slate-100 p-4 sm:p-5">
                 <h2 className="text-lg font-black text-slate-950">Beta users terbaru</h2>
-                <p className="mt-1 text-sm text-slate-500">Scan cepat siapa yang sudah masuk ekosistem beta.</p>
+                <p className="mt-1 text-sm text-slate-500">
+                  Scan cepat siapa yang sudah masuk ekosistem beta.
+                </p>
               </div>
               <div className="max-h-[28rem] divide-y divide-slate-100 overflow-y-auto">
                 {typedProfiles.length === 0 ? (
                   <p className="p-5 text-sm text-slate-500">Belum ada beta user yang kebaca.</p>
-                ) : typedProfiles.map((profile) => (
-                  <div key={profile.id} className="flex items-center justify-between gap-3 p-4 transition hover:bg-slate-50 sm:p-5">
-                    <div className="flex min-w-0 items-center gap-3">
-                      <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-100 text-sm font-black text-slate-700">
-                        {profile.avatar_url ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
-                        ) : (
-                          (profile.full_name || profile.email || 'N').slice(0, 1).toUpperCase()
-                        )}
+                ) : (
+                  typedProfiles.map((profile) => (
+                    <div
+                      key={profile.id}
+                      className="flex items-center justify-between gap-3 p-4 transition hover:bg-slate-50 sm:p-5"
+                    >
+                      <div className="flex min-w-0 items-center gap-3">
+                        <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-100 text-sm font-black text-slate-700">
+                          {profile.avatar_url ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={profile.avatar_url}
+                              alt=""
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            (profile.full_name || profile.email || 'N').slice(0, 1).toUpperCase()
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-black text-slate-950">
+                            {profile.full_name || profile.email}
+                          </p>
+                          <p className="truncate text-xs text-slate-500">
+                            {profile.campus_name || 'Kampus belum diisi'}
+                          </p>
+                        </div>
                       </div>
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-black text-slate-950">{profile.full_name || profile.email}</p>
-                        <p className="truncate text-xs text-slate-500">{profile.campus_name || 'Kampus belum diisi'}</p>
-                      </div>
+                      <Badge
+                        tone={
+                          profile.plan === 'command'
+                            ? 'brand'
+                            : profile.plan === 'pulse'
+                              ? 'info'
+                              : 'neutral'
+                        }
+                      >
+                        {getPlanLabel(profile.plan)}
+                      </Badge>
                     </div>
-                    <Badge tone={profile.plan === 'command' ? 'brand' : profile.plan === 'pulse' ? 'info' : 'neutral'}>
-                      {getPlanLabel(profile.plan)}
-                    </Badge>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>
@@ -204,25 +268,34 @@ export default async function AdminPage() {
             <CardContent className="p-0">
               <div className="border-b border-slate-100 p-4 sm:p-5">
                 <h2 className="text-lg font-black text-slate-950">Upgrade intent terbaru</h2>
-                <p className="mt-1 text-sm text-slate-500">Confirm manual setelah pembayaran benar-benar dicek.</p>
+                <p className="mt-1 text-sm text-slate-500">
+                  Confirm manual setelah pembayaran benar-benar dicek.
+                </p>
               </div>
               <div className="divide-y divide-slate-100">
                 {typedIntents.length === 0 ? (
                   <p className="p-5 text-sm text-slate-500">Belum ada intent upgrade.</p>
-                ) : typedIntents.map((intent) => (
-                  <div key={intent.id} className="p-4 transition hover:bg-slate-50 sm:p-5">
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-black text-slate-950">
-                          {PLAN_LABELS[intent.requested_plan] ?? intent.requested_plan}
-                        </p>
-                        <p className="mt-1 truncate text-xs text-slate-500">{labelFor(intent.user_id)} · {intent.payment_method}</p>
+                ) : (
+                  typedIntents.map((intent) => (
+                    <div key={intent.id} className="p-4 transition hover:bg-slate-50 sm:p-5">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-black text-slate-950">
+                            {PLAN_LABELS[intent.requested_plan] ?? intent.requested_plan}
+                          </p>
+                          <p className="mt-1 truncate text-xs text-slate-500">
+                            {labelFor(intent.user_id)} · {intent.payment_method}
+                          </p>
+                        </div>
+                        <Badge tone={statusTone(intent.status)}>{intent.status}</Badge>
                       </div>
-                      <Badge tone={statusTone(intent.status)}>{intent.status}</Badge>
+                      <SubscriptionIntentActions
+                        intentId={intent.id}
+                        disabled={intent.status !== 'pending'}
+                      />
                     </div>
-                    <SubscriptionIntentActions intentId={intent.id} disabled={intent.status !== 'pending'} />
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>
@@ -238,19 +311,25 @@ export default async function AdminPage() {
                     <Gift className="h-5 w-5 text-teal-600" />
                     Referral reward
                   </h2>
-                  <p className="mt-1 text-sm text-slate-500">Siapa mengajak siapa, dan status reward-nya.</p>
+                  <p className="mt-1 text-sm text-slate-500">
+                    Siapa mengajak siapa, dan status reward-nya.
+                  </p>
                 </div>
                 <Badge tone="info">{typedReferrals.length} total</Badge>
               </div>
               <div className="max-h-[28rem] overflow-y-auto">
                 {typedReferrals.length === 0 ? (
                   <p className="p-5 text-sm text-slate-500">
-                    Belum ada referral yang tercatat. Pastikan tabel referrals & SUPABASE_SERVICE_ROLE_KEY sudah diset.
+                    Belum ada referral yang tercatat. Pastikan tabel referrals &
+                    SUPABASE_SERVICE_ROLE_KEY sudah diset.
                   </p>
                 ) : (
                   <div className="divide-y divide-slate-100">
                     {typedReferrals.map((referral) => (
-                      <div key={referral.id} className="flex items-center justify-between gap-3 p-4 transition hover:bg-slate-50 sm:p-5">
+                      <div
+                        key={referral.id}
+                        className="flex items-center justify-between gap-3 p-4 transition hover:bg-slate-50 sm:p-5"
+                      >
                         <div className="min-w-0">
                           <p className="truncate text-sm font-black text-slate-950">
                             {labelFor(referral.referrer_id)}
@@ -258,7 +337,11 @@ export default async function AdminPage() {
                             {labelFor(referral.referred_id)}
                           </p>
                           <p className="mt-1 text-xs text-slate-500">
-                            {new Date(referral.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                            {new Date(referral.created_at).toLocaleDateString('id-ID', {
+                              day: 'numeric',
+                              month: 'short',
+                              year: 'numeric',
+                            })}
                           </p>
                         </div>
                         <Badge tone={referral.rewarded ? 'success' : 'warning'}>

@@ -53,7 +53,9 @@ export default function ReferralCard({
         <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-3">
           <p className="text-xs font-black uppercase tracking-wide text-slate-500">Referral link</p>
           {referralLink ? (
-            <p className="mt-2 break-all text-sm font-bold leading-6 text-slate-800">{referralLink}</p>
+            <p className="mt-2 break-all text-sm font-bold leading-6 text-slate-800">
+              {referralLink}
+            </p>
           ) : (
             <div className="mt-2 flex gap-2 text-sm leading-6 text-slate-500">
               <LockKeyhole className="mt-0.5 h-4 w-4 flex-shrink-0" />
@@ -79,7 +81,9 @@ export default function ReferralCard({
           <a
             href={referralLink ? whatsappUrl : undefined}
             className={`focus-ring inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl px-3 py-2 text-sm font-black text-white transition ${
-              referralLink ? 'bg-emerald-600 hover:bg-emerald-700' : 'pointer-events-none bg-slate-300'
+              referralLink
+                ? 'bg-emerald-600 hover:bg-emerald-700'
+                : 'pointer-events-none bg-slate-300'
             }`}
           >
             <MessageCircle className="h-4 w-4" />

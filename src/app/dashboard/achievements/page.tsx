@@ -4,7 +4,8 @@ import { createClient } from '@/lib/supabase/server'
 
 export const metadata = {
   title: 'Pencapaian · NEXA Campus',
-  description: 'Koleksi lencana NEXA Campus — buka dengan menyelesaikan deadline, menjaga streak, dan mengajak teman.',
+  description:
+    'Koleksi lencana NEXA Campus — buka dengan menyelesaikan deadline, menjaga streak, dan mengajak teman.',
 }
 
 export default async function AchievementsPage() {

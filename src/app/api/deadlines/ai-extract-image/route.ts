@@ -17,7 +17,11 @@ function jsonResponse(body: unknown, status = 200) {
 }
 
 function extractJsonArray(raw: string) {
-  const cleaned = raw.trim().replace(/^```(?:json)?/i, '').replace(/```$/i, '').trim()
+  const cleaned = raw
+    .trim()
+    .replace(/^```(?:json)?/i, '')
+    .replace(/```$/i, '')
+    .trim()
   try {
     const parsed = JSON.parse(cleaned)
     if (Array.isArray(parsed)) return { data: parsed }
@@ -44,15 +48,26 @@ export async function POST(request: NextRequest) {
   } = await supabase.auth.getUser()
   if (!user) return jsonResponse({ error: 'Kamu perlu login dulu.' }, 401)
 
-  const { data: profile } = await supabase.from('profiles').select('plan').eq('id', user.id).maybeSingle()
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('plan')
+    .eq('id', user.id)
+    .maybeSingle()
   if (!profile || profile.plan === 'radar') {
-    return jsonResponse({ error: 'AI dari foto tersedia untuk NEXA Pulse dan NEXA Command.', status: 'locked' }, 403)
+    return jsonResponse(
+      { error: 'AI dari foto tersedia untuk NEXA Pulse dan NEXA Command.', status: 'locked' },
+      403
+    )
   }
 
   const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) {
     return jsonResponse(
-      { error: 'AI feature is not configured yet. Untuk foto, AI wajib aktif — set GEMINI_API_KEY atau pakai input teks.', status: 'locked' },
+      {
+        error:
+          'AI feature is not configured yet. Untuk foto, AI wajib aktif — set GEMINI_API_KEY atau pakai input teks.',
+        status: 'locked',
+      },
       503
     )
   }
@@ -68,7 +83,8 @@ export async function POST(request: NextRequest) {
   const mimeType = typeof body.mimeType === 'string' ? body.mimeType : 'image/jpeg'
 
   if (!base64) return jsonResponse({ error: 'Upload fotonya dulu ya.' }, 400)
-  if (!ALLOWED_MIME.has(mimeType)) return jsonResponse({ error: 'Format gambar tidak didukung (pakai JPG/PNG/WebP).' }, 400)
+  if (!ALLOWED_MIME.has(mimeType))
+    return jsonResponse({ error: 'Format gambar tidak didukung (pakai JPG/PNG/WebP).' }, 400)
   if (Buffer.byteLength(base64, 'base64') > MAX_IMAGE_BYTES) {
     return jsonResponse({ error: 'Gambar terlalu besar. Maksimal 5MB.' }, 400)
   }
@@ -90,7 +106,11 @@ export async function POST(request: NextRequest) {
               ],
             },
           ],
-          generationConfig: { temperature: 0.1, maxOutputTokens: 1200, responseMimeType: 'application/json' },
+          generationConfig: {
+            temperature: 0.1,
+            maxOutputTokens: 1200,
+            responseMimeType: 'application/json',
+          },
         }),
       }
     )
@@ -98,21 +118,39 @@ export async function POST(request: NextRequest) {
     if (!response.ok) {
       const detail = await response.text().catch(() => '')
       console.error('[AI Photo] Gemini error', response.status, MODEL, detail.slice(0, 500))
-      return jsonResponse({ error: `AI gagal membaca gambar (HTTP ${response.status}). Cek GEMINI_API_KEY/model atau coba foto yang lebih jelas.` }, 502)
+      return jsonResponse(
+        {
+          error: `AI gagal membaca gambar (HTTP ${response.status}). Cek GEMINI_API_KEY/model atau coba foto yang lebih jelas.`,
+        },
+        502
+      )
     }
 
     const result = (await response.json()) as GeminiResponse
     const rawResponse =
-      result.candidates?.[0]?.content?.parts?.map((part) => part.text).filter(Boolean).join('\n').trim() || ''
+      result.candidates?.[0]?.content?.parts
+        ?.map((part) => part.text)
+        .filter(Boolean)
+        .join('\n')
+        .trim() || ''
 
     if (!rawResponse) {
-      return jsonResponse({ error: 'AI tidak menemukan deadline di gambar. Coba foto yang lebih jelas.' }, 502)
+      return jsonResponse(
+        { error: 'AI tidak menemukan deadline di gambar. Coba foto yang lebih jelas.' },
+        502
+      )
     }
 
     const parsed = extractJsonArray(rawResponse)
     if ('rawResponse' in parsed) {
       return jsonResponse(
-        { error: 'Hasil AI belum bisa diparse otomatis.', rawResponse: parsed.rawResponse, provider: 'gemini', model: MODEL, status: 'parse_failed' },
+        {
+          error: 'Hasil AI belum bisa diparse otomatis.',
+          rawResponse: parsed.rawResponse,
+          provider: 'gemini',
+          model: MODEL,
+          status: 'parse_failed',
+        },
         422
       )
     }

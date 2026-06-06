@@ -36,7 +36,9 @@ export default function FirstTimeOnboarding({ userId, userName }: FirstTimeOnboa
   const canSaveDeadline = deadlineTitle.trim().length > 0 && deadlineDueDate.length > 0
 
   const toggleSource = (source: string) => {
-    setSources((current) => current.includes(source) ? current.filter((item) => item !== source) : [...current, source])
+    setSources((current) =>
+      current.includes(source) ? current.filter((item) => item !== source) : [...current, source]
+    )
   }
 
   const saveMetadata = async () => {
@@ -46,7 +48,8 @@ export default function FirstTimeOnboarding({ userId, userName }: FirstTimeOnboa
       data: {
         deadline_sources: sources,
         reminder_preference: reminderPreference,
-        telegram_username: reminderPreference === 'telegram' ? normalizeTelegramUsername(telegramUsername) : null,
+        telegram_username:
+          reminderPreference === 'telegram' ? normalizeTelegramUsername(telegramUsername) : null,
       },
     })
     setIsSaving(false)
@@ -96,13 +99,16 @@ export default function FirstTimeOnboarding({ userId, userName }: FirstTimeOnboa
           userId,
           deadlineSources: sources,
           reminderPreference,
-          telegramUsername: reminderPreference === 'telegram' ? normalizeTelegramUsername(telegramUsername) : null,
-          deadline: skipDeadline ? null : {
-            title: deadlineTitle.trim(),
-            category: deadlineCategory,
-            due_date: deadlineDueDate,
-            priority: deadlinePriority,
-          },
+          telegramUsername:
+            reminderPreference === 'telegram' ? normalizeTelegramUsername(telegramUsername) : null,
+          deadline: skipDeadline
+            ? null
+            : {
+                title: deadlineTitle.trim(),
+                category: deadlineCategory,
+                due_date: deadlineDueDate,
+                priority: deadlinePriority,
+              },
         }),
       })
       const result = await response.json().catch(() => ({}))
@@ -120,14 +126,23 @@ export default function FirstTimeOnboarding({ userId, userName }: FirstTimeOnboa
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 px-4 py-6 backdrop-blur-sm" role="dialog" aria-modal="true">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 px-4 py-6 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+    >
       <div className="w-full max-w-xl rounded-lg bg-white shadow-2xl">
         <div className="border-b border-slate-200 px-6 py-5">
           <div className="flex items-center justify-between gap-4">
-            <p className="text-sm font-black uppercase tracking-wide text-brand-700">Step {step} of 3</p>
+            <p className="text-sm font-black uppercase tracking-wide text-brand-700">
+              Step {step} of 3
+            </p>
             <div className="flex gap-1.5" aria-hidden="true">
               {[1, 2, 3].map((item) => (
-                <span key={item} className={`h-2 w-10 rounded-full ${item <= step ? 'bg-brand-600' : 'bg-slate-200'}`} />
+                <span
+                  key={item}
+                  className={`h-2 w-10 rounded-full ${item <= step ? 'bg-brand-600' : 'bg-slate-200'}`}
+                />
               ))}
             </div>
           </div>
@@ -136,10 +151,15 @@ export default function FirstTimeOnboarding({ userId, userName }: FirstTimeOnboa
         <div className="px-6 py-6">
           {step === 1 && (
             <section>
-              <h2 className="text-2xl font-black text-slate-950">Halo {displayName}! Deadline kamu dari mana?</h2>
+              <h2 className="text-2xl font-black text-slate-950">
+                Halo {displayName}! Deadline kamu dari mana?
+              </h2>
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
                 {deadlineSources.map((source) => (
-                  <label key={source} className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-200 px-4 py-3 text-sm font-bold text-slate-800 hover:border-brand-300 hover:bg-brand-50">
+                  <label
+                    key={source}
+                    className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-200 px-4 py-3 text-sm font-bold text-slate-800 hover:border-brand-300 hover:bg-brand-50"
+                  >
                     <input
                       type="checkbox"
                       checked={sources.includes(source)}
@@ -182,7 +202,9 @@ export default function FirstTimeOnboarding({ userId, userName }: FirstTimeOnboa
                   <div className="flex items-center gap-3">
                     <input type="radio" disabled className="h-4 w-4 border-slate-300" />
                     <span className="font-black text-slate-950">WhatsApp</span>
-                    <span className="rounded-full bg-amber-100 px-2 py-1 text-xs font-black text-amber-800">coming soon</span>
+                    <span className="rounded-full bg-amber-100 px-2 py-1 text-xs font-black text-amber-800">
+                      coming soon
+                    </span>
                   </div>
                 </div>
 
@@ -214,11 +236,30 @@ export default function FirstTimeOnboarding({ userId, userName }: FirstTimeOnboa
                   className="rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none focus:border-brand-500"
                 />
                 <div className="grid gap-4 sm:grid-cols-3">
-                  <select value={deadlineCategory} onChange={(event) => setDeadlineCategory(event.target.value)} className="rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none focus:border-brand-500">
-                    {categories.map((category) => <option key={category} value={category}>{category}</option>)}
+                  <select
+                    value={deadlineCategory}
+                    onChange={(event) => setDeadlineCategory(event.target.value)}
+                    className="rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none focus:border-brand-500"
+                  >
+                    {categories.map((category) => (
+                      <option key={category} value={category}>
+                        {category}
+                      </option>
+                    ))}
                   </select>
-                  <input type="date" value={deadlineDueDate} onChange={(event) => setDeadlineDueDate(event.target.value)} className="rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none focus:border-brand-500" />
-                  <select value={deadlinePriority} onChange={(event) => setDeadlinePriority(event.target.value as (typeof priorities)[number])} className="rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none focus:border-brand-500">
+                  <input
+                    type="date"
+                    value={deadlineDueDate}
+                    onChange={(event) => setDeadlineDueDate(event.target.value)}
+                    className="rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none focus:border-brand-500"
+                  />
+                  <select
+                    value={deadlinePriority}
+                    onChange={(event) =>
+                      setDeadlinePriority(event.target.value as (typeof priorities)[number])
+                    }
+                    className="rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none focus:border-brand-500"
+                  >
                     <option value="low">Low</option>
                     <option value="medium">Medium</option>
                     <option value="high">High</option>
@@ -228,7 +269,11 @@ export default function FirstTimeOnboarding({ userId, userName }: FirstTimeOnboa
             </section>
           )}
 
-          {error && <p className="mt-5 rounded-lg bg-red-50 px-4 py-3 text-sm font-bold text-red-700">{error}</p>}
+          {error && (
+            <p className="mt-5 rounded-lg bg-red-50 px-4 py-3 text-sm font-bold text-red-700">
+              {error}
+            </p>
+          )}
         </div>
 
         <div className="flex flex-col-reverse gap-3 border-t border-slate-200 px-6 py-5 sm:flex-row sm:justify-end">
@@ -245,11 +290,17 @@ export default function FirstTimeOnboarding({ userId, userName }: FirstTimeOnboa
 
           <button
             type="button"
-            onClick={step === 1 ? goToStep2 : step === 2 ? goToStep3 : () => completeOnboarding(false)}
+            onClick={
+              step === 1 ? goToStep2 : step === 2 ? goToStep3 : () => completeOnboarding(false)
+            }
             disabled={isSaving}
             className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-600 px-5 py-3 text-sm font-black text-white hover:bg-brand-700 disabled:opacity-60"
           >
-            {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : step === 3 ? <Check className="h-4 w-4" /> : null}
+            {isSaving ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : step === 3 ? (
+              <Check className="h-4 w-4" />
+            ) : null}
             {step === 3 ? 'Selesai' : 'Lanjut'}
           </button>
         </div>

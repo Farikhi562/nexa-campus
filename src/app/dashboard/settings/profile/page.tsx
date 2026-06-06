@@ -9,17 +9,15 @@ export default async function ProfileSettingsPage() {
     data: { user },
   } = await supabase.auth.getUser()
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user!.id)
-    .single()
+  const { data: profile } = await supabase.from('profiles').select('*').eq('id', user!.id).single()
 
   return (
     <div className="space-y-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-sm font-bold uppercase tracking-wide text-brand-700">Profile Settings</p>
+          <p className="text-sm font-bold uppercase tracking-wide text-brand-700">
+            Profile Settings
+          </p>
           <h1 className="mt-1 text-2xl font-black text-slate-950">Edit profil</h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
             Ubah nama, kampus, provinsi, jurusan, semester, gender opsional, dan icon profil.

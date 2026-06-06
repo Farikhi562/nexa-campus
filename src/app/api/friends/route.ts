@@ -4,7 +4,9 @@ import { createClient } from '@/lib/supabase/server'
 // GET /api/friends — my friends list + sent + received requests
 export async function GET(request: NextRequest) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Login required.' }, { status: 401 })
 
   const { data: requests, error } = await supabase
@@ -16,12 +18,16 @@ export async function GET(request: NextRequest) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   const rows = (requests ?? []) as Array<{
-    id: string; requester_id: string; receiver_id: string
-    status: string; created_at: string; updated_at: string
+    id: string
+    requester_id: string
+    receiver_id: string
+    status: string
+    created_at: string
+    updated_at: string
   }>
 
   // Collect IDs of other users to fetch their public profiles
-  const otherIds = rows.map((r) => r.requester_id === user.id ? r.receiver_id : r.requester_id)
+  const otherIds = rows.map((r) => (r.requester_id === user.id ? r.receiver_id : r.requester_id))
   const uniqueIds = Array.from(new Set(otherIds))
   let profileMap: Record<string, unknown> = {}
   if (uniqueIds.length > 0) {

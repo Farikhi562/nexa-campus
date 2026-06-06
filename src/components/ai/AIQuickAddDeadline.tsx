@@ -59,7 +59,9 @@ function normalizeType(value: unknown): DeadlineType {
 
 function normalizePriority(value: unknown): DeadlinePriority {
   const normalized = normalizeText(value).toLowerCase()
-  return priorityValues.has(normalized as DeadlinePriority) ? (normalized as DeadlinePriority) : 'normal'
+  return priorityValues.has(normalized as DeadlinePriority)
+    ? (normalized as DeadlinePriority)
+    : 'normal'
 }
 
 function normalizeSource(value: unknown): DeadlineSource {
@@ -167,12 +169,16 @@ export default function AIQuickAddDeadline({
       return false
     }
     if (!result.data?.length) {
-      setError('Belum ada deadline yang bisa diekstrak. Coba teks/foto yang lebih jelas, atau tambah manual.')
+      setError(
+        'Belum ada deadline yang bisa diekstrak. Coba teks/foto yang lebih jelas, atau tambah manual.'
+      )
       if (result.rawResponse) setRawResponse(result.rawResponse)
       return false
     }
     setItems(result.data.map((item) => makeEditableDeadline(item, fallbackCampus)))
-    setMessage('Hasil AI sudah jadi preview. Cek dulu sebelum disimpan, karena keputusan final tetap di kamu.')
+    setMessage(
+      'Hasil AI sudah jadi preview. Cek dulu sebelum disimpan, karena keputusan final tetap di kamu.'
+    )
     return true
   }
 
@@ -240,13 +246,17 @@ export default function AIQuickAddDeadline({
     }
 
     if (!result.data?.length) {
-      setError('Belum ada deadline yang bisa diekstrak. Kamu bisa edit raw response atau tambah manual.')
+      setError(
+        'Belum ada deadline yang bisa diekstrak. Kamu bisa edit raw response atau tambah manual.'
+      )
       if (result.rawResponse) setRawResponse(result.rawResponse)
       return
     }
 
     setItems(result.data.map((item) => makeEditableDeadline(item, fallbackCampus)))
-    setMessage('Hasil AI sudah jadi preview. Cek dulu sebelum disimpan, karena keputusan final tetap di kamu.')
+    setMessage(
+      'Hasil AI sudah jadi preview. Cek dulu sebelum disimpan, karena keputusan final tetap di kamu.'
+    )
   }
 
   async function saveAll() {
@@ -254,7 +264,9 @@ export default function AIQuickAddDeadline({
     setMessage('')
 
     if (!canSave) {
-      setError('Lengkapi mata kuliah/kegiatan, tanggal, jam, kampus, dan ruangan di semua card dulu.')
+      setError(
+        'Lengkapi mata kuliah/kegiatan, tanggal, jam, kampus, dan ruangan di semua card dulu.'
+      )
       return
     }
 
@@ -299,10 +311,15 @@ export default function AIQuickAddDeadline({
         <div className="border-b border-slate-100 p-4 sm:p-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <Badge tone="brand" className="mb-3">AI Quick Add</Badge>
-              <h1 className="text-2xl font-black tracking-tight text-slate-950">Paste teks atau foto, jadi draft deadline.</h1>
+              <Badge tone="brand" className="mb-3">
+                AI Quick Add
+              </Badge>
+              <h1 className="text-2xl font-black tracking-tight text-slate-950">
+                Paste teks atau foto, jadi draft deadline.
+              </h1>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-                Tempel teks dari grup WA/VClass, atau upload foto papan tulis & screenshot jadwal — NEXA ubah jadi draft. NEXA tidak login ke sistem kampus mana pun.
+                Tempel teks dari grup WA/VClass, atau upload foto papan tulis & screenshot jadwal —
+                NEXA ubah jadi draft. NEXA tidak login ke sistem kampus mana pun.
               </p>
             </div>
             <Badge tone="info">Gemini Beta</Badge>
@@ -324,7 +341,12 @@ export default function AIQuickAddDeadline({
           </label>
 
           <div className="flex flex-col gap-3 sm:flex-row">
-            <Button type="button" onClick={extractDeadlines} disabled={extracting || extractingImage || saving} className="min-h-12 rounded-2xl">
+            <Button
+              type="button"
+              onClick={extractDeadlines}
+              disabled={extracting || extractingImage || saving}
+              className="min-h-12 rounded-2xl"
+            >
               {extracting ? (
                 <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/50 border-t-white" />
               ) : (
@@ -359,12 +381,22 @@ export default function AIQuickAddDeadline({
             </Link>
           </div>
 
-          {error && <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700">{error}</div>}
-          {message && <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-emerald-800">{message}</div>}
+          {error && (
+            <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700">
+              {error}
+            </div>
+          )}
+          {message && (
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-emerald-800">
+              {message}
+            </div>
+          )}
 
           {rawResponse && (
             <label className="block">
-              <span className="mb-2 block text-sm font-black text-slate-800">Raw response AI, bisa kamu edit manual</span>
+              <span className="mb-2 block text-sm font-black text-slate-800">
+                Raw response AI, bisa kamu edit manual
+              </span>
               <textarea
                 value={rawResponse}
                 onChange={(event) => setRawResponse(event.target.value)}
@@ -379,21 +411,35 @@ export default function AIQuickAddDeadline({
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <h2 className="text-lg font-black text-slate-950">Preview hasil extract</h2>
-                  <p className="text-sm text-slate-500">Edit dulu kalau ada tanggal, kategori, atau sumber yang kurang pas.</p>
+                  <p className="text-sm text-slate-500">
+                    Edit dulu kalau ada tanggal, kategori, atau sumber yang kurang pas.
+                  </p>
                 </div>
-                <Button type="button" onClick={saveAll} disabled={saving || !canSave} className="min-h-12 rounded-2xl">
+                <Button
+                  type="button"
+                  onClick={saveAll}
+                  disabled={saving || !canSave}
+                  className="min-h-12 rounded-2xl"
+                >
                   {saving ? 'Menyimpan...' : 'Simpan Semua'}
                 </Button>
               </div>
 
               <div className="grid gap-4 lg:grid-cols-2">
                 {items.map((item, index) => (
-                  <article key={`${item.title}-${index}`} className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+                  <article
+                    key={`${item.title}-${index}`}
+                    className="rounded-3xl border border-slate-200 bg-slate-50 p-4"
+                  >
                     <div className="mb-4 flex items-center justify-between gap-3">
                       <p className="font-black text-slate-950">Draft #{index + 1}</p>
                       <button
                         type="button"
-                        onClick={() => setItems((current) => current.filter((_, itemIndex) => itemIndex !== index))}
+                        onClick={() =>
+                          setItems((current) =>
+                            current.filter((_, itemIndex) => itemIndex !== index)
+                          )
+                        }
                         className="rounded-full px-3 py-1 text-xs font-black text-red-700 hover:bg-red-50"
                       >
                         Hapus
@@ -403,52 +449,177 @@ export default function AIQuickAddDeadline({
                     <div className="grid gap-3 sm:grid-cols-2">
                       <label className="sm:col-span-2">
                         <span className="mb-1 block text-xs font-black text-slate-600">Judul</span>
-                        <input value={item.title} onChange={(event) => setItems((current) => updateItem(current, index, 'title', event.target.value))} className="focus-ring w-full rounded-2xl border border-slate-300 px-3 py-2.5 text-sm" />
+                        <input
+                          value={item.title}
+                          onChange={(event) =>
+                            setItems((current) =>
+                              updateItem(current, index, 'title', event.target.value)
+                            )
+                          }
+                          className="focus-ring w-full rounded-2xl border border-slate-300 px-3 py-2.5 text-sm"
+                        />
                       </label>
                       <label className="sm:col-span-2">
-                        <span className="mb-1 block text-xs font-black text-slate-600">Mata kuliah / kegiatan</span>
-                        <input value={item.course_name} onChange={(event) => setItems((current) => updateItem(current, index, 'course_name', event.target.value))} className="focus-ring w-full rounded-2xl border border-slate-300 px-3 py-2.5 text-sm" required />
+                        <span className="mb-1 block text-xs font-black text-slate-600">
+                          Mata kuliah / kegiatan
+                        </span>
+                        <input
+                          value={item.course_name}
+                          onChange={(event) =>
+                            setItems((current) =>
+                              updateItem(current, index, 'course_name', event.target.value)
+                            )
+                          }
+                          className="focus-ring w-full rounded-2xl border border-slate-300 px-3 py-2.5 text-sm"
+                          required
+                        />
                       </label>
                       <label>
-                        <span className="mb-1 block text-xs font-black text-slate-600">Kategori</span>
-                        <select value={item.type} onChange={(event) => setItems((current) => updateItem(current, index, 'type', event.target.value as DeadlineType))} className="focus-ring w-full rounded-2xl border border-slate-300 px-3 py-2.5 text-sm">
-                          {DEADLINE_TYPES.map((type) => <option key={type.value} value={type.value}>{type.label}</option>)}
+                        <span className="mb-1 block text-xs font-black text-slate-600">
+                          Kategori
+                        </span>
+                        <select
+                          value={item.type}
+                          onChange={(event) =>
+                            setItems((current) =>
+                              updateItem(current, index, 'type', event.target.value as DeadlineType)
+                            )
+                          }
+                          className="focus-ring w-full rounded-2xl border border-slate-300 px-3 py-2.5 text-sm"
+                        >
+                          {DEADLINE_TYPES.map((type) => (
+                            <option key={type.value} value={type.value}>
+                              {type.label}
+                            </option>
+                          ))}
                         </select>
                       </label>
                       <label>
                         <span className="mb-1 block text-xs font-black text-slate-600">Sumber</span>
-                        <select value={item.source} onChange={(event) => setItems((current) => updateItem(current, index, 'source', event.target.value as DeadlineSource))} className="focus-ring w-full rounded-2xl border border-slate-300 px-3 py-2.5 text-sm">
-                          {DEADLINE_SOURCES.map((source) => <option key={source.value} value={source.value}>{source.label}</option>)}
+                        <select
+                          value={item.source}
+                          onChange={(event) =>
+                            setItems((current) =>
+                              updateItem(
+                                current,
+                                index,
+                                'source',
+                                event.target.value as DeadlineSource
+                              )
+                            )
+                          }
+                          className="focus-ring w-full rounded-2xl border border-slate-300 px-3 py-2.5 text-sm"
+                        >
+                          {DEADLINE_SOURCES.map((source) => (
+                            <option key={source.value} value={source.value}>
+                              {source.label}
+                            </option>
+                          ))}
                         </select>
                       </label>
                       <label>
-                        <span className="mb-1 block text-xs font-black text-slate-600">Tanggal</span>
-                        <input type="date" value={item.deadline_date} onChange={(event) => setItems((current) => updateItem(current, index, 'deadline_date', event.target.value))} className="focus-ring w-full rounded-2xl border border-slate-300 px-3 py-2.5 text-sm" />
+                        <span className="mb-1 block text-xs font-black text-slate-600">
+                          Tanggal
+                        </span>
+                        <input
+                          type="date"
+                          value={item.deadline_date}
+                          onChange={(event) =>
+                            setItems((current) =>
+                              updateItem(current, index, 'deadline_date', event.target.value)
+                            )
+                          }
+                          className="focus-ring w-full rounded-2xl border border-slate-300 px-3 py-2.5 text-sm"
+                        />
                       </label>
                       <label>
                         <span className="mb-1 block text-xs font-black text-slate-600">Jam</span>
-                        <input type="time" value={item.deadline_time} onChange={(event) => setItems((current) => updateItem(current, index, 'deadline_time', event.target.value))} className="focus-ring w-full rounded-2xl border border-slate-300 px-3 py-2.5 text-sm" />
+                        <input
+                          type="time"
+                          value={item.deadline_time}
+                          onChange={(event) =>
+                            setItems((current) =>
+                              updateItem(current, index, 'deadline_time', event.target.value)
+                            )
+                          }
+                          className="focus-ring w-full rounded-2xl border border-slate-300 px-3 py-2.5 text-sm"
+                        />
                       </label>
                       <label>
-                        <span className="mb-1 block text-xs font-black text-slate-600">Prioritas</span>
-                        <select value={item.priority} onChange={(event) => setItems((current) => updateItem(current, index, 'priority', event.target.value as DeadlinePriority))} className="focus-ring w-full rounded-2xl border border-slate-300 px-3 py-2.5 text-sm">
-                          {PRIORITIES.map((priority) => <option key={priority.value} value={priority.value}>{priority.label}</option>)}
+                        <span className="mb-1 block text-xs font-black text-slate-600">
+                          Prioritas
+                        </span>
+                        <select
+                          value={item.priority}
+                          onChange={(event) =>
+                            setItems((current) =>
+                              updateItem(
+                                current,
+                                index,
+                                'priority',
+                                event.target.value as DeadlinePriority
+                              )
+                            )
+                          }
+                          className="focus-ring w-full rounded-2xl border border-slate-300 px-3 py-2.5 text-sm"
+                        >
+                          {PRIORITIES.map((priority) => (
+                            <option key={priority.value} value={priority.value}>
+                              {priority.label}
+                            </option>
+                          ))}
                         </select>
                       </label>
                       <label>
                         <span className="mb-1 block text-xs font-black text-slate-600">Kampus</span>
-                        <input value={item.campus} onChange={(event) => setItems((current) => updateItem(current, index, 'campus', event.target.value))} className="focus-ring w-full rounded-2xl border border-slate-300 px-3 py-2.5 text-sm" />
+                        <input
+                          value={item.campus}
+                          onChange={(event) =>
+                            setItems((current) =>
+                              updateItem(current, index, 'campus', event.target.value)
+                            )
+                          }
+                          className="focus-ring w-full rounded-2xl border border-slate-300 px-3 py-2.5 text-sm"
+                        />
                       </label>
                       <label>
-                        <span className="mb-1 block text-xs font-black text-slate-600">Ruangan</span>
-                        <input value={item.room} onChange={(event) => setItems((current) => updateItem(current, index, 'room', event.target.value))} className="focus-ring w-full rounded-2xl border border-slate-300 px-3 py-2.5 text-sm" />
+                        <span className="mb-1 block text-xs font-black text-slate-600">
+                          Ruangan
+                        </span>
+                        <input
+                          value={item.room}
+                          onChange={(event) =>
+                            setItems((current) =>
+                              updateItem(current, index, 'room', event.target.value)
+                            )
+                          }
+                          className="focus-ring w-full rounded-2xl border border-slate-300 px-3 py-2.5 text-sm"
+                        />
                       </label>
                       <label className="sm:col-span-2">
                         <span className="mb-1 block text-xs font-black text-slate-600">Notes</span>
-                        <textarea value={item.notes} onChange={(event) => setItems((current) => updateItem(current, index, 'notes', event.target.value))} rows={3} className="focus-ring w-full resize-y rounded-2xl border border-slate-300 px-3 py-2.5 text-sm" />
+                        <textarea
+                          value={item.notes}
+                          onChange={(event) =>
+                            setItems((current) =>
+                              updateItem(current, index, 'notes', event.target.value)
+                            )
+                          }
+                          rows={3}
+                          className="focus-ring w-full resize-y rounded-2xl border border-slate-300 px-3 py-2.5 text-sm"
+                        />
                       </label>
                       <label className="flex items-start gap-2 rounded-2xl border border-slate-200 bg-white p-3 text-sm font-bold text-slate-700 sm:col-span-2">
-                        <input type="checkbox" checked={item.reminder_enabled} onChange={(event) => setItems((current) => updateItem(current, index, 'reminder_enabled', event.target.checked))} className="mt-0.5" />
+                        <input
+                          type="checkbox"
+                          checked={item.reminder_enabled}
+                          onChange={(event) =>
+                            setItems((current) =>
+                              updateItem(current, index, 'reminder_enabled', event.target.checked)
+                            )
+                          }
+                          className="mt-0.5"
+                        />
                         Butuh reminder
                       </label>
                     </div>
@@ -466,10 +637,15 @@ export default function AIQuickAddDeadline({
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-50 text-brand-700">
               <LockKeyhole className="h-6 w-6" />
             </div>
-            <Badge tone="brand" className="mb-3">Pulse & Command</Badge>
-            <h2 className="text-xl font-black text-slate-950">AI Quick Add terkunci untuk Radar.</h2>
+            <Badge tone="brand" className="mb-3">
+              Pulse & Command
+            </Badge>
+            <h2 className="text-xl font-black text-slate-950">
+              AI Quick Add terkunci untuk Radar.
+            </h2>
             <p className="mt-2 text-sm leading-6 text-slate-600">
-              Upgrade ke Pulse atau Command untuk extract deadline otomatis dari teks yang kamu paste manual.
+              Upgrade ke Pulse atau Command untuk extract deadline otomatis dari teks yang kamu
+              paste manual.
             </p>
             <Link
               href="/pricing"

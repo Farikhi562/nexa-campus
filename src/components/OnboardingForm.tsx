@@ -2,7 +2,16 @@
 
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Camera, CheckCircle2, GraduationCap, Info, MapPin, ShieldCheck, Upload, UserRound } from 'lucide-react'
+import {
+  Camera,
+  CheckCircle2,
+  GraduationCap,
+  Info,
+  MapPin,
+  ShieldCheck,
+  Upload,
+  UserRound,
+} from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import Button from '@/components/ui/Button'
 import {
@@ -71,7 +80,10 @@ export default function OnboardingForm({
     formData.append('photo', photoFile)
 
     const response = await fetch('/api/profile/photo', { method: 'POST', body: formData })
-    const result = (await response.json().catch(() => null)) as { avatar_url?: string; error?: string } | null
+    const result = (await response.json().catch(() => null)) as {
+      avatar_url?: string
+      error?: string
+    } | null
 
     setUploadingPhoto(false)
 
@@ -91,7 +103,8 @@ export default function OnboardingForm({
     setError('')
 
     if (!fullName.trim()) return setError('Nama lengkap wajib diisi.')
-    if (!campusName.trim()) return setError('Kampus wajib diisi. Kalau belum ada di daftar, ketik manual aja.')
+    if (!campusName.trim())
+      return setError('Kampus wajib diisi. Kalau belum ada di daftar, ketik manual aja.')
     if (!province.trim()) return setError('Provinsi wajib dipilih.')
     if (!major.trim()) return setError('Jurusan wajib dipilih.')
 
@@ -186,7 +199,9 @@ export default function OnboardingForm({
 
     const storedReferralCode =
       referralCode ||
-      (typeof window !== 'undefined' ? window.sessionStorage.getItem('nexa_referral_code') || '' : '')
+      (typeof window !== 'undefined'
+        ? window.sessionStorage.getItem('nexa_referral_code') || ''
+        : '')
 
     if (storedReferralCode) {
       await fetch('/api/referrals/complete-onboarding', {
@@ -209,7 +224,11 @@ export default function OnboardingForm({
           <div className="flex h-24 w-24 flex-shrink-0 items-center justify-center overflow-hidden rounded-3xl border border-slate-200 bg-slate-50 text-slate-400">
             {photoPreview || avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={photoPreview || avatarUrl} alt="Foto profil" className="h-full w-full object-cover" />
+              <img
+                src={photoPreview || avatarUrl}
+                alt="Foto profil"
+                className="h-full w-full object-cover"
+              />
             ) : (
               <Camera className="h-9 w-9" />
             )}
@@ -256,21 +275,32 @@ export default function OnboardingForm({
           <Info className="mt-0.5 h-5 w-5 flex-shrink-0" />
           <p>
             Pilih kampus, provinsi, dan jurusan dari daftar. Belum ada di daftar? Pilih
-            <span className="font-black"> &ldquo;Lainnya&rdquo;</span> atau ketik manual untuk kampus.
+            <span className="font-black"> &ldquo;Lainnya&rdquo;</span> atau ketik manual untuk
+            kampus.
           </p>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="block sm:col-span-2">
             <span className={labelClass}>
-              <span className="inline-flex items-center gap-1.5"><UserRound className="h-4 w-4 text-teal-700" /> Nama lengkap</span>
+              <span className="inline-flex items-center gap-1.5">
+                <UserRound className="h-4 w-4 text-teal-700" /> Nama lengkap
+              </span>
             </span>
-            <input value={fullName} onChange={(e) => setFullName(e.target.value)} required className={inputClass} placeholder="Nama sesuai yang kamu mau tampil" />
+            <input
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              required
+              className={inputClass}
+              placeholder="Nama sesuai yang kamu mau tampil"
+            />
           </label>
 
           <label className="block sm:col-span-2">
             <span className={labelClass}>
-              <span className="inline-flex items-center gap-1.5"><GraduationCap className="h-4 w-4 text-teal-700" /> Kampus / universitas</span>
+              <span className="inline-flex items-center gap-1.5">
+                <GraduationCap className="h-4 w-4 text-teal-700" /> Kampus / universitas
+              </span>
             </span>
             <input
               value={campusName}
@@ -292,36 +322,66 @@ export default function OnboardingForm({
 
           <label className="block">
             <span className={labelClass}>
-              <span className="inline-flex items-center gap-1.5"><MapPin className="h-4 w-4 text-teal-700" /> Provinsi</span>
+              <span className="inline-flex items-center gap-1.5">
+                <MapPin className="h-4 w-4 text-teal-700" /> Provinsi
+              </span>
             </span>
-            <select value={province} onChange={(e) => setProvince(e.target.value)} required className={inputClass}>
+            <select
+              value={province}
+              onChange={(e) => setProvince(e.target.value)}
+              required
+              className={inputClass}
+            >
               <option value="">Pilih provinsi</option>
               {PROVINCE_OPTIONS.map((item) => (
-                <option key={item} value={item}>{item}</option>
+                <option key={item} value={item}>
+                  {item}
+                </option>
               ))}
             </select>
           </label>
 
           <label className="block">
             <span className={labelClass}>Jurusan</span>
-            <select value={major} onChange={(e) => setMajor(e.target.value)} required className={inputClass}>
+            <select
+              value={major}
+              onChange={(e) => setMajor(e.target.value)}
+              required
+              className={inputClass}
+            >
               <option value="">Pilih jurusan</option>
               {MAJOR_OPTIONS.map((item) => (
-                <option key={item} value={item}>{item}</option>
+                <option key={item} value={item}>
+                  {item}
+                </option>
               ))}
             </select>
           </label>
 
           <label className="block">
             <span className={labelClass}>Semester</span>
-            <input type="number" min="1" max="14" value={semester} onChange={(e) => setSemester(e.target.value)} required className={inputClass} />
+            <input
+              type="number"
+              min="1"
+              max="14"
+              value={semester}
+              onChange={(e) => setSemester(e.target.value)}
+              required
+              className={inputClass}
+            />
           </label>
 
           <label className="block">
             <span className={labelClass}>Gender (opsional)</span>
-            <select value={gender} onChange={(e) => setGender(e.target.value)} className={inputClass}>
+            <select
+              value={gender}
+              onChange={(e) => setGender(e.target.value)}
+              className={inputClass}
+            >
               {GENDER_OPTIONS.map((item) => (
-                <option key={item.value || 'empty'} value={item.value}>{item.label}</option>
+                <option key={item.value || 'empty'} value={item.value}>
+                  {item.label}
+                </option>
               ))}
             </select>
           </label>
@@ -337,33 +397,58 @@ export default function OnboardingForm({
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <label className="block">
             <span className={labelClass}>NPM / Student ID</span>
-            <input value={studentId} onChange={(e) => setStudentId(e.target.value)} className={inputClass} />
+            <input
+              value={studentId}
+              onChange={(e) => setStudentId(e.target.value)}
+              className={inputClass}
+            />
           </label>
           <label className="block">
             <span className={labelClass}>Telegram chat ID</span>
-            <input value={telegramChatId} onChange={(e) => setTelegramChatId(e.target.value)} className={inputClass} />
+            <input
+              value={telegramChatId}
+              onChange={(e) => setTelegramChatId(e.target.value)}
+              className={inputClass}
+            />
           </label>
           <label className="block">
             <span className={labelClass}>Nomor HP</span>
-            <input value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} className={inputClass} />
+            <input
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              className={inputClass}
+            />
           </label>
           <label className="block">
             <span className={labelClass}>WhatsApp</span>
-            <input value={whatsappNumber} onChange={(e) => setWhatsappNumber(e.target.value)} className={inputClass} />
+            <input
+              value={whatsappNumber}
+              onChange={(e) => setWhatsappNumber(e.target.value)}
+              className={inputClass}
+            />
           </label>
         </div>
       </section>
 
       <div className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-xs leading-5 text-slate-600">
         <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-teal-700" />
-        <p>NEXA tidak pernah meminta password kampus. Data yang disimpan hanya profil dan deadline yang kamu input sendiri.</p>
+        <p>
+          NEXA tidak pernah meminta password kampus. Data yang disimpan hanya profil dan deadline
+          yang kamu input sendiri.
+        </p>
       </div>
 
       {error && (
-        <p className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700">{error}</p>
+        <p className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700">
+          {error}
+        </p>
       )}
 
-      <Button type="submit" disabled={loading || uploadingPhoto} className="min-h-12 w-full rounded-2xl">
+      <Button
+        type="submit"
+        disabled={loading || uploadingPhoto}
+        className="min-h-12 w-full rounded-2xl"
+      >
         {loading ? 'Menyimpan...' : 'Simpan & Masuk Dashboard'}
         {!loading && <CheckCircle2 className="h-4 w-4" />}
       </Button>

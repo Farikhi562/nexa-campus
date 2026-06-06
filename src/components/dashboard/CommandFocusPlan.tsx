@@ -1,7 +1,13 @@
 import Link from 'next/link'
 import { Crown, LockKeyhole, Target, TimerReset, Zap } from 'lucide-react'
 import Badge from '@/components/ui/Badge'
-import { formatDeadlineDate, formatDeadlineTime, getDisplayTitle, getUrgency, sortNearest } from '@/lib/deadline-utils'
+import {
+  formatDeadlineDate,
+  formatDeadlineTime,
+  getDisplayTitle,
+  getUrgency,
+  sortNearest,
+} from '@/lib/deadline-utils'
 import type { AcademicDeadline, Plan } from '@/types'
 
 type CommandFocusPlanProps = {
@@ -36,7 +42,8 @@ function scoreDeadline(deadline: AcademicDeadline) {
 }
 
 export default function CommandFocusPlan({ deadlines, userTier }: CommandFocusPlanProps) {
-  const safeTier = userTier === 'command' || userTier === 'pulse' || userTier === 'radar' ? userTier : 'radar'
+  const safeTier =
+    userTier === 'command' || userTier === 'pulse' || userTier === 'radar' ? userTier : 'radar'
   const isCommand = safeTier === 'command'
   const activeDeadlines = (deadlines ?? [])
     .filter((deadline) => deadline.status !== 'completed')
@@ -71,19 +78,29 @@ export default function CommandFocusPlan({ deadlines, userTier }: CommandFocusPl
             {activeDeadlines.map((deadline, index) => {
               const urgency = getUrgency(deadline)
               return (
-                <article key={deadline.id} className="rounded-2xl border border-white/10 bg-white/[0.06] p-4">
+                <article
+                  key={deadline.id}
+                  className="rounded-2xl border border-white/10 bg-white/[0.06] p-4"
+                >
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-300/10 text-sm font-black text-teal-100">
                       {index + 1}
                     </div>
                     <Badge tone={urgency.tone}>{urgency.label}</Badge>
                   </div>
-                  <h3 className="mt-4 text-sm font-black text-white">{getDisplayTitle(deadline)}</h3>
+                  <h3 className="mt-4 text-sm font-black text-white">
+                    {getDisplayTitle(deadline)}
+                  </h3>
                   <p className="mt-1 text-xs leading-5 text-slate-400">
-                    {formatDeadlineDate(deadline)} · {formatDeadlineTime(deadline)} · {deadline.priority}
+                    {formatDeadlineDate(deadline)} · {formatDeadlineTime(deadline)} ·{' '}
+                    {deadline.priority}
                   </p>
                   <div className="mt-4 flex gap-2 text-xs leading-5 text-slate-300">
-                    {index === 0 ? <Zap className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-200" /> : <Target className="mt-0.5 h-4 w-4 flex-shrink-0 text-teal-200" />}
+                    {index === 0 ? (
+                      <Zap className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-200" />
+                    ) : (
+                      <Target className="mt-0.5 h-4 w-4 flex-shrink-0 text-teal-200" />
+                    )}
                     <p>
                       {index === 0
                         ? 'Kerjakan ini dulu. Ini kandidat paling berisik di radar.'
@@ -125,7 +142,10 @@ export default function CommandFocusPlan({ deadlines, userTier }: CommandFocusPl
             <p className="mt-2 text-sm leading-6 text-slate-300">
               Upgrade ke NEXA Command untuk prioritas otomatis dan rencana fokus harian.
             </p>
-            <Link href="/pricing" className="mt-5 inline-flex rounded-2xl bg-teal-400 px-4 py-3 text-sm font-black text-slate-950 hover:bg-teal-300">
+            <Link
+              href="/pricing"
+              className="mt-5 inline-flex rounded-2xl bg-teal-400 px-4 py-3 text-sm font-black text-slate-950 hover:bg-teal-300"
+            >
               Lihat Command
             </Link>
           </div>

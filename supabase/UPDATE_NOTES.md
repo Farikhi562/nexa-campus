@@ -12,19 +12,19 @@ Di **Supabase → SQL Editor**, jalankan berurutan (semua idempotent):
 
 ## 2) Environment variables
 
-| Variable | Wajib | Fungsi |
-| --- | --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | ya | Koneksi Supabase |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ya | Koneksi Supabase |
-| `SUPABASE_SERVICE_ROLE_KEY` | ya | Admin lihat semua data, referral reward, upgrade plan via webhook (server-only) |
-| `GEMINI_API_KEY` | opsional | Aktifkan Tanya NEXA & AI Quick Add. Tanpa ini → fallback "AI feature is not configured yet." + parser sederhana |
-| `GEMINI_MODEL` | opsional | Default `gemini-2.5-flash-lite` / `gemini-2.5-flash` |
-| `ADMIN_EMAILS` | ya (admin) | Email admin, pisah koma. Kosong → halaman /admin tampilkan pesan setup |
-| `NEXT_PUBLIC_SITE_URL` | disarankan | Base URL untuk SEO (canonical, sitemap, OG) & finish-URL pembayaran |
-| `MIDTRANS_SERVER_KEY` | untuk bayar | Server key Midtrans (server-only) |
-| `NEXT_PUBLIC_MIDTRANS_CLIENT_KEY` | untuk bayar | Client key Midtrans (Snap.js) |
-| `MIDTRANS_IS_PRODUCTION` | opsional | `true` untuk production, default sandbox |
-| `NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION` | opsional | Sama, untuk memilih URL snap.js di client |
+| Variable                             | Wajib       | Fungsi                                                                                                          |
+| ------------------------------------ | ----------- | --------------------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`           | ya          | Koneksi Supabase                                                                                                |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY`      | ya          | Koneksi Supabase                                                                                                |
+| `SUPABASE_SERVICE_ROLE_KEY`          | ya          | Admin lihat semua data, referral reward, upgrade plan via webhook (server-only)                                 |
+| `GEMINI_API_KEY`                     | opsional    | Aktifkan Tanya NEXA & AI Quick Add. Tanpa ini → fallback "AI feature is not configured yet." + parser sederhana |
+| `GEMINI_MODEL`                       | opsional    | Default `gemini-2.5-flash-lite` / `gemini-2.5-flash`                                                            |
+| `ADMIN_EMAILS`                       | ya (admin)  | Email admin, pisah koma. Kosong → halaman /admin tampilkan pesan setup                                          |
+| `NEXT_PUBLIC_SITE_URL`               | disarankan  | Base URL untuk SEO (canonical, sitemap, OG) & finish-URL pembayaran                                             |
+| `MIDTRANS_SERVER_KEY`                | untuk bayar | Server key Midtrans (server-only)                                                                               |
+| `NEXT_PUBLIC_MIDTRANS_CLIENT_KEY`    | untuk bayar | Client key Midtrans (Snap.js)                                                                                   |
+| `MIDTRANS_IS_PRODUCTION`             | opsional    | `true` untuk production, default sandbox                                                                        |
+| `NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION` | opsional    | Sama, untuk memilih URL snap.js di client                                                                       |
 
 > Set **Payment Notification URL** di dashboard Midtrans ke:
 > `https://<domain>/api/payments/midtrans/notification`
@@ -63,6 +63,7 @@ npm run lint     # jika tersedia
 ## Update lanjutan: Badges & AI dari Foto
 
 ### Badges / Achievement
+
 - Halaman baru `/dashboard/achievements` + link di sidebar & menu avatar.
 - 13 lencana (bronze/silver/gold/special) yang terbuka otomatis dari data yang
   sudah ada: jumlah deadline dicatat & diselesaikan, selesai tepat waktu, streak,
@@ -71,6 +72,7 @@ npm run lint     # jika tersedia
   dan `referrals`. Endpoint: `GET /api/achievements`.
 
 ### AI Quick Add dari Foto (Gemini Vision)
+
 - Di halaman AI Quick Add ada tombol **"Upload Foto Jadwal"** (selain input teks).
   Foto papan tulis / screenshot jadwal → otomatis jadi draft deadline.
 - Endpoint baru: `POST /api/deadlines/ai-extract-image` (gated Pulse/Command,
@@ -84,17 +86,20 @@ npm run lint     # jika tersedia
 ## Update lanjutan 2: Fix plan + Menu titik-tiga + Focus Mode
 
 ### Fix `profiles_plan_check` (user baru gagal)
+
 Jalankan **`supabase/migrations/20260606_fix_new_user_plan.sql`** sekali di SQL Editor.
 Ini mengganti trigger `handle_new_user` (penyebabnya) supaya user baru selalu dibuat
 dengan `plan = 'radar'`, merapikan data lama, dan set default kolom. Setelah ini,
 signup user baru tidak akan error lagi.
 
 ### Menu titik-tiga (☰/⋮) di kiri header
+
 Di mobile, ada tombol titik-tiga di kiri header → drawer berisi **semua halaman**
 (Dashboard, Leaderboard, Pencapaian, Focus, Deadline, Reminder, Profil, Billing, dll.).
 Daftar menu sekarang satu sumber di `components/dashboard/nav-items.ts`.
 
 ### Fitur baru: Focus Mode (Pomodoro)
+
 - Halaman `/dashboard/focus`: timer Pomodoro (25/5, 45/10, 15/3) dengan ring progress,
   start/jeda/reset, dan hitungan sesi.
 - Menyelesaikan sesi fokus pertama tiap hari memberi **+5 poin** (dibatasi 1x/hari via
@@ -112,6 +117,7 @@ leaderboard (`get_leaderboard`, `get_my_rank`, `award_points`), `payment_orders`
 trigger user-baru, dan storage bucket benar-benar ada.
 
 Setelah itu:
+
 - `GET /api/leaderboard` tidak 500 lagi (sekarang juga turun anggun, bukan crash).
 - `POST /rest/v1/profiles` tidak 400 lagi (kolom lengkap).
 - `POST /api/ask-nexa` tidak 500 lagi — kalau Gemini bermasalah, balas pesan ramah
@@ -140,6 +146,7 @@ ter-rollback semua (fungsi leaderboard tidak terbuat).
 > dibungkus exception agar tidak membatalkan seluruh script.
 
 ### Ask NEXA masih "tidak bisa menjawab"
+
 Itu murni `GEMINI_API_KEY`/model. Cek key valid di Google AI Studio; hapus env
 `GEMINI_MODEL` agar pakai default `gemini-2.5-flash-lite`. Lihat log server `[Ask NEXA]`
 untuk alasan persis.

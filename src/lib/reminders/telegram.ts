@@ -8,7 +8,10 @@ export function isTelegramConfigured() {
   return Boolean(process.env.TELEGRAM_BOT_TOKEN)
 }
 
-export async function sendTelegramMessage(chatId: string | null | undefined, text: string): Promise<TelegramSendResult> {
+export async function sendTelegramMessage(
+  chatId: string | null | undefined,
+  text: string
+): Promise<TelegramSendResult> {
   const token = process.env.TELEGRAM_BOT_TOKEN
 
   if (!token) return { ok: false, reason: 'missing_token' }

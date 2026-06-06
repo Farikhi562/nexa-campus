@@ -60,12 +60,14 @@ export function parseDeadlinePayload(body: DeadlinePayload) {
 
   if (!courseName) return { error: 'Mata kuliah atau kegiatan wajib diisi.' }
   if (!allowedTypes.has(type as DeadlineType)) return { error: 'Tipe deadline tidak valid.' }
-  if (!allowedSources.has(source as DeadlineSource)) return { error: 'Sumber deadline tidak valid.' }
+  if (!allowedSources.has(source as DeadlineSource))
+    return { error: 'Sumber deadline tidak valid.' }
   if (!isValidDate(deadlineDate)) return { error: 'Tanggal deadline tidak valid.' }
   if (!isValidTime(deadlineTime)) return { error: 'Jam deadline tidak valid.' }
   if (!campus) return { error: 'Kampus wajib diisi.' }
   if (!room) return { error: 'Ruangan wajib diisi. Kalau online, isi dengan Online.' }
-  if (!allowedPriorities.has(priority as DeadlinePriority)) return { error: 'Prioritas tidak valid.' }
+  if (!allowedPriorities.has(priority as DeadlinePriority))
+    return { error: 'Prioritas tidak valid.' }
   if (!allowedStatuses.has(status as DeadlineStatus)) return { error: 'Status tidak valid.' }
 
   return {

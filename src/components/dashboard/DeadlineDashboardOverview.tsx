@@ -2,7 +2,22 @@
 
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
-import { AlertTriangle, BellOff, CalendarDays, Check, CheckCircle2, Clock, Flame, Pencil, Plus, RotateCcw, Share2, Sparkles, Trash2, TimerReset } from 'lucide-react'
+import {
+  AlertTriangle,
+  BellOff,
+  CalendarDays,
+  Check,
+  CheckCircle2,
+  Clock,
+  Flame,
+  Pencil,
+  Plus,
+  RotateCcw,
+  Share2,
+  Sparkles,
+  Trash2,
+  TimerReset,
+} from 'lucide-react'
 import Badge from '@/components/ui/Badge'
 import { Card, CardContent } from '@/components/ui/Card'
 import AskNexaWidget from '@/components/dashboard/AskNexaWidget'
@@ -13,7 +28,12 @@ import LeaderboardTeaser from '@/components/dashboard/LeaderboardTeaser'
 import UpgradeCountdownCard from '@/components/dashboard/UpgradeCountdownCard'
 import SetupChecklist from '@/components/dashboard/SetupChecklist'
 import ShareDeadlineModal from '@/components/dashboard/ShareDeadlineModal'
-import { AllDone, EmptyAll, EmptyOverdue, EmptyToday } from '@/components/dashboard/DeadlineEmptyStates'
+import {
+  AllDone,
+  EmptyAll,
+  EmptyOverdue,
+  EmptyToday,
+} from '@/components/dashboard/DeadlineEmptyStates'
 import {
   countDashboardStats,
   formatDeadlineDate,
@@ -130,8 +150,8 @@ export default function DeadlineDashboardOverview({
   const todayActiveDeadlines = todayDeadlines.filter((deadline) => deadline.status !== 'completed')
   const allTodayDone = todayDeadlines.length > 0 && todayActiveDeadlines.length === 0
   const nearestDeadline = activeDeadlines[0]
-  const highPriorityCount = activeDeadlines.filter((deadline) =>
-    deadline.priority === 'high' || deadline.priority === 'urgent'
+  const highPriorityCount = activeDeadlines.filter(
+    (deadline) => deadline.priority === 'high' || deadline.priority === 'urgent'
   ).length
 
   async function updateStatus(deadline: AcademicDeadline, status: 'completed' | 'pending') {
@@ -144,7 +164,10 @@ export default function DeadlineDashboardOverview({
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ mode: 'status', status }),
     })
-    const result = (await response.json().catch(() => null)) as { data?: AcademicDeadline; error?: string } | null
+    const result = (await response.json().catch(() => null)) as {
+      data?: AcademicDeadline
+      error?: string
+    } | null
 
     if (!response.ok || !result?.data) {
       setActionError(result?.error || 'Status deadline gagal diubah. Coba lagi sebentar.')
@@ -153,16 +176,23 @@ export default function DeadlineDashboardOverview({
     }
 
     setDeadlines((current) =>
-      current
-        .map((item) => (item.id === deadline.id ? result.data! : item))
-        .sort(sortNearest)
+      current.map((item) => (item.id === deadline.id ? result.data! : item)).sort(sortNearest)
     )
-    setActionMessage(status === 'completed' ? 'Deadline selesai. Satu beban hidup berkurang.' : 'Deadline dibalikin ke pending.')
+    setActionMessage(
+      status === 'completed'
+        ? 'Deadline selesai. Satu beban hidup berkurang.'
+        : 'Deadline dibalikin ke pending.'
+    )
     setBusyId(null)
   }
 
   async function deleteDeadline(deadline: AcademicDeadline) {
-    if (!confirm('Yakin mau hapus deadline ini? Kalau sudah dihapus, NEXA nggak bisa nyelametin dia lagi.')) return
+    if (
+      !confirm(
+        'Yakin mau hapus deadline ini? Kalau sudah dihapus, NEXA nggak bisa nyelametin dia lagi.'
+      )
+    )
+      return
 
     setBusyId(deadline.id)
     setActionError('')
@@ -211,7 +241,9 @@ export default function DeadlineDashboardOverview({
         <div className="relative bg-gradient-to-br from-slate-950 via-slate-900 to-brand-950 p-5 sm:p-6">
           <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <Badge tone="info" className="mb-3">Deadline Radar</Badge>
+              <Badge tone="info" className="mb-3">
+                Deadline Radar
+              </Badge>
               <h1 className="max-w-3xl text-2xl font-black tracking-tight sm:text-4xl">
                 {nearestDeadline
                   ? `${getDisplayTitle(nearestDeadline)} paling dekat.`
@@ -314,7 +346,9 @@ export default function DeadlineDashboardOverview({
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-lg font-black text-slate-950">Deadline terdekat</h2>
-              <p className="mt-1 text-sm text-slate-500">Urut dari yang paling perlu dilihat dulu.</p>
+              <p className="mt-1 text-sm text-slate-500">
+                Urut dari yang paling perlu dilihat dulu.
+              </p>
             </div>
             <Badge tone={stats.today > 0 ? 'danger' : 'success'}>
               {stats.today > 0 ? 'Hari ini panas' : 'Hari ini aman'}
@@ -335,7 +369,9 @@ export default function DeadlineDashboardOverview({
                 <div key={group.key}>
                   <div className="bg-slate-50/70 px-4 py-3 sm:px-5">
                     <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                      <h3 className="text-sm font-black uppercase tracking-wide text-slate-700">{group.label}</h3>
+                      <h3 className="text-sm font-black uppercase tracking-wide text-slate-700">
+                        {group.label}
+                      </h3>
                       <p className="text-xs leading-5 text-slate-500">{group.copy}</p>
                     </div>
                   </div>
@@ -344,7 +380,10 @@ export default function DeadlineDashboardOverview({
                     const isDone = deadline.status === 'completed'
 
                     return (
-                      <article key={deadline.id} className="p-4 transition hover:bg-slate-50/80 sm:p-5">
+                      <article
+                        key={deadline.id}
+                        className="p-4 transition hover:bg-slate-50/80 sm:p-5"
+                      >
                         <div className="flex gap-3">
                           <button
                             type="button"
@@ -355,7 +394,11 @@ export default function DeadlineDashboardOverview({
                                 ? 'border-emerald-500 bg-emerald-500 text-white hover:bg-emerald-600'
                                 : 'border-slate-300 bg-white text-transparent hover:border-teal-500 hover:text-teal-600'
                             }`}
-                            aria-label={isDone ? `Balikin ${getDisplayTitle(deadline)} ke pending` : `Tandai ${getDisplayTitle(deadline)} selesai`}
+                            aria-label={
+                              isDone
+                                ? `Balikin ${getDisplayTitle(deadline)} ke pending`
+                                : `Tandai ${getDisplayTitle(deadline)} selesai`
+                            }
                           >
                             <Check className="h-4 w-4" />
                           </button>
@@ -364,13 +407,19 @@ export default function DeadlineDashboardOverview({
                             <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
                               <div className="min-w-0">
                                 <div className="flex flex-wrap items-center gap-2">
-                                  <h3 className={`text-base font-black text-slate-950 ${isDone ? 'line-through decoration-slate-400' : ''}`}>
+                                  <h3
+                                    className={`text-base font-black text-slate-950 ${isDone ? 'line-through decoration-slate-400' : ''}`}
+                                  >
                                     {getDisplayTitle(deadline)}
                                   </h3>
                                   <Badge tone={urgency.tone}>{urgency.label}</Badge>
-                                  <Badge tone={getPriorityTone(deadline.priority)}>{deadline.priority}</Badge>
+                                  <Badge tone={getPriorityTone(deadline.priority)}>
+                                    {deadline.priority}
+                                  </Badge>
                                 </div>
-                                <p className="mt-1 text-sm font-semibold text-slate-600">{deadline.course_name}</p>
+                                <p className="mt-1 text-sm font-semibold text-slate-600">
+                                  {deadline.course_name}
+                                </p>
                               </div>
 
                               <div className="flex items-center gap-2 text-sm font-bold text-slate-700 lg:flex-shrink-0">
@@ -391,7 +440,10 @@ export default function DeadlineDashboardOverview({
                             </div>
 
                             <p className="mt-3 text-sm leading-6 text-slate-500">
-                              Lokasi: <span className="font-bold text-slate-700">{deadline.campus} / {deadline.room}</span>
+                              Lokasi:{' '}
+                              <span className="font-bold text-slate-700">
+                                {deadline.campus} / {deadline.room}
+                              </span>
                               {deadline.location_note ? ` / ${deadline.location_note}` : ''}
                             </p>
 
@@ -405,11 +457,17 @@ export default function DeadlineDashboardOverview({
                               </Link>
                               <button
                                 type="button"
-                                onClick={() => updateStatus(deadline, isDone ? 'pending' : 'completed')}
+                                onClick={() =>
+                                  updateStatus(deadline, isDone ? 'pending' : 'completed')
+                                }
                                 disabled={busyId === deadline.id}
                                 className="focus-ring inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 transition hover:-translate-y-0.5 hover:border-brand-200 hover:bg-brand-50 hover:text-brand-800 disabled:opacity-60"
                               >
-                                {isDone ? <RotateCcw className="h-3.5 w-3.5" /> : <Check className="h-3.5 w-3.5" />}
+                                {isDone ? (
+                                  <RotateCcw className="h-3.5 w-3.5" />
+                                ) : (
+                                  <Check className="h-3.5 w-3.5" />
+                                )}
                                 {isDone ? 'Balikin ke pending' : 'Tandai selesai'}
                               </button>
                               <button
@@ -438,7 +496,8 @@ export default function DeadlineDashboardOverview({
         <div className="rounded-3xl border border-white/80 bg-white/90 p-5 text-sm leading-6 text-slate-600 shadow-xl shadow-slate-200/70">
           <p className="font-black text-slate-950">Catatan kecil</p>
           <p className="mt-2">
-            NEXA Campus bukan sistem resmi kampus. Selalu cek informasi final dari kanal resmi kampus.
+            NEXA Campus bukan sistem resmi kampus. Selalu cek informasi final dari kanal resmi
+            kampus.
           </p>
         </div>
         <AskNexaWidget deadlines={deadlines} />

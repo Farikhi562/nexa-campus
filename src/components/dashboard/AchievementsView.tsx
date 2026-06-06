@@ -20,7 +20,17 @@ import { Card, CardContent } from '@/components/ui/Card'
 import { evaluateBadges, type AchievementStats, type BadgeProgress } from '@/lib/badges'
 
 const ICONS: Record<string, typeof Trophy> = {
-  Sparkles, CheckCircle2, Rocket, CalendarCheck, Clock, Flame, Trophy, Crown, UserPlus, Users, Gem,
+  Sparkles,
+  CheckCircle2,
+  Rocket,
+  CalendarCheck,
+  Clock,
+  Flame,
+  Trophy,
+  Crown,
+  UserPlus,
+  Users,
+  Gem,
 }
 
 const tierRing: Record<string, string> = {
@@ -41,7 +51,9 @@ function BadgeTile({ badge }: { badge: BadgeProgress }) {
   const { earned } = badge
 
   return (
-    <Card className={`relative overflow-hidden ${earned ? `ring-2 ${tierRing[badge.def.tier]}` : ''}`}>
+    <Card
+      className={`relative overflow-hidden ${earned ? `ring-2 ${tierRing[badge.def.tier]}` : ''}`}
+    >
       <CardContent className="p-4 sm:p-5">
         <div className="flex items-start gap-3">
           <span
@@ -57,7 +69,9 @@ function BadgeTile({ badge }: { badge: BadgeProgress }) {
             )}
           </span>
           <div className="min-w-0 flex-1">
-            <p className={`text-sm font-black ${earned ? 'text-slate-950' : 'text-slate-500'}`}>{badge.def.name}</p>
+            <p className={`text-sm font-black ${earned ? 'text-slate-950' : 'text-slate-500'}`}>
+              {badge.def.name}
+            </p>
             <p className="mt-0.5 text-xs leading-5 text-slate-500">{badge.def.desc}</p>
           </div>
         </div>
@@ -123,13 +137,20 @@ export default function AchievementsView() {
           </div>
           <h1 className="text-2xl font-black tracking-tight sm:text-3xl">Koleksi lencana kamu.</h1>
           <p className="mt-2 max-w-xl text-sm leading-6 text-slate-300">
-            {stats ? `${earnedCount} dari ${badges.length} lencana terbuka.` : 'Memuat pencapaianmu…'}
-            {nextUp && ` Paling dekat: ${nextUp.def.name} (${Math.min(nextUp.current, nextUp.def.goal)}/${nextUp.def.goal}).`}
+            {stats
+              ? `${earnedCount} dari ${badges.length} lencana terbuka.`
+              : 'Memuat pencapaianmu…'}
+            {nextUp &&
+              ` Paling dekat: ${nextUp.def.name} (${Math.min(nextUp.current, nextUp.def.goal)}/${nextUp.def.goal}).`}
           </p>
         </div>
       </section>
 
-      {error && <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
+      {error && (
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          {error}
+        </div>
+      )}
 
       {loading ? (
         <div className="flex items-center justify-center rounded-3xl border border-slate-200 bg-white p-10 text-slate-400">
@@ -144,7 +165,8 @@ export default function AchievementsView() {
       )}
 
       <p className="px-1 text-center text-xs leading-5 text-slate-400">
-        Lencana terbuka otomatis dari aktivitasmu: mencatat & menyelesaikan deadline, streak, poin, dan referral.
+        Lencana terbuka otomatis dari aktivitasmu: mencatat & menyelesaikan deadline, streak, poin,
+        dan referral.
       </p>
     </div>
   )
