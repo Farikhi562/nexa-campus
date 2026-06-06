@@ -22,13 +22,13 @@ CREATE TABLE IF NOT EXISTS public.notifications (
   title text NOT NULL,
   message text,
   link text,
-  read boolean NOT NULL DEFAULT false,
+  is_read boolean NOT NULL DEFAULT false,
   created_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS notifications_user_created_idx
   ON public.notifications (user_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS notifications_user_unread_idx
-  ON public.notifications (user_id, read) WHERE read = false;
+  ON public.notifications (user_id, is_read) WHERE is_read = false;
 
 ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "notifications_select_own" ON public.notifications;

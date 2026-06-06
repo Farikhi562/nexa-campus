@@ -11,7 +11,7 @@ type Notification = {
   title: string
   message: string | null
   link: string | null
-  read: boolean
+  is_read: boolean
   created_at: string
 }
 
@@ -85,7 +85,7 @@ export default function NotificationBell() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ all: true }),
     })
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
+    setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })))
     setUnreadCount(0)
   }
 
@@ -139,10 +139,10 @@ export default function NotificationBell() {
               <div className="divide-y divide-slate-50">
                 {notifications.map((notif) => {
                   const content = (
-                    <div className={`flex gap-3 px-4 py-3 transition hover:bg-slate-50 ${!notif.read ? 'bg-teal-50/40' : ''}`}>
+                    <div className={`flex gap-3 px-4 py-3 transition hover:bg-slate-50 ${!notif.is_read ? 'bg-teal-50/40' : ''}`}>
                       <span className="mt-0.5 flex-shrink-0 text-lg">{typeIcon[notif.type] ?? '📣'}</span>
                       <div className="min-w-0 flex-1">
-                        <p className={`text-sm leading-5 ${!notif.read ? 'font-black text-slate-950' : 'font-bold text-slate-700'}`}>
+                        <p className={`text-sm leading-5 ${!notif.is_read ? 'font-black text-slate-950' : 'font-bold text-slate-700'}`}>
                           {notif.title}
                         </p>
                         {notif.message && (
@@ -150,7 +150,7 @@ export default function NotificationBell() {
                         )}
                         <p className="mt-1 text-[10px] font-bold text-slate-400">{timeAgo(notif.created_at)}</p>
                       </div>
-                      {!notif.read && <div className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-teal-500" />}
+                      {!notif.is_read && <div className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-teal-500" />}
                     </div>
                   )
                   return notif.link ? (

@@ -15,7 +15,7 @@ export async function GET() {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  const unreadCount = (data ?? []).filter((n: { read: boolean }) => !n.read).length
+  const unreadCount = (data ?? []).filter((n: { is_read: boolean }) => !n.is_read).length
   return NextResponse.json({ data: data ?? [], unreadCount })
 }
 
@@ -30,13 +30,13 @@ export async function PATCH(request: NextRequest) {
   if (body.all) {
     await supabase
       .from('notifications')
-      .update({ read: true })
+      .update({ is_read: true })
       .eq('user_id', user.id)
-      .eq('read', false)
+      .eq('is_read', false)
   } else if (Array.isArray(body.ids)) {
     await supabase
       .from('notifications')
-      .update({ read: true })
+      .update({ is_read: true })
       .in('id', body.ids as string[])
       .eq('user_id', user.id)
   }
