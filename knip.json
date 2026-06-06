@@ -1,0 +1,17 @@
+{
+	"$schema": "https://unpkg.com/knip/schema.json",
+	"ignore": [
+	 "node_modules/**",
+	 ".next/**",
+	 "out/**",
+	 "dist/**",
+	 "build/**",
+	 "coverage/**",
+	 "public/**/*.mp4",
+	 "public/**/*.mov",
+	 "public/**/*.zip",
+	 "public/**/*.rar",
+	 "**/*.class",
+	 "knip-report.txt"
+	]
+}

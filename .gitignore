@@ -8,6 +8,16 @@ node_modules/
 out/
 build/
 dist/
+coverage/
+*.class
+knip-report.txt
+.env.production
+.env*.local
+gitleaks-report.json
+.env.*
+!.env.example
+gitleaks-report.json
+gitleaks-report.*
 
 # Environment — NEVER commit secrets
 .env
