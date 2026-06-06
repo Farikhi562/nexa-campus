@@ -44,7 +44,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ status: 'skipped' })
   }
 
-  const service = createServiceClient()
+  // Harden: service client might not be configured in all environments
+  let service: ReturnType<typeof createServiceClient>
+  try {
+    service = createServiceClient()
+  } catch (err) {
+    console.warn('[Referral] Service client tidak tersedia (SUPABASE_SERVICE_ROLE_KEY belum diset):', err)
+    return NextResponse.json({ status: 'skipped', reason: 'service_not_configured' })
+  }
+
   const { data: referrer, error: referrerError } = await service
     .from('profiles')
     .select('id, plan, pulse_trial_until')
@@ -52,7 +60,8 @@ export async function POST(request: NextRequest) {
     .maybeSingle()
 
   if (referrerError) {
-    return NextResponse.json({ error: 'Referral gagal dicek.' }, { status: 500 })
+    console.error('[Referral] Error cek referrer:', referrerError.message)
+    return NextResponse.json({ status: 'skipped', reason: 'lookup_failed' })
   }
 
   const typedReferrer = referrer as ReferrerProfile | null
@@ -60,6 +69,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ status: 'ignored' })
   }
 
+  // Simpan record referral
   const { data: insertedReferral, error: insertError } = await service
     .from('referrals')
     .insert({
@@ -74,10 +84,11 @@ export async function POST(request: NextRequest) {
     if (insertError.code === '23505') {
       return NextResponse.json({ status: 'already_recorded' })
     }
-
-    return NextResponse.json({ error: 'Referral gagal disimpan.' }, { status: 500 })
+    console.error('[Referral] Insert error:', insertError.message)
+    return NextResponse.json({ status: 'skipped', reason: 'insert_failed' })
   }
 
+  // Beri reward ke referrer
   const rewardUntil = addRewardDays(typedReferrer.pulse_trial_until)
   const profileUpdate =
     typedReferrer.plan === 'command'
@@ -90,13 +101,33 @@ export async function POST(request: NextRequest) {
     .eq('id', typedReferrer.id)
 
   if (rewardError) {
-    return NextResponse.json({ error: 'Reward referral gagal diproses.' }, { status: 500 })
+    console.error('[Referral] Reward error:', rewardError.message)
+    // Referral tercatat tapi reward gagal — jangan block onboarding
+    return NextResponse.json({ status: 'recorded_reward_pending' })
   }
 
+  // Mark rewarded
   await service
     .from('referrals')
     .update({ rewarded: true })
     .eq('id', insertedReferral?.id)
+    .then(() => null, () => null)
+
+  // Kirim notifikasi in-app ke referrer
+  const { data: referredProfile } = await supabase
+    .from('profiles')
+    .select('full_name')
+    .eq('id', user.id)
+    .maybeSingle()
+  const referredName = (referredProfile as { full_name?: string | null } | null)?.full_name ?? 'Teman kamu'
+
+  await service.from('notifications').insert({
+    user_id: typedReferrer.id,
+    type: 'achievement',
+    title: '🎉 Referral berhasil!',
+    message: `${referredName} baru saja bergabung pakai kode referral kamu. Kamu dapat 30 hari Pulse gratis!`,
+    link: '/dashboard',
+  }).then(() => null, () => null)
 
   return NextResponse.json({
     status: 'rewarded',

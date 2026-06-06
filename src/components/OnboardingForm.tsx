@@ -203,6 +203,17 @@ export default function OnboardingForm({
 
   return (
     <form onSubmit={submit} className="space-y-6">
+      {/* Referral code indicator — tampil kalau ada kode */}
+      {referralCode && (
+        <div className="flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+          <span className="text-base">🎁</span>
+          <span>
+            Kode referral <span className="font-black">{referralCode}</span> diterima.
+            Kamu & teman yang mengundang sama-sama dapat bonus setelah setup selesai.
+          </span>
+        </div>
+      )}
+
       {/* Foto profil */}
       <section className="rounded-3xl border border-slate-200 bg-white p-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">

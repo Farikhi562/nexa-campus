@@ -95,6 +95,7 @@ export interface StudyRoom {
   scheduled_at: string | null
   created_at: string
   updated_at: string
+  owner_name?: string | null
   is_member?: boolean
   member_role?: RoomMemberRole | null
   has_pending_request?: boolean

@@ -223,7 +223,7 @@ export default function DeadlineDashboardOverview({
                   : 'Belum ada deadline aktif. Entah hidupmu damai atau kamu belum nyatet.'}
               </p>
             </div>
-            <div className="flex flex-col gap-3 sm:flex-row lg:items-center">
+            <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap sm:gap-3">
               {highPriorityCount > 0 && (
                 <div className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-amber-300/20 bg-amber-300/10 px-4 py-3 text-sm font-black text-amber-100">
                   <Flame className="h-4 w-4" />

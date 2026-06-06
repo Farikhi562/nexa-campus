@@ -230,78 +230,120 @@ export default function StudyRoomView({ userId }: { userId: string }) {
           </Card>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
-            {rooms.map((room) => (
-              <Card key={room.id} className="flex flex-col">
-                <CardContent className="flex flex-1 flex-col p-4 sm:p-5">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <Badge tone={statusColor(room.status) as 'success' | 'warning' | 'neutral'}>
-                          {statusLabel(room.status)}
-                        </Badge>
-                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-bold capitalize text-slate-600">
-                          {room.category}
-                        </span>
+            {rooms.map((room) => {
+              const isPrivate = room.visibility === 'private'
+              const isPending = room.has_pending_request
+              const canEnter = room.is_member
+
+              return (
+                <Card key={room.id} className={`flex flex-col ${isPrivate && !canEnter ? 'border-dashed border-slate-300' : ''}`}>
+                  <CardContent className="flex flex-1 flex-col p-4 sm:p-5">
+                    {/* Header */}
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge tone={statusColor(room.status) as 'success' | 'warning' | 'neutral'}>
+                            {statusLabel(room.status)}
+                          </Badge>
+                          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-bold capitalize text-slate-600">
+                            {room.category}
+                          </span>
+                          {isPrivate && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-bold text-amber-700">
+                              🔒 Privat
+                            </span>
+                          )}
+                        </div>
+                        <h3 className="mt-2 text-base font-black text-slate-950 line-clamp-1">{room.title}</h3>
+                        {room.description && (
+                          <p className="mt-1 text-sm leading-5 text-slate-500 line-clamp-2">{room.description}</p>
+                        )}
                       </div>
-                      <h3 className="mt-2 text-base font-black text-slate-950 line-clamp-1">{room.title}</h3>
-                      {room.description && (
-                        <p className="mt-1 text-sm leading-5 text-slate-500 line-clamp-2">{room.description}</p>
+                    </div>
+
+                    {/* Meta */}
+                    <div className="mt-3 flex flex-wrap items-center gap-3 text-xs font-bold text-slate-500">
+                      <span className="flex items-center gap-1.5">
+                        <Users className="h-3.5 w-3.5" />
+                        {room.current_members_count}/{room.max_members} anggota
+                      </span>
+                      {room.scheduled_at && (
+                        <span className="flex items-center gap-1.5">
+                          <Clock className="h-3.5 w-3.5" />
+                          {new Date(room.scheduled_at).toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' })}
+                        </span>
+                      )}
+                      {room.topic && <span className="text-teal-700">#{room.topic}</span>}
+                    </div>
+
+                    {/* Owner info — selalu tampil untuk semua room */}
+                    {room.owner_name && (
+                      <p className="mt-2 text-xs text-slate-400">
+                        Dibuat oleh <span className="font-bold text-slate-600">{room.owner_name}</span>
+                      </p>
+                    )}
+
+                    {/* Actions */}
+                    <div className="mt-4 flex gap-2">
+                      {canEnter ? (
+                        <>
+                          {room.member_role === 'owner' && (
+                            <span className="inline-flex items-center rounded-2xl bg-amber-50 px-3 py-1.5 text-xs font-black text-amber-700">👑 Owner</span>
+                          )}
+                          <Link
+                            href={`/dashboard/study-room/${room.id}`}
+                            className="focus-ring inline-flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-2xl bg-teal-500 px-4 text-sm font-black text-white hover:bg-teal-400"
+                          >
+                            Masuk Room
+                          </Link>
+                          <Button
+                            onClick={() => handleLeave(room.id)}
+                            disabled={actionId === room.id}
+                            variant="outline"
+                            className="rounded-2xl text-sm"
+                          >
+                            Keluar
+                          </Button>
+                        </>
+                      ) : isPrivate ? (
+                        <div className="flex w-full flex-col gap-2">
+                          {isPending ? (
+                            <div className="flex w-full items-center justify-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 py-2.5 text-xs font-black text-amber-700">
+                              ⏳ Menunggu persetujuan owner...
+                            </div>
+                          ) : (
+                            <>
+                              <Link
+                                href={`/dashboard/study-room/${room.id}`}
+                                className="focus-ring inline-flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-3 text-xs font-black text-slate-700 hover:bg-slate-50"
+                              >
+                                Lihat Info
+                              </Link>
+                              <Button
+                                onClick={() => handleJoin(room)}
+                                disabled={actionId === room.id || room.status !== 'open'}
+                                className="w-full rounded-2xl text-sm"
+                              >
+                                {actionId === room.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : '🔒 Minta Bergabung'}
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      ) : (
+                        <Button
+                          onClick={() => handleJoin(room)}
+                          disabled={actionId === room.id || room.status !== 'open' || room.owner_id === userId}
+                          className="w-full rounded-2xl text-sm"
+                        >
+                          {actionId === room.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+                          {room.status === 'closed' ? 'Ditutup' : room.status === 'full' ? 'Penuh' : 'Join'}
+                        </Button>
                       )}
                     </div>
-                  </div>
-
-                  <div className="mt-3 flex flex-wrap items-center gap-3 text-xs font-bold text-slate-500">
-                    <span className="flex items-center gap-1.5">
-                      <Users className="h-3.5 w-3.5" />
-                      {room.current_members_count}/{room.max_members} anggota
-                    </span>
-                    {room.scheduled_at && (
-                      <span className="flex items-center gap-1.5">
-                        <Clock className="h-3.5 w-3.5" />
-                        {new Date(room.scheduled_at).toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' })}
-                      </span>
-                    )}
-                    {room.topic && <span className="text-teal-700">#{room.topic}</span>}
-                  </div>
-
-                  <div className="mt-4 flex gap-2">
-                    {room.is_member ? (
-                      <>
-                        {room.member_role === 'owner' && (
-                          <span className="inline-flex items-center rounded-2xl bg-amber-50 px-3 py-1.5 text-xs font-black text-amber-700">👑 Owner</span>
-                        )}
-                        <Link
-                          href={`/dashboard/study-room/${room.id}`}
-                          className="focus-ring inline-flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-2xl bg-teal-500 px-4 text-sm font-black text-white hover:bg-teal-400"
-                        >
-                          Masuk Room
-                        </Link>
-                        <Button
-                          onClick={() => handleLeave(room.id)}
-                          disabled={actionId === room.id}
-                          variant="outline"
-                          className="rounded-2xl text-sm"
-                        >
-                          Keluar
-                        </Button>
-                      </>
-                    ) : (
-                      <Button
-                        onClick={() => handleJoin(room)}
-                        disabled={actionId === room.id || room.status === 'closed' || room.status === 'full' || room.owner_id === userId}
-                        className="w-full rounded-2xl text-sm"
-                      >
-                        {actionId === room.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
-                        {room.status === 'closed' ? 'Ditutup'
-                          : room.status === 'full' ? 'Penuh'
-                          : room.visibility === 'private' ? '🔒 Minta Bergabung'
-                          : 'Join'}
-                      </Button>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              )
+            })}
           </div>
         )}
       </div>

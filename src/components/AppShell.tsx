@@ -3,6 +3,7 @@ import { Home, Plus, Sparkles, Trophy, Users } from 'lucide-react'
 import AvatarMenu from '@/components/AvatarMenu'
 import MobileNavMenu from '@/components/MobileNavMenu'
 import CollapsibleSidebar from '@/components/dashboard/CollapsibleSidebar'
+import NotificationBell from '@/components/NotificationBell'
 import NexaLogo from '@/components/NexaLogo'
 import { BRAND } from '@/lib/brand'
 import { isAdminEmail } from '@/lib/admin'
@@ -47,11 +48,14 @@ export default function AppShell({
               </div>
             </Link>
           </div>
-          <AvatarMenu
-            avatarUrl={profile?.avatar_url ?? null}
-            fullName={profile?.full_name ?? null}
-            email={profile?.email ?? null}
-          />
+          <div className="flex items-center gap-1.5">
+            <NotificationBell />
+            <AvatarMenu
+              avatarUrl={profile?.avatar_url ?? null}
+              fullName={profile?.full_name ?? null}
+              email={profile?.email ?? null}
+            />
+          </div>
         </div>
       </header>
 

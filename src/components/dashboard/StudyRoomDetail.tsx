@@ -76,6 +76,7 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
   const [showSettings, setShowSettings] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://campus.nexatechlabs.my.id'
 
   const myMembership = members.find((m) => m.user_id === userId)
   const myRole = myMembership?.role ?? null
@@ -218,6 +219,14 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
     setTimeout(() => setCopied(false), 2000)
   }
 
+  function shareToWA() {
+    if (!room) return
+    const text = encodeURIComponent(
+      `📚 Yuk belajar bareng di Study Room NEXA Campus!\n\nNama: ${room.title}\nKode Room: ${room.room_code}\n\nCara gabung:\n1. Buka NEXA Campus: ${siteUrl}/dashboard/study-room\n2. Masukkan kode: ${room.room_code}`
+    )
+    window.open(`https://wa.me/?text=${text}`, '_blank', 'noopener,noreferrer')
+  }
+
   if (loading) return (
     <div className="flex h-[70vh] items-center justify-center text-slate-400">
       <Loader2 className="h-6 w-6 animate-spin" />
@@ -236,21 +245,101 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
   if (!room.is_member) {
     return (
       <Card>
-        <CardContent className="p-8 text-center space-y-4">
-          <div className="text-4xl">🔒</div>
-          <h2 className="text-xl font-black text-slate-950">{room.title}</h2>
-          <p className="text-sm text-slate-500">
-            {room.visibility === 'private'
-              ? 'Room ini private. Minta izin dulu, jangan main nerobos kayak deadline H-1.'
-              : 'Kamu belum gabung room ini.'}
-          </p>
-          {room.has_pending_request ? (
-            <Badge tone="warning">Permintaan join sedang diproses...</Badge>
-          ) : (
-            <Link href="/dashboard/study-room">
-              <Button className="rounded-2xl">Kembali ke daftar room</Button>
+        <CardContent className="p-6 sm:p-8">
+          <div className="flex flex-col gap-5">
+            {/* Room info header */}
+            <div className="flex items-start gap-4">
+              <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-2xl">
+                {room.visibility === 'private' ? '🔒' : '📚'}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-black ${
+                    room.visibility === 'private' ? 'bg-amber-100 text-amber-700' : 'bg-teal-100 text-teal-700'
+                  }`}>
+                    {room.visibility === 'private' ? '🔒 Private' : '🌐 Publik'}
+                  </span>
+                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-bold capitalize text-slate-600">
+                    {room.category}
+                  </span>
+                  <span className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${
+                    room.status === 'open' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'
+                  }`}>
+                    {room.status === 'open' ? 'Buka' : room.status === 'full' ? 'Penuh' : 'Ditutup'}
+                  </span>
+                </div>
+                <h2 className="mt-2 text-xl font-black text-slate-950">{room.title}</h2>
+                {room.topic && <p className="mt-1 text-xs font-bold text-teal-600">#{room.topic}</p>}
+              </div>
+            </div>
+
+            {/* Description */}
+            {room.description && (
+              <p className="text-sm leading-6 text-slate-600">{room.description}</p>
+            )}
+
+            {/* Stats */}
+            <div className="flex flex-wrap gap-4 rounded-2xl border border-slate-100 bg-slate-50 p-4 text-sm">
+              <div>
+                <p className="text-xs text-slate-500">Anggota</p>
+                <p className="font-black text-slate-950">{room.current_members_count}/{room.max_members}</p>
+              </div>
+              {(room as StudyRoom & { owner_name?: string }).owner_name && (
+                <div>
+                  <p className="text-xs text-slate-500">Dibuat oleh</p>
+                  <p className="font-black text-slate-950">{(room as StudyRoom & { owner_name?: string }).owner_name}</p>
+                </div>
+              )}
+              {room.scheduled_at && (
+                <div>
+                  <p className="text-xs text-slate-500">Jadwal</p>
+                  <p className="font-black text-slate-950">
+                    {new Date(room.scheduled_at).toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' })}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* CTA */}
+            {room.visibility === 'private' ? (
+              <div className="space-y-3">
+                {room.has_pending_request ? (
+                  <div className="flex items-center justify-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 py-3 text-sm font-black text-amber-700">
+                    ⏳ Permintaan bergabung sedang diproses...
+                  </div>
+                ) : (
+                  <button
+                    onClick={async () => {
+                      const res = await fetch(`/api/study-rooms/${roomId}/requests`, { method: 'POST' })
+                      if (res.ok) { await loadAll() }
+                      else { const j = await res.json(); alert(j.error ?? 'Gagal.') }
+                    }}
+                    className="focus-ring w-full rounded-2xl bg-teal-500 py-3 text-sm font-black text-white hover:bg-teal-400"
+                  >
+                    🔒 Minta Bergabung
+                  </button>
+                )}
+                <p className="text-center text-xs text-slate-400">
+                  Room ini private. Minta izin dulu, jangan main nerobos kayak deadline H-1.
+                </p>
+              </div>
+            ) : (
+              <button
+                onClick={async () => {
+                  const res = await fetch(`/api/study-rooms/${roomId}/join`, { method: 'POST' })
+                  if (res.ok) { await loadAll() }
+                  else { const j = await res.json(); alert(j.error ?? 'Gagal join.') }
+                }}
+                className="focus-ring w-full rounded-2xl bg-teal-500 py-3 text-sm font-black text-white hover:bg-teal-400"
+              >
+                Gabung Room
+              </button>
+            )}
+
+            <Link href="/dashboard/study-room" className="flex items-center justify-center gap-1 text-sm font-bold text-slate-500 hover:text-slate-700">
+              <ChevronLeft className="h-4 w-4" /> Kembali ke daftar room
             </Link>
-          )}
+          </div>
         </CardContent>
       </Card>
     )
@@ -271,6 +360,12 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
               <button onClick={copyCode} className="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-2 py-0.5 font-black text-slate-700 hover:bg-slate-200">
                 {copied ? <Check className="h-3 w-3 text-emerald-600" /> : <Copy className="h-3 w-3" />}
                 {room.room_code}
+              </button>
+              <button
+                onClick={shareToWA}
+                className="inline-flex items-center gap-1 rounded-lg bg-green-100 px-2 py-0.5 text-[11px] font-black text-green-700 hover:bg-green-200"
+              >
+                📲 Share WA
               </button>
               {room.visibility === 'private' && <span className="rounded-full bg-amber-100 px-2 py-0.5 text-amber-700">Private</span>}
             </div>
@@ -329,6 +424,16 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
                             />
                             <p className="text-[11px] opacity-70">{msg.attachment_name}</p>
                           </div>
+                        ) : msg.message_type === 'file' && msg.attachment_path && msg.attachment_mime?.startsWith('video/') ? (
+                          <div className="space-y-1">
+                            <video controls className="max-h-48 max-w-full rounded-xl" preload="metadata">
+                              <source
+                                src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/room-attachments/${msg.attachment_path}`}
+                                type={msg.attachment_mime ?? 'video/mp4'}
+                              />
+                            </video>
+                            <p className="text-[11px] opacity-70">{msg.attachment_name} {msg.attachment_size ? `(${formatBytes(msg.attachment_size)})` : ''}</p>
+                          </div>
                         ) : msg.message_type === 'file' && msg.attachment_path ? (
                           <a
                             href={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/room-attachments/${msg.attachment_path}`}
@@ -357,7 +462,7 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip"
+                accept="image/*,video/mp4,video/webm,video/quicktime,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip"
                 className="sr-only"
                 onChange={(e) => { const f = e.target.files?.[0]; if (f) void sendFile(f); e.target.value = '' }}
               />

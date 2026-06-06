@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { MoreVertical, X } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
 import { DASHBOARD_NAV } from '@/components/dashboard/nav-items'
 import NexaLogo from '@/components/NexaLogo'
 
@@ -40,7 +40,7 @@ export default function MobileNavMenu({ isAdmin = false }: { isAdmin?: boolean }
         aria-expanded={open}
         className="focus-ring flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 ring-1 ring-slate-200 transition hover:bg-slate-200 lg:hidden"
       >
-        <MoreVertical className="h-5 w-5" />
+        <Menu className="h-5 w-5" />
       </button>
 
       {open && (

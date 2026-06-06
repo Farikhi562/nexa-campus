@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
-const MAX_SIZE = 10 * 1024 * 1024 // 10MB
+const MAX_SIZE = 50 * 1024 * 1024 // 50MB
 const ALLOWED_MIME = new Set([
+  // Gambar
   'image/jpeg','image/png','image/webp','image/gif',
+  // Video
+  'video/mp4','video/webm','video/ogg','video/quicktime','video/3gpp','video/x-msvideo',
+  // Dokumen
   'application/pdf','text/plain',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -47,6 +51,7 @@ export async function POST(request: NextRequest, { params }: Params) {
   const { data: { publicUrl } } = supabase.storage.from('room-attachments').getPublicUrl(path)
 
   const isImage = file.type.startsWith('image/')
+  const isVideo = file.type.startsWith('video/')
   return NextResponse.json({
     data: {
       path,
@@ -54,7 +59,7 @@ export async function POST(request: NextRequest, { params }: Params) {
       filename: file.name,
       file_size: file.size,
       mime_type: file.type,
-      message_type: isImage ? 'image' : 'file',
+      message_type: isImage ? 'image' : isVideo ? 'file' : 'file',
     }
   }, { status: 201 })
 }

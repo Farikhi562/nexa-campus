@@ -4,10 +4,31 @@
 
 html {
   -webkit-tap-highlight-color: transparent;
+  /* Cegah horizontal scroll di semua device */
+  overflow-x: hidden;
 }
 
 body {
   min-height: 100dvh;
+  /* Cegah horizontal overflow */
+  overflow-x: hidden;
+  /* Proper text rendering di mobile */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Pastikan semua element tidak overflow secara tidak sengaja */
+*,
+*::before,
+*::after {
+  max-width: 100%;
+}
+
+img,
+video,
+svg {
+  max-width: 100%;
+  height: auto;
 }
 
 .scrollbar-hide {

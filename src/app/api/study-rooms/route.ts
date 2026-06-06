@@ -13,7 +13,6 @@ export async function GET(request: NextRequest) {
   let query = supabase
     .from('study_rooms')
     .select('*')
-    .eq('visibility', 'public')
     .order('created_at', { ascending: false })
     .limit(50)
 
@@ -24,8 +23,23 @@ export async function GET(request: NextRequest) {
   const { data: rooms, error } = await query
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  // Get user memberships in one query
-  const roomIds = (rooms ?? []).map((r: { id: string }) => r.id)
+  const roomList = (rooms ?? []) as Array<Record<string, unknown>>
+  const roomIds = roomList.map((r) => r.id as string)
+  const ownerIds = Array.from(new Set(roomList.map((r) => r.owner_id as string)))
+
+  // Owner names (safe: only full_name, no email/phone)
+  let ownerNames: Record<string, string | null> = {}
+  if (ownerIds.length > 0) {
+    const { data: owners } = await supabase
+      .from('profiles')
+      .select('id, full_name')
+      .in('id', ownerIds)
+    for (const o of (owners ?? []) as Array<{ id: string; full_name: string | null }>) {
+      ownerNames[o.id] = o.full_name
+    }
+  }
+
+  // User memberships in one query
   let memberships: Array<{ room_id: string; role: string }> = []
   if (roomIds.length > 0) {
     const { data } = await supabase
@@ -36,11 +50,27 @@ export async function GET(request: NextRequest) {
     memberships = (data ?? []) as typeof memberships
   }
 
+  // Pending join requests for private rooms
+  let pendingRequests: Set<string> = new Set()
+  if (roomIds.length > 0) {
+    const { data: reqs } = await supabase
+      .from('study_room_join_requests')
+      .select('room_id')
+      .eq('user_id', user.id)
+      .eq('status', 'pending')
+      .in('room_id', roomIds)
+    for (const r of (reqs ?? []) as Array<{ room_id: string }>) {
+      pendingRequests.add(r.room_id)
+    }
+  }
+
   const membershipMap = new Map(memberships.map((m) => [m.room_id, m.role]))
-  const enriched = (rooms ?? []).map((r: Record<string, unknown>) => ({
+  const enriched = roomList.map((r) => ({
     ...r,
+    owner_name: ownerNames[r.owner_id as string] ?? null,
     is_member: membershipMap.has(r.id as string),
     member_role: membershipMap.get(r.id as string) ?? null,
+    has_pending_request: pendingRequests.has(r.id as string),
   }))
 
   return NextResponse.json({ data: enriched })
