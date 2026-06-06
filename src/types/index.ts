@@ -72,6 +72,52 @@ export interface LeaderboardMe {
 
 export type LeaderboardScope = 'weekly' | 'monthly' | 'all_time'
 
+// ---------- Study Room -------------------------------------------------------
+export type StudyRoomCategory =
+  | 'umum' | 'matematika' | 'fisika' | 'kimia' | 'biologi'
+  | 'informatika' | 'ekonomi' | 'hukum' | 'kedokteran' | 'bahasa' | 'seni' | 'lainnya'
+
+export interface StudyRoom {
+  id: string
+  owner_id: string
+  title: string
+  description: string | null
+  topic: string | null
+  category: StudyRoomCategory
+  max_members: number
+  current_members_count: number
+  status: 'open' | 'full' | 'closed'
+  visibility: 'public' | 'private'
+  scheduled_at: string | null
+  created_at: string
+  updated_at: string
+  is_member?: boolean
+  member_role?: 'owner' | 'member' | null
+}
+
+// ---------- Friends ----------------------------------------------------------
+export interface PublicProfile {
+  id: string
+  full_name: string | null
+  campus_name: string | null
+  major: string | null
+  avatar_url: string | null
+  plan: Plan
+  created_at: string
+}
+
+export type FriendRequestStatus = 'pending' | 'accepted' | 'rejected'
+
+export interface FriendRequest {
+  id: string
+  requester_id: string
+  receiver_id: string
+  status: FriendRequestStatus
+  created_at: string
+  updated_at: string
+  other_user?: PublicProfile | null
+}
+
 export interface Referral {
   id: string
   referrer_id: string

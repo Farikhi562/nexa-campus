@@ -1,8 +1,8 @@
 import Link from 'next/link'
-import { BellRing, Home, Plus, Sparkles, Trophy, UserRound } from 'lucide-react'
+import { Home, Plus, Sparkles, Trophy, Users } from 'lucide-react'
 import AvatarMenu from '@/components/AvatarMenu'
 import MobileNavMenu from '@/components/MobileNavMenu'
-import DashboardNavigation from '@/components/dashboard/DashboardNavigation'
+import CollapsibleSidebar from '@/components/dashboard/CollapsibleSidebar'
 import NexaLogo from '@/components/NexaLogo'
 import { BRAND } from '@/lib/brand'
 
@@ -17,8 +17,8 @@ const mobileNavItems = [
   { label: 'Home', href: '/dashboard', icon: Home },
   { label: 'Tambah', href: '/dashboard/deadlines/new', icon: Plus },
   { label: 'Ranking', href: '/dashboard/leaderboard', icon: Trophy },
+  { label: 'Study', href: '/dashboard/study-room', icon: Users },
   { label: 'AI', href: '/dashboard/deadlines/quick-add', icon: Sparkles },
-  { label: 'Profil', href: '/dashboard/settings/profile', icon: UserRound },
 ]
 
 export default function AppShell({
@@ -32,7 +32,7 @@ export default function AppShell({
     <div className="min-h-screen bg-slate-50">
       <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-3 py-2.5 sm:px-4 sm:py-3">
-          <div className="flex min-w-0 items-center gap-2.5">
+          <div className="flex min-w-0 items-center gap-2">
             <MobileNavMenu />
             <Link href="/dashboard" className="flex min-w-0 items-center gap-2.5">
               <NexaLogo className="h-9 w-9 flex-shrink-0 sm:h-10 sm:w-10" />
@@ -52,21 +52,15 @@ export default function AppShell({
         </div>
       </header>
 
-      <div className="mx-auto grid max-w-7xl gap-5 px-3 py-4 pb-28 sm:px-4 sm:py-5 lg:grid-cols-[280px_minmax(0,1fr)] lg:pb-8">
-        <aside className="hidden lg:block">
-          <div className="sticky top-24 space-y-4">
-            <DashboardNavigation />
-            <div className="rounded-3xl border border-slate-200 bg-white p-4 text-xs leading-5 text-slate-600 shadow-sm">
-              {BRAND.disclaimer}
-            </div>
-          </div>
-        </aside>
-
-        <main className="min-w-0 space-y-4 sm:space-y-5">
+      {/* Content: flex so CollapsibleSidebar can change width dynamically */}
+      <div className="mx-auto flex max-w-7xl gap-5 px-3 py-4 pb-28 sm:px-4 sm:py-5 lg:pb-8">
+        <CollapsibleSidebar />
+        <main className="min-w-0 flex-1 space-y-4 sm:space-y-5">
           {children}
         </main>
       </div>
 
+      {/* Mobile bottom nav */}
       <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/95 px-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-2 shadow-2xl shadow-slate-950/10 backdrop-blur-xl lg:hidden">
         <div className="mx-auto grid max-w-md grid-cols-5 gap-1">
           {mobileNavItems.map(({ label, href, icon: Icon }) => (
