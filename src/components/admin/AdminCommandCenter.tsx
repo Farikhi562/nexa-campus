@@ -333,7 +333,7 @@ export default function AdminCommandCenter({
           <Card className="border-amber-200 bg-amber-50">
             <CardContent className="flex items-start gap-3 p-4">
               <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600" />
-              <p className="text-sm text-amber-900">Secret key values tidak pernah ditampilkan di sini. Hanya status "configured/not configured" yang aman untuk ditampilkan.</p>
+              <p className="text-sm text-amber-900">Secret key values tidak pernah ditampilkan di sini. Hanya status &quot;configured/not configured&quot; yang aman untuk ditampilkan.</p>
             </CardContent>
           </Card>
         </div>
