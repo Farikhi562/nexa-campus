@@ -4,8 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 
 export const metadata = {
   title: 'Leaderboard · NEXA Campus',
-  description:
-    'Papan peringkat NEXA Campus. Kumpulkan poin dari deadline yang kamu selesaikan dan saingi teman serta kampusmu.',
+  description: 'Papan peringkat NEXA Campus. Kumpulkan poin dari deadline yang kamu selesaikan dan saingi teman serta kampusmu.',
 }
 
 export default async function LeaderboardPage() {

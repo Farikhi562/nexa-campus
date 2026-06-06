@@ -4,9 +4,7 @@ import { DASHBOARD_NAV } from '@/components/dashboard/nav-items'
 export default function DashboardNavigation() {
   return (
     <nav className="rounded-3xl border border-white/80 bg-white/90 p-3 shadow-xl shadow-slate-200/70 ring-1 ring-slate-950/[0.03] backdrop-blur">
-      <p className="px-2 pb-2 text-xs font-black uppercase tracking-[0.18em] text-brand-700">
-        Navigasi
-      </p>
+      <p className="px-2 pb-2 text-xs font-black uppercase tracking-[0.18em] text-brand-700">Navigasi</p>
       <div className="grid gap-1.5">
         {DASHBOARD_NAV.map(({ label, href, icon: Icon, hot, soon }) => (
           <Link

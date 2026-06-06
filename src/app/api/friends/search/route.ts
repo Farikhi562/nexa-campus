@@ -3,9 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Login required.' }, { status: 401 })
 
   const q = request.nextUrl.searchParams.get('q')?.trim() ?? ''

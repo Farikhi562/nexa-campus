@@ -93,7 +93,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Reward referral gagal diproses.' }, { status: 500 })
   }
 
-  await service.from('referrals').update({ rewarded: true }).eq('id', insertedReferral?.id)
+  await service
+    .from('referrals')
+    .update({ rewarded: true })
+    .eq('id', insertedReferral?.id)
 
   return NextResponse.json({
     status: 'rewarded',

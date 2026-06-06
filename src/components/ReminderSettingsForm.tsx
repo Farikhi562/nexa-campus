@@ -26,9 +26,7 @@ export default function ReminderSettingsForm({
   const [h3, setH3] = useState(preferences?.h3_enabled ?? false)
   const [h1, setH1] = useState(preferences?.h1_enabled ?? true)
   const [day, setDay] = useState(preferences?.day_enabled ?? true)
-  const [reminderTime, setReminderTime] = useState(
-    preferences?.reminder_time?.slice(0, 5) ?? '08:00'
-  )
+  const [reminderTime, setReminderTime] = useState(preferences?.reminder_time?.slice(0, 5) ?? '08:00')
   const [loading, setLoading] = useState(false)
   const [testing, setTesting] = useState(false)
   const [message, setMessage] = useState('')
@@ -57,16 +55,18 @@ export default function ReminderSettingsForm({
       return
     }
 
-    const { error: preferenceError } = await supabase.from('reminder_preferences').upsert({
-      id: preferences?.id,
-      user_id: profile.id,
-      channel: 'telegram',
-      h7_enabled: h7,
-      h3_enabled: h3,
-      h1_enabled: h1,
-      day_enabled: day,
-      reminder_time: reminderTime,
-    })
+    const { error: preferenceError } = await supabase
+      .from('reminder_preferences')
+      .upsert({
+        id: preferences?.id,
+        user_id: profile.id,
+        channel: 'telegram',
+        h7_enabled: h7,
+        h3_enabled: h3,
+        h1_enabled: h1,
+        day_enabled: day,
+        reminder_time: reminderTime,
+      })
 
     setLoading(false)
 
@@ -88,10 +88,7 @@ export default function ReminderSettingsForm({
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ telegramChatId: telegramChatId.trim() }),
     })
-    const result = (await response.json().catch(() => null)) as {
-      error?: string
-      message?: string
-    } | null
+    const result = (await response.json().catch(() => null)) as { error?: string; message?: string } | null
 
     setTesting(false)
 
@@ -113,8 +110,7 @@ export default function ReminderSettingsForm({
             </Badge>
             <h2 className="text-xl font-black text-slate-950">Telegram reminder</h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-              Masukkan Telegram chat ID kamu. NEXA tidak butuh password kampus, cuma butuh chat ID
-              untuk kirim reminder.
+              Masukkan Telegram chat ID kamu. NEXA tidak butuh password kampus, cuma butuh chat ID untuk kirim reminder.
             </p>
           </div>
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-50 text-teal-700">
@@ -137,9 +133,7 @@ export default function ReminderSettingsForm({
           </label>
 
           <label className="block">
-            <span className="mb-1.5 block text-sm font-black text-slate-700">
-              Jam reminder default
-            </span>
+            <span className="mb-1.5 block text-sm font-black text-slate-700">Jam reminder default</span>
             <input
               type="time"
               value={reminderTime}
@@ -159,10 +153,7 @@ export default function ReminderSettingsForm({
             ['H-1', h1, setH1],
             ['Hari-H', day, setDay],
           ].map(([label, checked, setter]) => (
-            <label
-              key={String(label)}
-              className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-black text-slate-700"
-            >
+            <label key={String(label)} className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-black text-slate-700">
               <input
                 type="checkbox"
                 checked={Boolean(checked)}
@@ -177,8 +168,7 @@ export default function ReminderSettingsForm({
       <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
         <h2 className="text-lg font-black text-slate-950">Kontak opsional</h2>
         <p className="mt-1 text-sm leading-6 text-slate-600">
-          WhatsApp masih roadmap. Nomor ini disimpan opsional untuk persiapan reminder produksi
-          nanti.
+          WhatsApp masih roadmap. Nomor ini disimpan opsional untuk persiapan reminder produksi nanti.
         </p>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <label className="block">
@@ -231,8 +221,7 @@ export default function ReminderSettingsForm({
       <div className="flex gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-xs leading-5 text-slate-600">
         <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-teal-700" />
         <p>
-          NEXA Campus bukan sistem resmi kampus. Reminder membantu, tapi info final tetap harus
-          dicek dari kanal resmi kampus.
+          NEXA Campus bukan sistem resmi kampus. Reminder membantu, tapi info final tetap harus dicek dari kanal resmi kampus.
         </p>
       </div>
     </form>

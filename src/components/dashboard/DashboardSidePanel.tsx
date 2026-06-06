@@ -82,9 +82,7 @@ export default function DashboardSidePanel({ userTier }: { userTier: Plan }) {
       <section className="rounded-3xl border border-teal-100 bg-gradient-to-br from-white to-teal-50/70 p-4 shadow-sm">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-700">
-              Plan aktif
-            </p>
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-700">Plan aktif</p>
             <h2 className="mt-1 text-lg font-black text-slate-950">{PLAN_LABELS[safeTier]}</h2>
           </div>
           <Badge tone="brand">{safeTier.toUpperCase()}</Badge>
@@ -115,17 +113,9 @@ export default function DashboardSidePanel({ userTier }: { userTier: Plan }) {
       <section className="rounded-3xl border border-slate-200 bg-slate-950 p-4 text-white shadow-sm">
         <p className="text-sm font-black">Ringkas paket</p>
         <div className="mt-3 space-y-3 text-xs leading-5 text-slate-300">
-          <p>
-            <span className="font-black text-white">Radar:</span> gratis buat mulai nyatet deadline.
-          </p>
-          <p>
-            <span className="font-black text-white">Pulse:</span> buat deadline yang perlu reminder
-            dasar.
-          </p>
-          <p>
-            <span className="font-black text-white">Command:</span> buat kontrol reminder dan akses
-            beta lebih lengkap.
-          </p>
+          <p><span className="font-black text-white">Radar:</span> gratis buat mulai nyatet deadline.</p>
+          <p><span className="font-black text-white">Pulse:</span> buat deadline yang perlu reminder dasar.</p>
+          <p><span className="font-black text-white">Command:</span> buat kontrol reminder dan akses beta lebih lengkap.</p>
         </div>
       </section>
     </aside>

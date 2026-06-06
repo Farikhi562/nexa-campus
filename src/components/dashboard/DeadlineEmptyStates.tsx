@@ -14,17 +14,20 @@ function UpgradePrompt({ userTier }: { userTier: Plan }) {
 
   return (
     <div className="mt-4 rounded-2xl border border-brand-100 bg-brand-50 p-3 text-xs leading-5 text-brand-800">
-      AI Quick Add tersedia di NEXA Pulse dan Command. Radar tetap bisa input manual, pelan-pelan
-      juga menang.
+      AI Quick Add tersedia di NEXA Pulse dan Command. Radar tetap bisa input manual, pelan-pelan juga menang.
     </div>
   )
 }
 
-function Shell({ children, className }: { children: ReactNode; className?: string }) {
+function Shell({
+  children,
+  className,
+}: {
+  children: ReactNode
+  className?: string
+}) {
   return (
-    <section
-      className={cn('rounded-3xl border border-slate-200 bg-white p-5 shadow-sm', className)}
-    >
+    <section className={cn('rounded-3xl border border-slate-200 bg-white p-5 shadow-sm', className)}>
       {children}
     </section>
   )
@@ -52,9 +55,7 @@ export function EmptyToday({ userTier, className }: EmptyStateProps) {
           </div>
           <div>
             <h2 className="text-base font-black text-slate-950">Hari ini bersih.</h2>
-            <p className="mt-1 text-sm leading-6 text-slate-600">
-              Jangan santai dulu, cek minggu depan.
-            </p>
+            <p className="mt-1 text-sm leading-6 text-slate-600">Jangan santai dulu, cek minggu depan.</p>
             <UpgradePrompt userTier={userTier} />
           </div>
         </div>

@@ -30,25 +30,20 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const body = (await request.json().catch(() => null)) as CompleteOnboardingPayload | null
+  const body = await request.json().catch(() => null) as CompleteOnboardingPayload | null
   if (!body || typeof body !== 'object') {
     return NextResponse.json({ error: 'Payload onboarding tidak valid.' }, { status: 400 })
   }
 
   const deadlineSources = Array.isArray(body.deadlineSources)
-    ? body.deadlineSources.filter(
-        (item): item is string => typeof item === 'string' && allowedSources.has(item)
-      )
+    ? body.deadlineSources.filter((item): item is string => typeof item === 'string' && allowedSources.has(item))
     : []
-  const reminderPreference =
-    typeof body.reminderPreference === 'string' &&
-    allowedReminderPreferences.has(body.reminderPreference)
-      ? body.reminderPreference
-      : 'dashboard'
-  const telegramUsername =
-    reminderPreference === 'telegram' && typeof body.telegramUsername === 'string'
-      ? normalizeTelegramUsername(body.telegramUsername)
-      : null
+  const reminderPreference = typeof body.reminderPreference === 'string' && allowedReminderPreferences.has(body.reminderPreference)
+    ? body.reminderPreference
+    : 'dashboard'
+  const telegramUsername = reminderPreference === 'telegram' && typeof body.telegramUsername === 'string'
+    ? normalizeTelegramUsername(body.telegramUsername)
+    : null
 
   if (deadlineSources.length === 0) {
     return NextResponse.json({ error: 'Pilih minimal satu sumber deadline.' }, { status: 400 })
@@ -103,15 +98,11 @@ function parseDeadline(deadline: DeadlinePayload) {
   }
 
   const title = typeof deadline.title === 'string' ? deadline.title.trim() : ''
-  const category =
-    typeof deadline.category === 'string' && deadline.category.trim()
-      ? deadline.category.trim()
-      : 'Tugas'
+  const category = typeof deadline.category === 'string' && deadline.category.trim() ? deadline.category.trim() : 'Tugas'
   const dueDate = typeof deadline.due_date === 'string' ? deadline.due_date : ''
-  const priority =
-    typeof deadline.priority === 'string' && allowedPriorities.has(deadline.priority)
-      ? deadline.priority
-      : 'medium'
+  const priority = typeof deadline.priority === 'string' && allowedPriorities.has(deadline.priority)
+    ? deadline.priority
+    : 'medium'
 
   if (!title || !dueDate) {
     return { ok: false as const, error: 'Judul dan tanggal deadline wajib diisi.' }
@@ -130,7 +121,7 @@ function parseDeadline(deadline: DeadlinePayload) {
 async function updateProfile(
   supabase: Awaited<ReturnType<typeof createClient>>,
   userId: string,
-  updates: Record<string, unknown>
+  updates: Record<string, unknown>,
 ) {
   const { error } = await supabase.from('profiles').update(updates).eq('id', userId)
   if (!error) return null
@@ -146,7 +137,7 @@ async function updateProfile(
 async function insertDeadline(
   supabase: Awaited<ReturnType<typeof createClient>>,
   userId: string,
-  deadline: { title: string; category: string; due_date: string; priority: string }
+  deadline: { title: string; category: string; due_date: string; priority: string },
 ) {
   const typeMap: Record<string, string> = {
     UTS: 'ujian',

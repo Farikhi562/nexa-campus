@@ -66,10 +66,7 @@ async function sendTelegramMessage(token: string, chatId: string, text: string) 
     }),
   })
 
-  const result = (await response.json().catch(() => null)) as {
-    ok?: boolean
-    description?: string
-  } | null
+  const result = (await response.json().catch(() => null)) as { ok?: boolean; description?: string } | null
   return {
     ok: response.ok && Boolean(result?.ok),
     error: result?.description,

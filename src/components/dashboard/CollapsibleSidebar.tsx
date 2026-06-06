@@ -7,9 +7,13 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { DASHBOARD_NAV } from '@/components/dashboard/nav-items'
 import { BRAND } from '@/lib/brand'
 
-export default function CollapsibleSidebar() {
+export default function CollapsibleSidebar({ isAdmin = false }: { isAdmin?: boolean }) {
   const [collapsed, setCollapsed] = useState(false)
   const pathname = usePathname()
+
+  const navItems = isAdmin
+    ? DASHBOARD_NAV
+    : DASHBOARD_NAV.filter((item) => item.href !== '/admin')
 
   // Persist collapse state
   useEffect(() => {

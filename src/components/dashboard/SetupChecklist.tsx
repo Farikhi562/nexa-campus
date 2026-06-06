@@ -62,12 +62,8 @@ export default function SetupChecklist({
     <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-700">
-            Setup beta
-          </p>
-          <h2 className="mt-1 text-lg font-black text-slate-950">
-            Biar NEXA siap dipakai beneran.
-          </h2>
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-700">Setup beta</p>
+          <h2 className="mt-1 text-lg font-black text-slate-950">Biar NEXA siap dipakai beneran.</h2>
           <p className="mt-1 text-sm leading-6 text-slate-500">
             {completedCount}/{total} selesai. Santai, tapi jangan hilang dari radar.
           </p>
@@ -81,20 +77,14 @@ export default function SetupChecklist({
         {itemsMeta.map(({ key, title, desc, href, icon: Icon }) => {
           const done = completedMap[key]
           const content = (
-            <div
-              className={`h-full rounded-2xl border p-4 transition ${
-                done
-                  ? 'border-emerald-200 bg-emerald-50'
-                  : 'border-slate-200 bg-slate-50 hover:border-brand-200 hover:bg-brand-50'
-              }`}
-            >
+            <div className={`h-full rounded-2xl border p-4 transition ${
+              done
+                ? 'border-emerald-200 bg-emerald-50'
+                : 'border-slate-200 bg-slate-50 hover:border-brand-200 hover:bg-brand-50'
+            }`}>
               <div className="flex items-start justify-between gap-3">
                 <Icon className={`h-5 w-5 ${done ? 'text-emerald-700' : 'text-brand-700'}`} />
-                {done ? (
-                  <CheckCircle2 className="h-5 w-5 text-emerald-700" />
-                ) : (
-                  <Circle className="h-5 w-5 text-slate-300" />
-                )}
+                {done ? <CheckCircle2 className="h-5 w-5 text-emerald-700" /> : <Circle className="h-5 w-5 text-slate-300" />}
               </div>
               <p className="mt-4 text-sm font-black text-slate-950">{title}</p>
               <p className="mt-1 text-xs leading-5 text-slate-600">{desc}</p>
@@ -121,8 +111,7 @@ export default function SetupChecklist({
         <div className="mt-4 flex gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
           <Send className="mt-0.5 h-5 w-5 flex-shrink-0" />
           <p>
-            Telegram belum aktif. Kalau bot token sudah ada di env, isi chat ID lalu kirim test
-            message di pengaturan reminder.
+            Telegram belum aktif. Kalau bot token sudah ada di env, isi chat ID lalu kirim test message di pengaturan reminder.
           </p>
         </div>
       )}

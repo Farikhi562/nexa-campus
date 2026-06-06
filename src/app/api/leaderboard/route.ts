@@ -20,11 +20,10 @@ export async function GET(request: NextRequest) {
 
   const scope = parseScope(request.nextUrl.searchParams.get('scope'))
 
-  const [{ data: entries, error: listError }, { data: rankRows, error: rankError }] =
-    await Promise.all([
-      supabase.rpc('get_leaderboard', { p_scope: scope, p_limit: 100 }),
-      supabase.rpc('get_my_rank', { p_scope: scope }),
-    ])
+  const [{ data: entries, error: listError }, { data: rankRows, error: rankError }] = await Promise.all([
+    supabase.rpc('get_leaderboard', { p_scope: scope, p_limit: 100 }),
+    supabase.rpc('get_my_rank', { p_scope: scope }),
+  ])
 
   if (listError || rankError) {
     console.error('[Leaderboard] rpc error', listError?.message, rankError?.message)

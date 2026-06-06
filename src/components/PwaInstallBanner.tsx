@@ -23,11 +23,7 @@ export default function PwaInstallBanner() {
 
     const dismissed = Number(window.localStorage.getItem(DISMISS_COUNT_KEY) || '0')
     const installed = window.localStorage.getItem(INSTALLED_KEY) === 'true'
-    if (
-      dismissed >= MAX_DISMISSALS ||
-      installed ||
-      window.matchMedia('(display-mode: standalone)').matches
-    ) {
+    if (dismissed >= MAX_DISMISSALS || installed || window.matchMedia('(display-mode: standalone)').matches) {
       return
     }
 
@@ -87,9 +83,7 @@ export default function PwaInstallBanner() {
           <Download className="h-5 w-5" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-black text-slate-950">
-            Install NEXA Campus — buka langsung tanpa browser
-          </p>
+          <p className="text-sm font-black text-slate-950">Install NEXA Campus — buka langsung tanpa browser</p>
           <div className="mt-3 flex flex-wrap gap-2">
             <button
               type="button"

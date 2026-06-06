@@ -4,22 +4,16 @@ import { getTypeLabel } from '@/lib/nexa-data'
 
 type BadgeTone = 'neutral' | 'brand' | 'success' | 'warning' | 'danger' | 'info'
 
-export function getDisplayTitle(
-  deadline: Pick<AcademicDeadline, 'title' | 'type' | 'course_name'>
-) {
+export function getDisplayTitle(deadline: Pick<AcademicDeadline, 'title' | 'type' | 'course_name'>) {
   const title = deadline.title?.trim()
   return title || `${getTypeLabel(deadline.type)} ${deadline.course_name}`
 }
 
-export function getDeadlineDateTime(
-  deadline: Pick<AcademicDeadline, 'deadline_date' | 'deadline_time'>
-) {
+export function getDeadlineDateTime(deadline: Pick<AcademicDeadline, 'deadline_date' | 'deadline_time'>) {
   return parseISO(`${deadline.deadline_date}T${deadline.deadline_time}`)
 }
 
-export function formatDeadlineDate(
-  deadline: Pick<AcademicDeadline, 'deadline_date' | 'deadline_time'>
-) {
+export function formatDeadlineDate(deadline: Pick<AcademicDeadline, 'deadline_date' | 'deadline_time'>) {
   return new Intl.DateTimeFormat('id-ID', {
     weekday: 'short',
     day: 'numeric',
@@ -31,15 +25,12 @@ export function formatDeadlineTime(deadline: Pick<AcademicDeadline, 'deadline_ti
   return deadline.deadline_time.slice(0, 5)
 }
 
-export function getUrgency(
-  deadline: Pick<AcademicDeadline, 'deadline_date' | 'deadline_time' | 'status'>
-) {
+export function getUrgency(deadline: Pick<AcademicDeadline, 'deadline_date' | 'deadline_time' | 'status'>) {
   const now = new Date()
   const due = getDeadlineDateTime(deadline)
   const days = differenceInCalendarDays(due, now)
 
-  if (deadline.status === 'completed')
-    return { label: 'Selesai', tone: 'success' as BadgeTone, days }
+  if (deadline.status === 'completed') return { label: 'Selesai', tone: 'success' as BadgeTone, days }
   if (isBefore(due, now)) return { label: 'Terlambat', tone: 'danger' as BadgeTone, days }
   if (days === 0) return { label: 'Hari ini', tone: 'danger' as BadgeTone, days }
   if (days <= 1) return { label: 'H-1', tone: 'warning' as BadgeTone, days }

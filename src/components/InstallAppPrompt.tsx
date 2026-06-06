@@ -10,10 +10,7 @@ type BeforeInstallPromptEvent = Event & {
 
 function isMobileDevice() {
   if (typeof window === 'undefined') return false
-  return (
-    window.matchMedia('(max-width: 768px)').matches ||
-    /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
-  )
+  return window.matchMedia('(max-width: 768px)').matches || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
 }
 
 function isStandalone() {

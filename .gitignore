@@ -20,6 +20,7 @@ gitleaks-report.json
 gitleaks-report.*
 playwright-report/
 test-results/
+lighthouse-*.html
 
 # Environment — NEVER commit secrets
 .env

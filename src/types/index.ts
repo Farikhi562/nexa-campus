@@ -74,26 +74,20 @@ export type LeaderboardScope = 'weekly' | 'monthly' | 'all_time'
 
 // ---------- Study Room -------------------------------------------------------
 export type StudyRoomCategory =
-  | 'umum'
-  | 'matematika'
-  | 'fisika'
-  | 'kimia'
-  | 'biologi'
-  | 'informatika'
-  | 'ekonomi'
-  | 'hukum'
-  | 'kedokteran'
-  | 'bahasa'
-  | 'seni'
-  | 'lainnya'
+  | 'umum' | 'matematika' | 'fisika' | 'kimia' | 'biologi'
+  | 'informatika' | 'ekonomi' | 'hukum' | 'kedokteran' | 'bahasa' | 'seni' | 'lainnya'
+
+export type RoomMemberRole = 'owner' | 'admin' | 'moderator' | 'member'
 
 export interface StudyRoom {
   id: string
   owner_id: string
+  room_code: string
   title: string
   description: string | null
   topic: string | null
   category: StudyRoomCategory
+  cover_url: string | null
   max_members: number
   current_members_count: number
   status: 'open' | 'full' | 'closed'
@@ -102,7 +96,42 @@ export interface StudyRoom {
   created_at: string
   updated_at: string
   is_member?: boolean
-  member_role?: 'owner' | 'member' | null
+  member_role?: RoomMemberRole | null
+  has_pending_request?: boolean
+}
+
+export interface StudyRoomMember {
+  id: string
+  room_id: string
+  user_id: string
+  role: RoomMemberRole
+  joined_at: string
+  profile?: PublicProfile | null
+}
+
+export interface StudyRoomJoinRequest {
+  id: string
+  room_id: string
+  user_id: string
+  status: 'pending' | 'approved' | 'rejected'
+  message: string | null
+  created_at: string
+  updated_at: string
+  user?: PublicProfile | null
+}
+
+export interface StudyRoomMessage {
+  id: string
+  room_id: string
+  sender_id: string
+  content: string | null
+  message_type: 'text' | 'image' | 'file'
+  attachment_path: string | null
+  attachment_name: string | null
+  attachment_size: number | null
+  attachment_mime: string | null
+  created_at: string
+  sender?: PublicProfile | null
 }
 
 // ---------- Friends ----------------------------------------------------------

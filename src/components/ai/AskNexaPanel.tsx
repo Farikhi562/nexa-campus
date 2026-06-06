@@ -100,8 +100,7 @@ export default function AskNexaPanel({ deadlines = [] }: AskNexaPanelProps) {
             </div>
             <h2 className="text-lg font-black text-slate-950">Tanya NEXA</h2>
             <p className="mt-1 text-sm leading-6 text-slate-600">
-              Tanyakan prioritas deadline, ringkasan tugas minggu ini, atau minta bantuan menyusun
-              rencana belajar.
+              Tanyakan prioritas deadline, ringkasan tugas minggu ini, atau minta bantuan menyusun rencana belajar.
             </p>
           </div>
           <Badge tone={provider === 'gemini' ? 'brand' : 'info'}>
@@ -120,9 +119,7 @@ export default function AskNexaPanel({ deadlines = [] }: AskNexaPanelProps) {
           />
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-xs leading-5 text-slate-500">
-              {loading
-                ? 'NEXA sedang mikir...'
-                : 'NEXA hanya membaca deadline yang kamu input sendiri.'}
+              {loading ? 'NEXA sedang mikir...' : 'NEXA hanya membaca deadline yang kamu input sendiri.'}
             </p>
             <Button type="submit" disabled={loading} className="rounded-2xl">
               {loading ? 'Mikir...' : 'Tanya NEXA'}
@@ -153,11 +150,7 @@ export default function AskNexaPanel({ deadlines = [] }: AskNexaPanelProps) {
         {answer && (
           <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-700">
             <div className="mb-2 flex items-center gap-2 text-xs font-black uppercase tracking-wide text-slate-500">
-              {status === 'locked' ? (
-                <LockKeyhole className="h-4 w-4" />
-              ) : (
-                <Sparkles className="h-4 w-4" />
-              )}
+              {status === 'locked' ? <LockKeyhole className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
               {status === 'locked' ? 'Preview locked' : 'Jawaban Tanya NEXA'}
             </div>
             {answer}
@@ -165,8 +158,7 @@ export default function AskNexaPanel({ deadlines = [] }: AskNexaPanelProps) {
         )}
 
         <p className="mt-4 text-xs leading-5 text-slate-500">
-          Tanya NEXA tidak mengambil data dari sistem kampus. Jawaban AI bisa membantu menyusun
-          prioritas, tapi keputusan akhir tetap di pengguna. Selalu cek informasi resmi dari kampus.
+          Tanya NEXA tidak mengambil data dari sistem kampus. Jawaban AI bisa membantu menyusun prioritas, tapi keputusan akhir tetap di pengguna. Selalu cek informasi resmi dari kampus.
         </p>
       </CardContent>
     </Card>

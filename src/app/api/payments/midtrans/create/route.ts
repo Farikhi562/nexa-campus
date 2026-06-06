@@ -56,10 +56,7 @@ export async function POST(request: NextRequest) {
     })
   } catch {
     return NextResponse.json(
-      {
-        error:
-          'Gagal menyiapkan order. Pastikan tabel payment_orders & SUPABASE_SERVICE_ROLE_KEY sudah diset.',
-      },
+      { error: 'Gagal menyiapkan order. Pastikan tabel payment_orders & SUPABASE_SERVICE_ROLE_KEY sudah diset.' },
       { status: 500 }
     )
   }
@@ -69,10 +66,7 @@ export async function POST(request: NextRequest) {
       orderId,
       amount,
       itemName: `NEXA ${plan === 'pulse' ? 'Pulse' : 'Command'} (1 bulan)`,
-      customer: {
-        name: (profile as { full_name?: string | null } | null)?.full_name,
-        email: user.email,
-      },
+      customer: { name: (profile as { full_name?: string | null } | null)?.full_name, email: user.email },
       finishUrl: `${BRAND.siteUrl}/dashboard/billing`,
     })
     return NextResponse.json({ token, redirectUrl, orderId })

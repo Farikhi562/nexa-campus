@@ -20,27 +20,9 @@ import { Card, CardContent } from '@/components/ui/Card'
 import { BRAND } from '@/lib/brand'
 
 const sampleDeadlines = [
-  {
-    title: 'Praktikum AOA',
-    source: 'iLab',
-    priority: 'urgent',
-    urgency: 'Hari ini',
-    tone: 'danger' as const,
-  },
-  {
-    title: 'Tugas Algoritma',
-    source: 'VClass',
-    priority: 'high',
-    urgency: 'H-1',
-    tone: 'warning' as const,
-  },
-  {
-    title: 'Kuis Matematika',
-    source: 'Grup WA',
-    priority: 'normal',
-    urgency: 'H-3',
-    tone: 'info' as const,
-  },
+  { title: 'Praktikum AOA', source: 'iLab', priority: 'urgent', urgency: 'Hari ini', tone: 'danger' as const },
+  { title: 'Tugas Algoritma', source: 'VClass', priority: 'high', urgency: 'H-1', tone: 'warning' as const },
+  { title: 'Kuis Matematika', source: 'Grup WA', priority: 'normal', urgency: 'H-3', tone: 'info' as const },
 ]
 
 const steps = [
@@ -50,39 +32,25 @@ const steps = [
 ]
 
 const features = [
-  [
-    'Deadline Dashboard',
-    'Hari ini, minggu ini, terlambat, dan deadline tanpa reminder langsung kebaca.',
-  ],
-  [
-    'Quick Add Deadline',
-    'Input manual cepat untuk tugas, praktikum, kuis, ujian, pembayaran, dan lainnya.',
-  ],
+  ['Deadline Dashboard', 'Hari ini, minggu ini, terlambat, dan deadline tanpa reminder langsung kebaca.'],
+  ['Quick Add Deadline', 'Input manual cepat untuk tugas, praktikum, kuis, ujian, pembayaran, dan lainnya.'],
   ['Reminder Settings', 'Siap untuk Telegram di MVP testing, WhatsApp tetap roadmap produksi.'],
-  [
-    'Priority & Category',
-    'Beri label urgent, high, normal, atau low biar urutan kerja lebih jelas.',
-  ],
+  ['Priority & Category', 'Beri label urgent, high, normal, atau low biar urutan kerja lebih jelas.'],
   ['Weekly Summary', 'Preview ringkasan mingguan untuk paket berbayar beta.'],
-  [
-    'Privacy-first manual input',
-    'Tidak minta password kampus dan tidak scraping sistem kampus tanpa izin.',
-  ],
+  ['Privacy-first manual input', 'Tidak minta password kampus dan tidak scraping sistem kampus tanpa izin.'],
 ]
 
 const previewCards = [
   {
     title: 'Dashboard Preview',
-    description:
-      'Tampilan ringkas untuk melihat deadline hari ini, minggu ini, overdue, dan prioritas tugas.',
+    description: 'Tampilan ringkas untuk melihat deadline hari ini, minggu ini, overdue, dan prioritas tugas.',
     imageSrc: '/screenshots/nexa-campus-dashboard.png',
     placeholderLabel: 'Dashboard Screenshot Placeholder',
     alt: 'Preview dashboard NEXA Campus',
   },
   {
     title: 'Add Deadline Preview',
-    description:
-      'Flow input manual untuk mencatat tugas, praktikum, ujian, pembayaran UKT, dan deadline akademik lainnya.',
+    description: 'Flow input manual untuk mencatat tugas, praktikum, ujian, pembayaran UKT, dan deadline akademik lainnya.',
     imageSrc: '/screenshots/nexa-campus-add-deadline.png',
     placeholderLabel: 'Add Deadline Screenshot Placeholder',
     alt: 'Preview tambah deadline NEXA Campus',
@@ -97,30 +65,12 @@ const previewCards = [
 ]
 
 const faqs = [
-  [
-    'Apakah NEXA Campus sistem resmi kampus?',
-    'Bukan. NEXA Campus adalah produk independen dari NEXA Tech Labs. Info final tetap wajib dicek di kanal resmi kampus.',
-  ],
-  [
-    'Apakah NEXA meminta password kampus?',
-    'Tidak. NEXA tidak meminta password VClass, iLab, Studentsite, NPM, atau platform kampus mana pun.',
-  ],
-  [
-    'Apakah deadline otomatis masuk dari VClass/iLab?',
-    'Belum. MVP beta fokus ke input manual yang aman dan jelas. Integrasi resmi hanya akan dibuat kalau ada izin yang valid.',
-  ],
-  [
-    'Apakah reminder WhatsApp sudah aktif?',
-    'Belum live. WhatsApp via Wablas adalah roadmap produksi. MVP testing disiapkan dengan struktur Telegram.',
-  ],
-  [
-    'Apa beda Radar, Pulse, dan Command?',
-    'Radar gratis untuk mulai rapi, Pulse untuk reminder dasar, Command untuk kontrol reminder lebih lengkap dan locked preview fitur beta.',
-  ],
-  [
-    'Bagaimana cara hapus data?',
-    'User bisa menghubungi support NEXA untuk request penghapusan data. Detailnya ada di halaman Privacy dan Support.',
-  ],
+  ['Apakah NEXA Campus sistem resmi kampus?', 'Bukan. NEXA Campus adalah produk independen dari NEXA Tech Labs. Info final tetap wajib dicek di kanal resmi kampus.'],
+  ['Apakah NEXA meminta password kampus?', 'Tidak. NEXA tidak meminta password VClass, iLab, Studentsite, NPM, atau platform kampus mana pun.'],
+  ['Apakah deadline otomatis masuk dari VClass/iLab?', 'Belum. MVP beta fokus ke input manual yang aman dan jelas. Integrasi resmi hanya akan dibuat kalau ada izin yang valid.'],
+  ['Apakah reminder WhatsApp sudah aktif?', 'Belum live. WhatsApp via Wablas adalah roadmap produksi. MVP testing disiapkan dengan struktur Telegram.'],
+  ['Apa beda Radar, Pulse, dan Command?', 'Radar gratis untuk mulai rapi, Pulse untuk reminder dasar, Command untuk kontrol reminder lebih lengkap dan locked preview fitur beta.'],
+  ['Bagaimana cara hapus data?', 'User bisa menghubungi support NEXA untuk request penghapusan data. Detailnya ada di halaman Privacy dan Support.'],
 ]
 
 export default function LandingPage() {
@@ -132,21 +82,11 @@ export default function LandingPage() {
             <NexaCampusLogo tone="dark" imageClassName="h-10 w-10" />
           </Link>
           <nav className="hidden items-center gap-6 text-sm font-bold text-slate-300 md:flex">
-            <a href="#cara-kerja" className="hover:text-teal-200">
-              Cara Kerja
-            </a>
-            <a href="#fitur" className="hover:text-teal-200">
-              Fitur
-            </a>
-            <Link href="/pricing" className="hover:text-teal-200">
-              Pricing
-            </Link>
-            <Link href="/privacy" className="hover:text-teal-200">
-              Privacy
-            </Link>
-            <Link href="/support" className="hover:text-teal-200">
-              Support
-            </Link>
+            <a href="#cara-kerja" className="hover:text-teal-200">Cara Kerja</a>
+            <a href="#fitur" className="hover:text-teal-200">Fitur</a>
+            <Link href="/pricing" className="hover:text-teal-200">Pricing</Link>
+            <Link href="/privacy" className="hover:text-teal-200">Privacy</Link>
+            <Link href="/support" className="hover:text-teal-200">Support</Link>
           </nav>
           <AuthStatusActions variant="dark" />
         </div>
@@ -158,18 +98,14 @@ export default function LandingPage() {
           <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[size:44px_44px] opacity-40" />
           <div className="relative mx-auto grid max-w-7xl gap-8 px-4 py-12 lg:grid-cols-[1.02fr_0.98fr] lg:py-16">
             <div className="flex flex-col justify-center">
-              <Badge
-                tone="brand"
-                className="mb-5 w-fit border-teal-300/20 bg-teal-300/10 text-teal-100"
-              >
+              <Badge tone="brand" className="mb-5 w-fit border-teal-300/20 bg-teal-300/10 text-teal-100">
                 MVP Beta · NEXA Tech Labs
               </Badge>
               <h1 className="max-w-3xl text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
                 Platform anti-lupa deadline untuk mahasiswa.
               </h1>
               <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
-                Catat tugas, praktikum, ujian, pembayaran, dan pengingat akademik dalam satu
-                dashboard yang cepat dibaca.
+                Catat tugas, praktikum, ujian, pembayaran, dan pengingat akademik dalam satu dashboard yang cepat dibaca.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link
@@ -205,10 +141,7 @@ export default function LandingPage() {
                 </div>
                 <div className="grid gap-3 sm:grid-cols-3">
                   {['Hari ini', 'Minggu ini', 'Tanpa reminder'].map((label, index) => (
-                    <div
-                      key={label}
-                      className="rounded-2xl border border-white/10 bg-white/[0.05] p-3"
-                    >
+                    <div key={label} className="rounded-2xl border border-white/10 bg-white/[0.05] p-3">
                       <p className="text-2xl font-black">{index === 0 ? 1 : index === 1 ? 3 : 2}</p>
                       <p className="mt-1 text-xs font-bold text-slate-400">{label}</p>
                     </div>
@@ -216,18 +149,13 @@ export default function LandingPage() {
                 </div>
                 <div className="mt-4 space-y-3">
                   {sampleDeadlines.map((deadline) => (
-                    <div
-                      key={deadline.title}
-                      className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.045] p-3"
-                    >
+                    <div key={deadline.title} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.045] p-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-teal-300/10 text-teal-200">
                         <TimerReset className="h-4 w-4" />
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-black">{deadline.title}</p>
-                        <p className="text-xs text-slate-400">
-                          {deadline.source} · {deadline.priority}
-                        </p>
+                        <p className="text-xs text-slate-400">{deadline.source} · {deadline.priority}</p>
                       </div>
                       <Badge tone={deadline.tone}>{deadline.urgency}</Badge>
                     </div>
@@ -246,12 +174,8 @@ export default function LandingPage() {
         <section className="bg-slate-50 text-slate-950">
           <div className="mx-auto max-w-7xl px-4 py-14">
             <div className="mb-8 max-w-2xl">
-              <p className="text-sm font-bold uppercase tracking-wide text-brand-700">
-                Preview NEXA Campus
-              </p>
-              <h2 className="mt-2 text-3xl font-black">
-                Beberapa tampilan produk sedang disiapkan.
-              </h2>
+              <p className="text-sm font-bold uppercase tracking-wide text-brand-700">Preview NEXA Campus</p>
+              <h2 className="mt-2 text-3xl font-black">Beberapa tampilan produk sedang disiapkan.</h2>
               <p className="mt-3 text-sm leading-6 text-slate-600">
                 Screenshot final akan ditambahkan setelah UI beta selesai.
               </p>
@@ -308,15 +232,8 @@ export default function LandingPage() {
         <section className="border-y border-white/10 bg-slate-950">
           <div className="mx-auto grid max-w-7xl gap-6 px-4 py-14 lg:grid-cols-[0.9fr_1.1fr]">
             <div>
-              <Badge
-                tone="brand"
-                className="mb-4 w-fit border-teal-300/20 bg-teal-300/10 text-teal-100"
-              >
-                Trust & Privacy
-              </Badge>
-              <h2 className="text-3xl font-black">
-                NEXA bantu ngingetin, bukan ngintip akun kampus.
-              </h2>
+              <Badge tone="brand" className="mb-4 w-fit border-teal-300/20 bg-teal-300/10 text-teal-100">Trust & Privacy</Badge>
+              <h2 className="text-3xl font-black">NEXA bantu ngingetin, bukan ngintip akun kampus.</h2>
               <p className="mt-4 text-sm leading-6 text-slate-300">{BRAND.disclaimer}</p>
             </div>
             <div className="grid gap-3">
@@ -325,10 +242,7 @@ export default function LandingPage() {
                 'NEXA tidak scraping sistem kampus tanpa izin.',
                 'Data yang disimpan hanya profil, deadline yang user input sendiri, kontak reminder opsional, dan status paket/subscription.',
               ].map((item) => (
-                <div
-                  key={item}
-                  className="flex gap-3 rounded-2xl border border-white/10 bg-white/[0.055] p-4 text-sm leading-6 text-slate-300"
-                >
+                <div key={item} className="flex gap-3 rounded-2xl border border-white/10 bg-white/[0.055] p-4 text-sm leading-6 text-slate-300">
                   <LockKeyhole className="mt-0.5 h-5 w-5 flex-shrink-0 text-teal-200" />
                   <p>{item}</p>
                 </div>
@@ -341,9 +255,7 @@ export default function LandingPage() {
           <div className="mx-auto max-w-7xl px-4 py-14">
             <div className="mb-8 max-w-2xl">
               <p className="text-sm font-bold uppercase tracking-wide text-brand-700">FAQ</p>
-              <h2 className="mt-2 text-3xl font-black">
-                Jawaban singkat, biar nggak tebak-tebakan.
-              </h2>
+              <h2 className="mt-2 text-3xl font-black">Jawaban singkat, biar nggak tebak-tebakan.</h2>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               {faqs.map(([question, answer]) => (
@@ -365,8 +277,7 @@ export default function LandingPage() {
               <Layers3 className="mx-auto mb-4 h-7 w-7 text-teal-200" />
               <h2 className="text-3xl font-black">Mulai dari NEXA Radar gratis.</h2>
               <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-300">
-                Catat deadline pertama, lihat yang paling dekat, dan biarkan dashboard bantu kamu
-                berhenti pura-pura ingat semuanya.
+                Catat deadline pertama, lihat yang paling dekat, dan biarkan dashboard bantu kamu berhenti pura-pura ingat semuanya.
               </p>
               <Link
                 href="/login?mode=signup"

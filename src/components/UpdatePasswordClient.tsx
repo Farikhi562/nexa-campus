@@ -77,16 +77,13 @@ export default function UpdatePasswordClient() {
           <NexaLogo className="h-11 w-11" />
           <div>
             <p className="text-lg font-black">NEXA Campus</p>
-            <p className="text-xs font-bold uppercase tracking-[0.22em] text-teal-200">
-              Reset Password
-            </p>
+            <p className="text-xs font-bold uppercase tracking-[0.22em] text-teal-200">Reset Password</p>
           </div>
         </div>
 
         <h1 className="text-2xl font-black tracking-tight">Bikin password baru.</h1>
         <p className="mt-2 text-sm leading-6 text-slate-400">
-          Link reset dari email sudah menyiapkan session sementara. Tinggal set password baru yang
-          kuat.
+          Link reset dari email sudah menyiapkan session sementara. Tinggal set password baru yang kuat.
         </p>
 
         {checkingSession ? (
@@ -108,9 +105,7 @@ export default function UpdatePasswordClient() {
               />
             </label>
             <label className="block">
-              <span className="mb-1.5 block text-sm font-bold text-slate-300">
-                Konfirmasi password
-              </span>
+              <span className="mb-1.5 block text-sm font-bold text-slate-300">Konfirmasi password</span>
               <input
                 type="password"
                 value={confirmPassword}
@@ -128,11 +123,7 @@ export default function UpdatePasswordClient() {
               </p>
             )}
 
-            <Button
-              type="submit"
-              disabled={!ready || loading}
-              className="h-12 w-full rounded-2xl bg-teal-500 text-slate-950 hover:bg-teal-300"
-            >
+            <Button type="submit" disabled={!ready || loading} className="h-12 w-full rounded-2xl bg-teal-500 text-slate-950 hover:bg-teal-300">
               {loading ? 'Menyimpan...' : 'Simpan Password Baru'}
             </Button>
           </form>

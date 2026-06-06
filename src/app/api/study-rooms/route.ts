@@ -3,9 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Login required.' }, { status: 401 })
 
   const q = request.nextUrl.searchParams.get('q')?.trim() ?? ''
@@ -50,17 +48,11 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Login required.' }, { status: 401 })
 
   let body: Record<string, unknown>
-  try {
-    body = await request.json()
-  } catch {
-    return NextResponse.json({ error: 'Invalid request.' }, { status: 400 })
-  }
+  try { body = await request.json() } catch { return NextResponse.json({ error: 'Invalid request.' }, { status: 400 }) }
 
   const title = typeof body.title === 'string' ? body.title.trim() : ''
   if (!title) return NextResponse.json({ error: 'Judul room wajib diisi.' }, { status: 400 })
@@ -84,13 +76,10 @@ export async function POST(request: NextRequest) {
     .select('*')
     .single()
 
-  if (error || !room)
-    return NextResponse.json({ error: error?.message ?? 'Gagal membuat room.' }, { status: 500 })
+  if (error || !room) return NextResponse.json({ error: error?.message ?? 'Gagal membuat room.' }, { status: 500 })
 
   // Insert owner as member (triggers update count to 1)
-  await supabase
-    .from('study_room_members')
-    .insert({ room_id: (room as { id: string }).id, user_id: user.id, role: 'owner' })
+  await supabase.from('study_room_members').insert({ room_id: (room as { id: string }).id, user_id: user.id, role: 'owner' })
 
   return NextResponse.json({ data: room }, { status: 201 })
 }

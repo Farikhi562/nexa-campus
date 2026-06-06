@@ -27,17 +27,13 @@ export default function TermsPage() {
             <div>
               <h2 className="font-black text-slate-950">Poin penting</h2>
               <p className="mt-1 text-sm leading-6 text-slate-600">
-                NEXA membantu mengelola deadline, tapi informasi akademik final tetap dari kanal
-                resmi kampus.
+                NEXA membantu mengelola deadline, tapi informasi akademik final tetap dari kanal resmi kampus.
               </p>
             </div>
           </div>
           <ul className="mt-6 grid gap-3 md:grid-cols-2">
             {TERMS.map((item) => (
-              <li
-                key={item}
-                className="flex gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-700"
-              >
+              <li key={item} className="flex gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-700">
                 <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-600" />
                 {item}
               </li>

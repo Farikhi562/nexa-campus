@@ -2,13 +2,18 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { MoreVertical, X } from 'lucide-react'
 import { DASHBOARD_NAV } from '@/components/dashboard/nav-items'
 import NexaLogo from '@/components/NexaLogo'
 
-export default function MobileNavMenu() {
+export default function MobileNavMenu({ isAdmin = false }: { isAdmin?: boolean }) {
   const [open, setOpen] = useState(false)
+  const pathname = usePathname()
 
+  const navItems = isAdmin
+    ? DASHBOARD_NAV
+    : DASHBOARD_NAV.filter((item) => item.href !== '/admin')
   useEffect(() => {
     if (open) {
       document.body.style.overflow = 'hidden'
@@ -47,17 +52,11 @@ export default function MobileNavMenu() {
           />
           <div className="absolute inset-y-0 left-0 flex w-[82%] max-w-xs flex-col bg-white shadow-2xl">
             <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
-              <Link
-                href="/dashboard"
-                onClick={() => setOpen(false)}
-                className="flex items-center gap-2.5"
-              >
+              <Link href="/dashboard" onClick={() => setOpen(false)} className="flex items-center gap-2.5">
                 <NexaLogo className="h-9 w-9" />
                 <div>
                   <p className="text-sm font-black leading-5 text-slate-950">NEXA Campus</p>
-                  <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-brand-700">
-                    Semua Halaman
-                  </p>
+                  <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-brand-700">Semua Halaman</p>
                 </div>
               </Link>
               <button
@@ -72,12 +71,16 @@ export default function MobileNavMenu() {
 
             <nav className="flex-1 overflow-y-auto p-3">
               <div className="grid gap-1.5">
-                {DASHBOARD_NAV.map(({ label, href, icon: Icon, hot, soon }) => (
+                {navItems.map(({ label, href, icon: Icon, hot, soon }) => (
                   <Link
                     key={href}
                     href={href}
                     onClick={() => setOpen(false)}
-                    className="focus-ring group flex min-h-12 items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-black text-slate-700 transition active:scale-[0.99] active:bg-brand-50"
+                    className={`focus-ring group flex min-h-12 items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-black transition active:scale-[0.99] ${
+                      (href === '/dashboard' ? pathname === '/dashboard' : pathname.startsWith(href))
+                        ? 'bg-slate-950 text-white'
+                        : 'text-slate-700 active:bg-brand-50'
+                    }`}
                   >
                     <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-brand-700">
                       <Icon className="h-4 w-4" />

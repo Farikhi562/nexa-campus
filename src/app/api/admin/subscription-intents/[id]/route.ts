@@ -20,7 +20,10 @@ async function requireAdmin() {
   return { user, isAdmin }
 }
 
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   const { isAdmin } = await requireAdmin()
   if (!isAdmin) {
     return NextResponse.json({ error: 'Unauthorized admin action.' }, { status: 401 })

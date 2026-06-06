@@ -42,7 +42,9 @@ export async function GET(request: NextRequest) {
       }
 
       if (!profile?.profile_completed) {
-        const referralCode = next.startsWith('/onboarding?ref=') ? next.split('ref=')[1] : ''
+        const referralCode = next.startsWith('/onboarding?ref=')
+          ? next.split('ref=')[1]
+          : ''
         const onboardingPath = referralCode
           ? `/onboarding?ref=${encodeURIComponent(decodeURIComponent(referralCode))}`
           : '/onboarding'

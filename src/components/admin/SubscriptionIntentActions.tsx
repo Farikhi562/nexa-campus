@@ -58,11 +58,7 @@ export default function SubscriptionIntentActions({
           {loadingAction === 'reject' ? 'Rejecting...' : 'Reject'}
         </Button>
       </div>
-      {message && (
-        <p className="rounded-2xl bg-emerald-50 p-3 text-xs font-bold text-emerald-700">
-          {message}
-        </p>
-      )}
+      {message && <p className="rounded-2xl bg-emerald-50 p-3 text-xs font-bold text-emerald-700">{message}</p>}
       {error && <p className="rounded-2xl bg-red-50 p-3 text-xs font-bold text-red-700">{error}</p>}
     </div>
   )

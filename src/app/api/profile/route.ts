@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
-const allowedGenders = new Set(['', 'laki_laki', 'perempuan', 'lainnya', 'tidak_ingin_menyebutkan'])
+const allowedGenders = new Set([
+  '',
+  'laki_laki',
+  'perempuan',
+  'lainnya',
+  'tidak_ingin_menyebutkan',
+])
 
 function text(value: unknown) {
   return typeof value === 'string' ? value.trim() : ''

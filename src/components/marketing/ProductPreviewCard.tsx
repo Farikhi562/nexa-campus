@@ -46,20 +46,14 @@ export default function ProductPreviewCard({
             <div className="relative grid gap-3">
               <div className="grid grid-cols-3 gap-2">
                 {[1, 2, 3].map((item) => (
-                  <div
-                    key={item}
-                    className="rounded-2xl border border-white/10 bg-white/[0.07] p-3"
-                  >
+                  <div key={item} className="rounded-2xl border border-white/10 bg-white/[0.07] p-3">
                     <div className="h-3 w-10 rounded-full bg-teal-200/50" />
                     <div className="mt-3 h-5 w-8 rounded-lg bg-white/20" />
                   </div>
                 ))}
               </div>
               {[1, 2, 3].map((item) => (
-                <div
-                  key={item}
-                  className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.06] p-3"
-                >
+                <div key={item} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.06] p-3">
                   <div className="h-9 w-9 rounded-2xl bg-teal-300/15" />
                   <div className="min-w-0 flex-1">
                     <div className="h-3 w-2/3 rounded-full bg-white/30" />

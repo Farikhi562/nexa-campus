@@ -85,9 +85,7 @@ export default function AvatarMenu({
               )}
             </span>
             <div className="min-w-0">
-              <p className="truncate text-sm font-black text-slate-950">
-                {fullName || 'Mahasiswa NEXA'}
-              </p>
+              <p className="truncate text-sm font-black text-slate-950">{fullName || 'Mahasiswa NEXA'}</p>
               {email && <p className="truncate text-xs text-slate-500">{email}</p>}
             </div>
           </div>

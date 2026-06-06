@@ -56,11 +56,9 @@ export async function createSnapTransaction(
     }),
   })
 
-  const data = (await response.json().catch(() => null)) as {
-    token?: string
-    redirect_url?: string
-    error_messages?: string[]
-  } | null
+  const data = (await response.json().catch(() => null)) as
+    | { token?: string; redirect_url?: string; error_messages?: string[] }
+    | null
 
   if (!response.ok || !data?.token) {
     const message = data?.error_messages?.join(', ') || 'Gagal membuat transaksi Midtrans.'

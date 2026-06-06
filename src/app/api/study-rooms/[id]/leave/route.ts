@@ -6,9 +6,7 @@ type Params = { params: Promise<{ id: string }> }
 export async function POST(_request: NextRequest, { params }: Params) {
   const { id } = await params
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Login required.' }, { status: 401 })
 
   const { data: membership } = await supabase
@@ -18,8 +16,7 @@ export async function POST(_request: NextRequest, { params }: Params) {
     .eq('user_id', user.id)
     .maybeSingle()
 
-  if (!membership)
-    return NextResponse.json({ error: 'Kamu tidak ada di room ini.' }, { status: 404 })
+  if (!membership) return NextResponse.json({ error: 'Kamu tidak ada di room ini.' }, { status: 404 })
 
   // If owner leaves → close the room
   if ((membership as { role: string }).role === 'owner') {

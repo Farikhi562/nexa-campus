@@ -40,19 +40,18 @@ export async function POST(request: NextRequest) {
 
   const extension = allowedTypes.get(file.type)
   if (!extension) {
-    return NextResponse.json(
-      { error: 'Format foto harus JPG, PNG, WebP, atau GIF.' },
-      { status: 400 }
-    )
+    return NextResponse.json({ error: 'Format foto harus JPG, PNG, WebP, atau GIF.' }, { status: 400 })
   }
 
   const path = `${user.id}/avatar-${Date.now()}.${extension}`
   const bytes = await file.arrayBuffer()
 
-  const { error: uploadError } = await supabase.storage.from(BUCKET).upload(path, bytes, {
-    contentType: file.type,
-    upsert: true,
-  })
+  const { error: uploadError } = await supabase.storage
+    .from(BUCKET)
+    .upload(path, bytes, {
+      contentType: file.type,
+      upsert: true,
+    })
 
   if (uploadError) {
     return NextResponse.json(
