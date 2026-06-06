@@ -6,7 +6,7 @@ export default function DashboardNavigation() {
     <nav className="rounded-3xl border border-white/80 bg-white/90 p-3 shadow-xl shadow-slate-200/70 ring-1 ring-slate-950/[0.03] backdrop-blur">
       <p className="px-2 pb-2 text-xs font-black uppercase tracking-[0.18em] text-brand-700">Navigasi</p>
       <div className="grid gap-1.5">
-        {DASHBOARD_NAV.map(({ label, href, icon: Icon, hot }) => (
+        {DASHBOARD_NAV.map(({ label, href, icon: Icon, hot, soon }) => (
           <Link
             key={href}
             href={href}
@@ -19,6 +19,11 @@ export default function DashboardNavigation() {
             {hot && (
               <span className="ml-auto rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-amber-700">
                 Baru
+              </span>
+            )}
+            {soon && (
+              <span className="ml-auto rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-slate-500">
+                Soon
               </span>
             )}
           </Link>

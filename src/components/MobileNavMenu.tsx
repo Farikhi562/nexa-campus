@@ -66,7 +66,7 @@ export default function MobileNavMenu() {
 
             <nav className="flex-1 overflow-y-auto p-3">
               <div className="grid gap-1.5">
-                {DASHBOARD_NAV.map(({ label, href, icon: Icon, hot }) => (
+                {DASHBOARD_NAV.map(({ label, href, icon: Icon, hot, soon }) => (
                   <Link
                     key={href}
                     href={href}
@@ -80,6 +80,11 @@ export default function MobileNavMenu() {
                     {hot && (
                       <span className="ml-auto rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-amber-700">
                         Baru
+                      </span>
+                    )}
+                    {soon && (
+                      <span className="ml-auto rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-slate-500">
+                        Soon
                       </span>
                     )}
                   </Link>

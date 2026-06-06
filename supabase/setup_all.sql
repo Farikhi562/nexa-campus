@@ -278,11 +278,11 @@ language sql security definer set search_path = public as $$
     group by pe.user_id
   )
   select p.id, coalesce(nullif(trim(p.full_name),''),'Mahasiswa NEXA'), p.avatar_url, p.campus_name,
-         coalesce(p.plan,'radar'), coalesce(a.points,0),
-         row_number() over (order by coalesce(a.points,0) desc, p.created_at asc)
+         coalesce(p.plan,'radar'), coalesce(a.pts,0),
+         row_number() over (order by coalesce(a.pts,0) desc, p.created_at asc)
   from public.profiles p
   join agg a on a.user_id = p.id
-  where coalesce(p.is_public_profile,true) = true and coalesce(a.points,0) > 0
+  where coalesce(p.is_public_profile,true) = true and coalesce(a.pts,0) > 0
   order by points desc, p.created_at asc
   limit greatest(1, least(coalesce(p_limit,100), 200));
 $$;

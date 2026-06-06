@@ -13,6 +13,7 @@ import {
   Timer,
   Trophy,
   UserRound,
+  Users,
 } from 'lucide-react'
 
 export type NavItem = {
@@ -20,6 +21,7 @@ export type NavItem = {
   href: string
   icon: typeof Home
   hot?: boolean
+  soon?: boolean
 }
 
 export const DASHBOARD_NAV: NavItem[] = [
@@ -27,6 +29,7 @@ export const DASHBOARD_NAV: NavItem[] = [
   { label: 'Leaderboard', href: '/dashboard/leaderboard', icon: Trophy, hot: true },
   { label: 'Pencapaian', href: '/dashboard/achievements', icon: Award, hot: true },
   { label: 'Focus Mode', href: '/dashboard/focus', icon: Timer, hot: true },
+  { label: 'Study Room', href: '/dashboard/study-room', icon: Users, soon: true },
   { label: 'Tambah Deadline', href: '/dashboard/deadlines/new', icon: Plus },
   { label: 'AI Quick Add', href: '/dashboard/deadlines/quick-add', icon: Sparkles },
   { label: 'Semua Deadline', href: '/dashboard/deadlines', icon: CalendarDays },
