@@ -1,67 +1,17 @@
--- ============================================================================
--- NEXA Campus — FIX NOW (minimal & anti-gagal). Jalankan SEKALI di SQL Editor.
--- Khusus memperbaiki: profiles_plan_check (user baru) + leaderboard belum aktif.
--- Sengaja TANPA bagian storage/policy yang berisiko bikin script di-rollback.
--- Idempotent (aman diulang).
--- ============================================================================
+-- Fix leaderboard RPC ambiguity in Supabase/PostgreSQL.
+-- Run this in Supabase SQL Editor after deploying the app.
+-- Root cause: RETURNS TABLE creates output variables named `points` and `rank`.
+-- Any unqualified `points` inside PL/pgSQL or ORDER BY can collide with table columns/aliases.
 
-create extension if not exists "pgcrypto";
+begin;
 
--- 1) Kolom yang dipakai app (aman kalau sudah ada)
-alter table public.profiles
-  add column if not exists is_public_profile boolean not null default true,
-  add column if not exists avatar_url text;
-
--- 2) FIX plan: rapikan nilai invalid (mis. 'user') -> 'radar', set default, pasang constraint
-alter table public.profiles drop constraint if exists profiles_plan_check;
-update public.profiles set plan = 'radar'
-where plan is null or plan not in ('radar','pulse','command');
-alter table public.profiles alter column plan set default 'radar';
-alter table public.profiles add constraint profiles_plan_check check (plan in ('radar','pulse','command'));
-
--- 3) Trigger user baru -> selalu plan 'radar'
-create or replace function public.handle_new_user()
-returns trigger language plpgsql security definer set search_path = public as $$
-begin
-  insert into public.profiles (id, email, full_name, plan, profile_completed)
-  values (new.id, coalesce(new.email,''),
-          coalesce(new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'name'),
-          'radar', false)
-  on conflict (id) do nothing;
-  return new;
-end; $$;
-drop trigger if exists on_auth_user_created on auth.users;
-create trigger on_auth_user_created after insert on auth.users
-  for each row execute procedure public.handle_new_user();
-
--- 4) Leaderboard: tabel poin + fungsi
-create table if not exists public.points_events (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references public.profiles(id) on delete cascade,
-  kind text not null,
-  points integer not null default 0,
-  ref text,
-  created_at timestamptz not null default now()
-);
-create index if not exists points_events_user_idx on public.points_events (user_id);
-create index if not exists points_events_created_idx on public.points_events (created_at);
-create unique index if not exists points_events_unique_ref on public.points_events (user_id, kind, ref) where ref is not null;
-
-alter table public.points_events enable row level security;
-drop policy if exists "points_events_select_own" on public.points_events;
-create policy "points_events_select_own" on public.points_events
-  for select to authenticated using (auth.uid() = user_id);
-
-create or replace function public.award_points(p_kind text, p_points integer, p_ref text default null)
-returns void language plpgsql security definer set search_path = public as $$
-declare uid uuid := auth.uid();
-begin
-  if uid is null then return; end if;
-  insert into public.points_events (user_id, kind, points, ref)
-  values (uid, p_kind, greatest(0, coalesce(p_points,0)), p_ref)
-  on conflict (user_id, kind, ref) where ref is not null do nothing;
-end; $$;
-grant execute on function public.award_points(text, integer, text) to authenticated;
+-- Remove old overloaded functions so Supabase RPC/PostgREST cannot call a stale version.
+drop function if exists public.get_leaderboard();
+drop function if exists public.get_leaderboard(text);
+drop function if exists public.get_leaderboard(integer);
+drop function if exists public.get_leaderboard(text, integer);
+drop function if exists public.get_my_rank();
+drop function if exists public.get_my_rank(text);
 
 create or replace function public.leaderboard_period_start(p_scope text)
 returns timestamptz
@@ -239,10 +189,10 @@ grant execute on function public.get_leaderboard(text, integer) to anon;
 grant execute on function public.get_leaderboard(text, integer) to authenticated;
 grant execute on function public.get_my_rank(text) to authenticated;
 
--- 5) Backfill poin dari deadline yang sudah selesai
-insert into public.points_events (user_id, kind, points, ref, created_at)
-select user_id, 'complete_deadline', 10, id::text, coalesce(updated_at, now())
-from public.academic_deadlines where status = 'completed'
-on conflict (user_id, kind, ref) where ref is not null do nothing;
+commit;
 
 notify pgrst, 'reload schema';
+
+-- Smoke test:
+-- select * from public.get_leaderboard('all_time', 100);
+-- select * from public.get_my_rank('all_time');

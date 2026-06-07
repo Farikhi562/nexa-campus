@@ -87,19 +87,19 @@ create or replace function public.leaderboard_period_start(p_scope text)
 returns timestamptz
 language sql
 stable
+set search_path = public
 as $$
   select case lower(coalesce(p_scope, 'all_time'))
-    when 'weekly' then date_trunc('week', (now() at time zone 'Asia/Jakarta'))
-    when 'monthly' then date_trunc('month', (now() at time zone 'Asia/Jakarta'))
+    when 'weekly' then (date_trunc('week', now() at time zone 'Asia/Jakarta') at time zone 'Asia/Jakarta')::timestamptz
+    when 'monthly' then (date_trunc('month', now() at time zone 'Asia/Jakarta') at time zone 'Asia/Jakarta')::timestamptz
     else '-infinity'::timestamptz
   end;
 $$;
 
--- ----------------------------------------------------------------------------
--- 6) FUNCTION: get_leaderboard(scope, limit)
---    Hanya user public (is_public_profile = true). TIDAK pernah expose email.
--- ----------------------------------------------------------------------------
-create or replace function public.get_leaderboard(p_scope text default 'all_time', p_limit integer default 100)
+create or replace function public.get_leaderboard(
+  p_scope text default 'all_time',
+  p_limit integer default 100
+)
 returns table (
   user_id uuid,
   display_name text,
@@ -117,32 +117,43 @@ as $$
     select public.leaderboard_period_start(p_scope) as start_at
   ),
   agg as (
-    select pe.user_id, sum(pe.points)::bigint as points
-    from public.points_events pe, period
-    where pe.created_at >= period.start_at
+    select
+      pe.user_id,
+      coalesce(sum(pe.points), 0)::bigint as total_points
+    from public.points_events pe
+    cross join period pr
+    where pe.created_at >= pr.start_at
     group by pe.user_id
+  ),
+  ranked as (
+    select
+      p.id as user_id,
+      coalesce(nullif(trim(p.full_name), ''), 'Mahasiswa NEXA')::text as display_name,
+      p.avatar_url::text as avatar_url,
+      p.campus_name::text as campus_name,
+      coalesce(p.plan, 'radar')::text as plan,
+      a.total_points as total_points,
+      row_number() over (
+        order by a.total_points desc, p.created_at asc
+      )::bigint as rank_number
+    from public.profiles p
+    join agg a on a.user_id = p.id
+    where coalesce(p.is_public_profile, true) = true
+      and a.total_points > 0
   )
   select
-    p.id as user_id,
-    coalesce(nullif(trim(p.full_name), ''), 'Mahasiswa NEXA') as display_name,
-    p.avatar_url,
-    p.campus_name,
-    coalesce(p.plan, 'radar') as plan,
-    coalesce(a.points, 0) as points,
-    row_number() over (order by coalesce(a.points, 0) desc, p.created_at asc) as rank
-  from public.profiles p
-  join agg a on a.user_id = p.id
-  where coalesce(p.is_public_profile, true) = true
-    and coalesce(a.points, 0) > 0
-  order by points desc, p.created_at asc
+    r.user_id,
+    r.display_name,
+    r.avatar_url,
+    r.campus_name,
+    r.plan,
+    r.total_points as points,
+    r.rank_number as rank
+  from ranked r
+  order by r.total_points desc, r.rank_number asc
   limit greatest(1, least(coalesce(p_limit, 100), 200));
 $$;
 
-grant execute on function public.get_leaderboard(text, integer) to authenticated;
-
--- ----------------------------------------------------------------------------
--- 7) FUNCTION: get_my_rank(scope) — untuk user yang sedang login (termasuk streak)
--- ----------------------------------------------------------------------------
 create or replace function public.get_my_rank(p_scope text default 'all_time')
 returns table (
   points bigint,
@@ -156,99 +167,98 @@ security definer
 set search_path = public
 as $$
 declare
-  uid uuid := auth.uid();
+  v_user_id uuid := auth.uid();
   v_start timestamptz := public.leaderboard_period_start(p_scope);
   v_points bigint := 0;
-  v_rank bigint;
-  v_total bigint := 0;
-  v_streak integer := 0;
-  v_public boolean := true;
+  v_rank bigint := null;
+  v_total_players bigint := 0;
+  v_current_streak integer := 0;
+  v_is_public boolean := true;
 begin
-  if uid is null then
+  if v_user_id is null then
     return;
   end if;
 
-  select coalesce(is_public_profile, true) into v_public from public.profiles where id = uid;
+  select coalesce(p.is_public_profile, true)
+  into v_is_public
+  from public.profiles p
+  where p.id = v_user_id;
 
-  select coalesce(sum(points), 0) into v_points
-  from public.points_events
-  where user_id = uid and created_at >= v_start;
+  select coalesce(sum(pe.points), 0)::bigint
+  into v_points
+  from public.points_events pe
+  where pe.user_id = v_user_id
+    and pe.created_at >= v_start;
 
-  -- Rank di antara user public (yang punya poin > 0).
   with agg as (
-    select pe.user_id, sum(pe.points)::bigint as pts
+    select
+      pe.user_id,
+      coalesce(sum(pe.points), 0)::bigint as total_points
     from public.points_events pe
     where pe.created_at >= v_start
     group by pe.user_id
   ),
   public_agg as (
-    select a.user_id, a.pts
+    select
+      a.user_id,
+      a.total_points
     from agg a
     join public.profiles p on p.id = a.user_id
-    where coalesce(p.is_public_profile, true) = true and a.pts > 0
+    where coalesce(p.is_public_profile, true) = true
+      and a.total_points > 0
   )
-  select count(*) + 1, (select count(*) from public_agg)
-  into v_rank, v_total
-  from public_agg
-  where pts > v_points;
+  select
+    count(*) filter (where pa.total_points > v_points) + 1,
+    count(*)
+  into v_rank, v_total_players
+  from public_agg pa;
 
-  -- Streak: hari berturut-turut ada penyelesaian deadline (all-time).
   with days as (
-    select distinct (created_at at time zone 'Asia/Jakarta')::date as d
-    from public.points_events
-    where user_id = uid and kind = 'complete_deadline'
+    select distinct (pe.created_at at time zone 'Asia/Jakarta')::date as activity_date
+    from public.points_events pe
+    where pe.user_id = v_user_id
+      and pe.kind = 'complete_deadline'
   ),
   grouped as (
-    select d, (d - (row_number() over (order by d))::int) as grp from days
+    select
+      d.activity_date,
+      d.activity_date - (row_number() over (order by d.activity_date))::int as streak_group
+    from days d
   ),
   runs as (
-    select count(*)::int as len, max(d) as last_day from grouped group by grp
+    select
+      count(*)::int as run_length,
+      max(g.activity_date) as last_day
+    from grouped g
+    group by g.streak_group
   )
-  select coalesce(max(case when last_day >= (now() at time zone 'Asia/Jakarta')::date - 1 then len else 0 end), 0)
-  into v_streak
-  from runs;
+  select coalesce(
+    max(
+      case
+        when r.last_day >= (now() at time zone 'Asia/Jakarta')::date - 1
+          then r.run_length
+        else 0
+      end
+    ),
+    0
+  )
+  into v_current_streak
+  from runs r;
 
   points := v_points;
-  rank := case when v_public and v_points > 0 then v_rank else null end;
-  total_players := v_total;
-  current_streak := v_streak;
-  is_public := v_public;
+  rank := case when v_is_public and v_points > 0 then v_rank else null end;
+  total_players := v_total_players;
+  current_streak := v_current_streak;
+  is_public := v_is_public;
+
   return next;
 end;
 $$;
 
+grant execute on function public.get_leaderboard(text, integer) to anon;
+grant execute on function public.get_leaderboard(text, integer) to authenticated;
 grant execute on function public.get_my_rank(text) to authenticated;
 
--- ----------------------------------------------------------------------------
--- 8) PAYMENT ORDERS (Midtrans)
--- ----------------------------------------------------------------------------
-create table if not exists public.payment_orders (
-  order_id text primary key,
-  user_id uuid not null references public.profiles(id) on delete cascade,
-  plan text not null check (plan in ('pulse', 'command')),
-  amount integer not null,
-  status text not null default 'pending' check (status in ('pending', 'paid', 'failed', 'expired', 'cancelled')),
-  provider text not null default 'midtrans',
-  raw_status text,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
-);
-
-create index if not exists payment_orders_user_idx on public.payment_orders (user_id, created_at desc);
-
-alter table public.payment_orders enable row level security;
-drop policy if exists "payment_orders_select_own" on public.payment_orders;
-create policy "payment_orders_select_own" on public.payment_orders
-  for select to authenticated using (auth.uid() = user_id);
--- Insert/update hanya lewat server (service role) -> tidak ada policy untuk user.
-
-drop trigger if exists payment_orders_set_updated_at on public.payment_orders;
-create trigger payment_orders_set_updated_at before update on public.payment_orders
-  for each row execute procedure public.set_updated_at();
-
--- ----------------------------------------------------------------------------
--- 9) BACKFILL poin dari deadline yang sudah selesai (sekali; idempotent via ref)
--- ----------------------------------------------------------------------------
 insert into public.points_events (user_id, kind, points, ref, created_at)
 select d.user_id, 'complete_deadline', 10, d.id::text, coalesce(d.updated_at, now())
 from public.academic_deadlines d
