@@ -1,0 +1,23 @@
+name: Send Deadline Reminders
+
+on:
+  schedule:
+    # Jalan tiap jam (GitHub Actions free, tidak ada batasan seperti Vercel Hobby)
+    - cron: '0 * * * *'
+  workflow_dispatch: # bisa trigger manual dari GitHub
+
+jobs:
+  send-reminders:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Trigger reminder endpoint
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X GET \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "${{ secrets.SITE_URL }}/api/cron/send-reminders")
+          echo "Response: $response"
+          if [ "$response" != "200" ]; then
+            echo "Warning: endpoint returned $response"
+          fi
