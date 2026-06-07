@@ -237,3 +237,59 @@ svg {
     filter: drop-shadow(0 2px 6px rgba(120, 53, 15, 0.35));
   }
 }
+
+/* v1.5.23 retention patch: badge scarcity animation.
+   Hanya 3 badge yang memakai class ini via ANIMATED_BADGE_IDS. Jangan bikin semua badge joget, nanti user pusing dan UI berubah jadi pasar malam. */
+@layer utilities {
+  @keyframes nexa-badge-float {
+    0%, 100% { transform: translateY(0) rotate(-1deg) scale(1); }
+    50% { transform: translateY(-3px) rotate(1deg) scale(1.045); }
+  }
+
+  @keyframes nexa-badge-glow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.36), 0 16px 34px rgba(124, 58, 237, 0.18); }
+    50% { box-shadow: 0 0 0 8px rgba(251, 191, 36, 0), 0 20px 44px rgba(124, 58, 237, 0.30); }
+  }
+
+  @keyframes nexa-badge-orbit {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes nexa-badge-shine {
+    0% { transform: translateX(-130%) skewX(-16deg); opacity: 0; }
+    18% { opacity: 0.78; }
+    45% { transform: translateX(260%) skewX(-16deg); opacity: 0; }
+    100% { transform: translateX(260%) skewX(-16deg); opacity: 0; }
+  }
+
+  @keyframes nexa-rarest-halo {
+    0%, 100% { filter: saturate(1) brightness(1); }
+    50% { filter: saturate(1.35) brightness(1.14); }
+  }
+
+  .nexa-animated-badge {
+    animation: nexa-badge-float 2.8s ease-in-out infinite, nexa-badge-glow 2.25s ease-in-out infinite;
+  }
+
+  .nexa-badge-orbit {
+    border: 1px solid rgba(251, 191, 36, 0.9);
+    border-top-color: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 0 18px rgba(251, 191, 36, 0.35);
+    animation: nexa-badge-orbit 3.4s linear infinite;
+  }
+
+  .nexa-badge-shine {
+    width: 44%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.72), transparent);
+    animation: nexa-badge-shine 2.6s ease-in-out infinite;
+  }
+
+  .nexa-badge-icon {
+    filter: drop-shadow(0 2px 7px rgba(15, 23, 42, 0.28));
+  }
+
+  .nexa-rarest-badge {
+    animation: nexa-badge-float 2.8s ease-in-out infinite, nexa-badge-glow 2.25s ease-in-out infinite, nexa-rarest-halo 3.6s ease-in-out infinite;
+  }
+}

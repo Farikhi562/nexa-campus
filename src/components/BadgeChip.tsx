@@ -1,51 +1,45 @@
-import { BADGES, type BadgeDef, type BadgeTier } from '@/lib/badges'
+import { ANIMATED_BADGE_IDS, BADGES, type BadgeDef, type BadgeTier } from '@/lib/badges'
 
-// Tier visual config — Command paling bagus
 const TIER_CONFIG: Record<BadgeTier, {
-  bg: string; ring: string; text: string; label: string; glow: string
+  bg: string; ring: string; text: string; label: string; glow: string; labelText: string
 }> = {
-  bronze: {
-    bg: 'bg-gradient-to-br from-orange-100 to-amber-100',
-    ring: 'ring-1 ring-orange-300',
-    text: 'text-orange-700',
-    label: 'bg-orange-100 text-orange-600',
+  common: {
+    bg: 'bg-gradient-to-br from-slate-50 to-slate-100',
+    ring: 'ring-1 ring-slate-200',
+    text: 'text-slate-700',
+    label: 'bg-slate-100 text-slate-600 ring-1 ring-slate-200',
     glow: '',
+    labelText: 'Biasa',
   },
-  silver: {
-    bg: 'bg-gradient-to-br from-blue-50 to-slate-100',
-    ring: 'ring-1 ring-blue-300',
-    text: 'text-blue-700',
-    label: 'bg-blue-50 text-blue-600',
-    glow: '',
-  },
-  gold: {
-    bg: 'bg-gradient-to-br from-amber-300 via-yellow-200 to-amber-400',
-    ring: 'ring-2 ring-amber-400',
-    text: 'text-amber-900',
-    label: 'bg-amber-100 text-amber-800',
-    glow: 'shadow-lg shadow-amber-200',
-  },
-  special: {
-    bg: 'bg-gradient-to-br from-violet-500 via-purple-400 to-fuchsia-500',
-    ring: 'ring-2 ring-violet-400',
+  epic: {
+    bg: 'bg-gradient-to-br from-violet-500 via-fuchsia-500 to-amber-300',
+    ring: 'ring-2 ring-fuchsia-300',
     text: 'text-white',
-    label: 'bg-violet-100 text-violet-700',
-    glow: 'shadow-lg shadow-violet-200',
+    label: 'bg-fuchsia-50 text-fuchsia-700 ring-1 ring-fuchsia-200',
+    glow: 'shadow-lg shadow-fuchsia-200/60',
+    labelText: 'Epic',
+  },
+  rarest: {
+    bg: 'bg-[conic-gradient(from_180deg_at_50%_50%,#0f172a,#7c3aed,#f59e0b,#14b8a6,#0f172a)]',
+    ring: 'ring-2 ring-amber-300',
+    text: 'text-white',
+    label: 'bg-slate-950 text-amber-200 ring-1 ring-amber-300/50',
+    glow: 'shadow-2xl shadow-amber-300/60',
+    labelText: 'Rarest',
   },
 }
 
-// Badge ID overrides for special visual treatment
 const BADGE_OVERRIDES: Record<string, { bg: string; ring: string; text: string; glow: string; emoji: string }> = {
   badge_command: {
     bg: 'bg-gradient-to-br from-yellow-400 via-amber-300 to-yellow-500',
-    ring: 'ring-2 ring-yellow-400',
-    text: 'text-yellow-900',
+    ring: 'ring-2 ring-yellow-300',
+    text: 'text-yellow-950',
     glow: 'shadow-xl shadow-yellow-300/60',
     emoji: '👑',
   },
   badge_pulse: {
     bg: 'bg-gradient-to-br from-blue-500 via-cyan-400 to-teal-400',
-    ring: 'ring-2 ring-cyan-400',
+    ring: 'ring-2 ring-cyan-300',
     text: 'text-white',
     glow: 'shadow-lg shadow-cyan-200',
     emoji: '⚡',
@@ -57,30 +51,29 @@ const BADGE_OVERRIDES: Record<string, { bg: string; ring: string; text: string; 
     glow: '',
     emoji: '🎯',
   },
-  elite: {
-    bg: 'bg-gradient-to-br from-amber-400 via-yellow-300 to-amber-500',
-    ring: 'ring-2 ring-amber-400',
-    text: 'text-amber-900',
-    glow: 'shadow-lg shadow-amber-200/60',
-    emoji: '👑',
+  nexa_origin: {
+    bg: 'bg-[conic-gradient(from_180deg_at_50%_50%,#020617,#7c3aed,#f59e0b,#2dd4bf,#020617)]',
+    ring: 'ring-2 ring-amber-200',
+    text: 'text-white',
+    glow: 'shadow-2xl shadow-amber-300/60',
+    emoji: '🌌',
   },
   streak_30: {
-    bg: 'bg-gradient-to-br from-orange-400 to-red-500',
-    ring: 'ring-2 ring-orange-400',
+    bg: 'bg-gradient-to-br from-orange-400 via-red-500 to-fuchsia-600',
+    ring: 'ring-2 ring-orange-300',
     text: 'text-white',
-    glow: 'shadow-lg shadow-orange-200',
+    glow: 'shadow-xl shadow-orange-200/70',
     emoji: '🔥',
   },
-  premium: {
-    bg: 'bg-gradient-to-br from-violet-500 via-purple-400 to-fuchsia-500',
-    ring: 'ring-2 ring-violet-400',
+  referral_10: {
+    bg: 'bg-gradient-to-br from-indigo-500 via-fuchsia-500 to-pink-400',
+    ring: 'ring-2 ring-fuchsia-300',
     text: 'text-white',
-    glow: 'shadow-lg shadow-violet-200',
-    emoji: '💎',
+    glow: 'shadow-lg shadow-fuchsia-200/60',
+    emoji: '🧲',
   },
 }
 
-// Badge display size
 type BadgeSize = 'xs' | 'sm' | 'md' | 'lg'
 
 const SIZE = {
@@ -94,10 +87,15 @@ function badgeEmoji(badge: BadgeDef): string {
   if (BADGE_OVERRIDES[badge.id]?.emoji) return BADGE_OVERRIDES[badge.id].emoji
   const iconEmojis: Record<string, string> = {
     Sparkles: '✨', CheckCircle2: '✅', Rocket: '🚀', CalendarCheck: '📅',
-    Clock: '⏰', Flame: '🔥', Trophy: '🏆', Crown: '👑',
-    UserPlus: '👋', Users: '👥', Gem: '💎', Radar: '🎯', Zap: '⚡',
+    Clock: '⏰', Flame: '🔥', Trophy: '🏆', Crown: '👑', UserPlus: '👋',
+    Users: '👥', Gem: '💎', Radar: '🎯', Zap: '⚡', HeartPulse: '💓',
+    Megaphone: '📣', Orbit: '🌌',
   }
   return iconEmojis[badge.icon] ?? '🏅'
+}
+
+function isAnimatedBadge(badge: BadgeDef) {
+  return Boolean(badge.animated) && (ANIMATED_BADGE_IDS as readonly string[]).includes(badge.id)
 }
 
 export function BadgeChip({
@@ -120,40 +118,39 @@ export function BadgeChip({
   const text = override?.text ?? tier.text
   const glow = override?.glow ?? tier.glow
   const emoji = badgeEmoji(badge)
-  const isCommandBadge = badge.id === 'badge_command'
+  const animated = isAnimatedBadge(badge)
+  const isRarest = badge.tier === 'rarest'
 
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={!onClick}
-      title={badge.name}
-      className={`relative flex flex-shrink-0 items-center justify-center transition ${s.wrap} ${bg} ${ring} ${glow} ${
+      title={`${badge.name}${animated ? ' · Animated badge' : ''}`}
+      className={`relative flex flex-shrink-0 items-center justify-center overflow-hidden transition ${s.wrap} ${bg} ${ring} ${glow} ${
         selected ? 'scale-110 ring-4 ring-offset-1 ring-teal-400' : ''
-      } ${isCommandBadge ? 'command-badge-glow' : ''} ${onClick ? 'cursor-pointer hover:scale-105 active:scale-95' : 'cursor-default'}`}
+      } ${animated ? 'nexa-animated-badge' : ''} ${isRarest ? 'nexa-rarest-badge' : ''} ${onClick ? 'cursor-pointer hover:scale-105 active:scale-95' : 'cursor-default'}`}
     >
-      {isCommandBadge && <span className="command-badge-orbit pointer-events-none absolute -inset-1.5 rounded-[inherit]" />}
-      <span className={`${text} ${isCommandBadge ? 'command-badge-crown' : ''}`}>{emoji}</span>
-      {isCommandBadge && <span className="command-badge-shine pointer-events-none absolute inset-y-0 left-0 rounded-[inherit]" />}
-      {/* Shimmer effect for special/gold */}
-      {(badge.tier === 'gold' || badge.tier === 'special' || badge.id === 'badge_command') && (
-        <span className="pointer-events-none absolute inset-0 rounded-[inherit] bg-[radial-gradient(circle_at_60%_35%,rgba(255,255,255,0.45),transparent_60%)]" />
+      {animated && <span className="nexa-badge-orbit pointer-events-none absolute -inset-1.5 rounded-[inherit]" />}
+      <span className={`relative z-10 ${text} ${animated ? 'nexa-badge-icon' : ''}`}>{emoji}</span>
+      {animated && <span className="nexa-badge-shine pointer-events-none absolute inset-y-0 left-0 rounded-[inherit]" />}
+      {!animated && badge.tier === 'epic' && (
+        <span className="pointer-events-none absolute inset-0 rounded-[inherit] bg-[radial-gradient(circle_at_62%_28%,rgba(255,255,255,0.5),transparent_58%)]" />
       )}
+      {isRarest && <span className="pointer-events-none absolute inset-0 rounded-[inherit] bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.25),transparent_55%)]" />}
     </button>
   )
 }
 
 export function BadgeTierLabel({ tier }: { tier: BadgeTier }) {
   const config = TIER_CONFIG[tier]
-  const labels = { bronze: 'Bronze', silver: 'Silver', gold: 'Gold', special: 'Special' }
   return (
     <span className={`rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wide ${config.label}`}>
-      {labels[tier]}
+      {config.labelText}
     </span>
   )
 }
 
-// Show featured badge as a tiny chip next to username
 export function FeaturedBadgePin({ badgeId }: { badgeId: string | null | undefined }) {
   if (!badgeId) return null
   const badge = BADGES.find((item) => item.id === badgeId)

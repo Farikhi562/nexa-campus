@@ -5,6 +5,7 @@ import { isAdminEmail } from '@/lib/admin'
 import type { Plan } from '@/types'
 
 const REWARD_DAYS = 30
+const REFERRER_POINTS = 75
 
 /** POST /api/admin/referrals/retry — admin retrigger reward untuk referral yang belum di-reward */
 export async function POST() {
@@ -40,7 +41,14 @@ export async function POST() {
 
     const { error } = await service.from('profiles').update(update).eq('id', r.id)
     if (!error) {
-      await service.from('referrals').update({ rewarded: true }).eq('id', ref.id).then(() => null, () => null)
+      await service.from('points_events').insert({
+        user_id: r.id,
+        kind: 'referral_reward',
+        points: REFERRER_POINTS,
+        ref: `referral:${ref.id}:retry`,
+      }).then(() => null, () => null)
+      await service.from('referrals').update({ rewarded: true, rewarded_at: new Date().toISOString(), reward_days: REWARD_DAYS, reward_plan: 'pulse' }).eq('id', ref.id).then(() => null, () => null)
+      await service.rpc('add_profile_badge', { p_user_id: r.id, p_badge: 'connector' }).then(() => null, () => null)
       rewarded++
     }
   }

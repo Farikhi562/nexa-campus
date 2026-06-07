@@ -11,6 +11,7 @@ import CommandFocusPlan from '@/components/dashboard/CommandFocusPlan'
 import ReferralCard from '@/components/dashboard/ReferralCard'
 import LeaderboardTeaser from '@/components/dashboard/LeaderboardTeaser'
 import DailyPulseCard from '@/components/dashboard/DailyPulseCard'
+import RetentionFomoStrip from '@/components/dashboard/RetentionFomoStrip'
 import UpgradeCountdownCard from '@/components/dashboard/UpgradeCountdownCard'
 import SetupChecklist from '@/components/dashboard/SetupChecklist'
 import ShareDeadlineModal from '@/components/dashboard/ShareDeadlineModal'
@@ -255,6 +256,13 @@ export default function DeadlineDashboardOverview({
 
       <DailyPulseCard />
 
+      <RetentionFomoStrip
+        referralCount={referralCount}
+        userTier={userTier}
+        todayActiveCount={todayActiveDeadlines.length}
+        highPriorityCount={highPriorityCount}
+      />
+
       <LeaderboardTeaser />
 
       <SetupChecklist
@@ -462,7 +470,9 @@ export default function DeadlineDashboardOverview({
           onClose={() => setShowExportModal(false)}
         />
       )}
-      <ReferralCard referralCode={referralCode} referralCount={referralCount} userTier={userTier} nexaId={nexaId} />
+      <div id="referral">
+        <ReferralCard referralCode={referralCode} referralCount={referralCount} userTier={userTier} nexaId={nexaId} />
+      </div>
     </div>
   )
 }

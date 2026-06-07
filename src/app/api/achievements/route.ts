@@ -9,11 +9,12 @@ export async function GET() {
   } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Kamu perlu login dulu.' }, { status: 401 })
 
-  const [createdRes, completedRes, ontimeRes, referralRes, profileRes, rankRes] = await Promise.all([
+  const [createdRes, completedRes, ontimeRes, referralRes, dailyCheckinRes, profileRes, rankRes] = await Promise.all([
     supabase.from('academic_deadlines').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
     supabase.from('academic_deadlines').select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('status', 'completed'),
     supabase.from('points_events').select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('kind', 'ontime_bonus'),
     supabase.from('referrals').select('id', { count: 'exact', head: true }).eq('referrer_id', user.id),
+    supabase.from('daily_checkins').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
     supabase.from('profiles').select('plan').eq('id', user.id).maybeSingle(),
     supabase.rpc('get_my_rank', { p_scope: 'all_time' }),
   ])
@@ -26,9 +27,11 @@ export async function GET() {
     completed: completedRes.count ?? 0,
     ontime: ontimeRes.count ?? 0,
     referrals: referralRes.count ?? 0,
+    dailyCheckins: dailyCheckinRes.count ?? 0,
     streak: (rank?.current_streak as number) ?? 0,
     points: (rank?.points as number) ?? 0,
     isPremium: plan !== 'radar',
+    plan,
   }
 
   return NextResponse.json({ stats })

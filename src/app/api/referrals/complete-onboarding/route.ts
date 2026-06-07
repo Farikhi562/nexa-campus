@@ -3,7 +3,9 @@ import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import type { Plan } from '@/types'
 
-const REWARD_DAYS = 30
+const REFERRER_REWARD_DAYS = 30
+const REFERRER_POINTS = 75
+const REFERRED_POINTS = 15
 
 type ReferrerProfile = {
   id: string
@@ -19,7 +21,54 @@ function addRewardDays(currentUntil: string | null) {
   const now = new Date()
   const current = currentUntil ? new Date(currentUntil) : null
   const base = current && current.getTime() > now.getTime() ? current : now
-  return new Date(base.getTime() + REWARD_DAYS * 24 * 60 * 60 * 1000).toISOString()
+  return new Date(base.getTime() + REFERRER_REWARD_DAYS * 24 * 60 * 60 * 1000).toISOString()
+}
+
+async function safeNotify(
+  service: ReturnType<typeof createServiceClient>,
+  payload: { user_id: string; type: string; title: string; message: string; link?: string }
+) {
+  await service.from('notifications').insert(payload).then(() => null, () => null)
+}
+
+async function awardReferralPoints(
+  service: ReturnType<typeof createServiceClient>,
+  referralId: string,
+  referrerId: string,
+  referredId: string
+) {
+  await service.from('points_events').insert([
+    {
+      user_id: referrerId,
+      kind: 'referral_reward',
+      points: REFERRER_POINTS,
+      ref: `referral:${referralId}:referrer`,
+    },
+    {
+      user_id: referredId,
+      kind: 'referral_join_bonus',
+      points: REFERRED_POINTS,
+      ref: `referral:${referralId}:referred`,
+    },
+  ]).then(() => null, () => null)
+}
+
+async function unlockReferralBadges(service: ReturnType<typeof createServiceClient>, referrerId: string) {
+  const { count } = await service
+    .from('referrals')
+    .select('id', { count: 'exact', head: true })
+    .eq('referrer_id', referrerId)
+    .eq('rewarded', true)
+
+  const rewardedCount = count ?? 0
+  const badges = ['connector']
+  if (rewardedCount >= 3) badges.push('squad')
+  if (rewardedCount >= 10) badges.push('referral_10')
+  if (rewardedCount >= 25) badges.push('nexa_origin')
+
+  for (const badge of badges) {
+    await service.rpc('add_profile_badge', { p_user_id: referrerId, p_badge: badge }).then(() => null, () => null)
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -44,7 +93,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ status: 'skipped' })
   }
 
-  // Harden: service client might not be configured in all environments
   let service: ReturnType<typeof createServiceClient>
   try {
     service = createServiceClient()
@@ -69,13 +117,27 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ status: 'ignored' })
   }
 
-  // Simpan record referral
+  const { data: existingReferral } = await service
+    .from('referrals')
+    .select('id, rewarded')
+    .eq('referred_id', user.id)
+    .maybeSingle()
+
+  if (existingReferral) {
+    return NextResponse.json({
+      status: (existingReferral as { rewarded?: boolean }).rewarded ? 'already_rewarded' : 'already_recorded',
+    })
+  }
+
   const { data: insertedReferral, error: insertError } = await service
     .from('referrals')
     .insert({
       referrer_id: typedReferrer.id,
       referred_id: user.id,
       rewarded: false,
+      reward_days: REFERRER_REWARD_DAYS,
+      reward_plan: 'pulse',
+      source: 'onboarding',
     })
     .select('id')
     .maybeSingle()
@@ -88,7 +150,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ status: 'skipped', reason: 'insert_failed' })
   }
 
-  // Beri reward ke referrer
+  const referralId = (insertedReferral as { id?: string } | null)?.id
+  if (!referralId) {
+    return NextResponse.json({ status: 'skipped', reason: 'insert_no_id' })
+  }
+
   const rewardUntil = addRewardDays(typedReferrer.pulse_trial_until)
   const profileUpdate =
     typedReferrer.plan === 'command'
@@ -102,35 +168,47 @@ export async function POST(request: NextRequest) {
 
   if (rewardError) {
     console.error('[Referral] Reward error:', rewardError.message)
-    // Referral tercatat tapi reward gagal — jangan block onboarding
     return NextResponse.json({ status: 'recorded_reward_pending' })
   }
 
-  // Mark rewarded
+  await awardReferralPoints(service, referralId, typedReferrer.id, user.id)
+
   await service
     .from('referrals')
-    .update({ rewarded: true })
-    .eq('id', insertedReferral?.id)
+    .update({ rewarded: true, rewarded_at: new Date().toISOString() })
+    .eq('id', referralId)
     .then(() => null, () => null)
 
-  // Kirim notifikasi in-app ke referrer
-  const { data: referredProfile } = await supabase
+  await unlockReferralBadges(service, typedReferrer.id)
+  await service.rpc('add_profile_badge', { p_user_id: user.id, p_badge: 'daily_1' }).then(() => null, () => null)
+
+  const { data: referredProfile } = await service
     .from('profiles')
     .select('full_name')
     .eq('id', user.id)
     .maybeSingle()
   const referredName = (referredProfile as { full_name?: string | null } | null)?.full_name ?? 'Teman kamu'
 
-  await service.from('notifications').insert({
+  await safeNotify(service, {
     user_id: typedReferrer.id,
     type: 'achievement',
     title: '🎉 Referral berhasil!',
-    message: `${referredName} baru saja bergabung pakai kode referral kamu. Kamu dapat 30 hari Pulse gratis!`,
-    link: '/dashboard',
-  }).then(() => null, () => null)
+    message: `${referredName} selesai onboarding dari link kamu. Reward aktif: +30 hari Pulse dan +${REFERRER_POINTS} poin.`,
+    link: '/dashboard#referral',
+  })
+
+  await safeNotify(service, {
+    user_id: user.id,
+    type: 'achievement',
+    title: 'Bonus referral masuk',
+    message: `Kamu join lewat referral dan dapat +${REFERRED_POINTS} poin awal. Selamat, sistem kecil ini berhasil memancing dopamin pertamamu.`,
+    link: '/dashboard/achievements',
+  })
 
   return NextResponse.json({
     status: 'rewarded',
     reward_until: rewardUntil,
+    referrer_points: REFERRER_POINTS,
+    referred_points: REFERRED_POINTS,
   })
 }
