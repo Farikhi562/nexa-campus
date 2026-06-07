@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { parseDeadlinePayload, parseStatusPatch, type DeadlinePayload } from '@/lib/deadline-validation'
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 
 function badRequest(message: string) {
   return NextResponse.json({ error: message }, { status: 400 })
@@ -60,13 +61,42 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   if (!data) return NextResponse.json({ error: 'Deadline tidak ditemukan.' }, { status: 404 })
 
-  // Poin leaderboard saat deadline ditandai selesai (idempotent per deadline).
-  // Diabaikan kalau fitur leaderboard belum di-setup.
+  // Award points and broadcast leaderboard update when deadline completed
   if (data?.status === 'completed') {
-    await supabase.rpc('award_points', { p_kind: 'complete_deadline', p_points: 10, p_ref: data.id }).then(undefined, () => null)
+    let totalPoints = 0
+
+    const completeResult = await supabase
+      .rpc('award_points', { p_kind: 'complete_deadline', p_points: 10, p_ref: data.id })
+      .then(() => 10, () => 0)
+    totalPoints += completeResult
+
     const today = new Date().toISOString().slice(0, 10)
     if (typeof data.deadline_date === 'string' && today <= data.deadline_date) {
-      await supabase.rpc('award_points', { p_kind: 'ontime_bonus', p_points: 5, p_ref: data.id }).then(undefined, () => null)
+      const ontimeResult = await supabase
+        .rpc('award_points', { p_kind: 'ontime_bonus', p_points: 5, p_ref: data.id })
+        .then(() => 5, () => 0)
+      totalPoints += ontimeResult
+    }
+
+    // Increment streak (idempotent per day)
+    await supabase
+      .rpc('increment_streak', { p_user_id: user.id })
+      .then(undefined, () => null)
+
+    // Broadcast to leaderboard channel via service client (bypasses RLS)
+    if (totalPoints > 0) {
+      try {
+        const serviceClient = createServiceClient()
+        await serviceClient
+          .channel('leaderboard-updates')
+          .send({
+            type: 'broadcast',
+            event: 'points_updated',
+            payload: { user_id: user.id, points: totalPoints },
+          })
+      } catch {
+        // Non-critical — leaderboard will auto-refresh every 60s anyway
+      }
     }
   }
 

@@ -316,7 +316,7 @@ export default function DeadlineForm({
 
       {error && <p className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700">{error}</p>}
 
-      <div className="fixed inset-x-0 bottom-[4.5rem] z-[60] border-t border-white/80 bg-white/95 p-3 shadow-2xl shadow-slate-900/10 backdrop-blur-xl sm:static sm:bottom-auto sm:z-auto sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none">
+      <div className="fixed inset-x-0 bottom-[5.5rem] z-[60] border-t border-white/80 bg-white/95 p-3 shadow-2xl shadow-slate-900/10 backdrop-blur-xl sm:static sm:bottom-auto sm:z-auto sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none">
         <div className="mx-auto flex max-w-3xl gap-3 sm:mx-0">
           <Button type="submit" disabled={loading} className="min-h-12 flex-1 rounded-2xl">
             {loading ? 'Menyimpan...' : isEditing ? 'Simpan Deadline' : 'Tambah Deadline'}

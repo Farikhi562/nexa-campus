@@ -74,6 +74,8 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
   const [uploading, setUploading] = useState(false)
   const [copied, setCopied] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
+  const [typingUsers, setTypingUsers] = useState<string[]>([])
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const membersRef = useRef<StudyRoomMember[]>([])
@@ -119,16 +121,77 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
         { event: 'INSERT', schema: 'public', table: 'study_room_messages', filter: `room_id=eq.${roomId}` },
         (payload) => {
           const newMsg = payload.new as StudyRoomMessage
-          // Gunakan membersRef.current untuk dapat data terbaru tanpa stale closure
           const sender = membersRef.current.find((m) => m.user_id === newMsg.sender_id)?.profile ?? null
           setMessages((prev) => {
             if (prev.find((m) => m.id === newMsg.id)) return prev
             return [...prev, { ...newMsg, sender }]
           })
         })
-      .subscribe()
+      .on('postgres_changes',
+        { event: 'DELETE', schema: 'public', table: 'study_room_messages', filter: `room_id=eq.${roomId}` },
+        (payload) => {
+          const deleted = payload.old as { id: string }
+          setMessages((prev) => prev.filter((m) => m.id !== deleted.id))
+        })
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'study_room_members', filter: `room_id=eq.${roomId}` },
+        async () => {
+          // Reload members on any member change (join/leave/role)
+          const res = await fetch(`/api/study-rooms/${roomId}/members`, { cache: 'no-store' })
+          if (res.ok) {
+            const json = await res.json()
+            setMembers(json.data ?? [])
+          }
+        })
+      .subscribe((status) => {
+        // Reconnect on channel error
+        if (status === 'CHANNEL_ERROR') {
+          console.warn('[NEXA] Realtime channel error, will retry automatically')
+        }
+      })
     return () => { void supabase.removeChannel(channel) }
   }, [roomId, supabase]) // tidak perlu 'members' di deps — pakai ref
+
+  // Typing indicator via Supabase Presence
+  useEffect(() => {
+    const presenceChannel = supabase.channel(`presence-room-${roomId}`, {
+      config: { presence: { key: userId } },
+    })
+    presenceChannel
+      .on('presence', { event: 'sync' }, () => {
+        const state = presenceChannel.presenceState<{ name: string; typing: boolean }>()
+        const others = Object.entries(state)
+          .filter(([key]) => key !== userId)
+          .flatMap(([, presences]) => presences)
+          .filter((p) => p.typing)
+          .map((p) => p.name)
+        setTypingUsers(others)
+      })
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          const myName = membersRef.current.find((m) => m.user_id === userId)?.profile?.full_name ?? 'Pengguna'
+          await presenceChannel.track({ name: myName, typing: false })
+        }
+      })
+
+    return () => { void supabase.removeChannel(presenceChannel) }
+  }, [roomId, userId, supabase])
+
+  // Broadcast typing presence with debounce
+  const broadcastTyping = useCallback(async () => {
+    const presenceChannel = supabase.getChannels().find(
+      (c) => c.topic === `realtime:presence-room-${roomId}`
+    )
+    if (!presenceChannel) return
+    const myName = membersRef.current.find((m) => m.user_id === userId)?.profile?.full_name ?? 'Pengguna'
+    // @ts-expect-error — presence track is available on RealtimeChannel
+    await presenceChannel.track({ name: myName, typing: true })
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current)
+    typingTimeoutRef.current = setTimeout(async () => {
+      // @ts-expect-error — presence track is available on RealtimeChannel
+      await presenceChannel.track({ name: myName, typing: false })
+    }, 2000)
+  }, [roomId, userId, supabase])
 
   // Auto-scroll to latest message
   useEffect(() => {
@@ -462,6 +525,19 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
 
           {/* Chat input */}
           <div className="flex-shrink-0 border-t border-slate-100 p-3">
+            {/* Typing indicator */}
+            {typingUsers.length > 0 && (
+              <p className="mb-1.5 text-[11px] font-bold text-slate-400 px-1">
+                {typingUsers.length === 1
+                  ? `${typingUsers[0]} sedang mengetik...`
+                  : `${typingUsers.slice(0, 2).join(', ')} sedang mengetik...`}
+                <span className="ml-1 inline-flex gap-0.5">
+                  <span className="h-1 w-1 animate-bounce rounded-full bg-slate-400 [animation-delay:0ms]" />
+                  <span className="h-1 w-1 animate-bounce rounded-full bg-slate-400 [animation-delay:150ms]" />
+                  <span className="h-1 w-1 animate-bounce rounded-full bg-slate-400 [animation-delay:300ms]" />
+                </span>
+              </p>
+            )}
             <div className="flex items-end gap-2">
               <input
                 ref={fileInputRef}
@@ -476,7 +552,7 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
               </button>
               <textarea
                 value={message}
-                onChange={(e) => setMessage(e.target.value)}
+                onChange={(e) => { setMessage(e.target.value); void broadcastTyping() }}
                 onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); void sendMessage() } }}
                 placeholder="Kirim pesan... (Enter untuk kirim)"
                 rows={1}

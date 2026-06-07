@@ -1,6 +1,7 @@
 'use client'
 
-import { Suspense, useEffect, useState } from 'react'
+import { Suspense, useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
@@ -55,8 +56,63 @@ function NavList({ isAdmin, onClose }: { isAdmin: boolean; onClose: () => void }
   )
 }
 
+function Drawer({ open, onClose, isAdmin }: { open: boolean; onClose: () => void; isAdmin: boolean }) {
+  if (!open) return null
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[999] lg:hidden"
+      aria-modal="true"
+      role="dialog"
+    >
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={onClose}
+      />
+
+      {/* Panel */}
+      <div className="absolute inset-y-0 left-0 flex w-[85%] max-w-[320px] flex-col bg-white shadow-2xl">
+        {/* Header */}
+        <div className="flex flex-shrink-0 items-center justify-between border-b border-slate-100 px-4 py-3">
+          <Link href="/dashboard" onClick={onClose} className="flex items-center gap-2.5">
+            <NexaLogo className="h-9 w-9" />
+            <div>
+              <p className="text-sm font-black text-slate-950">NEXA Campus</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-teal-600">Semua Halaman</p>
+            </div>
+          </Link>
+          <button
+            onClick={onClose}
+            aria-label="Tutup menu"
+            className="flex h-9 w-9 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 hover:bg-slate-200"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        {/* Nav items */}
+        <Suspense fallback={
+          <div className="flex-1 p-3">
+            <div className="space-y-2">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="h-12 rounded-2xl bg-slate-100 animate-pulse" />
+              ))}
+            </div>
+          </div>
+        }>
+          <NavList isAdmin={isAdmin} onClose={onClose} />
+        </Suspense>
+      </div>
+    </div>,
+    document.body
+  )
+}
+
 export default function MobileNavMenu({ isAdmin = false }: { isAdmin?: boolean }) {
   const [open, setOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => { setMounted(true) }, [])
 
   function close() { setOpen(false) }
   function toggle() { setOpen(v => !v) }
@@ -81,61 +137,13 @@ export default function MobileNavMenu({ isAdmin = false }: { isAdmin?: boolean }
         type="button"
         onClick={toggle}
         aria-label="Buka menu navigasi"
+        aria-expanded={open}
         className="flex h-9 w-9 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 transition hover:bg-slate-200 lg:hidden"
       >
-        <Menu className="h-5 w-5" />
+        {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </button>
 
-      {/* Drawer overlay */}
-      {open && (
-        <div
-          className="fixed inset-0 z-[100] lg:hidden"
-          aria-modal="true"
-          role="dialog"
-        >
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black/50"
-            onClick={close}
-          />
-
-          {/* Panel */}
-          <div className="absolute inset-y-0 left-0 flex w-[85%] max-w-[320px] flex-col bg-white shadow-2xl">
-
-            {/* Header */}
-            <div className="flex flex-shrink-0 items-center justify-between border-b border-slate-100 px-4 py-3">
-              <Link href="/dashboard" onClick={close} className="flex items-center gap-2.5">
-                <NexaLogo className="h-9 w-9" />
-                <div>
-                  <p className="text-sm font-black text-slate-950">NEXA Campus</p>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-teal-600">Semua Halaman</p>
-                </div>
-              </Link>
-              <button
-                onClick={close}
-                aria-label="Tutup menu"
-                className="flex h-9 w-9 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 hover:bg-slate-200"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            {/* Nav items — wrapped in Suspense karena usePathname butuh Suspense */}
-            <Suspense fallback={
-              <div className="flex-1 p-3">
-                <div className="space-y-2">
-                  {Array.from({ length: 8 }).map((_, i) => (
-                    <div key={i} className="h-12 rounded-2xl bg-slate-100 animate-pulse" />
-                  ))}
-                </div>
-              </div>
-            }>
-              <NavList isAdmin={isAdmin} onClose={close} />
-            </Suspense>
-
-          </div>
-        </div>
-      )}
+      {mounted && <Drawer open={open} onClose={close} isAdmin={isAdmin} />}
     </>
   )
 }

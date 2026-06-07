@@ -99,7 +99,7 @@ const jsonLd = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="id">
+    <html lang="id" suppressHydrationWarning>
       <body className="font-body bg-slate-50 text-slate-900 antialiased">
         <script
           type="application/ld+json"
