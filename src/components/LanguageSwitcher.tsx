@@ -1,7 +1,6 @@
 'use client'
 
-import { LANG_LABELS, type Lang } from '@/lib/i18n'
-import { useT } from '@/components/LanguageProvider'
+import { LANG_LABELS, useT, type Lang } from '@/components/LanguageProvider'
 
 export default function LanguageSwitcher() {
   const { lang, setLang: setAppLang } = useT()

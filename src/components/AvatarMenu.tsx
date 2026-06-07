@@ -4,8 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Award, Globe, LogOut, Settings, Trophy, UserRound } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { useT } from '@/components/LanguageProvider'
-import { LANG_LABELS, type Lang } from '@/lib/i18n'
+import { LANG_LABELS, useT, type Lang } from '@/components/LanguageProvider'
 
 function initials(name?: string | null) {
   if (!name) return 'N'
