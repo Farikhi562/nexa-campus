@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Crown, Flame, Loader2, Medal, RefreshCw, TrendingUp, Trophy } from 'lucide-react'
 import Badge from '@/components/ui/Badge'
+import { FeaturedBadgePin } from '@/components/BadgeChip'
 import { Card, CardContent } from '@/components/ui/Card'
 import type { LeaderboardEntry, LeaderboardMe, LeaderboardScope } from '@/types'
 
@@ -212,9 +213,12 @@ export default function LeaderboardView({ currentUserId }: { currentUserId: stri
                           {index === 0 ? <Crown className="h-4 w-4" /> : index + 1}
                         </span>
                       </div>
-                      <p className="mt-2 line-clamp-1 text-sm font-black text-slate-950">
-                        {entry.display_name}{isMe ? ' (kamu)' : ''}
-                      </p>
+                      <div className="mt-2 flex max-w-full items-center justify-center gap-1.5">
+                        <p className="line-clamp-1 text-sm font-black text-slate-950">
+                          {entry.display_name}{isMe ? ' (kamu)' : ''}
+                        </p>
+                        <FeaturedBadgePin badgeId={entry.featured_badge} />
+                      </div>
                       <p className="line-clamp-1 text-[11px] text-slate-500">{entry.campus_name || 'Kampus —'}</p>
                       <p className="mt-2 text-lg font-black text-slate-950">{entry.points}</p>
                       <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">poin</p>
@@ -249,6 +253,7 @@ export default function LeaderboardView({ currentUserId }: { currentUserId: stri
                             <p className="truncate text-sm font-black text-slate-950">
                               {entry.display_name}{isMe ? ' (kamu)' : ''}
                             </p>
+                            <FeaturedBadgePin badgeId={entry.featured_badge} />
                           </div>
                           <p className="truncate text-xs text-slate-500">{entry.campus_name || '—'}</p>
                         </div>

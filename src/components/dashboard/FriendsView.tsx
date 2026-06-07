@@ -1,12 +1,13 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { Check, Loader2, Search, UserPlus, X } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
+import { FeaturedBadgePin } from '@/components/BadgeChip'
 import type { FriendRequest, PublicProfile } from '@/types'
 
-function UserCard({ user, action }: { user: PublicProfile; action: React.ReactNode }) {
+function UserCard({ user, action }: { user: PublicProfile; action: ReactNode }) {
   const init = (user.full_name ?? 'N').slice(0, 1).toUpperCase()
   return (
     <Card>
@@ -17,7 +18,10 @@ function UserCard({ user, action }: { user: PublicProfile; action: React.ReactNo
           ) : init}
         </span>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-black text-slate-950">{user.full_name ?? 'Mahasiswa NEXA'}</p>
+          <div className="flex min-w-0 items-center gap-1.5">
+            <p className="truncate text-sm font-black text-slate-950">{user.full_name ?? 'Mahasiswa NEXA'}</p>
+            <FeaturedBadgePin badgeId={user.featured_badge} />
+          </div>
           <p className="truncate text-xs text-slate-500">{[user.campus_name, user.major].filter(Boolean).join(' · ')}</p>
           {user.nexa_id && <p className="text-[10px] font-bold text-slate-400">#{user.nexa_id}</p>}
         </div>

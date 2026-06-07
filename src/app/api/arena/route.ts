@@ -1,6 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
+type ArenaPostRow = Record<string, unknown> & { id: string; creator_id: string }
+type ArenaApplicationRow = { post_id: string; status: string }
+
+const ALLOWED_TYPES = new Set(['hackathon', 'bisnis', 'saintek', 'desain', 'akademik', 'seni', 'esport', 'olahraga', 'lainnya'])
+
+function text(value: unknown, max = 2000) {
+  if (typeof value !== 'string') return ''
+  return value.trim().slice(0, max)
+}
+
+function skills(value: unknown) {
+  if (!Array.isArray(value)) return []
+  return Array.from(new Set(value.map((item) => String(item).trim()).filter(Boolean))).slice(0, 12)
+}
+
+function optionalDate(value: unknown) {
+  const raw = text(value, 20)
+  return raw ? raw : null
+}
+
+function buildPostPayload(body: Record<string, unknown>) {
+  const title = text(body.title, 160)
+  const competitionType = text(body.competition_type, 30)
+  return {
+    title,
+    competition_name: text(body.competition_name, 160) || null,
+    competition_type: ALLOWED_TYPES.has(competitionType) ? competitionType : 'lainnya',
+    description: text(body.description, 3000) || null,
+    skills_needed: skills(body.skills_needed),
+    team_size_max: typeof body.team_size_max === 'number' ? Math.min(20, Math.max(2, Math.floor(body.team_size_max))) : 4,
+    deadline_registration: optionalDate(body.deadline_registration),
+    event_date: optionalDate(body.event_date),
+    prize: text(body.prize, 200) || null,
+    link_info: text(body.link_info, 500) || null,
+  }
+}
+
 export async function GET(req: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -9,26 +46,75 @@ export async function GET(req: NextRequest) {
   const q = req.nextUrl.searchParams.get('q')?.trim() ?? ''
   const type = req.nextUrl.searchParams.get('type') ?? ''
 
-  let query = supabase.from('nexa_arena_posts').select('*').order('created_at', { ascending: false }).limit(50)
-  if (q) query = query.or(`title.ilike.%${q}%,competition_name.ilike.%${q}%`)
+  let query = supabase
+    .from('nexa_arena_posts')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(50)
+
+  if (q) query = query.or(`title.ilike.%${q}%,competition_name.ilike.%${q}%,description.ilike.%${q}%`)
   if (type) query = query.eq('competition_type', type)
 
   const { data: posts, error } = await query
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  const rows = (posts ?? []) as Array<Record<string, unknown>>
-  const creatorIds = Array.from(new Set(rows.map(r => r.creator_id as string)))
+  const rows = (posts ?? []) as ArenaPostRow[]
+  const postIds = rows.map((row) => row.id)
+  const creatorIds = Array.from(new Set(rows.map((row) => row.creator_id)))
 
-  let creatorNames: Record<string, string> = {}
+  const creatorMap: Record<string, { full_name: string | null; featured_badge: string | null }> = {}
   if (creatorIds.length > 0) {
-    const { data: profiles } = await supabase.from('profiles').select('id, full_name').in('id', creatorIds)
-    for (const p of (profiles ?? []) as Array<{id:string;full_name:string|null}>) creatorNames[p.id] = p.full_name ?? 'User'
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, full_name, featured_badge')
+      .in('id', creatorIds)
+
+    for (const profile of (profiles ?? []) as Array<{ id: string; full_name: string | null; featured_badge: string | null }>) {
+      creatorMap[profile.id] = {
+        full_name: profile.full_name ?? 'User',
+        featured_badge: profile.featured_badge ?? null,
+      }
+    }
   }
 
-  const { data: myApps } = await supabase.from('nexa_arena_applications').select('post_id').eq('applicant_id', user.id)
-  const appliedSet = new Set((myApps ?? []).map((a: {post_id: string}) => a.post_id))
+  const myApplicationMap: Record<string, string> = {}
+  if (postIds.length > 0) {
+    const { data: myApps } = await supabase
+      .from('nexa_arena_applications')
+      .select('post_id, status')
+      .eq('applicant_id', user.id)
+      .in('post_id', postIds)
 
-  return NextResponse.json({ data: rows.map(r => ({ ...r, creator_name: creatorNames[r.creator_id as string] ?? null, has_applied: appliedSet.has(r.id as string) })) })
+    for (const app of (myApps ?? []) as ArenaApplicationRow[]) {
+      myApplicationMap[app.post_id] = app.status
+    }
+  }
+
+  const applicationCounts: Record<string, { total: number; pending: number }> = {}
+  if (postIds.length > 0) {
+    const { data: apps } = await supabase
+      .from('nexa_arena_applications')
+      .select('post_id, status')
+      .in('post_id', postIds)
+
+    for (const app of (apps ?? []) as ArenaApplicationRow[]) {
+      applicationCounts[app.post_id] ??= { total: 0, pending: 0 }
+      applicationCounts[app.post_id].total += 1
+      if (app.status === 'pending') applicationCounts[app.post_id].pending += 1
+    }
+  }
+
+  return NextResponse.json({
+    data: rows.map((row) => ({
+      ...row,
+      creator_name: creatorMap[row.creator_id]?.full_name ?? null,
+      creator_featured_badge: creatorMap[row.creator_id]?.featured_badge ?? null,
+      has_applied: Boolean(myApplicationMap[row.id]),
+      my_application_status: myApplicationMap[row.id] ?? null,
+      applications_count: applicationCounts[row.id]?.total ?? 0,
+      pending_applications_count: applicationCounts[row.id]?.pending ?? 0,
+    })),
+  })
 }
 
 export async function POST(req: NextRequest) {
@@ -39,20 +125,14 @@ export async function POST(req: NextRequest) {
   let body: Record<string, unknown>
   try { body = await req.json() } catch { return NextResponse.json({ error: 'Invalid.' }, { status: 400 }) }
 
-  const title = typeof body.title === 'string' ? body.title.trim() : ''
-  if (!title) return NextResponse.json({ error: 'Judul wajib diisi.' }, { status: 400 })
+  const payload = buildPostPayload(body)
+  if (!payload.title) return NextResponse.json({ error: 'Judul wajib diisi.' }, { status: 400 })
 
-  const { data, error } = await supabase.from('nexa_arena_posts').insert({
-    creator_id: user.id, title,
-    competition_name: typeof body.competition_name === 'string' ? body.competition_name.trim() || null : null,
-    competition_type: typeof body.competition_type === 'string' ? body.competition_type : 'lainnya',
-    description: typeof body.description === 'string' ? body.description.trim() || null : null,
-    skills_needed: Array.isArray(body.skills_needed) ? body.skills_needed : [],
-    team_size_max: typeof body.team_size_max === 'number' ? Math.min(20, Math.max(2, body.team_size_max)) : 4,
-    deadline_registration: typeof body.deadline_registration === 'string' && body.deadline_registration ? body.deadline_registration : null,
-    prize: typeof body.prize === 'string' ? body.prize.trim() || null : null,
-    link_info: typeof body.link_info === 'string' ? body.link_info.trim() || null : null,
-  }).select('*').single()
+  const { data, error } = await supabase
+    .from('nexa_arena_posts')
+    .insert({ creator_id: user.id, ...payload })
+    .select('*')
+    .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ data }, { status: 201 })

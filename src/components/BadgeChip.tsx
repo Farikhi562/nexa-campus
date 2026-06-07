@@ -1,4 +1,4 @@
-import type { BadgeDef, BadgeTier } from '@/lib/badges'
+import { BADGES, type BadgeDef, type BadgeTier } from '@/lib/badges'
 
 // Tier visual config — Command paling bagus
 const TIER_CONFIG: Record<BadgeTier, {
@@ -153,8 +153,7 @@ export function BadgeTierLabel({ tier }: { tier: BadgeTier }) {
 // Show featured badge as a tiny chip next to username
 export function FeaturedBadgePin({ badgeId }: { badgeId: string | null | undefined }) {
   if (!badgeId) return null
-  const { BADGES } = require('@/lib/badges') as { BADGES: BadgeDef[] }
-  const badge = BADGES.find((b: BadgeDef) => b.id === badgeId)
+  const badge = BADGES.find((item) => item.id === badgeId)
   if (!badge) return null
   return <BadgeChip badge={badge} size="xs" />
 }

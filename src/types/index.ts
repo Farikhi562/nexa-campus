@@ -59,6 +59,7 @@ export interface LeaderboardEntry {
   display_name: string | null
   avatar_url: string | null
   campus_name: string | null
+  featured_badge?: string | null
   plan: Plan
   points: number
   rank: number
@@ -146,6 +147,7 @@ export interface PublicProfile {
   avatar_url: string | null
   plan: Plan
   nexa_id: string | null
+  featured_badge?: string | null
   created_at: string
 }
 
