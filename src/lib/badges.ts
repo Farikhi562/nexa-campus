@@ -9,9 +9,10 @@ export type AchievementStats = {
   points: number
   referrals: number
   isPremium: boolean
+  plan?: string
 }
 
-export type BadgeMetric = 'completed' | 'created' | 'ontime' | 'streak' | 'points' | 'referrals' | 'premium'
+export type BadgeMetric = 'completed' | 'created' | 'ontime' | 'streak' | 'points' | 'referrals' | 'premium' | 'tier_radar' | 'tier_pulse' | 'tier_command'
 
 export type BadgeTier = 'bronze' | 'silver' | 'gold' | 'special'
 
@@ -39,6 +40,9 @@ export const BADGES: BadgeDef[] = [
   { id: 'connector', name: 'Pengajak', desc: 'Ajak 1 teman lewat referral.', icon: 'UserPlus', metric: 'referrals', goal: 1, tier: 'bronze' },
   { id: 'squad', name: 'Squad Builder', desc: 'Ajak 3 teman lewat referral.', icon: 'Users', metric: 'referrals', goal: 3, tier: 'gold' },
   { id: 'premium', name: 'Member Premium', desc: 'Aktifkan NEXA Pulse atau Command.', icon: 'Gem', metric: 'premium', goal: 1, tier: 'special' },
+  { id: 'badge_radar', name: '🎯 NEXA Radar', desc: 'Pengguna setia NEXA Radar. Awal dari segalanya.', icon: 'Radar', metric: 'tier_radar', goal: 1, tier: 'bronze' },
+  { id: 'badge_pulse', name: '⚡ NEXA Pulse', desc: 'Naik level ke Pulse. Deadline makin teratur.', icon: 'Zap', metric: 'tier_pulse', goal: 1, tier: 'silver' },
+  { id: 'badge_command', name: '👑 NEXA Command', desc: 'Puncak. Semua fitur terbuka, tidak ada yang tersembunyi.', icon: 'Crown', metric: 'tier_command', goal: 1, tier: 'gold' },
 ]
 
 export type BadgeProgress = {
@@ -57,6 +61,9 @@ function metricValue(stats: AchievementStats, metric: BadgeMetric): number {
     case 'points': return stats.points
     case 'referrals': return stats.referrals
     case 'premium': return stats.isPremium ? 1 : 0
+    case 'tier_radar': return stats.plan !== undefined ? 1 : 0
+    case 'tier_pulse': return stats.plan === 'pulse' || stats.plan === 'command' ? 1 : 0
+    case 'tier_command': return stats.plan === 'command' ? 1 : 0
   }
 }
 

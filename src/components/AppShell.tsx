@@ -1,7 +1,7 @@
 import Link from 'next/link'
-import { Home, Plus, Sparkles, Trophy, Users } from 'lucide-react'
 import AvatarMenu from '@/components/AvatarMenu'
 import MobileNavMenu from '@/components/MobileNavMenu'
+import MobileBottomNav from '@/components/MobileBottomNav'
 import CollapsibleSidebar from '@/components/dashboard/CollapsibleSidebar'
 import NotificationBell from '@/components/NotificationBell'
 import NexaLogo from '@/components/NexaLogo'
@@ -14,14 +14,6 @@ type ShellProfile = {
   avatar_url?: string | null
   email?: string | null
 }
-
-const mobileNavItems = [
-  { label: 'Home', href: '/dashboard', icon: Home },
-  { label: 'Tambah', href: '/dashboard/deadlines/new', icon: Plus },
-  { label: 'Ranking', href: '/dashboard/leaderboard', icon: Trophy },
-  { label: 'Study', href: '/dashboard/study-room', icon: Users },
-  { label: 'AI', href: '/dashboard/deadlines/quick-add', icon: Sparkles },
-]
 
 export default function AppShell({
   children,
@@ -66,20 +58,7 @@ export default function AppShell({
         </main>
       </div>
 
-      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/95 px-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-2 shadow-2xl shadow-slate-950/10 backdrop-blur-xl lg:hidden">
-        <div className="mx-auto grid max-w-md grid-cols-5 gap-1">
-          {mobileNavItems.map(({ label, href, icon: Icon }) => (
-            <Link
-              key={href}
-              href={href}
-              className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl px-1 text-[10px] font-black text-slate-600 transition active:scale-[0.98] active:bg-brand-50 active:text-brand-800"
-            >
-              <Icon className="h-5 w-5" />
-              <span className="truncate">{label}</span>
-            </Link>
-          ))}
-        </div>
-      </nav>
+      <MobileBottomNav />
     </div>
   )
 }

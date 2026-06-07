@@ -76,7 +76,11 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
   const [showSettings, setShowSettings] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const membersRef = useRef<StudyRoomMember[]>([])
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://campus.nexatechlabs.my.id'
+
+  // Selalu update ref ke nilai terbaru supaya realtime callback tidak stale
+  useEffect(() => { membersRef.current = members }, [members])
 
   const myMembership = members.find((m) => m.user_id === userId)
   const myRole = myMembership?.role ?? null
@@ -107,7 +111,7 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
   useEffect(() => { void loadAll() }, [loadAll])
   useEffect(() => { void loadJoinRequests() }, [loadJoinRequests])
 
-  // Realtime subscription
+  // Realtime subscription — pakai membersRef supaya tidak perlu recreate saat members berubah
   useEffect(() => {
     const channel = supabase
       .channel(`study-room-${roomId}`)
@@ -115,8 +119,8 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
         { event: 'INSERT', schema: 'public', table: 'study_room_messages', filter: `room_id=eq.${roomId}` },
         (payload) => {
           const newMsg = payload.new as StudyRoomMessage
-          // Enrich with sender from current members
-          const sender = members.find((m) => m.user_id === newMsg.sender_id)?.profile ?? null
+          // Gunakan membersRef.current untuk dapat data terbaru tanpa stale closure
+          const sender = membersRef.current.find((m) => m.user_id === newMsg.sender_id)?.profile ?? null
           setMessages((prev) => {
             if (prev.find((m) => m.id === newMsg.id)) return prev
             return [...prev, { ...newMsg, sender }]
@@ -124,7 +128,7 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
         })
       .subscribe()
     return () => { void supabase.removeChannel(channel) }
-  }, [roomId, supabase, members])
+  }, [roomId, supabase]) // tidak perlu 'members' di deps — pakai ref
 
   // Auto-scroll to latest message
   useEffect(() => {

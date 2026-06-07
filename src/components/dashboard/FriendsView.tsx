@@ -19,6 +19,7 @@ function UserCard({ user, action }: { user: PublicProfile; action: React.ReactNo
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-black text-slate-950">{user.full_name ?? 'Mahasiswa NEXA'}</p>
           <p className="truncate text-xs text-slate-500">{[user.campus_name, user.major].filter(Boolean).join(' · ')}</p>
+          {user.nexa_id && <p className="text-[10px] font-bold text-slate-400">#{user.nexa_id}</p>}
         </div>
         {action}
       </CardContent>
@@ -120,7 +121,7 @@ export default function FriendsView() {
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Cari nama, kampus, atau jurusan..."
+          placeholder="Cari nama, kampus, atau ketik Nexa ID 6 angka..."
           className="focus-ring w-full rounded-2xl border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm"
         />
         {searching && <Loader2 className="absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-slate-400" />}

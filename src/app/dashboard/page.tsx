@@ -6,7 +6,7 @@ import type { AcademicDeadline, Profile } from '@/types'
 
 type DashboardProfile = Pick<
   Profile,
-  'full_name' | 'plan' | 'referral_code' | 'profile_completed' | 'telegram_chat_id'
+  'full_name' | 'plan' | 'referral_code' | 'profile_completed' | 'telegram_chat_id' | 'nexa_id'
 >
 
 export default async function DashboardPage({
@@ -23,7 +23,7 @@ export default async function DashboardPage({
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('full_name, plan, referral_code, profile_completed, telegram_chat_id')
+    .select('full_name, plan, referral_code, profile_completed, telegram_chat_id, nexa_id')
     .eq('id', user.id)
     .maybeSingle()
 
@@ -63,6 +63,7 @@ export default async function DashboardPage({
       userName={dashboardProfile?.full_name}
       userTier={dashboardProfile?.plan ?? 'radar'}
       referralCode={dashboardProfile?.referral_code}
+      nexaId={dashboardProfile?.nexa_id ?? null}
       referralCount={referralStats.count ?? 0}
       profileCompleted={Boolean(dashboardProfile?.profile_completed)}
       hasTelegramChatId={Boolean(dashboardProfile?.telegram_chat_id)}

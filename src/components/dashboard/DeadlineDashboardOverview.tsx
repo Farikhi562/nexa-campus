@@ -35,6 +35,7 @@ type DeadlineDashboardOverviewProps = {
   showDeletedMessage?: boolean
   userTier?: Plan
   referralCode?: string | null
+  nexaId?: string | null
   referralCount?: number
   profileCompleted?: boolean
   hasTelegramChatId?: boolean
@@ -107,6 +108,7 @@ export default function DeadlineDashboardOverview({
   showDeletedMessage = false,
   userTier = 'radar',
   referralCode,
+  nexaId,
   referralCount = 0,
   profileCompleted = false,
   hasTelegramChatId = false,
@@ -264,27 +266,32 @@ export default function DeadlineDashboardOverview({
 
       <CommandFocusPlan deadlines={deadlines} userTier={userTier} />
 
-      <section className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-        <div className="hidden sm:col-span-2 lg:block xl:col-span-1">
+      <section className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="hidden lg:block">
           <DashboardSidePanel userTier={userTier} />
         </div>
-        {summaryMeta.map(({ key, label, icon: Icon, copy, tone }) => (
-          <Card key={key}>
-            <CardContent>
-              <div className="flex items-start justify-between gap-3">
+        {summaryMeta.slice(0, 3).map(({ key, label, icon: Icon, copy, tone }) => (
+          <Card key={key} className="overflow-hidden">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between gap-2">
                 <div>
-                  <p className="text-3xl font-black text-slate-950">{stats[key]}</p>
-                  <p className="mt-1 text-sm font-black text-slate-800">{label}</p>
+                  <p className="text-2xl font-black text-slate-950">{stats[key]}</p>
+                  <p className="mt-0.5 text-xs font-black text-slate-700">{label}</p>
                 </div>
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-50 ring-1 ring-slate-100">
-                  <Icon className={`h-5 w-5 ${tone}`} />
+                <div className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-slate-50`}>
+                  <Icon className={`h-4.5 w-4.5 ${tone}`} />
                 </div>
               </div>
-              <p className="mt-3 text-xs leading-5 text-slate-500">{copy}</p>
+              <p className="mt-2 text-[11px] leading-4 text-slate-400">{copy}</p>
             </CardContent>
           </Card>
         ))}
       </section>
+
+      {/* Mobile shortcut panel */}
+      <div className="lg:hidden">
+        <DashboardSidePanel userTier={userTier} />
+      </div>
 
       {deadlines.length > 0 && (
         <section id="deadline-week" className="grid gap-3 lg:grid-cols-2">
@@ -452,7 +459,7 @@ export default function DeadlineDashboardOverview({
           onClose={() => setShowExportModal(false)}
         />
       )}
-      <ReferralCard referralCode={referralCode} referralCount={referralCount} userTier={userTier} />
+      <ReferralCard referralCode={referralCode} referralCount={referralCount} userTier={userTier} nexaId={nexaId} />
     </div>
   )
 }

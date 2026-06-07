@@ -12,10 +12,12 @@ export default function ReferralCard({
   referralCode,
   referralCount,
   userTier,
+  nexaId,
 }: {
   referralCode?: string | null
   referralCount: number
   userTier: Plan
+  nexaId?: string | null
 }) {
   const [copied, setCopied] = useState(false)
 

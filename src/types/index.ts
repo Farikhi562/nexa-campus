@@ -44,6 +44,7 @@ export interface Profile {
   whatsapp_number: string | null
   plan: Plan
   referral_code: string | null
+  nexa_id: string | null
   pulse_trial_until: string | null
   is_public_profile: boolean | null
   badges: string[] | null
@@ -143,6 +144,7 @@ export interface PublicProfile {
   major: string | null
   avatar_url: string | null
   plan: Plan
+  nexa_id: string | null
   created_at: string
 }
 
