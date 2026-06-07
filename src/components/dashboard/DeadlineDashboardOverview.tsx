@@ -10,6 +10,7 @@ import DashboardSidePanel from '@/components/dashboard/DashboardSidePanel'
 import CommandFocusPlan from '@/components/dashboard/CommandFocusPlan'
 import ReferralCard from '@/components/dashboard/ReferralCard'
 import LeaderboardTeaser from '@/components/dashboard/LeaderboardTeaser'
+import DailyPulseCard from '@/components/dashboard/DailyPulseCard'
 import UpgradeCountdownCard from '@/components/dashboard/UpgradeCountdownCard'
 import SetupChecklist from '@/components/dashboard/SetupChecklist'
 import ShareDeadlineModal from '@/components/dashboard/ShareDeadlineModal'
@@ -251,6 +252,8 @@ export default function DeadlineDashboardOverview({
           </div>
         </div>
       </section>
+
+      <DailyPulseCard />
 
       <LeaderboardTeaser />
 

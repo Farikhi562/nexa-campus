@@ -3,7 +3,7 @@ const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://campus.nexatechla
 export const BRAND = {
   companyName: 'NEXA Tech Labs',
   productName: 'NEXA Campus',
-  version: '1.0.0',
+  version: '1.5.23',
   domain: SITE_URL.replace(/^https?:\/\//, ''),
   siteUrl: SITE_URL,
   disclaimer:

@@ -16,6 +16,8 @@ const shipped = [
   'Profile settings dengan upload foto',
   'Admin beta panel dan production readiness check',
   'Mobile install prompt',
+  'Daily Pulse check-in harian untuk streak dan poin',
+  'Public profile, badge, dan notification social layer',
 ]
 
 const betaNotes = [
@@ -49,10 +51,10 @@ export default function ReleaseNotesPage() {
       <section className="mx-auto max-w-5xl px-4 py-10">
         <Badge tone="brand">Release v{BRAND.version}</Badge>
         <h1 className="mt-4 max-w-3xl text-4xl font-black tracking-tight text-slate-950">
-          NEXA Campus MVP beta sudah siap diuji kecil-kecilan.
+          NEXA Campus v1.5.23 mulai fokus bikin user balik setiap hari.
         </h1>
         <p className="mt-4 max-w-3xl text-sm leading-6 text-slate-600">
-          Versi ini fokus ke satu janji utama: bantu mahasiswa mencatat, melihat, dan mengingat deadline akademik tanpa meminta password kampus.
+          Versi ini mulai nambah retention layer: Daily Pulse, streak, poin check-in, public profile, badge, dan notifikasi sosial yang benar-benar kepakai.
         </p>
 
         <div className="mt-8 grid gap-4 lg:grid-cols-[1fr_0.9fr]">
