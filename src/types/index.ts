@@ -48,6 +48,7 @@ export interface Profile {
   pulse_trial_until: string | null
   is_public_profile: boolean | null
   badges: string[] | null
+  featured_badge: string | null
   profile_completed: boolean
   created_at: string
   updated_at: string

@@ -165,51 +165,6 @@ export default function ReminderSettingsForm({
         </div>
       </section>
 
-      {/* Email reminder */}
-      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-        <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
-            <Send className="h-5 w-5" />
-          </div>
-          <div>
-            <h2 className="text-lg font-black text-slate-950">Reminder via Email</h2>
-            <p className="mt-1 text-sm leading-6 text-slate-600">
-              NEXA akan kirim reminder ke email akun kamu secara otomatis sesuai jadwal H-1 dan Hari-H. Tidak perlu setting tambahan — email terkirim ke alamat yang kamu gunakan untuk login.
-            </p>
-            <div className="mt-3 inline-flex items-center gap-2 rounded-xl bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-700">
-              <CheckCircle2 className="h-3.5 w-3.5" />
-              Aktif otomatis — terkirim ke email login kamu
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Browser/PWA push notification */}
-      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-        <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-teal-50 text-teal-600">
-            <BellRing className="h-5 w-5" />
-          </div>
-          <div className="flex-1">
-            <h2 className="text-lg font-black text-slate-950">Notifikasi Browser / PWA</h2>
-            <p className="mt-1 text-sm leading-6 text-slate-600">
-              Install NEXA Campus ke home screen sebagai PWA untuk mendapatkan notifikasi push langsung di HP kamu — seperti aplikasi native, tanpa buka browser dulu.
-            </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <div className="inline-flex items-center gap-1.5 rounded-xl bg-slate-100 px-3 py-2 text-xs font-black text-slate-700">
-                📱 Install PWA dulu
-              </div>
-              <div className="inline-flex items-center gap-1.5 rounded-xl bg-slate-100 px-3 py-2 text-xs font-black text-slate-700">
-                🔔 Izinkan notifikasi
-              </div>
-              <div className="inline-flex items-center gap-1.5 rounded-xl bg-teal-100 px-3 py-2 text-xs font-black text-teal-700">
-                ✓ Notif otomatis aktif
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
         <h2 className="text-lg font-black text-slate-950">Kontak opsional</h2>
         <p className="mt-1 text-sm leading-6 text-slate-600">

@@ -17,8 +17,13 @@ body {
   text-size-adjust: 100%;
 }
 
-/* Pastikan semua element tidak overflow secara tidak sengaja — 
-   Hanya berlaku untuk elemen block-level umum, bukan semua elemen */
+/* Pastikan semua element tidak overflow secara tidak sengaja */
+*,
+*::before,
+*::after {
+  max-width: 100%;
+}
+
 img,
 video,
 svg {

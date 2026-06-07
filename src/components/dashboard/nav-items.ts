@@ -1,27 +1,11 @@
 import {
-  Award,
-  BellRing,
-  CalendarDays,
-  CreditCard,
-  HelpCircle,
-  Home,
-  Plus,
-  Rocket,
-  Settings,
-  ShieldCheck,
-  Sparkles,
-  Timer,
-  Trophy,
-  UserRound,
-  Users,
+  Award, BellRing, CalendarDays, CreditCard, HelpCircle, Home,
+  Plus, Rocket, Settings, ShieldCheck, Sparkles, Sword, Timer,
+  Trophy, UserRound, Users,
 } from 'lucide-react'
 
 export type NavItem = {
-  label: string
-  href: string
-  icon: typeof Home
-  hot?: boolean
-  soon?: boolean
+  label: string; href: string; icon: typeof Home; hot?: boolean; soon?: boolean
 }
 
 export const DASHBOARD_NAV: NavItem[] = [
@@ -29,7 +13,8 @@ export const DASHBOARD_NAV: NavItem[] = [
   { label: 'Leaderboard', href: '/dashboard/leaderboard', icon: Trophy, hot: true },
   { label: 'Pencapaian', href: '/dashboard/achievements', icon: Award, hot: true },
   { label: 'Focus Mode', href: '/dashboard/focus', icon: Timer, hot: true },
-  { label: 'Study Room', href: '/dashboard/study-room', icon: Users, soon: false },
+  { label: 'NEXA Arena', href: '/dashboard/arena', icon: Sword, hot: true },
+  { label: 'Study Room', href: '/dashboard/study-room', icon: Users },
   { label: 'Cari Teman', href: '/dashboard/friends', icon: UserRound },
   { label: 'Tambah Deadline', href: '/dashboard/deadlines/new', icon: Plus },
   { label: 'AI Quick Add', href: '/dashboard/deadlines/quick-add', icon: Sparkles },

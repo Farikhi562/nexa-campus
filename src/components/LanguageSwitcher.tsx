@@ -1,33 +1,31 @@
 'use client'
 
-import { useLang, type Lang } from '@/lib/i18n'
-
-const LANGS: { key: Lang; flag: string; label: string }[] = [
-  { key: 'id', flag: '🇮🇩', label: 'ID' },
-  { key: 'en', flag: '🇬🇧', label: 'EN' },
-  { key: 'zh', flag: '🇨🇳', label: 'ZH' },
-]
+import { LANG_LABELS, setLang, type Lang } from '@/lib/i18n'
+import { useT } from '@/components/LanguageProvider'
 
 export default function LanguageSwitcher() {
-  const { lang, setLang } = useLang()
+  const { lang, setLang: setAppLang } = useT()
+
+  function change(l: Lang) {
+    setAppLang(l)
+    setLang(l)
+  }
 
   return (
-    <div className="flex items-center overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
-      {LANGS.map(({ key, flag, label }) => (
+    <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+      {(Object.entries(LANG_LABELS) as [Lang, string][]).map(([code, label]) => (
         <button
-          key={key}
-          type="button"
-          onClick={() => setLang(key)}
-          title={label}
-          aria-label={`Switch to ${label}`}
-          className={`flex items-center gap-1 px-2 py-1.5 text-[11px] font-black transition ${
-            lang === key
-              ? 'bg-slate-950 text-white'
-              : 'text-slate-600 hover:bg-slate-200'
+          key={code}
+          onClick={() => change(code)}
+          className={`flex items-center gap-3 rounded-2xl border-2 px-4 py-3 text-sm font-black transition ${
+            lang === code
+              ? 'border-teal-400 bg-teal-50 text-teal-800'
+              : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50'
           }`}
         >
-          <span>{flag}</span>
-          <span className="hidden sm:inline">{label}</span>
+          <span className="text-2xl">{label.split(' ')[0]}</span>
+          <span>{label.split(' ').slice(1).join(' ')}</span>
+          {lang === code && <span className="ml-auto text-teal-500">✓</span>}
         </button>
       ))}
     </div>

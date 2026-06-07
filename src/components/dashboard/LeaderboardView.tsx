@@ -1,17 +1,11 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Crown, Flame, Medal, RefreshCw, TrendingUp, Trophy, Zap } from 'lucide-react'
+import { Crown, Flame, Loader2, Medal, RefreshCw, TrendingUp, Trophy } from 'lucide-react'
 import Badge from '@/components/ui/Badge'
 import { Card, CardContent } from '@/components/ui/Card'
-import {
-  SkeletonPodium,
-  SkeletonLeaderboardEntry,
-} from '@/components/ui/SkeletonCard'
-import { createClient } from '@/lib/supabase/client'
 import type { LeaderboardEntry, LeaderboardMe, LeaderboardScope } from '@/types'
-import { BADGES } from '@/lib/badges'
 
 type ApiResponse = {
   scope: LeaderboardScope
@@ -26,31 +20,6 @@ const scopes: Array<{ key: LeaderboardScope; label: string }> = [
   { key: 'monthly', label: 'Bulan ini' },
   { key: 'all_time', label: 'Semua waktu' },
 ]
-
-// Badge ID → compact emoji/label
-function BadgeChip({ badgeId }: { badgeId: string }) {
-  const def = BADGES.find((b) => b.id === badgeId)
-  if (!def) return null
-  const emoji =
-    badgeId === 'badge_radar' ? '🎯' :
-    badgeId === 'badge_pulse' ? '⚡' :
-    badgeId === 'badge_command' ? '👑' :
-    badgeId === 'finisher_100' ? '🏆' :
-    badgeId === 'streak_60' ? '🔥' :
-    badgeId === 'legend_1000' ? '⭐' :
-    badgeId === 'squad' ? '👥' :
-    badgeId === 'influencer' ? '🌟' :
-    badgeId === 'finisher_50' ? '🚀' :
-    badgeId === 'streak_30' ? '🔥' :
-    badgeId === 'punctual_30' ? '⏰' :
-    badgeId === 'elite' ? '💎' :
-    '🏅'
-  return (
-    <span title={def.name} className="text-xs select-none">
-      {emoji}
-    </span>
-  )
-}
 
 function initials(name?: string | null) {
   if (!name) return 'N'
@@ -83,11 +52,9 @@ export default function LeaderboardView({ currentUserId }: { currentUserId: stri
   const [data, setData] = useState<ApiResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [liveActivity, setLiveActivity] = useState<string | null>(null)
-  const supabase = useMemo(() => createClient(), [])
 
-  const load = useCallback(async (nextScope: LeaderboardScope, silent = false) => {
-    if (!silent) setLoading(true)
+  const load = useCallback(async (nextScope: LeaderboardScope) => {
+    setLoading(true)
     setError('')
     try {
       const res = await fetch(`/api/leaderboard?scope=${nextScope}`, { cache: 'no-store' })
@@ -101,32 +68,12 @@ export default function LeaderboardView({ currentUserId }: { currentUserId: stri
     } catch {
       setError('Leaderboard gagal dimuat. Coba lagi sebentar.')
     } finally {
-      if (!silent) setLoading(false)
+      setLoading(false)
     }
   }, [])
 
-  useEffect(() => { load(scope) }, [scope, load])
-
-  // Real-time: Supabase Broadcast channel (avoids RLS restriction on points_events)
   useEffect(() => {
-    const channel = supabase
-      .channel('leaderboard-updates')
-      .on('broadcast', { event: 'points_updated' }, (payload) => {
-        load(scope, true)
-        const pts = (payload.payload as Record<string, unknown>)?.points as number | undefined
-        if (pts) {
-          setLiveActivity(`+${pts} poin baru masuk!`)
-          setTimeout(() => setLiveActivity(null), 4000)
-        }
-      })
-      .subscribe()
-    return () => { void supabase.removeChannel(channel) }
-  }, [supabase, scope, load])
-
-  // Auto-refresh every 60s
-  useEffect(() => {
-    const interval = setInterval(() => load(scope, true), 60_000)
-    return () => clearInterval(interval)
+    load(scope)
   }, [scope, load])
 
   const entries = data?.entries ?? []
@@ -146,19 +93,13 @@ export default function LeaderboardView({ currentUserId }: { currentUserId: stri
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_10%_90%,rgba(251,191,36,0.18),transparent_18rem)]" />
         <div className="relative flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <div className="mb-3 flex flex-wrap items-center gap-2">
-              <div className="inline-flex items-center gap-2 rounded-full border border-teal-300/20 bg-teal-300/10 px-3 py-1.5 text-xs font-black text-teal-100">
-                <Trophy className="h-3.5 w-3.5" />
-                NEXA Leaderboard
-              </div>
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-red-400/30 bg-red-400/10 px-2.5 py-1 text-[11px] font-black text-red-300">
-                <span className="h-1.5 w-1.5 rounded-full bg-red-400 animate-pulse" />
-                Live
-              </div>
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-teal-300/20 bg-teal-300/10 px-3 py-1.5 text-xs font-black text-teal-100">
+              <Trophy className="h-3.5 w-3.5" />
+              NEXA Leaderboard
             </div>
             <h1 className="text-2xl font-black tracking-tight sm:text-3xl">Naik peringkat. Jangan ketinggalan.</h1>
             <p className="mt-2 max-w-xl text-sm leading-6 text-slate-300">
-              Tiap deadline yang kamu catat &amp; selesaikan = poin. Selesai tepat waktu = bonus. Saingi mahasiswa lain.
+              Tiap deadline yang kamu catat & selesaikan = poin. Selesai tepat waktu = bonus. Saingi mahasiswa lain.
             </p>
           </div>
           <button
@@ -171,16 +112,7 @@ export default function LeaderboardView({ currentUserId }: { currentUserId: stri
         </div>
       </section>
 
-      {/* Live activity toast */}
-      {liveActivity && (
-        <div className="flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm font-black text-emerald-800">
-          <Zap className="h-4 w-4 flex-shrink-0" />
-          {liveActivity}
-          <span className="ml-auto text-xs font-medium text-emerald-600">Papan diperbarui otomatis</span>
-        </div>
-      )}
-
-      {/* Your rank */}
+      {/* Your rank — FOMO */}
       {me && me.points > 0 ? (
         <Card className="border-teal-100 bg-gradient-to-br from-teal-50/70 to-white">
           <CardContent className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
@@ -192,10 +124,7 @@ export default function LeaderboardView({ currentUserId }: { currentUserId: stri
               <div>
                 <p className="text-lg font-black text-slate-950">{me.points} poin</p>
                 <p className="mt-0.5 flex flex-wrap items-center gap-2 text-xs font-bold text-slate-600">
-                  <span className="inline-flex items-center gap-1">
-                    <Flame className="h-3.5 w-3.5 text-orange-500" />
-                    {me.current_streak} hari streak
-                  </span>
+                  <span className="inline-flex items-center gap-1"><Flame className="h-3.5 w-3.5 text-orange-500" />{me.current_streak} hari streak</span>
                   <span className="text-slate-300">·</span>
                   <span>{me.total_players} peserta</span>
                 </p>
@@ -250,15 +179,8 @@ export default function LeaderboardView({ currentUserId }: { currentUserId: stri
       )}
 
       {loading ? (
-        <div className="space-y-4">
-          <SkeletonPodium />
-          <Card>
-            <CardContent className="p-0">
-              <div className="divide-y divide-slate-100">
-                {[0, 1, 2, 3].map((i) => <SkeletonLeaderboardEntry key={i} />)}
-              </div>
-            </CardContent>
-          </Card>
+        <div className="flex items-center justify-center rounded-3xl border border-slate-200 bg-white p-10 text-slate-400">
+          <Loader2 className="h-6 w-6 animate-spin" />
         </div>
       ) : data?.setup ? (
         <Card className="border-amber-200 bg-amber-50">
@@ -281,7 +203,6 @@ export default function LeaderboardView({ currentUserId }: { currentUserId: stri
               {podium.map((entry, index) => {
                 const style = podiumStyles[index]
                 const isMe = entry.user_id === currentUserId
-                const entryBadges = (entry as LeaderboardEntry & { display_badges?: string[] }).display_badges ?? []
                 return (
                   <Card key={entry.user_id} className={`bg-gradient-to-b ${style.bg} ${style.order} ring-2 ${style.ring}`}>
                     <CardContent className="flex flex-col items-center p-3 text-center sm:p-4">
@@ -295,14 +216,6 @@ export default function LeaderboardView({ currentUserId }: { currentUserId: stri
                         {entry.display_name}{isMe ? ' (kamu)' : ''}
                       </p>
                       <p className="line-clamp-1 text-[11px] text-slate-500">{entry.campus_name || 'Kampus —'}</p>
-                      {/* Badge display */}
-                      {entryBadges.length > 0 && (
-                        <div className="mt-1 flex items-center gap-0.5">
-                          {entryBadges.slice(0, 3).map((bid) => (
-                            <BadgeChip key={bid} badgeId={bid} />
-                          ))}
-                        </div>
-                      )}
                       <p className="mt-2 text-lg font-black text-slate-950">{entry.points}</p>
                       <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">poin</p>
                     </CardContent>
@@ -319,34 +232,30 @@ export default function LeaderboardView({ currentUserId }: { currentUserId: stri
                 <div className="divide-y divide-slate-100">
                   {rest.map((entry) => {
                     const isMe = entry.user_id === currentUserId
-                    const entryBadges = (entry as LeaderboardEntry & { display_badges?: string[] }).display_badges ?? []
                     return (
                       <div
                         key={entry.user_id}
-                        className={`flex items-center justify-between gap-3 p-3 sm:p-4 ${isMe ? 'bg-teal-50/60' : 'hover:bg-slate-50'}`}
+                        className={`flex items-center gap-2 p-3 sm:gap-3 sm:p-4 ${isMe ? 'bg-teal-50/60' : 'hover:bg-slate-50'}`}
                       >
-                        <div className="flex min-w-0 items-center gap-3">
-                          <span className="w-7 text-center text-sm font-black text-slate-400">{entry.rank}</span>
-                          <Avatar url={entry.avatar_url} name={entry.display_name} />
-                          <div className="min-w-0">
+                        {/* Rank number */}
+                        <span className="w-6 flex-shrink-0 text-center text-xs font-black text-slate-400 sm:w-7 sm:text-sm">
+                          {entry.rank}
+                        </span>
+                        {/* Avatar */}
+                        <Avatar url={entry.avatar_url} name={entry.display_name} />
+                        {/* Name + campus — min-w-0 agar bisa truncate */}
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5">
                             <p className="truncate text-sm font-black text-slate-950">
                               {entry.display_name}{isMe ? ' (kamu)' : ''}
                             </p>
-                            <div className="flex items-center gap-1">
-                              <p className="truncate text-xs text-slate-500">{entry.campus_name || 'Kampus —'}</p>
-                              {entryBadges.length > 0 && (
-                                <span className="flex items-center gap-0.5">
-                                  {entryBadges.slice(0, 2).map((bid) => (
-                                    <BadgeChip key={bid} badgeId={bid} />
-                                  ))}
-                                </span>
-                              )}
-                            </div>
                           </div>
+                          <p className="truncate text-xs text-slate-500">{entry.campus_name || '—'}</p>
                         </div>
-                        <div className="flex flex-shrink-0 items-center gap-3">
-                          {entry.plan !== 'radar' && <Medal className="hidden h-4 w-4 text-teal-500 sm:block" />}
-                          <span className="text-sm font-black text-slate-950">{entry.points}</span>
+                        {/* Points — flex-shrink-0 agar tidak terpotong */}
+                        <div className="flex flex-shrink-0 items-center gap-1.5">
+                          {entry.plan !== 'radar' && <Medal className="h-3.5 w-3.5 text-teal-500" />}
+                          <span className="text-sm font-black tabular-nums text-slate-950">{entry.points}</span>
                         </div>
                       </div>
                     )
@@ -359,8 +268,7 @@ export default function LeaderboardView({ currentUserId }: { currentUserId: stri
       )}
 
       <p className="px-1 text-center text-xs leading-5 text-slate-400">
-        Poin: catat deadline +2, selesaikan +10, tepat waktu +5 bonus. Atur privasi tampil di leaderboard lewat profil.
-        {' '}<span className="text-teal-600 font-bold">Leaderboard update otomatis secara real-time.</span>
+        Poin: catat deadline +2, selesaikan +10, tepat waktu +5 bonus. Atur privasi tampil di leaderboard lewat profil. Email kamu tidak pernah ditampilkan.
       </p>
     </div>
   )

@@ -27,38 +27,15 @@ export async function GET(request: NextRequest) {
 
   if (listError || rankError) {
     console.error('[Leaderboard] rpc error', listError?.message, rankError?.message)
+    // Jangan 500 — fitur belum di-setup. Kembalikan kosong + flag setup.
     return NextResponse.json({ scope, entries: [], me: null, setup: true })
   }
-
-  const rawEntries = Array.isArray(entries) ? entries : []
-
-  // Fetch display_badges for all users in leaderboard
-  const userIds = rawEntries.map((e: Record<string, unknown>) => e.user_id as string).filter(Boolean)
-  let badgeMap: Record<string, string[]> = {}
-
-  if (userIds.length > 0) {
-    const { data: profiles } = await supabase
-      .from('profiles')
-      .select('id, badges')
-      .in('id', userIds)
-
-    if (profiles) {
-      for (const p of profiles) {
-        badgeMap[p.id] = (p.badges as string[] | null) ?? []
-      }
-    }
-  }
-
-  const enrichedEntries = rawEntries.map((e: Record<string, unknown>) => ({
-    ...e,
-    display_badges: badgeMap[e.user_id as string] ?? [],
-  }))
 
   const me = Array.isArray(rankRows) && rankRows.length > 0 ? rankRows[0] : null
 
   return NextResponse.json({
     scope,
-    entries: enrichedEntries,
+    entries: Array.isArray(entries) ? entries : [],
     me,
   })
 }

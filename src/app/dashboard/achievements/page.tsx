@@ -9,10 +9,11 @@ export const metadata = {
 
 export default async function AchievementsPage() {
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  return <AchievementsView />
+  const { data: profile } = await supabase
+    .from('profiles').select('plan').eq('id', user.id).maybeSingle()
+
+  return <AchievementsView userPlan={(profile as { plan?: string } | null)?.plan as 'radar'|'pulse'|'command' ?? 'radar'} userId={user.id} />
 }

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import InstallAppPrompt from '@/components/InstallAppPrompt'
+import { LanguageProvider } from '@/components/LanguageProvider'
 import { BRAND } from '@/lib/brand'
 import './globals.css'
 
@@ -99,13 +100,15 @@ const jsonLd = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="id" suppressHydrationWarning>
+    <html lang="id">
       <body className="font-body bg-slate-50 text-slate-900 antialiased">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        {children}
+        <LanguageProvider>
+          {children}
+        </LanguageProvider>
         <InstallAppPrompt />
       </body>
     </html>
