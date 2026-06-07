@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { Award, Globe, LogOut, Settings, Trophy, UserRound } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useT } from '@/components/LanguageProvider'
-import { LANG_LABELS, type Lang, setLang } from '@/lib/i18n'
+import { LANG_LABELS, type Lang } from '@/lib/i18n'
 
 function initials(name?: string | null) {
   if (!name) return 'N'
@@ -54,7 +54,6 @@ export default function AvatarMenu({
 
   function changeLang(l: Lang) {
     setAppLang(l)
-    setLang(l)
     setShowLang(false)
   }
 

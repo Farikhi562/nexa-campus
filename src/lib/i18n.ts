@@ -71,13 +71,28 @@ export function t(key: TranslationKey, lang: Lang = 'id'): string {
   return strings[key]?.[lang] ?? strings[key]?.['id'] ?? key
 }
 
+const FALLBACK_LANG: Lang = 'id'
+const STORAGE_KEY = 'nexa_lang'
+const LANG_CHANGE_EVENT = 'nexa_lang_change'
+const SUPPORTED_LANGS: Lang[] = ['id', 'en', 'zh']
+
 export function getLang(): Lang {
-  if (typeof window === 'undefined') return 'id'
-  return (localStorage.getItem('nexa_lang') as Lang) ?? 'id'
+  if (typeof window === 'undefined') return FALLBACK_LANG
+
+  const storedLang = window.localStorage.getItem(STORAGE_KEY)
+
+  if (SUPPORTED_LANGS.includes(storedLang as Lang)) {
+    return storedLang as Lang
+  }
+
+  return FALLBACK_LANG
 }
 
 export function setLang(lang: Lang) {
   if (typeof window === 'undefined') return
-  localStorage.setItem('nexa_lang', lang)
-  window.dispatchEvent(new Event('nexa_lang_change'))
+
+  const nextLang = SUPPORTED_LANGS.includes(lang) ? lang : FALLBACK_LANG
+
+  window.localStorage.setItem(STORAGE_KEY, nextLang)
+  window.dispatchEvent(new Event(LANG_CHANGE_EVENT))
 }

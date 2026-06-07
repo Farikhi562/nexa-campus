@@ -1,6 +1,6 @@
 'use client'
 
-import { LANG_LABELS, setLang, type Lang } from '@/lib/i18n'
+import { LANG_LABELS, type Lang } from '@/lib/i18n'
 import { useT } from '@/components/LanguageProvider'
 
 export default function LanguageSwitcher() {
@@ -8,7 +8,6 @@ export default function LanguageSwitcher() {
 
   function change(l: Lang) {
     setAppLang(l)
-    setLang(l)
   }
 
   return (
