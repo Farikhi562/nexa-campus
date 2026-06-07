@@ -8,6 +8,24 @@ function text(value: unknown, max = 1500) {
   return value.trim().slice(0, max)
 }
 
+async function notifyApplicant(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  applicantId: string,
+  action: 'accept' | 'reject',
+  postTitle: string
+) {
+  await supabase.from('notifications').insert({
+    user_id: applicantId,
+    type: action === 'accept' ? 'arena_application_accepted' : 'arena_application_rejected',
+    title: action === 'accept' ? 'Lamaran Arena diterima' : 'Lamaran Arena ditolak',
+    message: action === 'accept'
+      ? `Kamu diterima di postingan "${postTitle}". Mantap, ada yang percaya sama skill kamu.`
+      : `Lamaran kamu di postingan "${postTitle}" belum diterima. Sakit sedikit, tapi bukan akhir dunia coding.` ,
+    link: '/dashboard/arena',
+    is_read: false,
+  })
+}
+
 export async function PATCH(req: NextRequest, { params }: Params) {
   const { id, applicationId } = await params
   const supabase = await createClient()
@@ -22,28 +40,30 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
   const { data: post, error: postError } = await supabase
     .from('nexa_arena_posts')
-    .select('id, creator_id, status, current_team_size, team_size_max')
+    .select('id, creator_id, title, status, current_team_size, team_size_max')
     .eq('id', id)
     .maybeSingle()
 
   if (postError) return NextResponse.json({ error: postError.message }, { status: 500 })
   if (!post) return NextResponse.json({ error: 'Postingan tidak ditemukan.' }, { status: 404 })
 
-  const arenaPost = post as { creator_id: string; status: string; current_team_size: number; team_size_max: number }
+  const arenaPost = post as { creator_id: string; title: string; status: string; current_team_size: number; team_size_max: number }
   if (arenaPost.creator_id !== user.id) {
     return NextResponse.json({ error: 'Hanya pembuat postingan yang bisa memproses pelamar.' }, { status: 403 })
   }
 
   const { data: application, error: appError } = await supabase
     .from('nexa_arena_applications')
-    .select('id, status')
+    .select('id, applicant_id, status')
     .eq('id', applicationId)
     .eq('post_id', id)
     .maybeSingle()
 
   if (appError) return NextResponse.json({ error: appError.message }, { status: 500 })
   if (!application) return NextResponse.json({ error: 'Lamaran tidak ditemukan.' }, { status: 404 })
-  if ((application as { status: string }).status !== 'pending') {
+
+  const app = application as { id: string; applicant_id: string; status: string }
+  if (app.status !== 'pending') {
     return NextResponse.json({ error: 'Lamaran ini sudah diproses.' }, { status: 400 })
   }
 
@@ -71,5 +91,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  try { await notifyApplicant(supabase, app.applicant_id, action, arenaPost.title) } catch (error) { console.error('[Arena Review Notification]', error) }
+
   return NextResponse.json({ data })
 }

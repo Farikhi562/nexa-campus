@@ -27,9 +27,15 @@ export async function GET(request: NextRequest) {
   if (uniqueIds.length > 0) {
     const { data: profiles } = await supabase
       .from('profiles')
-      .select('id, full_name, campus_name, major, avatar_url, plan, nexa_id, featured_badge, created_at')
+      .select('id, full_name, campus_name, major, avatar_url, plan, nexa_id, featured_badge, public_profile_headline, profile_skills, profile_skills_visibility, created_at')
       .in('id', uniqueIds)
-    for (const p of profiles ?? []) profileMap[(p as { id: string }).id] = p
+    for (const p of profiles ?? []) {
+      const row = p as { id: string; profile_skills_visibility?: string | null; profile_skills?: string[] | null }
+      profileMap[row.id] = {
+        ...row,
+        profile_skills: row.profile_skills_visibility === 'private' ? [] : row.profile_skills ?? [],
+      }
+    }
   }
 
   const enriched = rows.map((r) => {

@@ -120,6 +120,7 @@ export function BadgeChip({
   const text = override?.text ?? tier.text
   const glow = override?.glow ?? tier.glow
   const emoji = badgeEmoji(badge)
+  const isCommandBadge = badge.id === 'badge_command'
 
   return (
     <button
@@ -129,12 +130,14 @@ export function BadgeChip({
       title={badge.name}
       className={`relative flex flex-shrink-0 items-center justify-center transition ${s.wrap} ${bg} ${ring} ${glow} ${
         selected ? 'scale-110 ring-4 ring-offset-1 ring-teal-400' : ''
-      } ${onClick ? 'cursor-pointer hover:scale-105 active:scale-95' : 'cursor-default'}`}
+      } ${isCommandBadge ? 'command-badge-glow' : ''} ${onClick ? 'cursor-pointer hover:scale-105 active:scale-95' : 'cursor-default'}`}
     >
-      <span className={text}>{emoji}</span>
+      {isCommandBadge && <span className="command-badge-orbit pointer-events-none absolute -inset-1.5 rounded-[inherit]" />}
+      <span className={`${text} ${isCommandBadge ? 'command-badge-crown' : ''}`}>{emoji}</span>
+      {isCommandBadge && <span className="command-badge-shine pointer-events-none absolute inset-y-0 left-0 rounded-[inherit]" />}
       {/* Shimmer effect for special/gold */}
       {(badge.tier === 'gold' || badge.tier === 'special' || badge.id === 'badge_command') && (
-        <span className="pointer-events-none absolute inset-0 rounded-inherit bg-[radial-gradient(circle_at_60%_35%,rgba(255,255,255,0.45),transparent_60%)]" />
+        <span className="pointer-events-none absolute inset-0 rounded-[inherit] bg-[radial-gradient(circle_at_60%_35%,rgba(255,255,255,0.45),transparent_60%)]" />
       )}
     </button>
   )

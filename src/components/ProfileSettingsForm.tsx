@@ -167,6 +167,16 @@ export default function ProfileSettingsForm({ profile }: { profile: Profile }) {
   const [studentId, setStudentId] = useState(profile.student_id ?? '')
   const [gender, setGender] = useState(profile.gender ?? '')
   const [isPublicProfile, setIsPublicProfile] = useState(profile.is_public_profile ?? true)
+  const [publicProfileHeadline, setPublicProfileHeadline] = useState(profile.public_profile_headline ?? '')
+  const [profileBio, setProfileBio] = useState(profile.profile_bio ?? '')
+  const [profileBioVisibility, setProfileBioVisibility] = useState<'public' | 'private'>(profile.profile_bio_visibility === 'private' ? 'private' : 'public')
+  const [profileSkills, setProfileSkills] = useState((profile.profile_skills ?? []).join(', '))
+  const [profileSkillsVisibility, setProfileSkillsVisibility] = useState<'public' | 'private'>(profile.profile_skills_visibility === 'private' ? 'private' : 'public')
+  const [profileInterests, setProfileInterests] = useState((profile.profile_interests ?? []).join(', '))
+  const [profileInterestsVisibility, setProfileInterestsVisibility] = useState<'public' | 'private'>(profile.profile_interests_visibility === 'private' ? 'private' : 'public')
+  const [portfolioUrl, setPortfolioUrl] = useState(profile.portfolio_url ?? '')
+  const [githubUrl, setGithubUrl] = useState(profile.github_url ?? '')
+  const [linkedinUrl, setLinkedinUrl] = useState(profile.linkedin_url ?? '')
   const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url ?? '')
   const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [photoPreview, setPhotoPreview] = useState('')
@@ -224,6 +234,16 @@ export default function ProfileSettingsForm({ profile }: { profile: Profile }) {
         gender: gender || null,
         avatar_icon: null,
         is_public_profile: isPublicProfile,
+        public_profile_headline: publicProfileHeadline.trim() || null,
+        profile_bio: profileBio.trim() || null,
+        profile_bio_visibility: profileBioVisibility,
+        profile_skills: profileSkills,
+        profile_skills_visibility: profileSkillsVisibility,
+        profile_interests: profileInterests,
+        profile_interests_visibility: profileInterestsVisibility,
+        portfolio_url: portfolioUrl.trim() || null,
+        github_url: githubUrl.trim() || null,
+        linkedin_url: linkedinUrl.trim() || null,
       }),
     })
     const result = (await response.json().catch(() => null)) as { error?: string; warning?: string } | null
@@ -408,6 +428,101 @@ export default function ProfileSettingsForm({ profile }: { profile: Profile }) {
                 />
               </span>
             </button>
+          </div>
+
+          <div className="md:col-span-2 rounded-3xl border border-slate-200 bg-slate-50 p-4">
+            <div className="mb-4">
+              <p className="text-sm font-black text-slate-950">Profil publik & skill</p>
+              <p className="mt-1 text-xs leading-5 text-slate-500">
+                Ini yang muncul saat user lain klik profilmu dari Cari Teman, Leaderboard, atau NEXA Arena. Bagian privat tetap kamu simpan, tapi tidak ditampilkan ke orang lain.
+              </p>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <label className="block md:col-span-2">
+                <span className="mb-1.5 block text-sm font-black text-slate-700">Headline singkat</span>
+                <input
+                  value={publicProfileHeadline}
+                  onChange={(event) => setPublicProfileHeadline(event.target.value)}
+                  maxLength={120}
+                  placeholder="Contoh: Junior AI Engineer · Backend learner · Business plan enthusiast"
+                  className="focus-ring w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm"
+                />
+              </label>
+
+              <label className="block md:col-span-2">
+                <span className="mb-1.5 flex items-center justify-between gap-3 text-sm font-black text-slate-700">
+                  Deskripsi diri
+                  <button
+                    type="button"
+                    onClick={() => setProfileBioVisibility((value) => value === 'public' ? 'private' : 'public')}
+                    className="rounded-full bg-white px-3 py-1 text-[11px] font-black text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50"
+                  >
+                    {profileBioVisibility === 'public' ? 'Publik' : 'Privat'}
+                  </button>
+                </span>
+                <textarea
+                  value={profileBio}
+                  onChange={(event) => setProfileBio(event.target.value)}
+                  maxLength={800}
+                  rows={5}
+                  placeholder="Ceritain latar belakang, minat, pengalaman, atau arah belajar kamu. Jangan nulis CV 18 halaman, ini profil, bukan prasasti."
+                  className="focus-ring w-full resize-none rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm leading-6"
+                />
+              </label>
+
+              <label className="block md:col-span-2">
+                <span className="mb-1.5 flex items-center justify-between gap-3 text-sm font-black text-slate-700">
+                  Skill
+                  <button
+                    type="button"
+                    onClick={() => setProfileSkillsVisibility((value) => value === 'public' ? 'private' : 'public')}
+                    className="rounded-full bg-white px-3 py-1 text-[11px] font-black text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50"
+                  >
+                    {profileSkillsVisibility === 'public' ? 'Publik' : 'Privat'}
+                  </button>
+                </span>
+                <input
+                  value={profileSkills}
+                  onChange={(event) => setProfileSkills(event.target.value)}
+                  placeholder="Python, React, Supabase, UI/UX, Public speaking"
+                  className="focus-ring w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm"
+                />
+                <span className="mt-1.5 block text-xs leading-5 text-slate-500">Pisahkan dengan koma. Skill ini juga ngebantu owner Arena ngecek pelamar.</span>
+              </label>
+
+              <label className="block md:col-span-2">
+                <span className="mb-1.5 flex items-center justify-between gap-3 text-sm font-black text-slate-700">
+                  Minat / bidang belajar
+                  <button
+                    type="button"
+                    onClick={() => setProfileInterestsVisibility((value) => value === 'public' ? 'private' : 'public')}
+                    className="rounded-full bg-white px-3 py-1 text-[11px] font-black text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50"
+                  >
+                    {profileInterestsVisibility === 'public' ? 'Publik' : 'Privat'}
+                  </button>
+                </span>
+                <input
+                  value={profileInterests}
+                  onChange={(event) => setProfileInterests(event.target.value)}
+                  placeholder="AI, bisnis digital, hackathon, PKM, data science"
+                  className="focus-ring w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm"
+                />
+              </label>
+
+              <label className="block">
+                <span className="mb-1.5 block text-sm font-black text-slate-700">Portfolio URL</span>
+                <input value={portfolioUrl} onChange={(event) => setPortfolioUrl(event.target.value)} placeholder="https://..." className="focus-ring w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm" />
+              </label>
+              <label className="block">
+                <span className="mb-1.5 block text-sm font-black text-slate-700">GitHub URL</span>
+                <input value={githubUrl} onChange={(event) => setGithubUrl(event.target.value)} placeholder="https://github.com/username" className="focus-ring w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm" />
+              </label>
+              <label className="block md:col-span-2">
+                <span className="mb-1.5 block text-sm font-black text-slate-700">LinkedIn URL</span>
+                <input value={linkedinUrl} onChange={(event) => setLinkedinUrl(event.target.value)} placeholder="https://linkedin.com/in/username" className="focus-ring w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm" />
+              </label>
+            </div>
           </div>
         </div>
       </section>

@@ -49,6 +49,16 @@ export interface Profile {
   is_public_profile: boolean | null
   badges: string[] | null
   featured_badge: string | null
+  public_profile_headline: string | null
+  profile_bio: string | null
+  profile_bio_visibility: 'public' | 'private' | null
+  profile_skills: string[] | null
+  profile_skills_visibility: 'public' | 'private' | null
+  profile_interests: string[] | null
+  profile_interests_visibility: 'public' | 'private' | null
+  portfolio_url: string | null
+  github_url: string | null
+  linkedin_url: string | null
   profile_completed: boolean
   created_at: string
   updated_at: string
@@ -148,6 +158,16 @@ export interface PublicProfile {
   plan: Plan
   nexa_id: string | null
   featured_badge?: string | null
+  public_profile_headline?: string | null
+  profile_bio?: string | null
+  profile_bio_visibility?: 'public' | 'private' | null
+  profile_skills?: string[] | null
+  profile_skills_visibility?: 'public' | 'private' | null
+  profile_interests?: string[] | null
+  profile_interests_visibility?: 'public' | 'private' | null
+  portfolio_url?: string | null
+  github_url?: string | null
+  linkedin_url?: string | null
   created_at: string
 }
 

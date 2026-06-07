@@ -1,6 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
+async function notifyFriendRequest(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  receiverId: string,
+  requesterId: string
+) {
+  const { data: requester } = await supabase
+    .from('profiles')
+    .select('full_name')
+    .eq('id', requesterId)
+    .maybeSingle()
+
+  const requesterName = (requester as { full_name?: string | null } | null)?.full_name || 'Mahasiswa NEXA'
+
+  await supabase.from('notifications').insert({
+    user_id: receiverId,
+    type: 'friend_request',
+    title: 'Permintaan pertemanan baru',
+    message: `${requesterName} ingin berteman dengan kamu di NEXA Campus.`,
+    link: '/dashboard/friends',
+    is_read: false,
+  })
+}
+
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -23,6 +46,9 @@ export async function POST(request: NextRequest) {
     if (error.code === '23505') return NextResponse.json({ error: 'Permintaan sudah pernah dikirim.' }, { status: 409 })
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
+
+  // Notifikasi tidak boleh menggagalkan add friend. Kalau tabel belum migration, request tetap jalan.
+  try { await notifyFriendRequest(supabase, receiverId, user.id) } catch (error) { console.error('[Friend Request Notification]', error) }
 
   return NextResponse.json({ data }, { status: 201 })
 }

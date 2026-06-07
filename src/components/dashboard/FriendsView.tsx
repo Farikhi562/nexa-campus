@@ -1,30 +1,47 @@
 'use client'
 
-import { useCallback, useEffect, useState, type ReactNode } from 'react'
+import Link from 'next/link'
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Check, Loader2, Search, UserPlus, X } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import { FeaturedBadgePin } from '@/components/BadgeChip'
 import type { FriendRequest, PublicProfile } from '@/types'
 
+function visibleSkills(user: PublicProfile) {
+  if (user.profile_skills_visibility === 'private') return []
+  return Array.isArray(user.profile_skills) ? user.profile_skills.filter(Boolean).slice(0, 3) : []
+}
+
 function UserCard({ user, action }: { user: PublicProfile; action: ReactNode }) {
   const init = (user.full_name ?? 'N').slice(0, 1).toUpperCase()
+  const skills = visibleSkills(user)
   return (
     <Card>
       <CardContent className="flex items-center gap-3 p-4">
-        <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-100 text-base font-black text-slate-600">
-          {user.avatar_url ? (
-            <img src={user.avatar_url} alt="" className="h-full w-full object-cover" />
-          ) : init}
-        </span>
-        <div className="min-w-0 flex-1">
-          <div className="flex min-w-0 items-center gap-1.5">
-            <p className="truncate text-sm font-black text-slate-950">{user.full_name ?? 'Mahasiswa NEXA'}</p>
-            <FeaturedBadgePin badgeId={user.featured_badge} />
+        <Link href={`/dashboard/profile/${user.id}`} className="group flex min-w-0 flex-1 items-center gap-3 rounded-2xl outline-none transition hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-2">
+          <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-100 text-base font-black text-slate-600">
+            {user.avatar_url ? (
+              <img src={user.avatar_url} alt="" className="h-full w-full object-cover" />
+            ) : init}
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="flex min-w-0 items-center gap-1.5">
+              <p className="truncate text-sm font-black text-slate-950 group-hover:text-teal-700">{user.full_name ?? 'Mahasiswa NEXA'}</p>
+              <FeaturedBadgePin badgeId={user.featured_badge} />
+            </div>
+            {user.public_profile_headline && <p className="truncate text-xs font-bold text-slate-600">{user.public_profile_headline}</p>}
+            <p className="truncate text-xs text-slate-500">{[user.campus_name, user.major].filter(Boolean).join(' · ')}</p>
+            {skills.length > 0 && (
+              <div className="mt-1 flex flex-wrap gap-1">
+                {skills.map((skill) => (
+                  <span key={skill} className="rounded-full bg-teal-50 px-2 py-0.5 text-[10px] font-black text-teal-700">{skill}</span>
+                ))}
+              </div>
+            )}
+            {user.nexa_id && <p className="mt-1 text-[10px] font-bold text-slate-400">#{user.nexa_id}</p>}
           </div>
-          <p className="truncate text-xs text-slate-500">{[user.campus_name, user.major].filter(Boolean).join(' · ')}</p>
-          {user.nexa_id && <p className="text-[10px] font-bold text-slate-400">#{user.nexa_id}</p>}
-        </div>
+        </Link>
         {action}
       </CardContent>
     </Card>
@@ -67,11 +84,11 @@ export default function FriendsView() {
     return () => clearTimeout(timer)
   }, [q])
 
-  const sentIds = new Set(sent.map((r) => r.receiver_id))
-  const friendIds = new Set([
+  const sentIds = useMemo(() => new Set(sent.map((r) => r.receiver_id)), [sent])
+  const friendIds = useMemo(() => new Set([
     ...friends.map((r) => r.receiver_id),
     ...friends.map((r) => r.requester_id),
-  ])
+  ]), [friends])
 
   async function sendRequest(receiverId: string) {
     setActionId(receiverId)
@@ -104,7 +121,6 @@ export default function FriendsView() {
 
   return (
     <div className="space-y-5">
-      {/* Hero */}
       <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-slate-950 p-5 text-white shadow-xl sm:p-7">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(45,212,191,0.26),transparent_18rem)]" />
         <div className="relative">
@@ -114,12 +130,11 @@ export default function FriendsView() {
           </div>
           <h1 className="text-2xl font-black tracking-tight sm:text-3xl">Belajar lebih seru bareng teman.</h1>
           <p className="mt-2 text-sm leading-6 text-slate-300">
-            Temukan mahasiswa lain, add sebagai teman, dan belajar bareng di Study Room.
+            Klik profil user lain buat lihat deskripsi publik, skill, badge, dan link portfolio. Akhirnya tombol notifikasi dan profil dipakai juga, bukan cuma dekorasi mahal.
           </p>
         </div>
       </section>
 
-      {/* Search */}
       <div className="relative">
         <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
         <input
@@ -131,7 +146,6 @@ export default function FriendsView() {
         {searching && <Loader2 className="absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-slate-400" />}
       </div>
 
-      {/* Search results */}
       {q.trim() && (
         <div className="space-y-3">
           <p className="text-xs font-black uppercase tracking-wide text-slate-500">Hasil pencarian</p>
@@ -147,7 +161,6 @@ export default function FriendsView() {
                 <UserCard
                   key={user.id}
                   user={user}
-                  
                   action={
                     isFriend ? (
                       <Badge tone="success">Teman</Badge>
@@ -175,7 +188,6 @@ export default function FriendsView() {
         <div className="flex items-center justify-center p-8 text-slate-400"><Loader2 className="h-5 w-5 animate-spin" /></div>
       ) : (
         <>
-          {/* Incoming requests */}
           {received.length > 0 && (
             <div className="space-y-3">
               <p className="text-xs font-black uppercase tracking-wide text-slate-500">
@@ -185,7 +197,6 @@ export default function FriendsView() {
                 <UserCard
                   key={req.id}
                   user={req.other_user}
-                  
                   action={
                     <div className="flex gap-2">
                       <button onClick={() => respond(req.id, 'accept')} disabled={actionId === req.id}
@@ -203,17 +214,15 @@ export default function FriendsView() {
             </div>
           )}
 
-          {/* Friends */}
           {friends.length > 0 && (
             <div className="space-y-3">
               <p className="text-xs font-black uppercase tracking-wide text-slate-500">Teman saya ({friends.length})</p>
               {friends.map((req) => req.other_user && (
-                <UserCard key={req.id} user={req.other_user}  action={<Badge tone="success">Teman</Badge>} />
+                <UserCard key={req.id} user={req.other_user} action={<Badge tone="success">Teman</Badge>} />
               ))}
             </div>
           )}
 
-          {/* Sent requests */}
           {sent.length > 0 && (
             <div className="space-y-3">
               <p className="text-xs font-black uppercase tracking-wide text-slate-500">Permintaan terkirim</p>
@@ -221,7 +230,6 @@ export default function FriendsView() {
                 <UserCard
                   key={req.id}
                   user={req.other_user}
-                  
                   action={
                     <button onClick={() => cancelRequest(req.id)} disabled={actionId === req.id}
                       className="focus-ring inline-flex items-center gap-1 rounded-2xl border border-slate-200 px-3 py-2 text-xs font-black text-slate-600 hover:bg-slate-50 disabled:opacity-50">

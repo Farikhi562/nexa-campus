@@ -214,9 +214,9 @@ export default function LeaderboardView({ currentUserId }: { currentUserId: stri
                         </span>
                       </div>
                       <div className="mt-2 flex max-w-full items-center justify-center gap-1.5">
-                        <p className="line-clamp-1 text-sm font-black text-slate-950">
+                        <Link href={`/dashboard/profile/${entry.user_id}`} className="line-clamp-1 text-sm font-black text-slate-950 hover:text-teal-700">
                           {entry.display_name}{isMe ? ' (kamu)' : ''}
-                        </p>
+                        </Link>
                         <FeaturedBadgePin badgeId={entry.featured_badge} />
                       </div>
                       <p className="line-clamp-1 text-[11px] text-slate-500">{entry.campus_name || 'Kampus —'}</p>
@@ -250,9 +250,9 @@ export default function LeaderboardView({ currentUserId }: { currentUserId: stri
                         {/* Name + campus — min-w-0 agar bisa truncate */}
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-1.5">
-                            <p className="truncate text-sm font-black text-slate-950">
+                            <Link href={`/dashboard/profile/${entry.user_id}`} className="truncate text-sm font-black text-slate-950 hover:text-teal-700">
                               {entry.display_name}{isMe ? ' (kamu)' : ''}
-                            </p>
+                            </Link>
                             <FeaturedBadgePin badgeId={entry.featured_badge} />
                           </div>
                           <p className="truncate text-xs text-slate-500">{entry.campus_name || '—'}</p>

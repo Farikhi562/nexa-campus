@@ -9,8 +9,17 @@ const allowedGenders = new Set([
   'tidak_ingin_menyebutkan',
 ])
 
-function text(value: unknown) {
-  return typeof value === 'string' ? value.trim() : ''
+function text(value: unknown, max = 2000) {
+  return typeof value === 'string' ? value.trim().slice(0, max) : ''
+}
+
+function visibility(value: unknown) {
+  return value === 'private' ? 'private' : 'public'
+}
+
+function textList(value: unknown, maxItems = 12) {
+  const raw = Array.isArray(value) ? value : typeof value === 'string' ? value.split(/[\n,]/) : []
+  return Array.from(new Set(raw.map((item) => String(item).trim()).filter(Boolean))).slice(0, maxItems)
 }
 
 function isSchemaError(error: { code?: string; message?: string }) {
@@ -47,7 +56,14 @@ export async function PATCH(request: NextRequest) {
   const semester = Number(body.semester)
   const studentId = text(body.student_id)
   const gender = text(body.gender)
-  const avatarIcon = text(body.avatar_icon)
+  const avatarIcon = text(body.avatar_icon, 40)
+  const publicProfileHeadline = text(body.public_profile_headline, 120)
+  const profileBio = text(body.profile_bio, 800)
+  const profileSkills = textList(body.profile_skills, 16)
+  const profileInterests = textList(body.profile_interests, 16)
+  const portfolioUrl = text(body.portfolio_url, 500)
+  const githubUrl = text(body.github_url, 500)
+  const linkedinUrl = text(body.linkedin_url, 500)
 
   if (!fullName) return NextResponse.json({ error: 'Nama wajib diisi.' }, { status: 400 })
   if (!campusName) return NextResponse.json({ error: 'Nama kampus wajib diisi.' }, { status: 400 })
@@ -73,6 +89,16 @@ export async function PATCH(request: NextRequest) {
     gender: gender || null,
     avatar_icon: avatarIcon || null,
     is_public_profile: typeof body.is_public_profile === 'boolean' ? body.is_public_profile : true,
+    public_profile_headline: publicProfileHeadline || null,
+    profile_bio: profileBio || null,
+    profile_bio_visibility: visibility(body.profile_bio_visibility),
+    profile_skills: profileSkills,
+    profile_skills_visibility: visibility(body.profile_skills_visibility),
+    profile_interests: profileInterests,
+    profile_interests_visibility: visibility(body.profile_interests_visibility),
+    portfolio_url: portfolioUrl || null,
+    github_url: githubUrl || null,
+    linkedin_url: linkedinUrl || null,
   }
 
   const { data, error } = await supabase

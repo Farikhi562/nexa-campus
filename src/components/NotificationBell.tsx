@@ -30,6 +30,9 @@ const typeIcon: Record<string, string> = {
   friend_accepted: '🤝',
   room_approved: '🚪',
   achievement: '🏆',
+  arena_application: '⚔️',
+  arena_application_accepted: '✅',
+  arena_application_rejected: '🛡️',
   system: '📣',
 }
 

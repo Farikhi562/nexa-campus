@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
   // Only safe, non-sensitive fields. Never email, phone, telegram.
   let query = supabase
     .from('profiles')
-    .select('id, full_name, campus_name, major, avatar_url, plan, nexa_id, featured_badge, created_at')
+    .select('id, full_name, campus_name, major, avatar_url, plan, nexa_id, featured_badge, public_profile_headline, profile_skills, profile_skills_visibility, created_at')
     .eq('is_public_profile', true)
     .neq('id', user.id)
     .limit(30)
@@ -33,5 +33,10 @@ export async function GET(request: NextRequest) {
   const { data, error } = await query
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  return NextResponse.json({ data: data ?? [] })
+  const sanitized = (data ?? []).map((row) => ({
+    ...row,
+    profile_skills: row.profile_skills_visibility === 'private' ? [] : row.profile_skills ?? [],
+  }))
+
+  return NextResponse.json({ data: sanitized })
 }

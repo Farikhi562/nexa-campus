@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useState, type Dispatch, type SetStateAction } from 'react'
 import {
   Check,
@@ -255,7 +256,7 @@ export default function ArenaView({ userId }: { userId: string }) {
 
                   {post.creator_name && (
                     <p className="mt-2 flex items-center gap-1.5 text-xs text-slate-400">
-                      oleh <span className="font-bold text-slate-600">{post.creator_name}</span>
+                      oleh <Link href={`/dashboard/profile/${post.creator_id}`} className="font-bold text-slate-600 hover:text-teal-700">{post.creator_name}</Link>
                       <FeaturedBadgePin badgeId={post.creator_featured_badge} />
                     </p>
                   )}
@@ -650,7 +651,11 @@ function ApplicantSection({
                 <ProfileAvatar url={applicant?.avatar_url} name={applicant?.full_name} />
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="font-black text-slate-950">{applicant?.full_name ?? 'Mahasiswa NEXA'}</p>
+                    {applicant?.id ? (
+                      <Link href={`/dashboard/profile/${applicant.id}`} className="font-black text-slate-950 hover:text-teal-700">{applicant.full_name ?? 'Mahasiswa NEXA'}</Link>
+                    ) : (
+                      <p className="font-black text-slate-950">Mahasiswa NEXA</p>
+                    )}
                     <FeaturedBadgePin badgeId={applicant?.featured_badge} />
                     <Badge tone={application.status === 'accepted' ? 'success' : application.status === 'rejected' ? 'danger' : 'warning'}>{application.status}</Badge>
                   </div>

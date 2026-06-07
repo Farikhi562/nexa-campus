@@ -181,6 +181,29 @@ svg {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-4px); }
   }
+
+  @keyframes nexa-command-float {
+    0%, 100% { transform: translateY(0) rotate(-1deg) scale(1); }
+    50% { transform: translateY(-3px) rotate(1deg) scale(1.04); }
+  }
+
+  @keyframes nexa-command-glow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.44), 0 14px 30px rgba(245, 158, 11, 0.22); }
+    50% { box-shadow: 0 0 0 7px rgba(251, 191, 36, 0), 0 18px 42px rgba(245, 158, 11, 0.34); }
+  }
+
+  @keyframes nexa-command-orbit {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes nexa-command-shine {
+    0% { transform: translateX(-120%) skewX(-16deg); opacity: 0; }
+    18% { opacity: 0.75; }
+    42% { transform: translateX(240%) skewX(-16deg); opacity: 0; }
+    100% { transform: translateX(240%) skewX(-16deg); opacity: 0; }
+  }
+
 }
 
 @layer utilities {
@@ -194,5 +217,23 @@ svg {
     background-image: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.45) 50%, transparent 65%);
     background-size: 200% 100%;
     animation: nexa-shimmer 2.4s linear infinite;
+  }
+
+  .command-badge-glow {
+    animation: nexa-command-float 2.8s ease-in-out infinite, nexa-command-glow 2.2s ease-in-out infinite;
+  }
+  .command-badge-orbit {
+    border: 1px solid rgba(251, 191, 36, 0.9);
+    border-top-color: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 0 18px rgba(251, 191, 36, 0.35);
+    animation: nexa-command-orbit 3.2s linear infinite;
+  }
+  .command-badge-shine {
+    width: 42%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.72), transparent);
+    animation: nexa-command-shine 2.6s ease-in-out infinite;
+  }
+  .command-badge-crown {
+    filter: drop-shadow(0 2px 6px rgba(120, 53, 15, 0.35));
   }
 }
