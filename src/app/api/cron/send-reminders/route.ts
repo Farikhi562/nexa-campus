@@ -274,7 +274,7 @@ export async function GET(request: NextRequest) {
             })
             const result = await sendTelegramMessage(chatId.trim(), text)
             sent = result.ok
-            providerError = result.ok ? null : result.error
+            providerError = 'error' in result ? result.error : undefined
           }
         } else if (channel === 'email' || (shouldEmail && channel === 'telegram')) {
           // Also send email for urgent reminders if email is available
