@@ -48,6 +48,9 @@ export interface Profile {
   pulse_trial_until: string | null
   is_public_profile: boolean | null
   badges: string[] | null
+  online_status_visibility: 'public' | 'friends' | 'private' | null
+  study_room_presence_visibility: 'members' | 'private' | null
+  dm_privacy: 'friends' | 'none' | null
   featured_badge: string | null
   public_profile_headline: string | null
   profile_bio: string | null
@@ -139,11 +142,13 @@ export interface StudyRoomMessage {
   room_id: string
   sender_id: string
   content: string | null
-  message_type: 'text' | 'image' | 'file'
+  message_type: 'text' | 'image' | 'video' | 'file'
   attachment_path: string | null
   attachment_name: string | null
   attachment_size: number | null
   attachment_mime: string | null
+  edited_at?: string | null
+  deleted_at?: string | null
   created_at: string
   sender?: PublicProfile | null
 }
@@ -168,7 +173,27 @@ export interface PublicProfile {
   portfolio_url?: string | null
   github_url?: string | null
   linkedin_url?: string | null
+  online_status_visibility?: 'public' | 'friends' | 'private' | null
+  study_room_presence_visibility?: 'members' | 'private' | null
+  dm_privacy?: 'friends' | 'none' | null
+  last_seen_at?: string | null
   created_at: string
+}
+
+export interface PrivateMessage {
+  id: string
+  sender_id: string
+  receiver_id: string
+  content: string | null
+  message_type: 'text' | 'image' | 'video' | 'file'
+  attachment_path: string | null
+  attachment_name: string | null
+  attachment_size: number | null
+  attachment_mime: string | null
+  edited_at: string | null
+  deleted_at: string | null
+  created_at: string
+  sender?: PublicProfile | null
 }
 
 export type FriendRequestStatus = 'pending' | 'accepted' | 'rejected'

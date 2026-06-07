@@ -17,6 +17,18 @@ function visibility(value: unknown) {
   return value === 'private' ? 'private' : 'public'
 }
 
+function onlineVisibility(value: unknown) {
+  return value === 'public' || value === 'private' ? value : 'friends'
+}
+
+function roomPresenceVisibility(value: unknown) {
+  return value === 'private' ? 'private' : 'members'
+}
+
+function dmPrivacy(value: unknown) {
+  return value === 'none' ? 'none' : 'friends'
+}
+
 function textList(value: unknown, maxItems = 12) {
   const raw = Array.isArray(value) ? value : typeof value === 'string' ? value.split(/[\n,]/) : []
   return Array.from(new Set(raw.map((item) => String(item).trim()).filter(Boolean))).slice(0, maxItems)
@@ -99,6 +111,9 @@ export async function PATCH(request: NextRequest) {
     portfolio_url: portfolioUrl || null,
     github_url: githubUrl || null,
     linkedin_url: linkedinUrl || null,
+    online_status_visibility: onlineVisibility(body.online_status_visibility),
+    study_room_presence_visibility: roomPresenceVisibility(body.study_room_presence_visibility),
+    dm_privacy: dmPrivacy(body.dm_privacy),
   }
 
   const { data, error } = await supabase

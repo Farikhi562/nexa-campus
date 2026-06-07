@@ -26,6 +26,9 @@ const PROFILE_SELECT = `
   portfolio_url,
   github_url,
   linkedin_url,
+  online_status_visibility,
+  study_room_presence_visibility,
+  dm_privacy,
   created_at
 `
 

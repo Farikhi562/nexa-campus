@@ -177,6 +177,9 @@ export default function ProfileSettingsForm({ profile }: { profile: Profile }) {
   const [portfolioUrl, setPortfolioUrl] = useState(profile.portfolio_url ?? '')
   const [githubUrl, setGithubUrl] = useState(profile.github_url ?? '')
   const [linkedinUrl, setLinkedinUrl] = useState(profile.linkedin_url ?? '')
+  const [onlineStatusVisibility, setOnlineStatusVisibility] = useState<'public' | 'friends' | 'private'>(profile.online_status_visibility ?? 'friends')
+  const [studyRoomPresenceVisibility, setStudyRoomPresenceVisibility] = useState<'members' | 'private'>(profile.study_room_presence_visibility ?? 'members')
+  const [dmPrivacy, setDmPrivacy] = useState<'friends' | 'none'>(profile.dm_privacy ?? 'friends')
   const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url ?? '')
   const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [photoPreview, setPhotoPreview] = useState('')
@@ -244,6 +247,9 @@ export default function ProfileSettingsForm({ profile }: { profile: Profile }) {
         portfolio_url: portfolioUrl.trim() || null,
         github_url: githubUrl.trim() || null,
         linkedin_url: linkedinUrl.trim() || null,
+        online_status_visibility: onlineStatusVisibility,
+        study_room_presence_visibility: studyRoomPresenceVisibility,
+        dm_privacy: dmPrivacy,
       }),
     })
     const result = (await response.json().catch(() => null)) as { error?: string; warning?: string } | null
@@ -522,6 +528,35 @@ export default function ProfileSettingsForm({ profile }: { profile: Profile }) {
                 <span className="mb-1.5 block text-sm font-black text-slate-700">LinkedIn URL</span>
                 <input value={linkedinUrl} onChange={(event) => setLinkedinUrl(event.target.value)} placeholder="https://linkedin.com/in/username" className="focus-ring w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm" />
               </label>
+
+              <div className="md:col-span-2 rounded-3xl border border-amber-200 bg-amber-50 p-4">
+                <p className="text-sm font-black text-amber-950">Privasi sosial & Study Room</p>
+                <p className="mt-1 text-xs leading-5 text-amber-900">Atur siapa yang bisa lihat kamu online dan siapa yang boleh kirim chat pribadi. Akhirnya user dikasih kendali, konsep yang ternyata bagus juga.</p>
+                <div className="mt-4 grid gap-3 md:grid-cols-3">
+                  <label className="block">
+                    <span className="mb-1.5 block text-xs font-black uppercase tracking-wide text-amber-900">Status online</span>
+                    <select value={onlineStatusVisibility} onChange={(event) => setOnlineStatusVisibility(event.target.value as 'public' | 'friends' | 'private')} className="focus-ring w-full rounded-2xl border border-amber-200 bg-white px-3 py-2.5 text-sm">
+                      <option value="friends">Teman saja</option>
+                      <option value="public">Publik</option>
+                      <option value="private">Sembunyikan</option>
+                    </select>
+                  </label>
+                  <label className="block">
+                    <span className="mb-1.5 block text-xs font-black uppercase tracking-wide text-amber-900">Online di Study Room</span>
+                    <select value={studyRoomPresenceVisibility} onChange={(event) => setStudyRoomPresenceVisibility(event.target.value as 'members' | 'private')} className="focus-ring w-full rounded-2xl border border-amber-200 bg-white px-3 py-2.5 text-sm">
+                      <option value="members">Tampil ke member room</option>
+                      <option value="private">Sembunyikan</option>
+                    </select>
+                  </label>
+                  <label className="block">
+                    <span className="mb-1.5 block text-xs font-black uppercase tracking-wide text-amber-900">Chat pribadi</span>
+                    <select value={dmPrivacy} onChange={(event) => setDmPrivacy(event.target.value as 'friends' | 'none')} className="focus-ring w-full rounded-2xl border border-amber-200 bg-white px-3 py-2.5 text-sm">
+                      <option value="friends">Teman bisa chat</option>
+                      <option value="none">Matikan chat pribadi</option>
+                    </select>
+                  </label>
+                </div>
+              </div>
             </div>
           </div>
         </div>

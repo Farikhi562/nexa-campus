@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import CreateRoomModal from '@/components/dashboard/CreateRoomModal'
+import OnlineFriendsStrip from '@/components/dashboard/OnlineFriendsStrip'
 import type { StudyRoom, StudyRoomCategory } from '@/types'
 
 const CATEGORIES: Array<{ value: StudyRoomCategory | ''; label: string }> = [
@@ -159,6 +160,12 @@ export default function StudyRoomView({ userId }: { userId: string }) {
             </Button>
           </div>
         </section>
+
+        <OnlineFriendsStrip />
+
+        <div className="rounded-3xl border border-cyan-100 bg-cyan-50 p-4 text-xs leading-5 text-cyan-900">
+          <b>Privasi aktif:</b> status online teman hanya tampil kalau mereka mengizinkan. Di dalam room, indikator online juga ikut pengaturan privasi masing-masing user. Aplikasi yang sedikit sopan, kejutan langka di internet.
+        </div>
 
         {/* Join by code */}
         <div className="flex gap-2">

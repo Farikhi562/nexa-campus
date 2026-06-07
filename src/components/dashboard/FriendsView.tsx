@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { Check, Loader2, Search, UserPlus, X } from 'lucide-react'
+import { Check, Loader2, MessageCircle, Search, UserPlus, X } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import { FeaturedBadgePin } from '@/components/BadgeChip'
@@ -218,7 +218,18 @@ export default function FriendsView() {
             <div className="space-y-3">
               <p className="text-xs font-black uppercase tracking-wide text-slate-500">Teman saya ({friends.length})</p>
               {friends.map((req) => req.other_user && (
-                <UserCard key={req.id} user={req.other_user} action={<Badge tone="success">Teman</Badge>} />
+                <UserCard
+                  key={req.id}
+                  user={req.other_user}
+                  action={
+                    <div className="flex flex-col gap-2 sm:flex-row">
+                      <Link href={`/dashboard/messages/${req.other_user.id}`} className="focus-ring inline-flex items-center justify-center gap-1.5 rounded-2xl bg-teal-400 px-3 py-2 text-xs font-black text-slate-950 hover:bg-teal-300">
+                        <MessageCircle className="h-3.5 w-3.5" /> Chat
+                      </Link>
+                      <Badge tone="success">Teman</Badge>
+                    </div>
+                  }
+                />
               ))}
             </div>
           )}

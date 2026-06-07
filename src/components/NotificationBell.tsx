@@ -29,6 +29,7 @@ const typeIcon: Record<string, string> = {
   friend_request: '👋',
   friend_accepted: '🤝',
   room_approved: '🚪',
+  direct_message: '💬',
   achievement: '🏆',
   arena_application: '⚔️',
   arena_application_accepted: '✅',

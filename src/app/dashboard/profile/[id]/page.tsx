@@ -28,6 +28,9 @@ const PROFILE_SELECT = `
   portfolio_url,
   github_url,
   linkedin_url,
+  online_status_visibility,
+  study_room_presence_visibility,
+  dm_privacy,
   created_at
 `
 
@@ -62,5 +65,16 @@ export default async function UserProfilePage({ params }: Params) {
 
   if (!profile) notFound()
 
-  return <PublicUserProfileView profile={profile as never} isOwnProfile={profile.id === user.id} />
+  let canMessage = false
+  if (profile.id !== user.id) {
+    const { data: friendship } = await supabase
+      .from('friend_requests')
+      .select('id')
+      .eq('status', 'accepted')
+      .or(`and(requester_id.eq.${user.id},receiver_id.eq.${profile.id}),and(requester_id.eq.${profile.id},receiver_id.eq.${user.id})`)
+      .maybeSingle()
+    canMessage = Boolean(friendship) && (profile as { dm_privacy?: string | null }).dm_privacy !== 'none'
+  }
+
+  return <PublicUserProfileView profile={profile as never} isOwnProfile={profile.id === user.id} canMessage={canMessage} />
 }

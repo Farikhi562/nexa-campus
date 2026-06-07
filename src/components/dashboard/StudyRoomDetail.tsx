@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Check, ChevronLeft, Copy, Crown, Edit2, FileText, Image as ImageIcon,
-  Loader2, LogOut, MoreVertical, Paperclip, Send, Settings, Shield, Trash2, UserMinus, UserPlus, Users, X
+  Loader2, LogOut, MoreVertical, Paperclip, Radio, Send, Settings, Shield, Smile, Trash2, UserMinus, UserPlus, Users, X
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent } from '@/components/ui/Card'
@@ -53,6 +53,8 @@ function formatTime(dateStr: string) {
   return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
 }
 
+const EMOJIS = ['🔥', '😂', '👍', '🥲', '😭', '🚀', '✅', '💀']
+
 function formatBytes(bytes: number) {
   if (bytes < 1024) return `${bytes} B`
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`
@@ -74,6 +76,9 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
   const [uploading, setUploading] = useState(false)
   const [copied, setCopied] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
+  const [onlineMemberIds, setOnlineMemberIds] = useState<Set<string>>(new Set())
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editingText, setEditingText] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const membersRef = useRef<StudyRoomMember[]>([])
@@ -88,6 +93,7 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
   const myMembership = members.find((m) => m.user_id === userId)
   const myRole = myMembership?.role ?? null
   const canManage = myRole === 'owner' || myRole === 'admin'
+  const myRoomPresenceVisibility = myMembership?.profile?.study_room_presence_visibility ?? 'members'
 
   const loadAll = useCallback(async () => {
     setLoading(true)
@@ -114,28 +120,29 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
   useEffect(() => { void loadAll() }, [loadAll])
   useEffect(() => { void loadJoinRequests() }, [loadJoinRequests])
 
-  // Satu channel untuk: postgres_changes (pesan baru) + broadcast (typing indicator)
+  // Satu channel untuk: postgres_changes (pesan baru/edit/hapus) + broadcast (typing) + presence (online member)
   useEffect(() => {
     const channel = supabase
-      .channel(`study-room-${roomId}`)
+      .channel(`study-room-${roomId}`, { config: { presence: { key: userId } } })
       .on('postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'study_room_messages', filter: `room_id=eq.${roomId}` },
+        { event: '*', schema: 'public', table: 'study_room_messages', filter: `room_id=eq.${roomId}` },
         (payload) => {
-          const newMsg = payload.new as StudyRoomMessage
-          const sender = membersRef.current.find((m) => m.user_id === newMsg.sender_id)?.profile ?? null
-          setMessages((prev) => {
-            if (prev.find((m) => m.id === newMsg.id)) return prev
-            return [...prev, { ...newMsg, sender }]
-          })
+          const row = (payload.new || payload.old) as StudyRoomMessage | undefined
+          if (!row) return
+          const sender = membersRef.current.find((m) => m.user_id === row.sender_id)?.profile ?? null
+          if (payload.eventType === 'INSERT') {
+            setMessages((prev) => prev.find((m) => m.id === row.id) ? prev : [...prev, { ...row, sender }])
+          } else if (payload.eventType === 'UPDATE') {
+            setMessages((prev) => prev.map((m) => m.id === row.id ? { ...m, ...row, sender: m.sender ?? sender } : m))
+          } else if (payload.eventType === 'DELETE') {
+            setMessages((prev) => prev.filter((m) => m.id !== row.id))
+          }
         })
       .on('broadcast', { event: 'typing' }, ({ payload }) => {
         const { sender_id, sender_name } = payload as { sender_id: string; sender_name: string }
-        if (sender_id === userId) return // jangan tampilkan typing diri sendiri
+        if (sender_id === userId) return
         setTypingUsers((prev) => ({ ...prev, [sender_id]: sender_name }))
-        // Auto-hapus setelah 3 detik tanpa ketik lagi
-        if (typingTimeoutRef.current[sender_id]) {
-          clearTimeout(typingTimeoutRef.current[sender_id])
-        }
+        if (typingTimeoutRef.current[sender_id]) clearTimeout(typingTimeoutRef.current[sender_id])
         typingTimeoutRef.current[sender_id] = setTimeout(() => {
           setTypingUsers((prev) => {
             const next = { ...prev }
@@ -144,7 +151,20 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
           })
         }, 3000)
       })
-      .subscribe()
+      .on('presence', { event: 'sync' }, () => {
+        const state = channel.presenceState()
+        const ids = new Set<string>()
+        Object.values(state).flat().forEach((presence) => {
+          const user_id = (presence as { user_id?: string }).user_id
+          if (user_id) ids.add(user_id)
+        })
+        setOnlineMemberIds(ids)
+      })
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED' && myRoomPresenceVisibility !== 'private') {
+          void channel.track({ user_id: userId, online_at: new Date().toISOString() })
+        }
+      })
 
     channelRef.current = channel
     return () => {
@@ -152,7 +172,7 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
       channelRef.current = null
       Object.values(typingTimeoutRef.current).forEach(clearTimeout)
     }
-  }, [roomId, supabase, userId])
+  }, [myRoomPresenceVisibility, roomId, supabase, userId])
 
   // Auto-scroll to latest message
   useEffect(() => {
@@ -185,7 +205,7 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
     const upJson = await upRes.json()
     if (!upRes.ok) { alert(upJson.error ?? 'Gagal upload file.'); setUploading(false); return }
     const att = upJson.data
-    await fetch(`/api/study-rooms/${roomId}/messages`, {
+    const msgRes = await fetch(`/api/study-rooms/${roomId}/messages`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -197,7 +217,37 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
         attachment_mime: att.mime_type,
       }),
     })
+    if (!msgRes.ok) { const j = await msgRes.json().catch(() => ({})); alert(j.error ?? 'Gagal kirim file.') }
     setUploading(false)
+  }
+
+
+  async function saveMessageEdit() {
+    if (!editingId || !editingText.trim()) return
+    const res = await fetch(`/api/study-rooms/${roomId}/messages/${editingId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content: editingText.trim() }),
+    })
+    const json = await res.json().catch(() => ({}))
+    if (res.ok && json.data) {
+      setMessages((prev) => prev.map((m) => m.id === editingId ? { ...m, ...json.data } : m))
+      setEditingId(null)
+      setEditingText('')
+    } else {
+      alert(json.error ?? 'Gagal edit pesan.')
+    }
+  }
+
+  async function deleteMessage(messageId: string) {
+    if (!confirm('Hapus pesan ini? Foto/video/file juga akan dihapus dari chat.')) return
+    const res = await fetch(`/api/study-rooms/${roomId}/messages/${messageId}`, { method: 'DELETE' })
+    const json = await res.json().catch(() => ({}))
+    if (res.ok && json.data) {
+      setMessages((prev) => prev.map((m) => m.id === messageId ? { ...m, ...json.data } : m))
+    } else {
+      alert(json.error ?? 'Gagal hapus pesan.')
+    }
   }
 
   async function handleJoinRequest(requestId: string, action: 'approve' | 'reject') {
@@ -393,6 +443,7 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
             <h1 className="truncate text-base font-black text-slate-950">{room.title}</h1>
             <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
               <span>{room.current_members_count}/{room.max_members} anggota</span>
+              <span className="inline-flex items-center gap-1 text-emerald-600"><Radio className="h-3 w-3" /> {onlineMemberIds.size} online</span>
               <button onClick={copyCode} className="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-2 py-0.5 font-black text-slate-700 hover:bg-slate-200">
                 {copied ? <Check className="h-3 w-3 text-emerald-600" /> : <Copy className="h-3 w-3" />}
                 {room.room_code}
@@ -445,12 +496,22 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
                     <Avatar url={msg.sender?.avatar_url} name={msg.sender?.full_name} size="sm" />
                     <div className={`max-w-[75%] space-y-1 ${isMe ? 'items-end' : 'items-start'} flex flex-col`}>
                       <p className={`text-[11px] font-bold text-slate-500 ${isMe ? 'text-right' : ''}`}>
-                        {isMe ? 'Kamu' : (msg.sender?.full_name ?? 'Anggota')} · {formatTime(msg.created_at)}
+                        {isMe ? 'Kamu' : (msg.sender?.full_name ?? 'Anggota')} · {formatTime(msg.created_at)} {msg.edited_at && !msg.deleted_at ? '· diedit' : ''}
                       </p>
                       <div className={`rounded-2xl px-3.5 py-2.5 text-sm leading-6 ${
                         isMe ? 'rounded-tr-sm bg-teal-500 text-white' : 'rounded-tl-sm bg-slate-100 text-slate-900'
                       }`}>
-                        {msg.message_type === 'image' && msg.attachment_path ? (
+                        {msg.deleted_at ? (
+                          <p className="italic opacity-70">Pesan dihapus</p>
+                        ) : editingId === msg.id ? (
+                          <div className="space-y-2">
+                            <textarea value={editingText} onChange={(e) => setEditingText(e.target.value)} rows={2} className="w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-900" />
+                            <div className="flex gap-2">
+                              <button onClick={saveMessageEdit} className="rounded-xl bg-slate-950 px-3 py-1 text-xs font-black text-white">Simpan</button>
+                              <button onClick={() => setEditingId(null)} className="rounded-xl bg-white/80 px-3 py-1 text-xs font-black text-slate-700">Batal</button>
+                            </div>
+                          </div>
+                        ) : msg.message_type === 'image' && msg.attachment_path ? (
                           <div className="space-y-1">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
@@ -460,7 +521,7 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
                             />
                             <p className="text-[11px] opacity-70">{msg.attachment_name}</p>
                           </div>
-                        ) : msg.message_type === 'file' && msg.attachment_path && msg.attachment_mime?.startsWith('video/') ? (
+                        ) : (msg.message_type === 'video' || msg.attachment_mime?.startsWith('video/')) && msg.attachment_path ? (
                           <div className="space-y-1">
                             <video controls className="max-h-48 max-w-full rounded-xl" preload="metadata">
                               <source
@@ -484,6 +545,18 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
                           <p>{msg.content}</p>
                         )}
                       </div>
+                      {isMe && !msg.deleted_at && (
+                        <div className="flex gap-1 opacity-80">
+                          {msg.message_type === 'text' && (
+                            <button onClick={() => { setEditingId(msg.id); setEditingText(msg.content ?? '') }} className="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-black text-slate-600 hover:bg-slate-200">
+                              <Edit2 className="inline h-3 w-3" /> Edit
+                            </button>
+                          )}
+                          <button onClick={() => deleteMessage(msg.id)} className="rounded-full bg-red-50 px-2 py-1 text-[10px] font-black text-red-600 hover:bg-red-100">
+                            <Trash2 className="inline h-3 w-3" /> Hapus
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )
@@ -508,6 +581,13 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
 
           {/* Chat input */}
           <div className="flex-shrink-0 border-t border-slate-100 p-3">
+            <div className="mb-2 flex flex-wrap gap-1">
+              {EMOJIS.map((emoji) => (
+                <button key={emoji} type="button" onClick={() => setMessage((value) => `${value}${emoji}`)} className="rounded-xl bg-slate-100 px-2 py-1 text-sm hover:bg-slate-200">
+                  {emoji}
+                </button>
+              ))}
+            </div>
             <div className="flex items-end gap-2">
               <input
                 ref={fileInputRef}
@@ -570,13 +650,16 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
 
           <div className="flex-1 overflow-y-auto p-3">
             <p className="mb-2 text-xs font-black uppercase tracking-wide text-slate-500">
-              Anggota ({members.length})
+              Anggota ({members.length}) · {onlineMemberIds.size} online
+            </p>
+            <p className="mb-3 rounded-2xl bg-white p-2.5 text-[11px] leading-5 text-slate-500 shadow-sm">
+              Status online mengikuti privasi user. Kalau disembunyikan, dia tidak muncul online meski lagi di room. Teknologi yang akhirnya belajar sopan sedikit.
             </p>
             <div className="space-y-1.5">
               {members.map((member) => (
                 <div key={member.user_id} className="flex items-center justify-between gap-2 rounded-2xl bg-white p-2.5 shadow-sm">
                   <div className="flex min-w-0 items-center gap-2">
-                    <Avatar url={member.profile?.avatar_url} name={member.profile?.full_name} size="sm" />
+                    <span className="relative"><Avatar url={member.profile?.avatar_url} name={member.profile?.full_name} size="sm" />{onlineMemberIds.has(member.user_id) && member.profile?.study_room_presence_visibility !== 'private' && <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white bg-emerald-500" />}</span>
                     <div className="min-w-0">
                       <p className="truncate text-xs font-black text-slate-950">
                         {member.user_id === userId ? 'Kamu' : (member.profile?.full_name ?? 'Member')}

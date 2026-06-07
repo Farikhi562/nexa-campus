@@ -42,7 +42,7 @@ export async function GET(request: NextRequest, { params }: Params) {
   let profiles: Record<string, unknown> = {}
   if (senderIds.length > 0) {
     const { data: p } = await supabase
-      .from('profiles').select('id, full_name, avatar_url')
+      .from('profiles').select('id, full_name, avatar_url, featured_badge, study_room_presence_visibility, dm_privacy')
       .in('id', senderIds)
     for (const profile of p ?? []) profiles[(profile as { id: string }).id] = profile
   }
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest, { params }: Params) {
   try { body = await request.json() } catch { return NextResponse.json({ error: 'Invalid request.' }, { status: 400 }) }
 
   const content = typeof body.content === 'string' ? body.content.trim() : ''
-  const messageType = body.message_type === 'image' ? 'image' : body.message_type === 'file' ? 'file' : 'text'
+  const messageType = body.message_type === 'image' ? 'image' : body.message_type === 'video' ? 'video' : body.message_type === 'file' ? 'file' : 'text'
 
   if (!content && messageType === 'text') {
     return NextResponse.json({ error: 'Pesan tidak boleh kosong.' }, { status: 400 })

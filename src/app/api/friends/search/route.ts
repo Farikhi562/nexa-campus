@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
   // Only safe, non-sensitive fields. Never email, phone, telegram.
   let query = supabase
     .from('profiles')
-    .select('id, full_name, campus_name, major, avatar_url, plan, nexa_id, featured_badge, public_profile_headline, profile_skills, profile_skills_visibility, created_at')
+    .select('id, full_name, campus_name, major, avatar_url, plan, nexa_id, featured_badge, public_profile_headline, profile_skills, profile_skills_visibility, online_status_visibility, dm_privacy, created_at')
     .eq('is_public_profile', true)
     .neq('id', user.id)
     .limit(30)

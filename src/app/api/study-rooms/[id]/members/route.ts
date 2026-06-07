@@ -19,7 +19,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
   let profiles: Record<string, unknown> = {}
   if (profileIds.length > 0) {
     const { data: p } = await supabase
-      .from('profiles').select('id, full_name, avatar_url, campus_name, major')
+      .from('profiles').select('id, full_name, avatar_url, campus_name, major, featured_badge, study_room_presence_visibility, dm_privacy')
       .in('id', profileIds)
     for (const profile of p ?? []) profiles[(profile as { id: string }).id] = profile
   }

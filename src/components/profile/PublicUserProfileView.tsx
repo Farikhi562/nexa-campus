@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowLeft, ExternalLink, Lock, ShieldCheck, Sparkles, UserRound } from 'lucide-react'
+import { ArrowLeft, ExternalLink, Lock, MessageCircle, Radio, ShieldCheck, Sparkles, UserRound } from 'lucide-react'
 import { BadgeChip, BadgeTierLabel, FeaturedBadgePin } from '@/components/BadgeChip'
 import { Card, CardContent } from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
@@ -31,6 +31,9 @@ type ViewProfile = {
   portfolio_url: string | null
   github_url: string | null
   linkedin_url: string | null
+  online_status_visibility?: 'public' | 'friends' | 'private' | null
+  study_room_presence_visibility?: 'members' | 'private' | null
+  dm_privacy?: 'friends' | 'none' | null
   created_at: string
 }
 
@@ -71,7 +74,7 @@ function ExternalProfileLink({ href, label }: { href: string | null; label: stri
   )
 }
 
-export default function PublicUserProfileView({ profile, isOwnProfile }: { profile: ViewProfile; isOwnProfile: boolean }) {
+export default function PublicUserProfileView({ profile, isOwnProfile, canMessage = false }: { profile: ViewProfile; isOwnProfile: boolean; canMessage?: boolean }) {
   const isPublic = profile.is_public_profile ?? true
   const badges = collectBadges(profile)
   const showBio = canShow(isOwnProfile, profile.profile_bio_visibility)
@@ -86,11 +89,18 @@ export default function PublicUserProfileView({ profile, isOwnProfile }: { profi
         <Link href="/dashboard/friends" className="focus-ring inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-600 hover:bg-slate-50">
           <ArrowLeft className="h-4 w-4" /> Kembali
         </Link>
-        {isOwnProfile && (
-          <Link href="/dashboard/settings/profile" className="focus-ring rounded-2xl bg-teal-400 px-3 py-2 text-xs font-black text-slate-950 hover:bg-teal-300">
-            Edit Profil
-          </Link>
-        )}
+        <div className="flex items-center gap-2">
+          {canMessage && (
+            <Link href={`/dashboard/messages/${profile.id}`} className="focus-ring inline-flex items-center gap-1.5 rounded-2xl bg-teal-400 px-3 py-2 text-xs font-black text-slate-950 hover:bg-teal-300">
+              <MessageCircle className="h-3.5 w-3.5" /> Chat
+            </Link>
+          )}
+          {isOwnProfile && (
+            <Link href="/dashboard/settings/profile" className="focus-ring rounded-2xl bg-teal-400 px-3 py-2 text-xs font-black text-slate-950 hover:bg-teal-300">
+              Edit Profil
+            </Link>
+          )}
+        </div>
       </div>
 
       <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-slate-950 p-5 text-white shadow-xl sm:p-7">
@@ -111,6 +121,9 @@ export default function PublicUserProfileView({ profile, isOwnProfile }: { profi
               </Badge>
               {!isPublic && <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-black text-slate-200"><Lock className="h-3 w-3" /> Profil privat</span>}
               {profile.featured_badge && <FeaturedBadgePin badgeId={profile.featured_badge} />}
+              {profile.online_status_visibility !== 'private' && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-400/15 px-2.5 py-1 text-[11px] font-black text-emerald-100"><Radio className="h-3 w-3" /> Bisa tampil online</span>
+              )}
             </div>
             <h1 className="text-2xl font-black tracking-tight sm:text-3xl">{profile.full_name ?? 'Mahasiswa NEXA'}</h1>
             {profile.public_profile_headline && <p className="mt-2 max-w-2xl text-sm font-bold leading-6 text-teal-100">{profile.public_profile_headline}</p>}
