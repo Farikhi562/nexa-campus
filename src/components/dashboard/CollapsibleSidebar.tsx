@@ -47,7 +47,7 @@ export default function CollapsibleSidebar({ isAdmin = false }: { isAdmin?: bool
             </p>
           )}
           <div className={`grid gap-0.5 ${collapsed ? 'p-2' : 'p-2'}`}>
-            {DASHBOARD_NAV.map(({ label, href, icon: Icon, hot, soon }) => {
+            {navItems.map(({ label, href, icon: Icon, hot, soon }) => {
               const active = isActive(href)
               return (
                 <Link

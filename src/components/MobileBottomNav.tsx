@@ -3,14 +3,14 @@
 import { Suspense } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { BookOpen, Home, Plus, Sparkles, Users2 } from 'lucide-react'
+import { Home, Plus, Sword, UserRound, Users } from 'lucide-react'
 
 const NAV = [
   { label: 'Home', href: '/dashboard', icon: Home },
+  { label: 'Arena', href: '/dashboard/arena', icon: Sword },
+  { label: 'Teman', href: '/dashboard/friends', icon: UserRound },
+  { label: 'Study', href: '/dashboard/study-room', icon: Users },
   { label: 'Tambah', href: '/dashboard/deadlines/new', icon: Plus },
-  { label: 'Teman', href: '/dashboard/friends', icon: Users2 },
-  { label: 'Study', href: '/dashboard/study-room', icon: BookOpen },
-  { label: 'AI', href: '/dashboard/deadlines/quick-add', icon: Sparkles },
 ]
 
 function NavItems() {
@@ -25,6 +25,7 @@ function NavItems() {
     <>
       {NAV.map(({ label, href, icon: Icon }) => {
         const active = isActive(href)
+
         return (
           <Link
             key={href}
