@@ -293,3 +293,64 @@ svg {
     animation: nexa-badge-float 2.8s ease-in-out infinite, nexa-badge-glow 2.25s ease-in-out infinite, nexa-rarest-halo 3.6s ease-in-out infinite;
   }
 }
+
+/* Founder verified effect: khusus akun pencipta NEXA Campus. Jangan dijual kayak centang palsu, tolong. */
+.nexa-founder-check {
+  position: relative;
+  color: #f59e0b;
+  filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.55));
+  animation: nexa-founder-pulse 2.1s ease-in-out infinite;
+}
+
+.nexa-founder-check::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 9999px;
+  border: 1px solid rgba(245, 158, 11, 0.55);
+  animation: nexa-founder-ring 2.1s ease-out infinite;
+}
+
+.nexa-founder-verified {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(251, 191, 36, 0.65);
+  background: linear-gradient(135deg, #fff7ed, #fef3c7, #fbbf24);
+  color: #78350f;
+  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.18), 0 12px 28px rgba(245, 158, 11, 0.24);
+  animation: nexa-founder-float 3s ease-in-out infinite;
+}
+
+.nexa-founder-verified::before {
+  content: '';
+  position: absolute;
+  inset: -50%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.7), transparent);
+  transform: translateX(-70%) rotate(20deg);
+  animation: nexa-founder-shine 2.8s ease-in-out infinite;
+}
+
+.nexa-founder-verified > * {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes nexa-founder-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.13); }
+}
+
+@keyframes nexa-founder-ring {
+  0% { transform: scale(0.72); opacity: 0.85; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+
+@keyframes nexa-founder-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-1px); }
+}
+
+@keyframes nexa-founder-shine {
+  0% { transform: translateX(-80%) rotate(20deg); }
+  58%, 100% { transform: translateX(120%) rotate(20deg); }
+}

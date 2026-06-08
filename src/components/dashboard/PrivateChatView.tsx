@@ -6,6 +6,7 @@ import { ArrowLeft, Edit2, FileText, Loader2, Paperclip, Send, Smile, Trash2 } f
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent } from '@/components/ui/Card'
 import { FeaturedBadgePin } from '@/components/BadgeChip'
+import FounderVerifiedBadge from '@/components/FounderVerifiedBadge'
 import type { PrivateMessage, PublicProfile } from '@/types'
 
 const EMOJIS = ['🔥', '😂', '👍', '🥲', '😭', '🚀', '✅', '💀']
@@ -169,7 +170,7 @@ export default function PrivateChatView({ friendId, userId }: { friendId: string
               {friend?.avatar_url ? <img src={friend.avatar_url} alt="" className="h-full w-full object-cover" /> : avatarText(friend?.full_name)}
             </span>
             <span className="min-w-0">
-              <span className="flex items-center gap-1.5"><span className="truncate text-sm font-black text-slate-950">{friend?.full_name ?? 'Teman NEXA'}</span><FeaturedBadgePin badgeId={friend?.featured_badge} /></span>
+              <span className="flex items-center gap-1.5"><span className="truncate text-sm font-black text-slate-950">{friend?.full_name ?? 'Teman NEXA'}</span><FounderVerifiedBadge founderVerified={friend?.founder_verified} email={friend?.email} compact /><FeaturedBadgePin badgeId={friend?.featured_badge} /></span>
               <span className="block truncate text-xs text-slate-500">Chat pribadi · foto, video, emoji, file</span>
             </span>
           </Link>
@@ -192,7 +193,7 @@ export default function PrivateChatView({ friendId, userId }: { friendId: string
                 {isMe ? 'K' : friend?.avatar_url ? <img src={friend.avatar_url} alt="" className="h-full w-full object-cover" /> : avatarText(friend?.full_name)}
               </span>
               <div className={`max-w-[76%] space-y-1 ${isMe ? 'items-end' : 'items-start'} flex flex-col`}>
-                <p className={`text-[11px] font-bold text-slate-500 ${isMe ? 'text-right' : ''}`}>{isMe ? 'Kamu' : (friend?.full_name ?? 'Teman')} · {formatTime(msg.created_at)} {msg.edited_at && !deleted ? '· diedit' : ''}</p>
+                <p className={`text-[11px] font-bold text-slate-500 ${isMe ? 'text-right' : ''}`}><span className="inline-flex items-center gap-1">{isMe ? 'Kamu' : (friend?.full_name ?? 'Teman')} {!isMe && <FounderVerifiedBadge founderVerified={friend?.founder_verified} email={friend?.email} compact />}</span> · {formatTime(msg.created_at)} {msg.edited_at && !deleted ? '· diedit' : ''}</p>
                 <div className={`rounded-2xl px-3.5 py-2.5 text-sm leading-6 ${isMe ? 'rounded-tr-sm bg-teal-500 text-white' : 'rounded-tl-sm bg-slate-100 text-slate-900'}`}>
                   {deleted ? (
                     <p className="italic opacity-70">Pesan dihapus</p>

@@ -6,6 +6,7 @@ import { Check, Loader2, MessageCircle, Search, UserPlus, X } from 'lucide-react
 import { Card, CardContent } from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import { FeaturedBadgePin } from '@/components/BadgeChip'
+import FounderVerifiedBadge from '@/components/FounderVerifiedBadge'
 import type { FriendRequest, PublicProfile } from '@/types'
 
 function visibleSkills(user: PublicProfile) {
@@ -28,6 +29,7 @@ function UserCard({ user, action }: { user: PublicProfile; action: ReactNode }) 
           <div className="min-w-0 flex-1">
             <div className="flex min-w-0 items-center gap-1.5">
               <p className="truncate text-sm font-black text-slate-950 group-hover:text-teal-700">{user.full_name ?? 'Mahasiswa NEXA'}</p>
+              <FounderVerifiedBadge founderVerified={user.founder_verified} email={user.email} compact />
               <FeaturedBadgePin badgeId={user.featured_badge} />
             </div>
             {user.public_profile_headline && <p className="truncate text-xs font-bold text-slate-600">{user.public_profile_headline}</p>}

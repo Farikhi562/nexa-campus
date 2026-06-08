@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
+const NEXA_FOUNDER_EMAIL = 'fauzanalfa36@gmail.com'
+function founderVerified(email: unknown) { return String(email ?? '').trim().toLowerCase() === NEXA_FOUNDER_EMAIL }
+
 export async function GET() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -34,7 +37,7 @@ export async function GET() {
 
   const { data: profiles, error: profileError } = await supabase
     .from('profiles')
-    .select('id, full_name, avatar_url, campus_name, major, featured_badge, online_status_visibility')
+    .select('id, email, full_name, avatar_url, campus_name, major, featured_badge, online_status_visibility')
     .in('id', onlineIds)
     .neq('online_status_visibility', 'private')
 
@@ -45,6 +48,8 @@ export async function GET() {
     const presenceRow = presenceMap.get(String(profile.id)) as { last_seen_at?: string | null } | undefined
     return {
       ...profile,
+      email: null,
+      founder_verified: founderVerified(profile.email),
       last_seen_at: presenceRow?.last_seen_at ?? null,
     }
   })

@@ -12,6 +12,7 @@ import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import type { StudyRoom, StudyRoomMember, StudyRoomMessage, StudyRoomJoinRequest, RoomMemberRole } from '@/types'
 import Link from 'next/link'
+import FounderVerifiedBadge from '@/components/FounderVerifiedBadge'
 
 function initials(name?: string | null) {
   if (!name) return 'N'
@@ -261,6 +262,7 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
   }
 
   async function handleRoleChange(targetUserId: string, role: RoomMemberRole) {
+    if (role === 'owner' && !confirm('Promosikan user ini jadi owner? Owner lama otomatis turun jadi admin. Ini bukan kerajaan, tapi tetap butuh konfirmasi.')) return
     const res = await fetch(`/api/study-rooms/${roomId}/members/${targetUserId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -278,7 +280,7 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
   }
 
   async function handleLeave() {
-    if (!confirm(myRole === 'owner' ? 'Kamu owner. Keluar akan menutup room. Yakin?' : 'Keluar dari room ini?')) return
+    if (!confirm(myRole === 'owner' ? 'Kamu owner. Kalau keluar, owner otomatis pindah ke admin/moderator/member lain. Kalau cuma kamu sendiri, room ditutup. Lanjut?' : 'Keluar dari room ini?')) return
     const res = await fetch(`/api/study-rooms/${roomId}/leave`, { method: 'POST' })
     if (res.ok) router.push('/dashboard/study-room')
     else { const j = await res.json(); alert(j.error) }
@@ -496,7 +498,7 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
                     <Avatar url={msg.sender?.avatar_url} name={msg.sender?.full_name} size="sm" />
                     <div className={`max-w-[75%] space-y-1 ${isMe ? 'items-end' : 'items-start'} flex flex-col`}>
                       <p className={`text-[11px] font-bold text-slate-500 ${isMe ? 'text-right' : ''}`}>
-                        {isMe ? 'Kamu' : (msg.sender?.full_name ?? 'Anggota')} · {formatTime(msg.created_at)} {msg.edited_at && !msg.deleted_at ? '· diedit' : ''}
+                        <span className="inline-flex items-center gap-1">{isMe ? 'Kamu' : (msg.sender?.full_name ?? 'Anggota')} <FounderVerifiedBadge founderVerified={msg.sender?.founder_verified} email={msg.sender?.email} compact /></span> · {formatTime(msg.created_at)} {msg.edited_at && !msg.deleted_at ? '· diedit' : ''}
                       </p>
                       <div className={`rounded-2xl px-3.5 py-2.5 text-sm leading-6 ${
                         isMe ? 'rounded-tr-sm bg-teal-500 text-white' : 'rounded-tl-sm bg-slate-100 text-slate-900'
@@ -630,7 +632,7 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
                   <div key={req.id} className="flex items-center justify-between gap-2 rounded-2xl bg-white p-2.5 shadow-sm">
                     <div className="flex min-w-0 items-center gap-2">
                       <Avatar url={req.user?.avatar_url} name={req.user?.full_name} size="sm" />
-                      <p className="truncate text-xs font-black text-slate-950">{req.user?.full_name ?? 'User'}</p>
+                      <p className="flex min-w-0 items-center gap-1 truncate text-xs font-black text-slate-950"><span className="truncate">{req.user?.full_name ?? 'User'}</span><FounderVerifiedBadge founderVerified={req.user?.founder_verified} email={req.user?.email} compact /></p>
                     </div>
                     <div className="flex gap-1">
                       <button onClick={() => handleJoinRequest(req.id, 'approve')}
@@ -653,7 +655,7 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
               Anggota ({members.length}) · {onlineMemberIds.size} online
             </p>
             <p className="mb-3 rounded-2xl bg-white p-2.5 text-[11px] leading-5 text-slate-500 shadow-sm">
-              Status online mengikuti privasi user. Kalau disembunyikan, dia tidak muncul online meski lagi di room. Teknologi yang akhirnya belajar sopan sedikit.
+Nama anggota selalu terlihat untuk satu grup room. Yang mengikuti privasi hanya status online. Kalau disembunyikan, dia tidak muncul online meski lagi di room. Chat pribadi tetap ikut pilihan masing-masing user.
             </p>
             <div className="space-y-1.5">
               {members.map((member) => (
@@ -661,13 +663,14 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
                   <div className="flex min-w-0 items-center gap-2">
                     <span className="relative"><Avatar url={member.profile?.avatar_url} name={member.profile?.full_name} size="sm" />{onlineMemberIds.has(member.user_id) && member.profile?.study_room_presence_visibility !== 'private' && <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white bg-emerald-500" />}</span>
                     <div className="min-w-0">
-                      <p className="truncate text-xs font-black text-slate-950">
-                        {member.user_id === userId ? 'Kamu' : (member.profile?.full_name ?? 'Member')}
+                      <p className="flex min-w-0 items-center gap-1 truncate text-xs font-black text-slate-950">
+                        <span className="truncate">{member.user_id === userId ? 'Kamu' : (member.profile?.full_name ?? 'Member')}</span>
+                        <FounderVerifiedBadge founderVerified={member.profile?.founder_verified} email={member.profile?.email} compact />
                       </p>
                       <RoleBadge role={member.role} />
                     </div>
                   </div>
-                  {canManage && member.user_id !== userId && member.role !== 'owner' && (
+                  {canManage && member.user_id !== userId && (myRole === 'owner' || member.role !== 'owner') && (
                     <div className="relative group">
                       <button className="flex h-7 w-7 items-center justify-center rounded-xl text-slate-400 hover:bg-slate-100">
                         <MoreVertical className="h-3.5 w-3.5" />
@@ -675,6 +678,12 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
                       <div className="absolute right-0 top-8 z-10 hidden w-40 rounded-2xl border border-slate-200 bg-white p-1 shadow-xl group-hover:block">
                         {myRole === 'owner' && (
                           <>
+                            {member.role !== 'owner' && (
+                              <button onClick={() => handleRoleChange(member.user_id, 'owner')}
+                                className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold text-amber-700 hover:bg-amber-50">
+                                <Crown className="h-3.5 w-3.5" /> Promosikan Owner
+                              </button>
+                            )}
                             {member.role !== 'admin' && (
                               <button onClick={() => handleRoleChange(member.user_id, 'admin')}
                                 className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50">

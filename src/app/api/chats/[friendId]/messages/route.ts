@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
+const NEXA_FOUNDER_EMAIL = 'fauzanalfa36@gmail.com'
+function founderVerified(email: unknown) { return String(email ?? '').trim().toLowerCase() === NEXA_FOUNDER_EMAIL }
+
 type Params = { params: Promise<{ friendId: string }> }
 
 
@@ -25,11 +28,12 @@ export async function GET(request: NextRequest, { params }: Params) {
 
   const { data: friend, error: friendError } = await supabase
     .from('profiles')
-    .select('id, full_name, avatar_url, campus_name, major, featured_badge, dm_privacy')
+    .select('id, email, full_name, avatar_url, campus_name, major, featured_badge, dm_privacy')
     .eq('id', friendId)
     .maybeSingle()
   if (friendError) return NextResponse.json({ error: friendError.message }, { status: 500 })
   if (!friend) return NextResponse.json({ error: 'Teman tidak ditemukan.' }, { status: 404 })
+  const safeFriend = { ...(friend as Record<string, unknown>), email: null, founder_verified: founderVerified((friend as { email?: string | null }).email) }
 
   const limit = Math.min(Number(request.nextUrl.searchParams.get('limit') ?? 60), 100)
   const { data: messages, error } = await supabase
@@ -40,7 +44,7 @@ export async function GET(request: NextRequest, { params }: Params) {
     .limit(limit)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ friend, data: (messages ?? []).reverse() })
+  return NextResponse.json({ friend: safeFriend, data: (messages ?? []).reverse() })
 }
 
 export async function POST(request: NextRequest, { params }: Params) {

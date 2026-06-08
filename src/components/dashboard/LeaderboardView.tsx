@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Crown, Flame, Loader2, Medal, RefreshCw, TrendingUp, Trophy } from 'lucide-react'
 import Badge from '@/components/ui/Badge'
 import { FeaturedBadgePin } from '@/components/BadgeChip'
+import FounderVerifiedBadge from '@/components/FounderVerifiedBadge'
 import { Card, CardContent } from '@/components/ui/Card'
 import type { LeaderboardEntry, LeaderboardMe, LeaderboardScope } from '@/types'
 
@@ -217,6 +218,7 @@ export default function LeaderboardView({ currentUserId }: { currentUserId: stri
                         <Link href={`/dashboard/profile/${entry.user_id}`} className="line-clamp-1 text-sm font-black text-slate-950 hover:text-teal-700">
                           {entry.display_name}{isMe ? ' (kamu)' : ''}
                         </Link>
+                        <FounderVerifiedBadge founderVerified={entry.founder_verified} email={entry.email} compact />
                         <FeaturedBadgePin badgeId={entry.featured_badge} />
                       </div>
                       <p className="line-clamp-1 text-[11px] text-slate-500">{entry.campus_name || 'Kampus —'}</p>
@@ -253,6 +255,7 @@ export default function LeaderboardView({ currentUserId }: { currentUserId: stri
                             <Link href={`/dashboard/profile/${entry.user_id}`} className="truncate text-sm font-black text-slate-950 hover:text-teal-700">
                               {entry.display_name}{isMe ? ' (kamu)' : ''}
                             </Link>
+                            <FounderVerifiedBadge founderVerified={entry.founder_verified} email={entry.email} compact />
                             <FeaturedBadgePin badgeId={entry.featured_badge} />
                           </div>
                           <p className="truncate text-xs text-slate-500">{entry.campus_name || '—'}</p>

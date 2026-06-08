@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
+const NEXA_FOUNDER_EMAIL = 'fauzanalfa36@gmail.com'
+function founderVerified(email: unknown) { return String(email ?? '').trim().toLowerCase() === NEXA_FOUNDER_EMAIL }
+
 type Params = { params: Promise<{ id: string }> }
 
 const PROFILE_SELECT = `
   id,
+  email,
   full_name,
   campus_name,
   province,
@@ -57,9 +61,14 @@ export async function GET(_request: NextRequest, { params }: Params) {
   if (!data) return NextResponse.json({ error: 'Profil tidak ditemukan.' }, { status: 404 })
 
   const isOwnProfile = data.id === user.id
+  const safeProfile = {
+    ...(data as Record<string, unknown>),
+    email: null,
+    founder_verified: founderVerified((data as { email?: string | null }).email),
+  }
   if (!isOwnProfile && data.is_public_profile === false) {
-    return NextResponse.json({ data: { id: data.id, full_name: data.full_name, avatar_url: data.avatar_url, is_public_profile: false } })
+    return NextResponse.json({ data: { id: data.id, full_name: data.full_name, avatar_url: data.avatar_url, is_public_profile: false, founder_verified: safeProfile.founder_verified } })
   }
 
-  return NextResponse.json({ data: hidePrivate(data as Record<string, unknown>, isOwnProfile) })
+  return NextResponse.json({ data: hidePrivate(safeProfile, isOwnProfile) })
 }

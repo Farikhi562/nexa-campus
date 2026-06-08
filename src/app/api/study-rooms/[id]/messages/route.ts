@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
+const NEXA_FOUNDER_EMAIL = 'fauzanalfa36@gmail.com'
+function founderVerified(email: unknown) { return String(email ?? '').trim().toLowerCase() === NEXA_FOUNDER_EMAIL }
+
 type Params = { params: Promise<{ id: string }> }
 
 async function checkMembership(supabase: Awaited<ReturnType<typeof createClient>>, roomId: string, userId: string) {
@@ -42,9 +45,12 @@ export async function GET(request: NextRequest, { params }: Params) {
   let profiles: Record<string, unknown> = {}
   if (senderIds.length > 0) {
     const { data: p } = await supabase
-      .from('profiles').select('id, full_name, avatar_url, featured_badge, study_room_presence_visibility, dm_privacy')
+      .from('profiles').select('id, email, full_name, avatar_url, featured_badge, study_room_presence_visibility, dm_privacy')
       .in('id', senderIds)
-    for (const profile of p ?? []) profiles[(profile as { id: string }).id] = profile
+    for (const profile of p ?? []) {
+      const row = profile as Record<string, unknown> & { id: string }
+      profiles[row.id] = { ...row, email: null, founder_verified: founderVerified(row.email) }
+    }
   }
 
   const enriched = msgs.map((m: Record<string, unknown>) => ({

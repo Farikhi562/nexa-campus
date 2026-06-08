@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 import type { LeaderboardScope } from '@/types'
 
 const SCOPES: LeaderboardScope[] = ['weekly', 'monthly', 'all_time']
+const NEXA_FOUNDER_EMAIL = 'fauzanalfa36@gmail.com'
+function founderVerified(email: unknown) { return String(email ?? '').trim().toLowerCase() === NEXA_FOUNDER_EMAIL }
 
 function parseScope(value: string | null): LeaderboardScope {
   return SCOPES.includes(value as LeaderboardScope) ? (value as LeaderboardScope) : 'all_time'
@@ -32,10 +34,27 @@ export async function GET(request: NextRequest) {
   }
 
   const me = Array.isArray(rankRows) && rankRows.length > 0 ? rankRows[0] : null
+  const list = Array.isArray(entries) ? entries : []
+
+  // get_leaderboard RPC tidak membawa email. Enrich sedikit supaya efek verified founder
+  // tetap berbasis email asli, bukan tebak-tebakan nama. Untung masih ada standar waras.
+  const ids = list.map((entry: { user_id?: string }) => entry.user_id).filter(Boolean)
+  let emailMap = new Map<string, string | null>()
+  if (ids.length > 0) {
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, email')
+      .in('id', ids)
+    emailMap = new Map((profiles ?? []).map((p: { id: string; email: string | null }) => [p.id, p.email]))
+  }
 
   return NextResponse.json({
     scope,
-    entries: Array.isArray(entries) ? entries : [],
+    entries: list.map((entry: { user_id?: string }) => ({
+      ...entry,
+      email: null,
+      founder_verified: entry.user_id ? founderVerified(emailMap.get(entry.user_id)) : false,
+    })),
     me,
   })
 }

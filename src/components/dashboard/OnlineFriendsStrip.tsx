@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Radio, MessageCircle } from 'lucide-react'
 import { FeaturedBadgePin } from '@/components/BadgeChip'
+import FounderVerifiedBadge from '@/components/FounderVerifiedBadge'
 import type { PublicProfile } from '@/types'
 
 export default function OnlineFriendsStrip() {
@@ -45,6 +46,7 @@ export default function OnlineFriendsStrip() {
               <span className="min-w-0 flex-1">
                 <span className="flex items-center gap-1.5">
                   <span className="truncate text-xs font-black text-slate-950 group-hover:text-teal-700">{friend.full_name ?? 'Teman NEXA'}</span>
+                  <FounderVerifiedBadge founderVerified={friend.founder_verified} email={friend.email} compact />
                   <FeaturedBadgePin badgeId={friend.featured_badge} />
                 </span>
                 <span className="mt-0.5 flex items-center gap-1 text-[10px] font-bold text-slate-500"><MessageCircle className="h-3 w-3" /> Chat pribadi</span>

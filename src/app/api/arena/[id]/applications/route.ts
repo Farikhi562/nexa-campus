@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
+const NEXA_FOUNDER_EMAIL = 'fauzanalfa36@gmail.com'
+function founderVerified(email: unknown) { return String(email ?? '').trim().toLowerCase() === NEXA_FOUNDER_EMAIL }
+
 type Params = { params: Promise<{ id: string }> }
 type ApplicationRow = Record<string, unknown> & { applicant_id: string }
 
 type ProfileRow = {
   id: string
+  email?: string | null
+  founder_verified?: boolean | null
   full_name: string | null
   campus_name: string | null
   major: string | null
@@ -49,11 +54,13 @@ export async function GET(_req: NextRequest, { params }: Params) {
   if (applicantIds.length > 0) {
     const { data: profiles, error: profileError } = await supabase
       .from('profiles')
-      .select('id, full_name, campus_name, major, semester, avatar_url, plan, nexa_id, featured_badge')
+      .select('id, email, full_name, campus_name, major, semester, avatar_url, plan, nexa_id, featured_badge')
       .in('id', applicantIds)
 
     if (profileError) return NextResponse.json({ error: profileError.message }, { status: 500 })
-    for (const profile of (profiles ?? []) as ProfileRow[]) profileMap[profile.id] = profile
+    for (const profile of (profiles ?? []) as ProfileRow[]) {
+      profileMap[profile.id] = { ...profile, email: null, founder_verified: founderVerified(profile.email) }
+    }
   }
 
   return NextResponse.json({ data: rows.map((row) => ({ ...row, applicant: profileMap[row.applicant_id] ?? null })) })

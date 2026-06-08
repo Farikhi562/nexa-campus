@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
+const NEXA_FOUNDER_EMAIL = 'fauzanalfa36@gmail.com'
+function founderVerified(email: unknown) { return String(email ?? '').trim().toLowerCase() === NEXA_FOUNDER_EMAIL }
+
 // GET /api/friends — my friends list + sent + received requests
 export async function GET(request: NextRequest) {
   const supabase = await createClient()
@@ -27,12 +30,14 @@ export async function GET(request: NextRequest) {
   if (uniqueIds.length > 0) {
     const { data: profiles } = await supabase
       .from('profiles')
-      .select('id, full_name, campus_name, major, avatar_url, plan, nexa_id, featured_badge, public_profile_headline, profile_skills, profile_skills_visibility, online_status_visibility, dm_privacy, created_at')
+      .select('id, email, full_name, campus_name, major, avatar_url, plan, nexa_id, featured_badge, public_profile_headline, profile_skills, profile_skills_visibility, online_status_visibility, dm_privacy, created_at')
       .in('id', uniqueIds)
     for (const p of profiles ?? []) {
       const row = p as { id: string; profile_skills_visibility?: string | null; profile_skills?: string[] | null }
       profileMap[row.id] = {
         ...row,
+        email: null,
+        founder_verified: founderVerified((row as { email?: string | null }).email),
         profile_skills: row.profile_skills_visibility === 'private' ? [] : row.profile_skills ?? [],
       }
     }

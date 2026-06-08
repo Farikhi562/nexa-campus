@@ -30,6 +30,7 @@ export type SubscriptionIntentStatus = 'pending' | 'confirmed' | 'rejected' | 'c
 export interface Profile {
   id: string
   email: string
+  founder_verified?: boolean | null
   full_name: string | null
   campus_name: string | null
   province: string | null
@@ -69,6 +70,8 @@ export interface Profile {
 
 export interface LeaderboardEntry {
   user_id: string
+  email?: string | null
+  founder_verified?: boolean | null
   display_name: string | null
   avatar_url: string | null
   campus_name: string | null
@@ -156,6 +159,8 @@ export interface StudyRoomMessage {
 // ---------- Friends ----------------------------------------------------------
 export interface PublicProfile {
   id: string
+  email?: string | null
+  founder_verified?: boolean | null
   full_name: string | null
   campus_name: string | null
   major: string | null
