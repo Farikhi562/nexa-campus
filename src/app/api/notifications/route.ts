@@ -1,22 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
-export async function GET() {
+export const dynamic = 'force-dynamic'
+
+const MAX_LIMIT = 100
+
+export async function GET(request: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Login required.' }, { status: 401 })
+
+  const limitParam = Number(request.nextUrl.searchParams.get('limit') ?? 30)
+  const limit = Math.min(Math.max(Number.isFinite(limitParam) ? limitParam : 30, 1), MAX_LIMIT)
 
   const { data, error } = await supabase
     .from('notifications')
     .select('*')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
-    .limit(20)
+    .limit(limit)
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) return NextResponse.json({ error: error.message, code: error.code, details: error.details, hint: error.hint }, { status: 500 })
 
-  const unreadCount = (data ?? []).filter((n: { is_read: boolean }) => !n.is_read).length
-  return NextResponse.json({ data: data ?? [], unreadCount })
+  const rows = data ?? []
+  const unreadCount = rows.filter((n: { is_read: boolean }) => !n.is_read).length
+  return NextResponse.json({ data: rows, unreadCount })
 }
 
 export async function PATCH(request: NextRequest) {
@@ -28,17 +36,20 @@ export async function PATCH(request: NextRequest) {
   try { body = await request.json() } catch { /* ignore */ }
 
   if (body.all) {
-    await supabase
+    const { error } = await supabase
       .from('notifications')
-      .update({ is_read: true })
+      .update({ is_read: true, read_at: new Date().toISOString() })
       .eq('user_id', user.id)
       .eq('is_read', false)
-  } else if (Array.isArray(body.ids)) {
-    await supabase
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  } else if (Array.isArray(body.ids) && body.ids.length > 0) {
+    const ids = body.ids.map((id) => String(id)).filter(Boolean).slice(0, 100)
+    const { error } = await supabase
       .from('notifications')
-      .update({ is_read: true })
-      .in('id', body.ids as string[])
+      .update({ is_read: true, read_at: new Date().toISOString() })
+      .in('id', ids)
       .eq('user_id', user.id)
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
   return NextResponse.json({ ok: true })

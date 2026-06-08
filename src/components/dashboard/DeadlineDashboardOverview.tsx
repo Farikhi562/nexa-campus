@@ -14,6 +14,10 @@ import DailyPulseCard from '@/components/dashboard/DailyPulseCard'
 import RetentionFomoStrip from '@/components/dashboard/RetentionFomoStrip'
 import ActivityFeedCard from '@/components/dashboard/ActivityFeedCard'
 import ProfileCompletionCard from '@/components/dashboard/ProfileCompletionCard'
+import WeeklyChallengeCard from '@/components/dashboard/WeeklyChallengeCard'
+import BadgeShowcaseCard from '@/components/dashboard/BadgeShowcaseCard'
+import FriendSuggestionsCard from '@/components/dashboard/FriendSuggestionsCard'
+import OnboardingCoachCard from '@/components/dashboard/OnboardingCoachCard'
 import UpgradeCountdownCard from '@/components/dashboard/UpgradeCountdownCard'
 import SetupChecklist from '@/components/dashboard/SetupChecklist'
 import ShareDeadlineModal from '@/components/dashboard/ShareDeadlineModal'
@@ -266,6 +270,15 @@ export default function DeadlineDashboardOverview({
       />
 
       <LeaderboardTeaser />
+
+      <section className="grid gap-4 lg:grid-cols-2">
+        <WeeklyChallengeCard />
+        <BadgeShowcaseCard compact />
+      </section>
+
+      <OnboardingCoachCard />
+
+      <FriendSuggestionsCard compact />
 
       <section className="grid gap-4 lg:grid-cols-[minmax(0,0.9fr)_minmax(300px,0.55fr)]">
         <ActivityFeedCard />

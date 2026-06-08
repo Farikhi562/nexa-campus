@@ -168,6 +168,11 @@ export default function NotificationBell() {
               </div>
             )}
           </div>
+          <div className="border-t border-slate-100 p-3">
+            <Link href="/dashboard/notifications" onClick={() => setOpen(false)} className="block rounded-2xl bg-slate-950 px-4 py-2.5 text-center text-xs font-black text-white hover:bg-slate-800">
+              Buka Notification Center
+            </Link>
+          </div>
         </div>
       )}
     </div>

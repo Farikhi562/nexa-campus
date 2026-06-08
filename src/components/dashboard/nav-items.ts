@@ -16,6 +16,7 @@ export const DASHBOARD_NAV: NavItem[] = [
   { label: 'NEXA Arena', href: '/dashboard/arena', icon: Sword, hot: true },
   { label: 'Study Room', href: '/dashboard/study-room', icon: Users },
   { label: 'Cari Teman', href: '/dashboard/friends', icon: UserRound },
+  { label: 'Notifikasi', href: '/dashboard/notifications', icon: BellRing },
   { label: 'Tambah Deadline', href: '/dashboard/deadlines/new', icon: Plus },
   { label: 'AI Quick Add', href: '/dashboard/deadlines/quick-add', icon: Sparkles },
   { label: 'Semua Deadline', href: '/dashboard/deadlines', icon: CalendarDays },

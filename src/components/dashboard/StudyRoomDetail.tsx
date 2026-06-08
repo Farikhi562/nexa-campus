@@ -13,6 +13,7 @@ import Button from '@/components/ui/Button'
 import type { StudyRoom, StudyRoomMember, StudyRoomMessage, StudyRoomJoinRequest, RoomMemberRole } from '@/types'
 import Link from 'next/link'
 import FounderVerifiedBadge from '@/components/FounderVerifiedBadge'
+import StudyRoomWorkspaceCard from '@/components/dashboard/StudyRoomWorkspaceCard'
 
 function initials(name?: string | null) {
   if (!name) return 'N'
@@ -657,6 +658,8 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
             <p className="mb-3 rounded-2xl bg-white p-2.5 text-[11px] leading-5 text-slate-500 shadow-sm">
 Nama anggota selalu terlihat untuk satu grup room. Yang mengikuti privasi hanya status online. Kalau disembunyikan, dia tidak muncul online meski lagi di room. Chat pribadi tetap ikut pilihan masing-masing user.
             </p>
+            <StudyRoomWorkspaceCard roomId={roomId} canManage={canManage} />
+
             <div className="space-y-1.5">
               {members.map((member) => (
                 <div key={member.user_id} className="flex items-center justify-between gap-2 rounded-2xl bg-white p-2.5 shadow-sm">

@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import { FeaturedBadgePin } from '@/components/BadgeChip'
 import SmartEmptyState from '@/components/dashboard/SmartEmptyState'
+import FriendSuggestionsCard from '@/components/dashboard/FriendSuggestionsCard'
 import FounderVerifiedBadge from '@/components/FounderVerifiedBadge'
 import type { FriendRequest, PublicProfile } from '@/types'
 
@@ -126,7 +127,9 @@ export default function FriendsView() {
     <div className="space-y-5">
       <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-slate-950 p-5 text-white shadow-xl sm:p-7">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(45,212,191,0.26),transparent_18rem)]" />
-        <div className="relative">
+        <FriendSuggestionsCard />
+
+      <div className="relative">
           <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-teal-300/20 bg-teal-300/10 px-3 py-1.5 text-xs font-black text-teal-100">
             <UserPlus className="h-3.5 w-3.5" />
             Cari Teman

@@ -285,6 +285,15 @@ export default function ArenaView({ userId }: { userId: string }) {
                     </div>
                   )}
 
+                  {post.team_members && post.team_members.some((member) => member.user_id === userId) && (
+                    <Link
+                      href={`/dashboard/arena/${post.id}/workspace`}
+                      className="mb-3 inline-flex w-full min-h-10 items-center justify-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-black text-amber-800 transition hover:bg-amber-100"
+                    >
+                      <Users className="h-3.5 w-3.5" /> Team Workspace
+                    </Link>
+                  )}
+
                   <div className="mt-auto pt-4">
                     {isOwner ? (
                       <div className="space-y-2">
