@@ -1,8 +1,13 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 
 const NEXA_FOUNDER_EMAIL = 'fauzanalfa36@gmail.com'
 function founderVerified(email: unknown) { return String(email ?? '').trim().toLowerCase() === NEXA_FOUNDER_EMAIL }
+
+function dataClient<T>(fallback: T): T {
+  try { return createServiceClient() as T } catch { return fallback }
+}
 
 export async function GET() {
   const supabase = await createClient()
@@ -35,9 +40,10 @@ export async function GET() {
   const onlineIds = Array.from(new Set((presence ?? []).map((p: { user_id: string }) => p.user_id)))
   if (onlineIds.length === 0) return NextResponse.json({ data: [] })
 
-  const { data: profiles, error: profileError } = await supabase
+  const db = dataClient(supabase)
+  const { data: profiles, error: profileError } = await db
     .from('profiles')
-    .select('id, email, full_name, avatar_url, campus_name, major, featured_badge, online_status_visibility')
+    .select('id, email, founder_verified, full_name, avatar_url, campus_name, major, nexa_id, featured_badge, online_status_visibility')
     .in('id', onlineIds)
     .neq('online_status_visibility', 'private')
 
@@ -49,7 +55,7 @@ export async function GET() {
     return {
       ...profile,
       email: null,
-      founder_verified: founderVerified(profile.email),
+      founder_verified: founderVerified(profile.email) || Boolean(profile.founder_verified),
       last_seen_at: presenceRow?.last_seen_at ?? null,
     }
   })

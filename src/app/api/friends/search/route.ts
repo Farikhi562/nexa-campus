@@ -1,8 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 
 const NEXA_FOUNDER_EMAIL = 'fauzanalfa36@gmail.com'
 function founderVerified(email: unknown) { return String(email ?? '').trim().toLowerCase() === NEXA_FOUNDER_EMAIL }
+
+function dataClient<T>(fallback: T): T {
+  try {
+    return createServiceClient() as T
+  } catch {
+    return fallback
+  }
+}
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient()
@@ -13,11 +22,12 @@ export async function GET(request: NextRequest) {
   const campus = request.nextUrl.searchParams.get('campus')?.trim() ?? ''
   const major = request.nextUrl.searchParams.get('major')?.trim() ?? ''
 
-  // Select email only server-side to compute founder verification. Response keeps email hidden.
-  let query = supabase
+  // Cari Teman sengaja tidak dikunci oleh toggle leaderboard.
+  // Toggle itu cuma untuk papan peringkat; search tetap butuh basic identity supaya fitur sosial hidup.
+  const db = dataClient(supabase)
+  let query = db
     .from('profiles')
-    .select('id, email, full_name, campus_name, major, avatar_url, plan, nexa_id, featured_badge, public_profile_headline, profile_skills, profile_skills_visibility, online_status_visibility, dm_privacy, created_at')
-    .eq('is_public_profile', true)
+    .select('id, email, founder_verified, full_name, campus_name, major, avatar_url, plan, nexa_id, featured_badge, public_profile_headline, profile_skills, profile_skills_visibility, online_status_visibility, dm_privacy, created_at')
     .neq('id', user.id)
     .limit(30)
 
@@ -27,7 +37,8 @@ export async function GET(request: NextRequest) {
     if (isNexaId) {
       query = query.eq('nexa_id', q.trim())
     } else {
-      query = query.ilike('full_name', `%${q}%`)
+      const escaped = q.replace(/[%_]/g, '')
+      query = query.or(`full_name.ilike.%${escaped}%,campus_name.ilike.%${escaped}%,major.ilike.%${escaped}%`)
     }
   }
   if (campus) query = query.ilike('campus_name', `%${campus}%`)
@@ -39,7 +50,7 @@ export async function GET(request: NextRequest) {
   const sanitized = (data ?? []).map((row) => ({
     ...row,
     email: null,
-    founder_verified: founderVerified((row as { email?: string | null }).email),
+    founder_verified: founderVerified((row as { email?: string | null }).email) || Boolean((row as { founder_verified?: boolean | null }).founder_verified),
     profile_skills: row.profile_skills_visibility === 'private' ? [] : row.profile_skills ?? [],
   }))
 

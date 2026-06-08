@@ -118,8 +118,15 @@ export async function PATCH(request: NextRequest) {
 
   const { data, error } = await supabase
     .from('profiles')
-    .update(fullPayload)
-    .eq('id', user.id)
+    .upsert(
+      {
+        id: user.id,
+        email: user.email ?? null,
+        ...fullPayload,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'id' }
+    )
     .select('*')
     .single()
 
@@ -129,8 +136,16 @@ export async function PATCH(request: NextRequest) {
     if (isSchemaError(error)) {
       const { data: fallbackData, error: fallbackError } = await supabase
         .from('profiles')
-        .update(corePayload)
-        .eq('id', user.id)
+        .upsert(
+          {
+            id: user.id,
+            email: user.email ?? null,
+            ...corePayload,
+            is_public_profile: typeof body.is_public_profile === 'boolean' ? body.is_public_profile : true,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'id' }
+        )
         .select('*')
         .single()
 

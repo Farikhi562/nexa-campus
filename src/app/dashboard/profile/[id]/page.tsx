@@ -4,9 +4,25 @@ import { notFound, redirect } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/Card'
 import PublicUserProfileView from '@/components/profile/PublicUserProfileView'
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
+
+const NEXA_FOUNDER_EMAIL = 'fauzanalfa36@gmail.com'
+function founderVerified(email: unknown, cached?: unknown) {
+  return Boolean(cached) || String(email ?? '').trim().toLowerCase() === NEXA_FOUNDER_EMAIL
+}
+
+function dataClient<T>(fallback: T): T {
+  try {
+    return createServiceClient() as T
+  } catch {
+    return fallback
+  }
+}
 
 const PROFILE_SELECT = `
   id,
+  email,
+  founder_verified,
   full_name,
   campus_name,
   province,
@@ -47,7 +63,9 @@ export default async function UserProfilePage({ params }: Params) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile, error } = await supabase
+  const db = dataClient(supabase)
+
+  const { data: profile, error } = await db
     .from('profiles')
     .select(PROFILE_SELECT)
     .eq('id', id)
@@ -76,5 +94,14 @@ export default async function UserProfilePage({ params }: Params) {
     canMessage = Boolean(friendship) && (profile as { dm_privacy?: string | null }).dm_privacy !== 'none'
   }
 
-  return <PublicUserProfileView profile={profile as never} isOwnProfile={profile.id === user.id} canMessage={canMessage} />
+  const safeProfile = {
+    ...(profile as Record<string, unknown>),
+    email: null,
+    founder_verified: founderVerified(
+      (profile as { email?: string | null }).email,
+      (profile as { founder_verified?: boolean | null }).founder_verified,
+    ),
+  }
+
+  return <PublicUserProfileView profile={safeProfile as never} isOwnProfile={profile.id === user.id} canMessage={canMessage} />
 }

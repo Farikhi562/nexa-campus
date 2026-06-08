@@ -1,8 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 
 const NEXA_FOUNDER_EMAIL = 'fauzanalfa36@gmail.com'
 function founderVerified(email: unknown) { return String(email ?? '').trim().toLowerCase() === NEXA_FOUNDER_EMAIL }
+
+function dataClient<T>(fallback: T): T {
+  try {
+    return createServiceClient() as T
+  } catch {
+    return fallback
+  }
+}
 
 type Params = { params: Promise<{ friendId: string }> }
 
@@ -26,14 +35,15 @@ export async function GET(request: NextRequest, { params }: Params) {
   if (friendId === user.id) return NextResponse.json({ error: 'Tidak bisa chat diri sendiri. Itu namanya catatan pribadi, bukan fitur sosial.' }, { status: 400 })
   if (!await areFriends(supabase, user.id, friendId)) return NextResponse.json({ error: 'Chat pribadi hanya untuk teman yang sudah accepted.' }, { status: 403 })
 
-  const { data: friend, error: friendError } = await supabase
+  const db = dataClient(supabase)
+  const { data: friend, error: friendError } = await db
     .from('profiles')
-    .select('id, email, full_name, avatar_url, campus_name, major, featured_badge, dm_privacy')
+    .select('id, email, founder_verified, full_name, avatar_url, campus_name, major, nexa_id, featured_badge, dm_privacy')
     .eq('id', friendId)
     .maybeSingle()
   if (friendError) return NextResponse.json({ error: friendError.message }, { status: 500 })
   if (!friend) return NextResponse.json({ error: 'Teman tidak ditemukan.' }, { status: 404 })
-  const safeFriend = { ...(friend as Record<string, unknown>), email: null, founder_verified: founderVerified((friend as { email?: string | null }).email) }
+  const safeFriend = { ...(friend as Record<string, unknown>), email: null, founder_verified: founderVerified((friend as { email?: string | null }).email) || Boolean((friend as { founder_verified?: boolean | null }).founder_verified) }
 
   const limit = Math.min(Number(request.nextUrl.searchParams.get('limit') ?? 60), 100)
   const { data: messages, error } = await supabase
@@ -55,7 +65,8 @@ export async function POST(request: NextRequest, { params }: Params) {
   if (friendId === user.id) return NextResponse.json({ error: 'Tidak bisa chat diri sendiri.' }, { status: 400 })
   if (!await areFriends(supabase, user.id, friendId)) return NextResponse.json({ error: 'Chat pribadi hanya untuk teman.' }, { status: 403 })
 
-  const { data: friend } = await supabase.from('profiles').select('dm_privacy').eq('id', friendId).maybeSingle()
+  const db = dataClient(supabase)
+  const { data: friend } = await db.from('profiles').select('dm_privacy').eq('id', friendId).maybeSingle()
   if ((friend as { dm_privacy?: string } | null)?.dm_privacy === 'none') {
     return NextResponse.json({ error: 'User ini mematikan chat pribadi.' }, { status: 403 })
   }

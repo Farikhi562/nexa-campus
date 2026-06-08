@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
+
+function dataClient<T>(fallback: T): T {
+  try { return createServiceClient() as T } catch { return fallback }
+}
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient()
@@ -30,7 +35,8 @@ export async function GET(request: NextRequest) {
   // Owner names (safe: only full_name, no email/phone)
   let ownerNames: Record<string, string | null> = {}
   if (ownerIds.length > 0) {
-    const { data: owners } = await supabase
+    const db = dataClient(supabase)
+    const { data: owners } = await db
       .from('profiles')
       .select('id, full_name')
       .in('id', ownerIds)

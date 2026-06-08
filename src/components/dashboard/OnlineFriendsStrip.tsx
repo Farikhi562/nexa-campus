@@ -50,6 +50,7 @@ export default function OnlineFriendsStrip() {
                   <FeaturedBadgePin badgeId={friend.featured_badge} />
                 </span>
                 <span className="mt-0.5 flex items-center gap-1 text-[10px] font-bold text-slate-500"><MessageCircle className="h-3 w-3" /> Chat pribadi</span>
+                {friend.nexa_id && <span className="mt-0.5 block text-[10px] font-black text-slate-400">#{friend.nexa_id}</span>}
               </span>
             </Link>
           ))}

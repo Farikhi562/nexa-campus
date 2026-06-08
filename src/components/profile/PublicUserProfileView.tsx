@@ -122,7 +122,7 @@ export default function PublicUserProfileView({ profile, isOwnProfile, canMessag
               <Badge tone={profile.plan === 'command' ? 'warning' : profile.plan === 'pulse' ? 'brand' : 'neutral'}>
                 {profile.plan.toUpperCase()}
               </Badge>
-              {!isPublic && <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-black text-slate-200"><Lock className="h-3 w-3" /> Profil privat</span>}
+              {!isPublic && <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-black text-slate-200"><Lock className="h-3 w-3" /> Tidak tampil leaderboard</span>}
               {profile.featured_badge && <FeaturedBadgePin badgeId={profile.featured_badge} />}
               {profile.online_status_visibility !== 'private' && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-emerald-400/15 px-2.5 py-1 text-[11px] font-black text-emerald-100"><Radio className="h-3 w-3" /> Bisa tampil online</span>
@@ -138,16 +138,7 @@ export default function PublicUserProfileView({ profile, isOwnProfile, canMessag
         </div>
       </section>
 
-      {!isPublic && !isOwnProfile ? (
-        <Card>
-          <CardContent className="p-8 text-center">
-            <Lock className="mx-auto mb-3 h-10 w-10 text-slate-300" />
-            <h2 className="text-lg font-black text-slate-950">Profil ini privat.</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-500">User ini memilih buat nggak menampilkan detail publik. Pilihan yang waras, mengingat internet kadang seperti pasar malam tanpa satpam.</p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid gap-5 lg:grid-cols-[1.5fr_1fr]">
+      <div className="grid gap-5 lg:grid-cols-[1.5fr_1fr]">
           <div className="space-y-5">
             <Card>
               <CardContent className="p-5">
@@ -234,7 +225,6 @@ export default function PublicUserProfileView({ profile, isOwnProfile, canMessag
             </Card>
           </div>
         </div>
-      )}
     </div>
   )
 }

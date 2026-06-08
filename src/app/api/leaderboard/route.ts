@@ -1,10 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 import type { LeaderboardScope } from '@/types'
 
 const SCOPES: LeaderboardScope[] = ['weekly', 'monthly', 'all_time']
 const NEXA_FOUNDER_EMAIL = 'fauzanalfa36@gmail.com'
 function founderVerified(email: unknown) { return String(email ?? '').trim().toLowerCase() === NEXA_FOUNDER_EMAIL }
+
+function dataClient<T>(fallback: T): T {
+  try {
+    return createServiceClient() as T
+  } catch {
+    return fallback
+  }
+}
 
 function parseScope(value: string | null): LeaderboardScope {
   return SCOPES.includes(value as LeaderboardScope) ? (value as LeaderboardScope) : 'all_time'
@@ -41,11 +50,12 @@ export async function GET(request: NextRequest) {
   const ids = list.map((entry: { user_id?: string }) => entry.user_id).filter(Boolean)
   let emailMap = new Map<string, string | null>()
   if (ids.length > 0) {
-    const { data: profiles } = await supabase
+    const db = dataClient(supabase)
+    const { data: profiles } = await db
       .from('profiles')
-      .select('id, email')
+      .select('id, email, founder_verified')
       .in('id', ids)
-    emailMap = new Map((profiles ?? []).map((p: { id: string; email: string | null }) => [p.id, p.email]))
+    emailMap = new Map((profiles ?? []).map((p: { id: string; email: string | null; founder_verified?: boolean | null }) => [p.id, p.founder_verified ? NEXA_FOUNDER_EMAIL : p.email]))
   }
 
   return NextResponse.json({

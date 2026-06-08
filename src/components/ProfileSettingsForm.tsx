@@ -419,7 +419,7 @@ export default function ProfileSettingsForm({ profile }: { profile: Profile }) {
               <span>
                 <span className="block text-sm font-black text-slate-950">Tampil di leaderboard</span>
                 <span className="mt-0.5 block text-xs leading-5 text-slate-500">
-                  Kalau aktif, nama, foto, dan poinmu muncul di papan peringkat publik.
+                  Kalau aktif, nama, foto, dan poinmu muncul di papan peringkat. Ini tidak menyembunyikan kamu dari Cari Teman atau anggota Study Room.
                 </span>
               </span>
               <span
@@ -440,7 +440,7 @@ export default function ProfileSettingsForm({ profile }: { profile: Profile }) {
             <div className="mb-4">
               <p className="text-sm font-black text-slate-950">Profil publik & skill</p>
               <p className="mt-1 text-xs leading-5 text-slate-500">
-                Ini yang muncul saat user lain klik profilmu dari Cari Teman, Leaderboard, atau NEXA Arena. Bagian privat tetap kamu simpan, tapi tidak ditampilkan ke orang lain.
+                Ini yang muncul saat user lain klik profilmu dari Cari Teman, Leaderboard, atau NEXA Arena. Nama, kampus, jurusan, dan NEXA ID tetap terlihat supaya fitur sosial tidak mati gaya. Deskripsi, skill, minat, online status, dan chat pribadi tetap bisa kamu atur.
               </p>
             </div>
 
@@ -531,7 +531,7 @@ export default function ProfileSettingsForm({ profile }: { profile: Profile }) {
 
               <div className="md:col-span-2 rounded-3xl border border-amber-200 bg-amber-50 p-4">
                 <p className="text-sm font-black text-amber-950">Privasi sosial & Study Room</p>
-                <p className="mt-1 text-xs leading-5 text-amber-900">Atur siapa yang bisa lihat kamu online dan siapa yang boleh kirim chat pribadi. Akhirnya user dikasih kendali, konsep yang ternyata bagus juga.</p>
+                <p className="mt-1 text-xs leading-5 text-amber-900">Privasi di sini hanya untuk status online dan izin chat pribadi. Nama kamu tetap tampil di Cari Teman dan daftar anggota Study Room, karena kalau semuanya disembunyikan aplikasinya berubah jadi ruang kosong digital.</p>
                 <div className="mt-4 grid gap-3 md:grid-cols-3">
                   <label className="block">
                     <span className="mb-1.5 block text-xs font-black uppercase tracking-wide text-amber-900">Status online</span>

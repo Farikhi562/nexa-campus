@@ -667,7 +667,10 @@ Nama anggota selalu terlihat untuk satu grup room. Yang mengikuti privasi hanya 
                         <span className="truncate">{member.user_id === userId ? 'Kamu' : (member.profile?.full_name ?? 'Member')}</span>
                         <FounderVerifiedBadge founderVerified={member.profile?.founder_verified} email={member.profile?.email} compact />
                       </p>
-                      <RoleBadge role={member.role} />
+                      <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
+                        <RoleBadge role={member.role} />
+                        {member.profile?.nexa_id && <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-black text-slate-500">#{member.profile.nexa_id}</span>}
+                      </div>
                     </div>
                   </div>
                   {canManage && member.user_id !== userId && (myRole === 'owner' || member.role !== 'owner') && (

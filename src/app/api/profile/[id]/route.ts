@@ -1,14 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 
 const NEXA_FOUNDER_EMAIL = 'fauzanalfa36@gmail.com'
 function founderVerified(email: unknown) { return String(email ?? '').trim().toLowerCase() === NEXA_FOUNDER_EMAIL }
+
+function dataClient<T>(fallback: T): T {
+  try {
+    return createServiceClient() as T
+  } catch {
+    return fallback
+  }
+}
 
 type Params = { params: Promise<{ id: string }> }
 
 const PROFILE_SELECT = `
   id,
   email,
+  founder_verified,
   full_name,
   campus_name,
   province,
@@ -51,7 +61,8 @@ export async function GET(_request: NextRequest, { params }: Params) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Login required.' }, { status: 401 })
 
-  const { data, error } = await supabase
+  const db = dataClient(supabase)
+  const { data, error } = await db
     .from('profiles')
     .select(PROFILE_SELECT)
     .eq('id', id)
@@ -64,10 +75,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
   const safeProfile = {
     ...(data as Record<string, unknown>),
     email: null,
-    founder_verified: founderVerified((data as { email?: string | null }).email),
-  }
-  if (!isOwnProfile && data.is_public_profile === false) {
-    return NextResponse.json({ data: { id: data.id, full_name: data.full_name, avatar_url: data.avatar_url, is_public_profile: false, founder_verified: safeProfile.founder_verified } })
+    founder_verified: founderVerified((data as { email?: string | null }).email) || Boolean((data as { founder_verified?: boolean | null }).founder_verified),
   }
 
   return NextResponse.json({ data: hidePrivate(safeProfile, isOwnProfile) })

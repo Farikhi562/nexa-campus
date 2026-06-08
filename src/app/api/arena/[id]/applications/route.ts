@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 
 const NEXA_FOUNDER_EMAIL = 'fauzanalfa36@gmail.com'
 function founderVerified(email: unknown) { return String(email ?? '').trim().toLowerCase() === NEXA_FOUNDER_EMAIL }
+
+function dataClient<T>(fallback: T): T {
+  try { return createServiceClient() as T } catch { return fallback }
+}
 
 type Params = { params: Promise<{ id: string }> }
 type ApplicationRow = Record<string, unknown> & { applicant_id: string }
@@ -52,14 +57,15 @@ export async function GET(_req: NextRequest, { params }: Params) {
   const profileMap: Record<string, ProfileRow> = {}
 
   if (applicantIds.length > 0) {
-    const { data: profiles, error: profileError } = await supabase
+    const db = dataClient(supabase)
+    const { data: profiles, error: profileError } = await db
       .from('profiles')
-      .select('id, email, full_name, campus_name, major, semester, avatar_url, plan, nexa_id, featured_badge')
+      .select('id, email, founder_verified, full_name, campus_name, major, semester, avatar_url, plan, nexa_id, featured_badge')
       .in('id', applicantIds)
 
     if (profileError) return NextResponse.json({ error: profileError.message }, { status: 500 })
     for (const profile of (profiles ?? []) as ProfileRow[]) {
-      profileMap[profile.id] = { ...profile, email: null, founder_verified: founderVerified(profile.email) }
+      profileMap[profile.id] = { ...profile, email: null, founder_verified: founderVerified(profile.email) || Boolean(profile.founder_verified) }
     }
   }
 
