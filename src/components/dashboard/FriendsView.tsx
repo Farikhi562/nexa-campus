@@ -6,6 +6,7 @@ import { Check, Loader2, MessageCircle, Search, UserPlus, X } from 'lucide-react
 import { Card, CardContent } from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import { FeaturedBadgePin } from '@/components/BadgeChip'
+import SmartEmptyState from '@/components/dashboard/SmartEmptyState'
 import FounderVerifiedBadge from '@/components/FounderVerifiedBadge'
 import type { FriendRequest, PublicProfile } from '@/types'
 
@@ -256,9 +257,7 @@ export default function FriendsView() {
           )}
 
           {!q.trim() && friends.length === 0 && sent.length === 0 && received.length === 0 && (
-            <Card><CardContent className="py-10 text-center text-sm text-slate-500">
-              Belum ada teman. Cari nama atau kampus teman di atas.
-            </CardContent></Card>
+            <SmartEmptyState kind="friends" />
           )}
         </>
       )}

@@ -20,6 +20,7 @@ import { FeaturedBadgePin } from '@/components/BadgeChip'
 import { Card, CardContent } from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
+import SmartEmptyState from '@/components/dashboard/SmartEmptyState'
 
 type ArenaPost = {
   id: string
@@ -217,14 +218,10 @@ export default function ArenaView({ userId }: { userId: string }) {
       {loading ? (
         <div className="flex justify-center p-10 text-slate-400"><Loader2 className="h-6 w-6 animate-spin" /></div>
       ) : posts.length === 0 ? (
-        <Card>
-          <CardContent className="p-10 text-center">
-            <Sword className="mx-auto mb-3 h-10 w-10 text-slate-200" />
-            <p className="font-black text-slate-950">Belum ada postingan cari tim.</p>
-            <p className="mt-1 text-sm text-slate-500">Buat postingan pertama, biar fitur ini nggak jadi museum UI.</p>
-            <Button onClick={() => setShowCreate(true)} className="mt-4 rounded-2xl">Buat Postingan</Button>
-          </CardContent>
-        </Card>
+        <SmartEmptyState
+          kind="arena"
+          action={<Button onClick={() => setShowCreate(true)} className="rounded-2xl">Buat Postingan</Button>}
+        />
       ) : (
         <div className="grid gap-3 sm:grid-cols-2">
           {posts.map((post) => {

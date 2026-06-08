@@ -3,12 +3,13 @@
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { BookOpen, Clock, Loader2, Plus, Search, Users, X } from 'lucide-react'
+import { Clock, Loader2, Plus, Search, Users } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import CreateRoomModal from '@/components/dashboard/CreateRoomModal'
 import OnlineFriendsStrip from '@/components/dashboard/OnlineFriendsStrip'
+import SmartEmptyState from '@/components/dashboard/SmartEmptyState'
 import type { StudyRoom, StudyRoomCategory } from '@/types'
 
 const CATEGORIES: Array<{ value: StudyRoomCategory | ''; label: string }> = [
@@ -221,20 +222,14 @@ export default function StudyRoomView({ userId }: { userId: string }) {
             <Loader2 className="h-6 w-6 animate-spin" />
           </div>
         ) : rooms.length === 0 ? (
-          <Card>
-            <CardContent className="flex flex-col items-center gap-4 p-10 text-center">
-              <BookOpen className="h-12 w-12 text-slate-200" />
-              <div>
-                <p className="text-base font-black text-slate-950">Belum ada study room.</p>
-                <p className="mt-1 text-sm text-slate-500">
-                  Entah semua orang lagi produktif diam-diam, atau belum ada yang mulai.
-                </p>
-              </div>
+          <SmartEmptyState
+            kind="study-room"
+            action={(
               <Button onClick={() => setShowCreate(true)} className="rounded-2xl">
                 <Plus className="h-4 w-4" /> Buat Study Room
               </Button>
-            </CardContent>
-          </Card>
+            )}
+          />
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
             {rooms.map((room) => {

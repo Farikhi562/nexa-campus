@@ -12,6 +12,8 @@ import ReferralCard from '@/components/dashboard/ReferralCard'
 import LeaderboardTeaser from '@/components/dashboard/LeaderboardTeaser'
 import DailyPulseCard from '@/components/dashboard/DailyPulseCard'
 import RetentionFomoStrip from '@/components/dashboard/RetentionFomoStrip'
+import ActivityFeedCard from '@/components/dashboard/ActivityFeedCard'
+import ProfileCompletionCard from '@/components/dashboard/ProfileCompletionCard'
 import UpgradeCountdownCard from '@/components/dashboard/UpgradeCountdownCard'
 import SetupChecklist from '@/components/dashboard/SetupChecklist'
 import ShareDeadlineModal from '@/components/dashboard/ShareDeadlineModal'
@@ -264,6 +266,11 @@ export default function DeadlineDashboardOverview({
       />
 
       <LeaderboardTeaser />
+
+      <section className="grid gap-4 lg:grid-cols-[minmax(0,0.9fr)_minmax(300px,0.55fr)]">
+        <ActivityFeedCard />
+        <ProfileCompletionCard />
+      </section>
 
       <SetupChecklist
         profileCompleted={profileCompleted}
