@@ -5,6 +5,8 @@ import { Card, CardContent } from '@/components/ui/Card'
 import PublicUserProfileView from '@/components/profile/PublicUserProfileView'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
+import { getEffectivePlan } from '@/lib/plans'
+import { BADGES } from '@/lib/badges'
 
 const NEXA_FOUNDER_EMAIL = 'fauzanalfa36@gmail.com'
 function founderVerified(email: unknown, cached?: unknown) {
@@ -30,6 +32,11 @@ const PROFILE_SELECT = `
   semester,
   avatar_url,
   plan,
+  pulse_trial_until,
+  plan_expires_at,
+  subscription_expires_at,
+  command_expires_at,
+  lifetime_command,
   nexa_id,
   is_public_profile,
   featured_badge,
@@ -94,13 +101,25 @@ export default async function UserProfilePage({ params }: Params) {
     canMessage = Boolean(friendship) && (profile as { dm_privacy?: string | null }).dm_privacy !== 'none'
   }
 
+  const [{ count: friendCount }] = await Promise.all([
+    db
+      .from('friend_requests')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'accepted')
+      .or(`requester_id.eq.${profile.id},receiver_id.eq.${profile.id}`),
+  ])
+
+  const isFounder = founderVerified(
+    (profile as { email?: string | null }).email,
+    (profile as { founder_verified?: boolean | null }).founder_verified,
+  )
   const safeProfile = {
     ...(profile as Record<string, unknown>),
     email: null,
-    founder_verified: founderVerified(
-      (profile as { email?: string | null }).email,
-      (profile as { founder_verified?: boolean | null }).founder_verified,
-    ),
+    founder_verified: isFounder,
+    plan: getEffectivePlan(profile as never),
+    badges: isFounder ? BADGES.map((badge) => badge.id) : ((profile as { badges?: unknown }).badges ?? []),
+    friend_count: friendCount ?? 0,
   }
 
   return <PublicUserProfileView profile={safeProfile as never} isOwnProfile={profile.id === user.id} canMessage={canMessage} />

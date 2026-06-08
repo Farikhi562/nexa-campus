@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowLeft, ExternalLink, Lock, MessageCircle, Radio, ShieldCheck, Sparkles, UserRound } from 'lucide-react'
+import { ArrowLeft, ExternalLink, Lock, MessageCircle, Radio, ShieldCheck, Sparkles, UserRound, Users } from 'lucide-react'
 import { BadgeChip, BadgeTierLabel, FeaturedBadgePin } from '@/components/BadgeChip'
 import FounderVerifiedBadge from '@/components/FounderVerifiedBadge'
 import { Card, CardContent } from '@/components/ui/Card'
@@ -24,6 +24,7 @@ type ViewProfile = {
   is_public_profile: boolean | null
   featured_badge: string | null
   badges: string[] | null
+  friend_count?: number | null
   public_profile_headline: string | null
   profile_bio: string | null
   profile_bio_visibility: Visibility
@@ -133,7 +134,10 @@ export default function PublicUserProfileView({ profile, isOwnProfile, canMessag
             <p className="mt-2 text-sm leading-6 text-slate-300">
               {[profile.campus_name, profile.major, profile.semester ? `Semester ${profile.semester}` : null].filter(Boolean).join(' · ') || 'Profil akademik belum lengkap'}
             </p>
-            {profile.nexa_id && <p className="mt-1 text-xs font-black text-slate-400">NEXA ID #{profile.nexa_id}</p>}
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-xs font-black text-slate-400">
+              {profile.nexa_id && <span>NEXA ID #{profile.nexa_id}</span>}
+              <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-slate-200"><Users className="h-3.5 w-3.5" /> {profile.friend_count ?? 0} teman</span>
+            </div>
           </div>
         </div>
       </section>

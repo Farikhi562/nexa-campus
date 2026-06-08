@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { getEffectivePlan } from '@/lib/plans'
 
 const MODEL = process.env.GEMINI_VISION_MODEL || process.env.GEMINI_MODEL || 'gemini-2.5-flash'
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024 // 5MB
@@ -44,8 +45,8 @@ export async function POST(request: NextRequest) {
   } = await supabase.auth.getUser()
   if (!user) return jsonResponse({ error: 'Kamu perlu login dulu.' }, 401)
 
-  const { data: profile } = await supabase.from('profiles').select('plan').eq('id', user.id).maybeSingle()
-  if (!profile || profile.plan === 'radar') {
+  const { data: profile } = await supabase.from('profiles').select('email, plan, pulse_trial_until, plan_expires_at, subscription_expires_at, command_expires_at, lifetime_command').eq('id', user.id).maybeSingle()
+  if (getEffectivePlan({ ...(profile ?? {}), email: user.email }) === 'radar') {
     return jsonResponse({ error: 'AI dari foto tersedia untuk NEXA Pulse dan NEXA Command.', status: 'locked' }, 403)
   }
 

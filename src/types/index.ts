@@ -44,6 +44,10 @@ export interface Profile {
   telegram_chat_id: string | null
   whatsapp_number: string | null
   plan: Plan
+  plan_expires_at?: string | null
+  subscription_expires_at?: string | null
+  command_expires_at?: string | null
+  lifetime_command?: boolean | null
   referral_code: string | null
   nexa_id: string | null
   pulse_trial_until: string | null
@@ -77,6 +81,9 @@ export interface LeaderboardEntry {
   campus_name: string | null
   featured_badge?: string | null
   plan: Plan
+  plan_expires_at?: string | null
+  subscription_expires_at?: string | null
+  lifetime_command?: boolean | null
   points: number
   rank: number
 }
@@ -140,6 +147,15 @@ export interface StudyRoomJoinRequest {
   user?: PublicProfile | null
 }
 
+export interface ArenaTeamMember {
+  id: string
+  post_id: string
+  user_id: string
+  role: 'creator' | 'member'
+  joined_at: string
+  profile?: PublicProfile | null
+}
+
 export interface StudyRoomMessage {
   id: string
   room_id: string
@@ -182,6 +198,8 @@ export interface PublicProfile {
   study_room_presence_visibility?: 'members' | 'private' | null
   dm_privacy?: 'friends' | 'none' | null
   last_seen_at?: string | null
+  friend_count?: number | null
+  badges?: string[] | null
   created_at: string
 }
 

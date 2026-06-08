@@ -74,7 +74,14 @@ export async function POST(request: NextRequest) {
 
   // Hanya upgrade kalau benar-benar dibayar dan belum pernah diproses.
   if (isPaid && order.status !== 'paid') {
-    await service.from('profiles').update({ plan: order.plan }).eq('id', order.user_id)
+    const planExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+    await service.from('profiles').update({
+      plan: order.plan,
+      plan_expires_at: planExpiresAt,
+      subscription_expires_at: planExpiresAt,
+      subscription_status: 'active',
+      updated_at: new Date().toISOString(),
+    }).eq('id', order.user_id)
     await service
       .from('subscription_intents')
       .insert({

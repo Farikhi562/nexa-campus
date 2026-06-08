@@ -92,6 +92,45 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
+  if (action === 'accept') {
+    const joinedAt = new Date().toISOString()
+    const { error: memberError } = await supabase
+      .from('nexa_arena_team_members')
+      .upsert(
+        {
+          post_id: id,
+          user_id: app.applicant_id,
+          role: 'member',
+          source_application_id: applicationId,
+          joined_at: joinedAt,
+        },
+        { onConflict: 'post_id,user_id' }
+      )
+
+    if (memberError) {
+      console.error('[Arena Team Member] failed:', memberError)
+      return NextResponse.json({ error: `Lamaran diterima, tapi gagal memasukkan ke anggota tim: ${memberError.message}` }, { status: 500 })
+    }
+
+    const nextTeamSize = Math.min(arenaPost.team_size_max, arenaPost.current_team_size + 1)
+    await supabase
+      .from('nexa_arena_posts')
+      .update({
+        current_team_size: nextTeamSize,
+        status: nextTeamSize >= arenaPost.team_size_max ? 'full' : arenaPost.status,
+        updated_at: joinedAt,
+      })
+      .eq('id', id)
+      .eq('creator_id', user.id)
+
+    await supabase.from('points_events').insert({
+      user_id: app.applicant_id,
+      kind: 'arena_approved',
+      points: 20,
+      metadata: { post_id: id, application_id: applicationId },
+    }).then(undefined, () => null)
+  }
+
   try { await notifyApplicant(supabase, app.applicant_id, action, arenaPost.title) } catch (error) { console.error('[Arena Review Notification]', error) }
 
   return NextResponse.json({ data })

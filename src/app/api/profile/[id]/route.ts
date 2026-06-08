@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
+import { getEffectivePlan } from '@/lib/plans'
+import { BADGES } from '@/lib/badges'
 
 const NEXA_FOUNDER_EMAIL = 'fauzanalfa36@gmail.com'
 function founderVerified(email: unknown) { return String(email ?? '').trim().toLowerCase() === NEXA_FOUNDER_EMAIL }
@@ -26,6 +28,11 @@ const PROFILE_SELECT = `
   semester,
   avatar_url,
   plan,
+  pulse_trial_until,
+  plan_expires_at,
+  subscription_expires_at,
+  command_expires_at,
+  lifetime_command,
   nexa_id,
   is_public_profile,
   featured_badge,
@@ -72,10 +79,22 @@ export async function GET(_request: NextRequest, { params }: Params) {
   if (!data) return NextResponse.json({ error: 'Profil tidak ditemukan.' }, { status: 404 })
 
   const isOwnProfile = data.id === user.id
+  const [{ count: friendCount }] = await Promise.all([
+    db
+      .from('friend_requests')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'accepted')
+      .or(`requester_id.eq.${id},receiver_id.eq.${id}`),
+  ])
+
+  const founder = founderVerified((data as { email?: string | null }).email) || Boolean((data as { founder_verified?: boolean | null }).founder_verified)
   const safeProfile = {
     ...(data as Record<string, unknown>),
     email: null,
-    founder_verified: founderVerified((data as { email?: string | null }).email) || Boolean((data as { founder_verified?: boolean | null }).founder_verified),
+    founder_verified: founder,
+    plan: getEffectivePlan(data as never),
+    badges: founder ? BADGES.map((badge) => badge.id) : ((data as { badges?: unknown }).badges ?? []),
+    friend_count: friendCount ?? 0,
   }
 
   return NextResponse.json({ data: hidePrivate(safeProfile, isOwnProfile) })

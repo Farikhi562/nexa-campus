@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 
 type ArenaPostRow = Record<string, unknown> & { id: string; creator_id: string }
 type ArenaApplicationRow = { post_id: string; status: string }
+type ArenaTeamMemberRow = { post_id: string; user_id: string; role: string; joined_at: string }
 
 const ALLOWED_TYPES = new Set(['hackathon', 'bisnis', 'saintek', 'desain', 'akademik', 'seni', 'esport', 'olahraga', 'lainnya'])
 
@@ -104,6 +105,32 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  const memberRowsByPost: Record<string, ArenaTeamMemberRow[]> = {}
+  if (postIds.length > 0) {
+    const { data: members } = await supabase
+      .from('nexa_arena_team_members')
+      .select('post_id, user_id, role, joined_at')
+      .in('post_id', postIds)
+      .order('joined_at', { ascending: true })
+
+    for (const member of (members ?? []) as ArenaTeamMemberRow[]) {
+      memberRowsByPost[member.post_id] ??= []
+      memberRowsByPost[member.post_id].push(member)
+    }
+  }
+
+  const memberUserIds = Array.from(new Set(Object.values(memberRowsByPost).flat().map((member) => member.user_id)))
+  const memberProfileMap: Record<string, { id: string; full_name: string | null; avatar_url: string | null; nexa_id: string | null; featured_badge: string | null }> = {}
+  if (memberUserIds.length > 0) {
+    const { data: memberProfiles } = await supabase
+      .from('profiles')
+      .select('id, full_name, avatar_url, nexa_id, featured_badge')
+      .in('id', memberUserIds)
+    for (const profile of (memberProfiles ?? []) as Array<{ id: string; full_name: string | null; avatar_url: string | null; nexa_id: string | null; featured_badge: string | null }>) {
+      memberProfileMap[profile.id] = profile
+    }
+  }
+
   return NextResponse.json({
     data: rows.map((row) => ({
       ...row,
@@ -113,6 +140,7 @@ export async function GET(req: NextRequest) {
       my_application_status: myApplicationMap[row.id] ?? null,
       applications_count: applicationCounts[row.id]?.total ?? 0,
       pending_applications_count: applicationCounts[row.id]?.pending ?? 0,
+      team_members: (memberRowsByPost[row.id] ?? []).map((member) => ({ ...member, profile: memberProfileMap[member.user_id] ?? null })),
     })),
   })
 }
@@ -135,5 +163,20 @@ export async function POST(req: NextRequest) {
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  await supabase.from('nexa_arena_team_members').upsert({
+    post_id: data.id,
+    user_id: user.id,
+    role: 'creator',
+    joined_at: new Date().toISOString(),
+  }, { onConflict: 'post_id,user_id' }).then(undefined, () => null)
+
+  await supabase.from('points_events').insert({
+    user_id: user.id,
+    kind: 'arena_post_created',
+    points: 10,
+    metadata: { post_id: data.id },
+  }).then(undefined, () => null)
+
   return NextResponse.json({ data }, { status: 201 })
 }

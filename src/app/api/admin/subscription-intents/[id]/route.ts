@@ -60,9 +60,16 @@ export async function PATCH(
 
   if (action === 'confirm') {
     const requestedPlan = intent.requested_plan as Exclude<Plan, 'radar'>
+    const planExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
     const { error: profileError } = await service
       .from('profiles')
-      .update({ plan: requestedPlan })
+      .update({
+        plan: requestedPlan,
+        plan_expires_at: planExpiresAt,
+        subscription_expires_at: planExpiresAt,
+        subscription_status: 'active',
+        updated_at: new Date().toISOString(),
+      })
       .eq('id', intent.user_id)
 
     if (profileError) {

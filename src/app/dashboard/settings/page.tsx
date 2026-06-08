@@ -3,9 +3,11 @@ import { BellRing, CreditCard, Globe, ShieldCheck, UserRound } from 'lucide-reac
 import Badge from '@/components/ui/Badge'
 import { Card, CardContent } from '@/components/ui/Card'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
+import DeleteAccountDangerZone from '@/components/DeleteAccountDangerZone'
 import { createClient } from '@/lib/supabase/server'
 import { PLAN_LABELS } from '@/lib/nexa-data'
 import type { Profile } from '@/types'
+import { getEffectivePlan, planExpiresLabel } from '@/lib/plans'
 
 const settingItems = [
   { title: 'Edit Profil', desc: 'Ubah nama, kampus, provinsi, gender opsional, dan foto profil.', href: '/dashboard/settings/profile', icon: UserRound },
@@ -19,6 +21,8 @@ export default async function SettingsPage() {
   const { data: { user } } = await supabase.auth.getUser()
   const { data: profile } = await supabase.from('profiles').select('*').eq('id', user!.id).single()
   const typedProfile = profile as Profile
+  const effectivePlan = getEffectivePlan({ ...typedProfile, email: user?.email })
+  const expiresLabel = planExpiresLabel({ ...typedProfile, email: user?.email })
 
   return (
     <div className="space-y-5">
@@ -35,7 +39,7 @@ export default async function SettingsPage() {
               {typedProfile.nexa_id && <p className="mt-0.5 text-xs font-bold text-teal-600">Nexa ID: #{typedProfile.nexa_id}</p>}
             </div>
           </div>
-          <Badge tone="brand">Plan: {PLAN_LABELS[typedProfile.plan]}</Badge>
+          <div className="flex flex-col items-start gap-1 sm:items-end"><Badge tone="brand">Plan aktif: {PLAN_LABELS[effectivePlan]}</Badge>{expiresLabel && <span className="text-xs font-bold text-slate-500">Berlaku: {expiresLabel}</span>}</div>
         </div>
       </div>
 
@@ -66,6 +70,8 @@ export default async function SettingsPage() {
           </Card>
         ))}
       </div>
+
+      <DeleteAccountDangerZone email={typedProfile.email} />
     </div>
   )
 }

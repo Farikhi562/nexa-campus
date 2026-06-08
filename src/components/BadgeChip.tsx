@@ -89,7 +89,7 @@ function badgeEmoji(badge: BadgeDef): string {
     Sparkles: '✨', CheckCircle2: '✅', Rocket: '🚀', CalendarCheck: '📅',
     Clock: '⏰', Flame: '🔥', Trophy: '🏆', Crown: '👑', UserPlus: '👋',
     Users: '👥', Gem: '💎', Radar: '🎯', Zap: '⚡', HeartPulse: '💓',
-    Megaphone: '📣', Orbit: '🌌',
+    Megaphone: '📣', Orbit: '🌌', Handshake: '🤝', Sword: '⚔️', Medal: '🥇',
   }
   return iconEmojis[badge.icon] ?? '🏅'
 }

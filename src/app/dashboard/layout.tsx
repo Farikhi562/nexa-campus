@@ -4,6 +4,7 @@ import DashboardSuccessToast from '@/components/DashboardSuccessToast'
 import PwaInstallBanner from '@/components/PwaInstallBanner'
 import { createClient } from '@/lib/supabase/server'
 import type { Profile } from '@/types'
+import { getEffectivePlan } from '@/lib/plans'
 import { Suspense, type ReactNode } from 'react'
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
@@ -18,7 +19,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('full_name, plan, profile_completed, avatar_url, nexa_id')
+    .select('full_name, email, plan, pulse_trial_until, plan_expires_at, subscription_expires_at, command_expires_at, lifetime_command, profile_completed, avatar_url, nexa_id')
     .eq('id', user.id)
     .maybeSingle()
 
@@ -32,7 +33,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   return (
     <AppShell
       profile={{
-        plan: (profile?.plan as Profile['plan']) ?? 'radar',
+        plan: getEffectivePlan({ ...(profile ?? {}), email: user.email }),
         full_name: userName,
         avatar_url: (profile as { avatar_url?: string | null } | null)?.avatar_url ?? null,
         email: user.email ?? null,

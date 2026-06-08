@@ -13,6 +13,12 @@ export type AchievementStats = {
   points: number
   referrals: number
   dailyCheckins?: number
+  weeklyRank?: number | null
+  monthlyRank?: number | null
+  arenaApproved?: number
+  arenaCreated?: number
+  manualBadgeIds?: string[]
+  isFounder?: boolean
   isPremium: boolean
   plan?: string
 }
@@ -26,6 +32,11 @@ export type BadgeMetric =
   | 'referrals'
   | 'daily_checkins'
   | 'premium'
+  | 'weekly_rank1'
+  | 'monthly_rank1'
+  | 'arena_approved'
+  | 'arena_created'
+  | 'manual_badge'
   | 'tier_radar'
   | 'tier_pulse'
   | 'tier_command'
@@ -61,6 +72,10 @@ export const BADGES: BadgeDef[] = [
   { id: 'daily_7', name: 'Ritual Mingguan', desc: 'Check-in Daily Pulse 7 kali.', icon: 'HeartPulse', metric: 'daily_checkins', goal: 7, tier: 'common' },
   { id: 'centurion', name: 'Centurion', desc: 'Kumpulkan 100 poin.', icon: 'Trophy', metric: 'points', goal: 100, tier: 'common' },
   { id: 'connector', name: 'Pengajak', desc: 'Ajak 1 teman lewat referral.', icon: 'UserPlus', metric: 'referrals', goal: 1, tier: 'common' },
+  { id: 'arena_applicant', name: 'Arena Approved', desc: 'Diterima owner ke tim NEXA Arena.', icon: 'Handshake', metric: 'arena_approved', goal: 1, tier: 'common' },
+  { id: 'arena_creator', name: 'Arena Captain', desc: 'Buat postingan cari tim di NEXA Arena.', icon: 'Sword', metric: 'arena_created', goal: 1, tier: 'common' },
+  { id: 'weekly_champion', name: 'Juara Mingguan', desc: 'Pernah jadi rank #1 leaderboard mingguan.', icon: 'Medal', metric: 'weekly_rank1', goal: 1, tier: 'common' },
+  { id: 'monthly_champion', name: 'Juara Bulanan', desc: 'Pernah jadi rank #1 leaderboard bulanan.', icon: 'Trophy', metric: 'monthly_rank1', goal: 1, tier: 'common' },
   { id: 'badge_radar', name: '🎯 NEXA Radar', desc: 'Pengguna setia NEXA Radar. Awal dari segalanya.', icon: 'Radar', metric: 'tier_radar', goal: 1, tier: 'common' },
   { id: 'badge_pulse', name: '⚡ NEXA Pulse', desc: 'Naik level ke Pulse. Deadline makin teratur.', icon: 'Zap', metric: 'tier_pulse', goal: 1, tier: 'common' },
   { id: 'premium', name: 'Member Premium', desc: 'Aktifkan NEXA Pulse atau Command.', icon: 'Gem', metric: 'premium', goal: 1, tier: 'common' },
@@ -95,6 +110,11 @@ function metricValue(stats: AchievementStats, metric: BadgeMetric): number {
     case 'points': return stats.points
     case 'referrals': return stats.referrals
     case 'daily_checkins': return stats.dailyCheckins ?? 0
+    case 'weekly_rank1': return stats.weeklyRank === 1 ? 1 : 0
+    case 'monthly_rank1': return stats.monthlyRank === 1 ? 1 : 0
+    case 'arena_approved': return stats.arenaApproved ?? 0
+    case 'arena_created': return stats.arenaCreated ?? 0
+    case 'manual_badge': return 0
     case 'premium': return stats.isPremium ? 1 : 0
     case 'tier_radar': return stats.plan !== undefined ? 1 : 0
     case 'tier_pulse': return stats.plan === 'pulse' || stats.plan === 'command' ? 1 : 0
@@ -103,9 +123,10 @@ function metricValue(stats: AchievementStats, metric: BadgeMetric): number {
 }
 
 export function evaluateBadges(stats: AchievementStats): BadgeProgress[] {
+  const manual = new Set(stats.manualBadgeIds ?? [])
   return BADGES.map((def) => {
     const current = metricValue(stats, def.metric)
-    const earned = current >= def.goal
+    const earned = stats.isFounder || manual.has(def.id) || current >= def.goal
     return {
       def,
       current,

@@ -42,6 +42,12 @@ type ArenaPost = {
   my_application_status?: 'pending' | 'accepted' | 'rejected' | null
   pending_applications_count?: number
   applications_count?: number
+  team_members?: Array<{
+    user_id: string
+    role: string
+    joined_at: string
+    profile?: { id: string; full_name: string | null; avatar_url: string | null; nexa_id: string | null; featured_badge: string | null } | null
+  }>
 }
 
 type ArenaApplication = {
@@ -259,6 +265,27 @@ export default function ArenaView({ userId }: { userId: string }) {
                       oleh <Link href={`/dashboard/profile/${post.creator_id}`} className="font-bold text-slate-600 hover:text-teal-700">{post.creator_name}</Link>
                       <FeaturedBadgePin badgeId={post.creator_featured_badge} />
                     </p>
+                  )}
+
+                  {post.team_members && post.team_members.length > 0 && (
+                    <div className="mt-3 rounded-2xl border border-emerald-100 bg-emerald-50/70 p-2.5">
+                      <p className="mb-2 text-[10px] font-black uppercase tracking-wide text-emerald-700">Tim approved</p>
+                      <div className="flex flex-wrap gap-2">
+                        {post.team_members.slice(0, 5).map((member) => (
+                          <Link key={member.user_id} href={`/dashboard/profile/${member.user_id}`} className="inline-flex items-center gap-1.5 rounded-full bg-white px-2 py-1 text-[11px] font-black text-slate-700 ring-1 ring-emerald-100 hover:text-emerald-700">
+                            <span className="flex h-5 w-5 items-center justify-center overflow-hidden rounded-full bg-slate-100 text-[9px]">
+                              {member.profile?.avatar_url ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={member.profile.avatar_url} alt="" className="h-full w-full object-cover" />
+                              ) : initials(member.profile?.full_name)}
+                            </span>
+                            {member.profile?.full_name ?? 'Member'}
+                            <FeaturedBadgePin badgeId={member.profile?.featured_badge} />
+                          </Link>
+                        ))}
+                        {post.team_members.length > 5 && <span className="rounded-full bg-white px-2 py-1 text-[11px] font-black text-slate-400 ring-1 ring-emerald-100">+{post.team_members.length - 5}</span>}
+                      </div>
+                    </div>
                   )}
 
                   <div className="mt-auto pt-4">

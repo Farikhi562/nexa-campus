@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import AchievementsView from '@/components/dashboard/AchievementsView'
 import { createClient } from '@/lib/supabase/server'
+import { getEffectivePlan } from '@/lib/plans'
 
 export const metadata = {
   title: 'Pencapaian · NEXA Campus',
@@ -13,7 +14,10 @@ export default async function AchievementsPage() {
   if (!user) redirect('/login')
 
   const { data: profile } = await supabase
-    .from('profiles').select('plan').eq('id', user.id).maybeSingle()
+    .from('profiles')
+    .select('email, plan, pulse_trial_until, plan_expires_at, subscription_expires_at, command_expires_at, lifetime_command')
+    .eq('id', user.id)
+    .maybeSingle()
 
-  return <AchievementsView userPlan={(profile as { plan?: string } | null)?.plan as 'radar'|'pulse'|'command' ?? 'radar'} userId={user.id} />
+  return <AchievementsView userPlan={getEffectivePlan({ ...(profile ?? {}), email: user.email })} userId={user.id} />
 }
