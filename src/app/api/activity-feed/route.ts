@@ -36,7 +36,7 @@ function titleForKind(kind: string, name: string, points: number) {
   const safeName = name || 'Mahasiswa NEXA'
   if (kind.includes('complete_deadline')) return `${safeName} menyelesaikan deadline`
   if (kind.includes('daily')) return `${safeName} check-in Daily Pulse`
-  if (kind.includes('referral')) return `${safeName} mengajak user baru`
+  if (kind.includes('referral')) return `${safeName} mengajak pengguna baru`
   if (kind.includes('arena')) return `${safeName} aktif di NEXA Arena`
   if (kind.includes('study')) return `${safeName} aktif di Study Room`
   if (kind.includes('leaderboard') || kind.includes('champion')) return `${safeName} naik di leaderboard`
@@ -47,7 +47,7 @@ function titleForKind(kind: string, name: string, points: number) {
 function descriptionForKind(kind: string, points: number) {
   if (kind.includes('complete_deadline')) return 'Satu tugas beres. Peradaban akademik masih punya harapan kecil.'
   if (kind.includes('daily')) return 'Check-in harian masuk. Streak dan konsistensi mulai dibangun.'
-  if (kind.includes('referral')) return 'Referral aktif. Efek FOMO bekerja, seperti biasa manusia memang gampang dipancing progress.'
+  if (kind.includes('referral')) return 'Referral aktif. Teman baru berhasil bergabung lewat link kamu.'
   if (kind.includes('arena')) return 'Aktivitas Arena tercatat. Cari tim mulai jadi fitur yang hidup.'
   if (kind.includes('study')) return 'Aktivitas belajar bareng tercatat di Study Room.'
   if (kind.includes('leaderboard') || kind.includes('champion')) return 'Kompetisi mingguan dan bulanan mulai terasa.'
@@ -114,7 +114,7 @@ export async function GET() {
 
     return NextResponse.json({ data: feed })
   } catch {
-    // Fallback supaya dashboard tetap hidup kalau points_events belum kebaca RLS/schema.
+    // Fallback agar dashboard tetap berjalan jika points_events belum terbaca RLS/schema.
     const { data: ownDeadlines } = await supabase
       .from('academic_deadlines')
       .select('id, title, course_name, updated_at, created_at, status')

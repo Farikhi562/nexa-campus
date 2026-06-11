@@ -91,7 +91,7 @@ export default function OnboardingForm({
     setError('')
 
     if (!fullName.trim()) return setError('Nama lengkap wajib diisi.')
-    if (!campusName.trim()) return setError('Kampus wajib diisi. Kalau belum ada di daftar, ketik manual aja.')
+    if (!campusName.trim()) return setError('Kampus wajib diisi. Jika belum ada di daftar, tulis manual.')
     if (!province.trim()) return setError('Provinsi wajib dipilih.')
     if (!major.trim()) return setError('Jurusan wajib dipilih.')
 
@@ -102,7 +102,7 @@ export default function OnboardingForm({
 
     setLoading(true)
 
-    // Upload foto dulu kalau ada yang dipilih tapi belum keupload.
+    // Upload foto jika ada file yang dipilih dan belum terunggah.
     let resolvedAvatarUrl = avatarUrl
     if (photoFile) {
       const uploaded = await uploadPhoto()
@@ -343,7 +343,7 @@ export default function OnboardingForm({
       <section className="rounded-3xl border border-slate-200 bg-white p-5">
         <p className="text-sm font-black text-slate-950">Detail tambahan (opsional)</p>
         <p className="mt-1 text-xs leading-5 text-slate-500">
-          Telegram bisa diisi untuk testing reminder. WhatsApp masih roadmap/coming soon.
+          Telegram bisa diisi untuk reminder awal. WhatsApp belum aktif dan akan disiapkan di versi berikutnya.
         </p>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <label className="block">

@@ -1,7 +1,7 @@
 {
   "name": "NEXA Campus",
   "short_name": "NEXA",
-  "description": "Platform anti-lupa deadline untuk mahasiswa",
+  "description": "Dashboard deadline kampus untuk mahasiswa",
   "theme_color": "#2563eb",
   "background_color": "#ffffff",
   "display": "standalone",

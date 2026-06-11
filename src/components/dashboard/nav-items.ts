@@ -26,5 +26,5 @@ export const DASHBOARD_NAV: NavItem[] = [
   { label: 'Pengaturan', href: '/dashboard/settings', icon: Settings },
   { label: 'Support', href: '/support', icon: HelpCircle },
   { label: 'Release v1.0.0', href: '/release-notes', icon: Rocket },
-  { label: 'Admin Beta', href: '/admin', icon: ShieldCheck },
+  { label: 'Admin', href: '/admin', icon: ShieldCheck },
 ]

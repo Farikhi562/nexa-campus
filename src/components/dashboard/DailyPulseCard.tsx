@@ -28,24 +28,24 @@ type DailyPulseResponse = {
 }
 
 const moodOptions: Array<{ value: DailyMood; label: string; emoji: string; copy: string }> = [
-  { value: 'semangat', label: 'Gas', emoji: '🔥', copy: 'mode ngebut' },
-  { value: 'normal', label: 'Normal', emoji: '🙂', copy: 'cukup waras' },
-  { value: 'capek', label: 'Capek', emoji: '🫠', copy: 'pelan tapi jalan' },
-  { value: 'tertekan', label: 'Berat', emoji: '🌧️', copy: 'butuh ditata' },
+  { value: 'semangat', label: 'Semangat', emoji: '🔥', copy: 'siap bergerak' },
+  { value: 'normal', label: 'Normal', emoji: '🙂', copy: 'stabil' },
+  { value: 'capek', label: 'Capek', emoji: '🫠', copy: 'butuh pelan-pelan' },
+  { value: 'tertekan', label: 'Berat', emoji: '🌧️', copy: 'butuh dirapikan' },
 ]
 
 const defaultGoals = [
-  'Beresin 1 deadline paling dekat',
-  'Rapihin jadwal kuliah hari ini',
+  'Selesaikan 1 deadline paling dekat',
+  'Rapikan jadwal kuliah hari ini',
   'Masuk Study Room minimal 15 menit',
   'Cari 1 teman belajar / tim Arena',
 ]
 
 function getTodayCopy(pulse: DailyPulse | null) {
-  if (!pulse) return 'Buka dashboard, pilih target, lalu pulang lagi besok. Manipulasi dopamine, tapi yang legal.'
-  if (pulse.pendingToday > 0) return `${pulse.pendingToday} deadline hari ini masih nunggu. Tenang, satu-satu, bukan duel final.`
-  if (pulse.completedToday > 0) return `Hari ini sudah ada ${pulse.completedToday} deadline selesai. Ini baru manusia fungsional, sedikit mengejutkan.`
-  return 'Belum ada deadline hari ini. Pakai waktunya buat siap-siap, bukan scroll tanpa arah seperti tradisi nasional.'
+  if (!pulse) return 'Buka dashboard, pilih target kecil, lalu lanjutkan hari ini dengan lebih terarah.'
+  if (pulse.pendingToday > 0) return `${pulse.pendingToday} deadline hari ini masih menunggu. Kerjakan satu per satu.`
+  if (pulse.completedToday > 0) return `Hari ini sudah ada ${pulse.completedToday} deadline selesai. Lanjutkan ritme yang bagus ini.`
+  return 'Belum ada deadline hari ini. Pakai waktunya untuk menyiapkan tugas berikutnya atau merapikan jadwal.'
 }
 
 export default function DailyPulseCard() {
@@ -79,7 +79,7 @@ export default function DailyPulseCard() {
       if (result.data.focusGoal) setFocusGoal(result.data.focusGoal)
       if (result.data.checkinNote) setCheckinNote(result.data.checkinNote)
     } catch {
-      setError('Daily Pulse gagal dimuat. Internet atau server lagi drama kecil.')
+      setError('Daily Pulse gagal dimuat. Periksa koneksi atau coba lagi sebentar.')
     } finally {
       setLoading(false)
     }
@@ -109,9 +109,9 @@ export default function DailyPulseCard() {
       }
 
       setPulse(result.data)
-      setMessage(result.data.checkedIn ? 'Check-in hari ini aman. Besok balik lagi, biar streak-nya nggak wafat sia-sia.' : 'Daily Pulse tersimpan.')
+      setMessage(result.data.checkedIn ? 'Check-in hari ini tersimpan. Balik lagi besok untuk menjaga streak.' : 'Daily Pulse tersimpan.')
     } catch {
-      setError('Check-in gagal. Server lagi menguji kesabaran umat manusia.')
+      setError('Check-in gagal. Coba lagi sebentar.')
     } finally {
       setSaving(false)
     }
@@ -127,14 +127,14 @@ export default function DailyPulseCard() {
           <div className="relative flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
             <div className="max-w-2xl">
               <div className="flex flex-wrap items-center gap-2">
-                <Badge tone="brand">Daily Pulse v1.5.23</Badge>
+                <Badge tone="brand">Daily Pulse</Badge>
                 <Badge tone={pulse?.checkedIn ? 'success' : 'info'}>
                   {pulse?.checkedIn ? 'Sudah check-in' : 'Belum check-in'}
                 </Badge>
               </div>
 
               <h2 className="mt-3 text-xl font-black tracking-tight text-slate-950 sm:text-2xl">
-                Bikin user balik tiap hari, mulai dari ritual 20 detik.
+                Check-in singkat untuk menjaga ritme harian.
               </h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">{retentionLine}</p>
 
@@ -182,7 +182,7 @@ export default function DailyPulseCard() {
                     </div>
                     <div>
                       <p className="font-black text-slate-950">Target hari ini sudah dikunci.</p>
-                      <p className="mt-1 text-sm leading-6 text-slate-500">{pulse.focusGoal || 'Jalanin hari ini dengan lebih sadar, bukan autopilot doang.'}</p>
+                      <p className="mt-1 text-sm leading-6 text-slate-500">{pulse.focusGoal || 'Jalani hari ini dengan target yang lebih jelas.'}</p>
                     </div>
                   </div>
                   {pulse.checkinNote && (
@@ -191,7 +191,7 @@ export default function DailyPulseCard() {
                     </div>
                   )}
                   <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-3 text-sm font-bold text-emerald-800">
-                    +{pulse.pointsAwarded || 3} poin check-in hari ini sudah diamankan.
+                    +{pulse.pointsAwarded || 3} poin check-in hari ini berhasil ditambahkan.
                   </div>
                   {message && <p className="text-xs font-bold text-emerald-700">{message}</p>}
                 </div>
@@ -233,7 +233,7 @@ export default function DailyPulseCard() {
                       onChange={(event) => setCheckinNote(event.target.value)}
                       rows={3}
                       maxLength={180}
-                      placeholder="Contoh: hari ini mau fokus AP2B dulu."
+                      placeholder="Contoh: hari ini mau fokus tugas AP2B dulu."
                       className="mt-2 w-full resize-none rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-semibold text-slate-700 outline-none transition placeholder:text-slate-300 focus:border-cyan-400 focus:ring-4 focus:ring-cyan-100"
                     />
                   </div>
@@ -252,7 +252,7 @@ export default function DailyPulseCard() {
 
           <div className="relative mt-5 rounded-2xl border border-cyan-100 bg-white/65 p-3 text-xs leading-5 text-slate-500">
             <span className="inline-flex items-center gap-1 font-black text-slate-700"><Target className="h-3.5 w-3.5" /> Kenapa ini dulu?</span>{' '}
-            Karena fitur yang bikin betah bukan selalu yang paling canggih, tapi yang bikin user punya alasan balik besok.
+            Karena kebiasaan kecil yang konsisten sering lebih berguna daripada fitur besar yang jarang dipakai.
           </div>
         </div>
       </CardContent>

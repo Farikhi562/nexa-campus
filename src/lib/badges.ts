@@ -76,22 +76,22 @@ export const BADGES: BadgeDef[] = [
   { id: 'arena_creator', name: 'Arena Captain', desc: 'Buat postingan cari tim di NEXA Arena.', icon: 'Sword', metric: 'arena_created', goal: 1, tier: 'common' },
   { id: 'weekly_champion', name: 'Juara Mingguan', desc: 'Pernah jadi rank #1 leaderboard mingguan.', icon: 'Medal', metric: 'weekly_rank1', goal: 1, tier: 'common' },
   { id: 'monthly_champion', name: 'Juara Bulanan', desc: 'Pernah jadi rank #1 leaderboard bulanan.', icon: 'Trophy', metric: 'monthly_rank1', goal: 1, tier: 'common' },
-  { id: 'badge_radar', name: '🎯 NEXA Radar', desc: 'Pengguna setia NEXA Radar. Awal dari segalanya.', icon: 'Radar', metric: 'tier_radar', goal: 1, tier: 'common' },
-  { id: 'badge_pulse', name: '⚡ NEXA Pulse', desc: 'Naik level ke Pulse. Deadline makin teratur.', icon: 'Zap', metric: 'tier_pulse', goal: 1, tier: 'common' },
+  { id: 'badge_radar', name: '🎯 NEXA Radar', desc: 'Pengguna setia NEXA Radar. Langkah awal memakai NEXA.', icon: 'Radar', metric: 'tier_radar', goal: 1, tier: 'common' },
+  { id: 'badge_pulse', name: '⚡ NEXA Pulse', desc: 'Naik level ke Pulse untuk reminder yang lebih rapi.', icon: 'Zap', metric: 'tier_pulse', goal: 1, tier: 'common' },
   { id: 'premium', name: 'Member Premium', desc: 'Aktifkan NEXA Pulse atau Command.', icon: 'Gem', metric: 'premium', goal: 1, tier: 'common' },
 
   // EPIC — tepat 8 badge
-  { id: 'finisher_50', name: 'Mesin Deadline', desc: 'Selesaikan 50 deadline.', icon: 'Rocket', metric: 'completed', goal: 50, tier: 'epic', fomo: 'Epic: bukti kamu bukan cuma niat.' },
-  { id: 'punctual_25', name: 'Anti Telat', desc: 'Dapatkan 25 bonus tepat waktu.', icon: 'Clock', metric: 'ontime', goal: 25, tier: 'epic', fomo: 'Epic: langka karena disiplin itu barang mahal.' },
-  { id: 'streak_30', name: 'Tak Terhentikan', desc: 'Streak 30 hari berturut-turut.', icon: 'Flame', metric: 'streak', goal: 30, tier: 'epic', animated: true, fomo: 'Animated Epic: satu dari tiga badge bergerak.' },
-  { id: 'elite', name: 'Elite 500', desc: 'Kumpulkan 500 poin.', icon: 'Crown', metric: 'points', goal: 500, tier: 'epic', fomo: 'Epic: poinnya sudah tidak main-main.' },
-  { id: 'daily_30', name: 'Daily Loyalist', desc: 'Check-in Daily Pulse 30 kali.', icon: 'HeartPulse', metric: 'daily_checkins', goal: 30, tier: 'epic', fomo: 'Epic: cuma user yang balik terus yang bisa buka.' },
-  { id: 'squad', name: 'Squad Builder', desc: 'Ajak 3 teman lewat referral.', icon: 'Users', metric: 'referrals', goal: 3, tier: 'epic', fomo: 'Epic: mulai kelihatan sebagai builder komunitas.' },
-  { id: 'referral_10', name: 'Campus Magnet', desc: 'Ajak 10 teman lewat referral.', icon: 'Megaphone', metric: 'referrals', goal: 10, tier: 'epic', fomo: 'Epic: referral kamu sudah punya efek domino.' },
-  { id: 'badge_command', name: '👑 NEXA Command', desc: 'Puncak plan. Semua fitur terbuka, tidak ada yang tersembunyi.', icon: 'Crown', metric: 'tier_command', goal: 1, tier: 'epic', animated: true, fomo: 'Animated Epic: badge bergerak khusus Command.' },
+  { id: 'finisher_50', name: 'Mesin Deadline', desc: 'Selesaikan 50 deadline.', icon: 'Rocket', metric: 'completed', goal: 50, tier: 'epic', fomo: 'Epic: bukti progres yang konsisten.' },
+  { id: 'punctual_25', name: 'Anti Telat', desc: 'Dapatkan 25 bonus tepat waktu.', icon: 'Clock', metric: 'ontime', goal: 25, tier: 'epic', fomo: 'Epic: untuk progres yang disiplin.' },
+  { id: 'streak_30', name: 'Tak Terhentikan', desc: 'Streak 30 hari berturut-turut.', icon: 'Flame', metric: 'streak', goal: 30, tier: 'epic', animated: true, fomo: 'Animated Epic: salah satu badge bergerak.' },
+  { id: 'elite', name: 'Elite 500', desc: 'Kumpulkan 500 poin.', icon: 'Crown', metric: 'points', goal: 500, tier: 'epic', fomo: 'Epic: poinmu sudah tinggi.' },
+  { id: 'daily_30', name: 'Daily Loyalist', desc: 'Check-in Daily Pulse 30 kali.', icon: 'HeartPulse', metric: 'daily_checkins', goal: 30, tier: 'epic', fomo: 'Epic: terbuka untuk pengguna yang aktif secara konsisten.' },
+  { id: 'squad', name: 'Squad Builder', desc: 'Ajak 3 teman lewat referral.', icon: 'Users', metric: 'referrals', goal: 3, tier: 'epic', fomo: 'Epic: mulai membangun komunitas.' },
+  { id: 'referral_10', name: 'Campus Magnet', desc: 'Ajak 10 teman lewat referral.', icon: 'Megaphone', metric: 'referrals', goal: 10, tier: 'epic', fomo: 'Epic: referral kamu mulai berdampak.' },
+  { id: 'badge_command', name: '👑 NEXA Command', desc: 'Paket tertinggi dengan akses fitur paling lengkap.', icon: 'Crown', metric: 'tier_command', goal: 1, tier: 'epic', animated: true, fomo: 'Animated Epic: badge khusus Command.' },
 
   // RAREST — tepat 1 badge
-  { id: 'nexa_origin', name: 'NEXA Origin', desc: 'Badge terlangka. Ajak 25 teman lewat referral dan jadi bagian awal pertumbuhan NEXA Campus.', icon: 'Orbit', metric: 'referrals', goal: 25, tier: 'rarest', animated: true, fomo: 'Rarest: cuma satu badge di kelas ini.' },
+  { id: 'nexa_origin', name: 'NEXA Origin', desc: 'Badge terlangka. Ajak 25 teman lewat referral dan jadi bagian awal pertumbuhan NEXA Campus.', icon: 'Orbit', metric: 'referrals', goal: 25, tier: 'rarest', animated: true, fomo: 'Rarest: badge paling terbatas di kelas ini.' },
 ]
 
 export type BadgeProgress = {

@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
     .update({ status, raw_status: transaction_status ?? null })
     .eq('order_id', order_id)
 
-  // Hanya upgrade kalau benar-benar dibayar dan belum pernah diproses.
+  // Upgrade hanya dilakukan jika pembayaran valid dan belum pernah diproses.
   if (isPaid && order.status !== 'paid') {
     const planExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
     await service.from('profiles').update({

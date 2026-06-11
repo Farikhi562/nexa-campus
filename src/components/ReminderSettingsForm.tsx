@@ -75,7 +75,7 @@ export default function ReminderSettingsForm({
       return
     }
 
-    setMessage('Pengaturan Telegram tersimpan. NEXA sudah siap ngingetin, asal chat ID benar.')
+    setMessage('Pengaturan Telegram tersimpan. NEXA siap mengirim reminder jika chat ID sudah benar.')
   }
 
   async function sendTestMessage() {
@@ -106,7 +106,7 @@ export default function ReminderSettingsForm({
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <Badge tone={telegramConfigured ? 'success' : 'warning'} className="mb-3">
-              {telegramConfigured ? 'Telegram bot configured' : 'Telegram token belum kebaca'}
+              {telegramConfigured ? 'Telegram bot configured' : 'Telegram token belum terbaca'}
             </Badge>
             <h2 className="text-xl font-black text-slate-950">Telegram reminder</h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
@@ -145,7 +145,7 @@ export default function ReminderSettingsForm({
       </section>
 
       <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 className="text-lg font-black text-slate-950">Kapan NEXA harus ngingetin?</h2>
+        <h2 className="text-lg font-black text-slate-950">Kapan NEXA perlu mengingatkan?</h2>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {[
             ['H-7', h7, setH7],
@@ -168,7 +168,7 @@ export default function ReminderSettingsForm({
       <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
         <h2 className="text-lg font-black text-slate-950">Kontak opsional</h2>
         <p className="mt-1 text-sm leading-6 text-slate-600">
-          WhatsApp masih roadmap. Nomor ini disimpan opsional untuk persiapan reminder produksi nanti.
+          WhatsApp belum aktif. Nomor ini bersifat opsional untuk persiapan reminder di versi berikutnya.
         </p>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <label className="block">

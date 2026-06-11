@@ -38,10 +38,10 @@ export async function GET() {
 
   const missions = [
     { id: 'deadline_3', label: 'Selesaikan 3 deadline', current: completedDeadlines, goal: 3, href: '/dashboard', reward: '+60 poin' },
-    { id: 'pulse_5', label: 'Daily Pulse 5 hari', current: checkins, goal: 5, href: '/dashboard', reward: 'Streak pressure sehat' },
-    { id: 'friend_1', label: 'Tambah 1 teman', current: friends, goal: 1, href: '/dashboard/friends', reward: '+20 social points' },
-    { id: 'room_1', label: 'Join 1 Study Room', current: rooms, goal: 1, href: '/dashboard/study-room', reward: 'Study Partner progress' },
-    { id: 'arena_1', label: 'Apply 1 Arena', current: arena, goal: 1, href: '/dashboard/arena', reward: 'Arena Applicant progress' },
+    { id: 'pulse_5', label: 'Daily Pulse 5 hari', current: checkins, goal: 5, href: '/dashboard', reward: 'Progress streak' },
+    { id: 'friend_1', label: 'Tambah 1 teman', current: friends, goal: 1, href: '/dashboard/friends', reward: '+20 poin sosial' },
+    { id: 'room_1', label: 'Gabung 1 Study Room', current: rooms, goal: 1, href: '/dashboard/study-room', reward: 'Progress study partner' },
+    { id: 'arena_1', label: 'Daftar 1 Arena', current: arena, goal: 1, href: '/dashboard/arena', reward: 'Progress Arena' },
   ]
   const done = missions.filter((m) => m.current >= m.goal).length
 

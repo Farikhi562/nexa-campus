@@ -68,9 +68,9 @@ export default function ProfileCompletionCard() {
               <UserRoundCog className="h-3.5 w-3.5" />
               Profile Power
             </div>
-            <h3 className="mt-3 text-lg font-black text-slate-950">Lengkapi profil biar lebih dipercaya.</h3>
+            <h3 className="mt-3 text-lg font-black text-slate-950">Lengkapi profil agar lebih mudah dikenali.</h3>
             <p className="mt-1 text-sm leading-6 text-slate-500">
-              Profil yang rapi bikin orang lebih berani add, invite Study Room, atau approve kamu di Arena. Rupanya manusia butuh konteks sebelum percaya, mengejutkan sekali.
+              Profil yang rapi membantu orang lain lebih percaya saat menambah teman, mengundang ke Study Room, atau menerima kamu di Arena.
             </p>
           </div>
           <div className="flex h-20 w-20 flex-shrink-0 flex-col items-center justify-center rounded-3xl border border-teal-200 bg-white text-center shadow-lg shadow-teal-100/70">

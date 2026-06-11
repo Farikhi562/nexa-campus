@@ -29,7 +29,7 @@ export async function DELETE(req: NextRequest) {
   const service = createServiceClient()
   const userId = user.id
 
-  // Hapus relasi yang paling sering punya FK dulu. Kalau ada tabel yang belum ada, errornya diabaikan.
+  // Hapus relasi yang paling sering memiliki FK terlebih dahulu. Jika tabel belum ada, error diabaikan.
   await safeDelete(service, 'private_messages', 'sender_id', userId)
   await safeDelete(service, 'private_messages', 'receiver_id', userId)
   await safeDelete(service, 'study_room_messages', 'sender_id', userId)

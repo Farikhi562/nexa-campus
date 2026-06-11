@@ -5,32 +5,32 @@ import { Card, CardContent } from '@/components/ui/Card'
 const sections = [
   {
     title: 'Data yang kami simpan',
-    body: 'NEXA menyimpan profil dasar user, deadline akademik yang user input sendiri, kontak reminder opsional, dan status paket/subscription intent.',
+    body: 'NEXA menyimpan profil dasar, deadline akademik yang kamu masukkan sendiri, kontak reminder opsional, dan status paket.',
     icon: Database,
   },
   {
     title: 'Data yang tidak kami minta',
-    body: 'NEXA tidak meminta atau menyimpan password VClass, iLab, Studentsite, NPM, email kampus, atau platform kampus lain.',
+    body: 'NEXA tidak meminta atau menyimpan password VClass, iLab, Studentsite, NPM, email kampus, atau akun kampus lain.',
     icon: LockKeyhole,
   },
   {
     title: 'Cara data digunakan',
-    body: 'Data dipakai untuk menampilkan dashboard deadline, menghitung urgensi, menyimpan preferensi reminder, dan memproses request upgrade manual.',
+    body: 'Data dipakai untuk menampilkan dashboard, menghitung urgensi deadline, menyimpan preferensi reminder, dan memproses upgrade.',
     icon: ShieldCheck,
   },
   {
     title: 'Reminder Telegram/WhatsApp',
-    body: 'Telegram disiapkan untuk testing reminder. WhatsApp via Wablas adalah roadmap produksi. Kontak hanya disimpan jika user memilih memakai reminder.',
+    body: 'Telegram digunakan untuk tahap awal reminder. WhatsApp akan dipertimbangkan setelah sistem utama stabil. Kontak hanya disimpan jika kamu memilih memakai reminder.',
     icon: Mail,
   },
   {
     title: 'Keamanan database dan Row Level Security',
-    body: 'Database dirancang dengan Supabase RLS agar user hanya dapat membaca dan mengubah data miliknya sendiri. Service role key tidak dipakai di client.',
+    body: 'Database memakai Supabase RLS agar setiap pengguna hanya bisa membaca dan mengubah datanya sendiri. Service role key tidak dipakai di sisi client.',
     icon: ShieldCheck,
   },
   {
     title: 'Penghapusan data',
-    body: 'User dapat meminta penghapusan data melalui halaman support. Kami akan memproses request sesuai kemampuan operasional MVP beta.',
+    body: 'Kamu dapat meminta penghapusan data lewat halaman support. Request akan diproses sesuai alur operasional yang tersedia.',
     icon: Trash2,
   },
 ]
@@ -38,9 +38,9 @@ const sections = [
 export default function PrivacyPage() {
   return (
     <PublicPageShell
-      badge="Privacy-first MVP"
-      title="Privacy Policy yang jujur dan gampang dibaca."
-      description="NEXA Campus dibangun dengan prinsip data minimum. Kami hanya menyimpan data yang dibutuhkan agar dashboard deadline dan reminder bisa bekerja."
+      badge="Privasi NEXA Campus"
+      title="Kebijakan privasi yang dibuat sesederhana mungkin."
+      description="NEXA Campus hanya menyimpan data yang dibutuhkan agar dashboard deadline dan reminder bisa berjalan."
       primaryCta={{ label: 'Hubungi Support', href: '/support' }}
       secondaryCta={{ label: 'Lihat Terms', href: '/terms' }}
     >
@@ -57,7 +57,7 @@ export default function PrivacyPage() {
       </div>
 
       <div className="mt-5 rounded-3xl border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-900">
-        NEXA Campus bukan sistem resmi kampus. Selalu cek informasi final dari kanal resmi kampus sebelum mengambil keputusan akademik.
+        NEXA Campus bukan sistem resmi kampus. Tetap cek informasi final lewat kanal resmi kampus sebelum mengambil keputusan akademik.
       </div>
     </PublicPageShell>
   )

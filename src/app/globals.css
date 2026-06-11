@@ -239,7 +239,7 @@ svg {
 }
 
 /* v1.5.23 retention patch: badge scarcity animation.
-   Hanya 3 badge yang memakai class ini via ANIMATED_BADGE_IDS. Jangan bikin semua badge joget, nanti user pusing dan UI berubah jadi pasar malam. */
+   Hanya 3 badge yang memakai class ini via ANIMATED_BADGE_IDS. Jangan terapkan animasi ke semua badge agar UI tetap nyaman dibaca. */
 @layer utilities {
   @keyframes nexa-badge-float {
     0%, 100% { transform: translateY(0) rotate(-1deg) scale(1); }
@@ -294,7 +294,7 @@ svg {
   }
 }
 
-/* Founder verified effect: khusus akun pencipta NEXA Campus. Jangan dijual kayak centang palsu, tolong. */
+/* Founder verified effect: khusus akun pencipta NEXA Campus. */
 .nexa-founder-check {
   position: relative;
   color: #f59e0b;

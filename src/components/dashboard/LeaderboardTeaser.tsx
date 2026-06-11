@@ -54,16 +54,16 @@ export default function LeaderboardTeaser() {
                 Kamu peringkat #{data.rank} · {data.points} poin
               </p>
             ) : (
-              <p className="mt-0.5 text-base font-black text-white">Belum punya poin minggu ini — kejar sekarang!</p>
+              <p className="mt-0.5 text-base font-black text-white">Belum punya poin minggu ini. Mulai dari check-in atau selesaikan deadline.</p>
             )}
             {data && (
               <p className={`mt-0.5 inline-flex items-center gap-1 text-xs font-bold ${
                 data.currentStreak > 0 ? 'text-orange-300' : 'text-slate-400'
               }`}>
                 {data.currentStreak > 0 ? (
-                  <><Flame className="h-3.5 w-3.5" /> {data.currentStreak} hari streak — jangan putus!</>
+                  <><Flame className="h-3.5 w-3.5" /> {data.currentStreak} hari streak. Pertahankan.</>
                 ) : (
-                  <>💀 Streak mati — selesaikan deadline hari ini untuk mulai lagi</>
+                  <>Mulai streak baru dengan check-in atau menyelesaikan deadline hari ini</>
                 )}
               </p>
             )}

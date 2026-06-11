@@ -90,7 +90,7 @@ export default function ArenaTeamWorkspaceView({ postId, userId }: { postId: str
         <Card>
           <CardContent className="p-4 sm:p-5">
             <div className="flex items-center justify-between gap-3">
-              <div><h2 className="font-black text-slate-950">Task awal owner</h2><p className="text-sm text-slate-500">Owner kasih arahan biar tim nggak cuma “gas” lalu hilang.</p></div>
+              <div><h2 className="font-black text-slate-950">Task awal owner</h2><p className="text-sm text-slate-500">Owner bisa memberi arahan awal supaya kerja tim lebih jelas.</p></div>
               {isCreator && <Button onClick={() => save()} disabled={saving} className="rounded-2xl"><Save className="h-4 w-4" /> Simpan</Button>}
             </div>
             {isCreator ? <textarea value={workspace.owner_task ?? ''} onChange={(e) => setWorkspace({ ...workspace, owner_task: e.target.value })} rows={5} className="mt-4 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm" placeholder="Contoh: Riset lomba, bagi role, bikin proposal awal..." /> : <p className="mt-4 rounded-2xl bg-slate-50 p-4 text-sm leading-6 text-slate-600">{workspace.owner_task || 'Owner belum menulis task awal.'}</p>}

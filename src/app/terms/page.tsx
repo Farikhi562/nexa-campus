@@ -4,19 +4,19 @@ import { Card, CardContent } from '@/components/ui/Card'
 
 const TERMS = [
   'NEXA Campus bukan platform resmi universitas atau kampus mana pun.',
-  'User wajib memverifikasi informasi akademik final melalui kanal resmi kampus.',
+  'Pengguna tetap perlu memverifikasi informasi akademik final melalui kanal resmi kampus.',
   'Reminder dapat gagal karena provider, jaringan, konfigurasi bot, atau gangguan sistem.',
-  'User bertanggung jawab atas akurasi data deadline yang dimasukkan.',
+  'Pengguna bertanggung jawab atas akurasi deadline yang dimasukkan.',
   'NEXA menghormati aturan kampus dan hukum yang berlaku di Indonesia.',
-  'Fitur roadmap seperti WhatsApp Wablas, AI Quick Add, dan Ask NEXA belum dianggap fitur produksi sampai diumumkan resmi.',
+  'Fitur seperti WhatsApp reminder, AI Quick Add, dan Ask NEXA masih bisa berubah selama tahap pengembangan.',
 ]
 
 export default function TermsPage() {
   return (
     <PublicPageShell
       badge="Terms of Service"
-      title="Aturan main yang singkat, jelas, dan fair."
-      description="Dengan menggunakan NEXA Campus, user memahami bahwa produk ini adalah alat bantu pribadi untuk mencatat dan mengingat deadline."
+      title="Aturan penggunaan yang singkat dan jelas."
+      description="Dengan menggunakan NEXA Campus, pengguna memahami bahwa produk ini adalah alat bantu pribadi untuk mencatat dan mengingat deadline."
       primaryCta={{ label: 'Mulai Pakai NEXA', href: '/login?mode=signup' }}
       secondaryCta={{ label: 'Baca Privacy', href: '/privacy' }}
     >

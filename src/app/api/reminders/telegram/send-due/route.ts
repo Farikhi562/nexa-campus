@@ -51,7 +51,7 @@ function makeReminderMessage(deadline: AcademicDeadline, day: number) {
     `Waktu: ${deadline.deadline_date} ${deadline.deadline_time.slice(0, 5)}`,
     `Lokasi: ${deadline.campus} - ${deadline.room}`,
     '',
-    'NEXA bisa ngingetin, tapi tugasnya tetap kamu yang ngerjain. Tragis, tapi adil.',
+    'NEXA membantu mengingatkan, tetapi pengerjaan tugas tetap ada di kamu.',
   ].join('\n')
 }
 

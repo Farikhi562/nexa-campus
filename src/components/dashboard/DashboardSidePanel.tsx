@@ -15,7 +15,7 @@ const planColors: Record<Plan, string> = {
 const planFeatures: Record<Plan, string[]> = {
   radar: ['5 active deadlines', 'Dashboard basic', 'Countdown deadline'],
   pulse: ['Unlimited deadlines', 'Reminder H-1 & hari-H', 'Weekly summary'],
-  command: ['Custom reminder H-7,H-3,H-1', 'AI Quick Add beta', 'Beta feature access'],
+  command: ['Custom reminder H-7,H-3,H-1', 'AI Quick Add preview', 'Akses fitur baru'],
 }
 
 const quickActions = [

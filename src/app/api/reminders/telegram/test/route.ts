@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     body: JSON.stringify({
       chat_id: telegramChatId,
       text:
-        'Halo dari NEXA Campus. Telegram reminder kamu sudah nyambung. Deadline tetap kamu yang kerjain, tragis tapi adil.',
+        'Halo dari NEXA Campus. Telegram reminder kamu sudah terhubung. Kamu akan mendapat pengingat sesuai pengaturan yang dipilih.',
       disable_web_page_preview: true,
     }),
   })

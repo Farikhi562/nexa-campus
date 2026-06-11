@@ -4,9 +4,9 @@ import { LanguageProvider } from '@/components/LanguageProvider'
 import { BRAND } from '@/lib/brand'
 import './globals.css'
 
-const TITLE = 'NEXA Campus — Anti-Lupa Deadline Kampus untuk Mahasiswa'
+const TITLE = 'NEXA Campus — Dashboard Deadline Kampus untuk Mahasiswa'
 const DESCRIPTION =
-  'Dashboard deadline & reminder akademik untuk mahasiswa Indonesia. Catat tugas, praktikum, kuis, dan ujian, dapat reminder Telegram, dan saingi teman di leaderboard — tanpa meminta password kampus.'
+  'Dashboard deadline dan reminder akademik untuk mahasiswa. Catat tugas, praktikum, kuis, ujian, dan pengingat kuliah tanpa perlu memberikan password kampus.'
 
 export const metadata: Metadata = {
   applicationName: 'NEXA Campus',

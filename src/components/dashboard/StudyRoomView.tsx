@@ -165,7 +165,7 @@ export default function StudyRoomView({ userId }: { userId: string }) {
         <OnlineFriendsStrip />
 
         <div className="rounded-3xl border border-cyan-100 bg-cyan-50 p-4 text-xs leading-5 text-cyan-900">
-          <b>Privasi aktif:</b> status online teman hanya tampil kalau mereka mengizinkan. Di dalam room, indikator online juga ikut pengaturan privasi masing-masing user. Aplikasi yang sedikit sopan, kejutan langka di internet.
+          <b>Privasi aktif:</b> status online teman hanya tampil kalau mereka mengizinkan. Di dalam room, indikator online juga mengikuti pengaturan privasi masing-masing pengguna.
         </div>
 
         {/* Join by code */}

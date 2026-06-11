@@ -119,7 +119,7 @@ export default function LoginClient({ initialMode = 'login' }: { initialMode?: M
               <NexaCampusLogo tone="dark" imageClassName="h-12 w-12" />
             </Link>
             <div className="hidden rounded-full border border-teal-200/15 bg-teal-200/10 px-3 py-1.5 text-xs font-bold text-teal-100 sm:inline-flex">
-              Beta access
+              Early access
             </div>
           </div>
 
@@ -175,7 +175,7 @@ export default function LoginClient({ initialMode = 'login' }: { initialMode?: M
                   <div className="mb-4 flex items-center justify-between gap-3">
                     <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-slate-300">
                       <Sparkles className="h-3.5 w-3.5 text-teal-200" />
-                      Akun beta
+                      Akun NEXA
                     </div>
                     <span className="rounded-full bg-teal-300/10 px-3 py-1.5 text-xs font-bold text-teal-100">
                       Google OAuth
@@ -242,7 +242,7 @@ export default function LoginClient({ initialMode = 'login' }: { initialMode?: M
 
                     <div className="flex items-start gap-2 rounded-2xl border border-teal-200/10 bg-teal-200/[0.06] p-3 text-xs leading-5 text-teal-50/80">
                       <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-teal-200" />
-                      <p>Login ini tidak meminta password kampus. NEXA hanya memakai Google OAuth untuk akun beta.</p>
+                      <p>Login ini tidak meminta password kampus. NEXA hanya memakai Google OAuth untuk membuat akun.</p>
                     </div>
 
                     {mode === 'login' && (

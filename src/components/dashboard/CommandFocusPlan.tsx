@@ -54,7 +54,7 @@ export default function CommandFocusPlan({ deadlines, userTier }: CommandFocusPl
             </Badge>
             <h2 className="text-xl font-black tracking-tight">Command Focus Plan</h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
-              Prioritas otomatis dari deadline terdekat, urgency, priority, dan status reminder.
+              Urutan prioritas berdasarkan deadline terdekat, tingkat urgensi, prioritas, dan status reminder.
             </p>
           </div>
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-300/10 text-teal-200">
@@ -64,7 +64,7 @@ export default function CommandFocusPlan({ deadlines, userTier }: CommandFocusPl
 
         {activeDeadlines.length === 0 ? (
           <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.06] p-4 text-sm leading-6 text-slate-300">
-            Belum ada deadline aktif. Command Center standby, hidupmu sedang suspiciously tenang.
+            Belum ada deadline aktif. Command Focus Plan akan muncul setelah kamu menambahkan deadline.
           </div>
         ) : (
           <div className="mt-5 grid gap-3 lg:grid-cols-3">
@@ -86,10 +86,10 @@ export default function CommandFocusPlan({ deadlines, userTier }: CommandFocusPl
                     {index === 0 ? <Zap className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-200" /> : <Target className="mt-0.5 h-4 w-4 flex-shrink-0 text-teal-200" />}
                     <p>
                       {index === 0
-                        ? 'Kerjakan ini dulu. Ini kandidat paling berisik di radar.'
+                        ? 'Kerjakan ini dulu. Deadline ini paling perlu perhatian sekarang.'
                         : deadline.reminder_enabled
-                          ? 'Sudah ada reminder, tapi tetap masuk antrean fokus.'
-                          : 'Belum ada reminder. Aktifkan kalau ini rawan kelupaan.'}
+                          ? 'Sudah ada reminder, tapi tetap masuk daftar fokus.'
+                          : 'Belum ada reminder. Aktifkan kalau deadline ini penting.'}
                     </p>
                   </div>
                 </article>
@@ -104,7 +104,7 @@ export default function CommandFocusPlan({ deadlines, userTier }: CommandFocusPl
             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-teal-400 px-4 py-3 text-sm font-black text-slate-950 hover:bg-teal-300"
           >
             <TimerReset className="h-4 w-4" />
-            Tambah Deadline Prioritas
+            Tambah deadline prioritas
           </Link>
           <Link
             href="/dashboard/settings/reminders"
@@ -121,9 +121,9 @@ export default function CommandFocusPlan({ deadlines, userTier }: CommandFocusPl
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-300/10 text-teal-200">
               <LockKeyhole className="h-6 w-6" />
             </div>
-            <h3 className="text-xl font-black text-white">Command Focus Plan terkunci.</h3>
+            <h3 className="text-xl font-black text-white">Command Focus Plan belum aktif.</h3>
             <p className="mt-2 text-sm leading-6 text-slate-300">
-              Upgrade ke NEXA Command untuk prioritas otomatis dan rencana fokus harian.
+              Upgrade ke NEXA Command untuk melihat prioritas otomatis dan rencana fokus harian.
             </p>
             <Link href="/pricing" className="mt-5 inline-flex rounded-2xl bg-teal-400 px-4 py-3 text-sm font-black text-slate-950 hover:bg-teal-300">
               Lihat Command

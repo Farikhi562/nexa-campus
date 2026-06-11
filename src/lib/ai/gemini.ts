@@ -30,13 +30,13 @@ function buildPrompt({ question, deadlines = [], userContext }: AskGeminiInput) 
     deadlines: deadlines.slice(0, 30),
     rules: [
       'NEXA tidak mengambil data dari sistem kampus.',
-      'NEXA hanya membaca deadline yang user input manual.',
-      'Jawaban AI membantu menyusun prioritas, tapi keputusan akhir tetap di user.',
+      'NEXA hanya membaca deadline yang dimasukkan pengguna secara manual.',
+      'Jawaban AI membantu menyusun prioritas, tetapi keputusan akhir tetap ada pada pengguna.',
     ],
   }
 
   return [
-    `Pertanyaan user: ${question}`,
+    `Pertanyaan pengguna: ${question}`,
     '',
     'Konteks deadline manual dari NEXA Campus:',
     JSON.stringify(context, null, 2),
@@ -49,7 +49,7 @@ export async function askGemini(input: AskGeminiInput) {
 
   if (!apiKey) {
     return {
-      answer: 'AI feature is not configured yet. Kamu tetap bisa mencatat dan mengelola deadline secara manual.',
+      answer: 'Fitur AI belum aktif. Kamu tetap bisa mencatat dan mengelola deadline secara manual.',
       provider: 'none' as const,
       model,
       status: 'locked' as const,

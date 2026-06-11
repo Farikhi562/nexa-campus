@@ -172,7 +172,7 @@ export default function AIQuickAddDeadline({
       return false
     }
     setItems(result.data.map((item) => makeEditableDeadline(item, fallbackCampus)))
-    setMessage('Hasil AI sudah jadi preview. Cek dulu sebelum disimpan, karena keputusan final tetap di kamu.')
+    setMessage('Draft deadline berhasil dibuat. Cek dan edit dulu sebelum disimpan.')
     return true
   }
 
@@ -215,7 +215,7 @@ export default function AIQuickAddDeadline({
     setRawResponse('')
 
     if (!rawText.trim()) {
-      setError('Paste info deadline dulu ya.')
+      setError('Tempel info deadline terlebih dahulu.')
       return
     }
 
@@ -240,13 +240,13 @@ export default function AIQuickAddDeadline({
     }
 
     if (!result.data?.length) {
-      setError('Belum ada deadline yang bisa diekstrak. Kamu bisa edit raw response atau tambah manual.')
+      setError('Belum ada deadline yang bisa dibaca. Coba pakai teks yang lebih jelas atau tambah manual.')
       if (result.rawResponse) setRawResponse(result.rawResponse)
       return
     }
 
     setItems(result.data.map((item) => makeEditableDeadline(item, fallbackCampus)))
-    setMessage('Hasil AI sudah jadi preview. Cek dulu sebelum disimpan, karena keputusan final tetap di kamu.')
+    setMessage('Draft deadline berhasil dibuat. Cek dan edit dulu sebelum disimpan.')
   }
 
   async function saveAll() {
@@ -254,7 +254,7 @@ export default function AIQuickAddDeadline({
     setMessage('')
 
     if (!canSave) {
-      setError('Lengkapi mata kuliah/kegiatan, tanggal, jam, kampus, dan ruangan di semua card dulu.')
+      setError('Lengkapi mata kuliah/kegiatan, tanggal, jam, kampus, dan ruangan di semua draft terlebih dahulu.')
       return
     }
 
@@ -288,7 +288,7 @@ export default function AIQuickAddDeadline({
     }
 
     setSaving(false)
-    setMessage('Semua deadline berhasil disimpan. Dashboard kamu sekarang lebih susah diajak lupa.')
+    setMessage('Semua deadline berhasil disimpan. Dashboard kamu sudah diperbarui.')
     setRawText('')
     setItems([])
   }
@@ -300,19 +300,19 @@ export default function AIQuickAddDeadline({
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <Badge tone="brand" className="mb-3">AI Quick Add</Badge>
-              <h1 className="text-2xl font-black tracking-tight text-slate-950">Paste teks atau foto, jadi draft deadline.</h1>
+              <h1 className="text-2xl font-black tracking-tight text-slate-950">Ubah teks atau foto menjadi draft deadline.</h1>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-                Tempel teks dari grup WA/VClass, atau upload foto papan tulis & screenshot jadwal — NEXA ubah jadi draft. NEXA tidak login ke sistem kampus mana pun.
+                Tempel teks dari grup WA atau VClass, atau upload foto papan tulis dan screenshot jadwal. NEXA akan membantu membuat draft tanpa login ke sistem kampus.
               </p>
             </div>
-            <Badge tone="info">Gemini Beta</Badge>
+            <Badge tone="info">AI Preview</Badge>
           </div>
         </div>
 
         <div className="space-y-5 p-4 sm:p-5">
           <label className="block">
             <span className="mb-2 block text-sm font-black text-slate-800">
-              Paste info dari grup WA, VClass, atau catatan dosen
+              Tempel info dari grup WA, VClass, atau catatan dosen
             </span>
             <textarea
               value={rawText}
@@ -330,7 +330,7 @@ export default function AIQuickAddDeadline({
               ) : (
                 <Wand2 className="h-4 w-4" />
               )}
-              {extracting ? 'NEXA lagi baca...' : 'Extract dari Teks'}
+              {extracting ? 'NEXA sedang membaca...' : 'Baca dari teks'}
             </Button>
             <label className="focus-ring inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm font-black text-slate-700 transition hover:bg-slate-50">
               {extractingImage ? (
@@ -338,7 +338,7 @@ export default function AIQuickAddDeadline({
               ) : (
                 <ImageUp className="h-4 w-4 text-teal-700" />
               )}
-              {extractingImage ? 'Membaca foto...' : 'Upload Foto Jadwal'}
+              {extractingImage ? 'Membaca foto...' : 'Upload foto jadwal'}
               <input
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
@@ -364,7 +364,7 @@ export default function AIQuickAddDeadline({
 
           {rawResponse && (
             <label className="block">
-              <span className="mb-2 block text-sm font-black text-slate-800">Raw response AI, bisa kamu edit manual</span>
+              <span className="mb-2 block text-sm font-black text-slate-800">Respons AI mentah, bisa diedit manual</span>
               <textarea
                 value={rawResponse}
                 onChange={(event) => setRawResponse(event.target.value)}
@@ -378,8 +378,8 @@ export default function AIQuickAddDeadline({
             <div className="space-y-4">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h2 className="text-lg font-black text-slate-950">Preview hasil extract</h2>
-                  <p className="text-sm text-slate-500">Edit dulu kalau ada tanggal, kategori, atau sumber yang kurang pas.</p>
+                  <h2 className="text-lg font-black text-slate-950">Preview hasil baca</h2>
+                  <p className="text-sm text-slate-500">Periksa lagi tanggal, kategori, dan sumber sebelum disimpan.</p>
                 </div>
                 <Button type="button" onClick={saveAll} disabled={saving || !canSave} className="min-h-12 rounded-2xl">
                   {saving ? 'Menyimpan...' : 'Simpan Semua'}
@@ -467,15 +467,15 @@ export default function AIQuickAddDeadline({
               <LockKeyhole className="h-6 w-6" />
             </div>
             <Badge tone="brand" className="mb-3">Pulse & Command</Badge>
-            <h2 className="text-xl font-black text-slate-950">AI Quick Add terkunci untuk Radar.</h2>
+            <h2 className="text-xl font-black text-slate-950">AI Quick Add belum aktif di Radar.</h2>
             <p className="mt-2 text-sm leading-6 text-slate-600">
-              Upgrade ke Pulse atau Command untuk extract deadline otomatis dari teks yang kamu paste manual.
+              Upgrade ke Pulse atau Command untuk membuat draft deadline dari teks yang kamu tempel.
             </p>
             <Link
               href="/pricing"
               className="mt-5 inline-flex items-center justify-center gap-2 rounded-2xl bg-brand-600 px-4 py-3 text-sm font-black text-white hover:bg-brand-700"
             >
-              Lihat Upgrade
+              Lihat paket
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>

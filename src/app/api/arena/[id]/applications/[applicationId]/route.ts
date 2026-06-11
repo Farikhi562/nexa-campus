@@ -20,7 +20,7 @@ async function notifyApplicant(
     title: action === 'accept' ? 'Lamaran Arena diterima' : 'Lamaran Arena ditolak',
     message: action === 'accept'
       ? `Kamu diterima di postingan "${postTitle}". Mantap, ada yang percaya sama skill kamu.`
-      : `Lamaran kamu di postingan "${postTitle}" belum diterima. Sakit sedikit, tapi bukan akhir dunia coding.` ,
+      : `Lamaran kamu di postingan "${postTitle}" belum diterima. Kamu masih bisa mencoba kesempatan lain.` ,
     link: '/dashboard/arena',
     is_read: false,
   })

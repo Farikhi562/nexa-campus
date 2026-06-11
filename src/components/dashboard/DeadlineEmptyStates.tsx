@@ -14,7 +14,7 @@ function UpgradePrompt({ userTier }: { userTier: Plan }) {
 
   return (
     <div className="mt-4 rounded-2xl border border-brand-100 bg-brand-50 p-3 text-xs leading-5 text-brand-800">
-      AI Quick Add tersedia di NEXA Pulse dan Command. Radar tetap bisa input manual, pelan-pelan juga menang.
+      AI Quick Add tersedia di NEXA Pulse dan Command. Di Radar, kamu tetap bisa menambah deadline secara manual.
     </div>
   )
 }
@@ -55,7 +55,7 @@ export function EmptyToday({ userTier, className }: EmptyStateProps) {
           </div>
           <div>
             <h2 className="text-base font-black text-slate-950">Hari ini bersih.</h2>
-            <p className="mt-1 text-sm leading-6 text-slate-600">Jangan santai dulu, cek minggu depan.</p>
+            <p className="mt-1 text-sm leading-6 text-slate-600">Cek juga deadline minggu ini supaya tidak ada yang kelewat.</p>
             <UpgradePrompt userTier={userTier} />
           </div>
         </div>
@@ -75,7 +75,7 @@ export function EmptyAll({ userTier, className }: EmptyStateProps) {
       </div>
       <h2 className="mt-5 text-xl font-black text-slate-950">Belum ada deadline yang dicatat.</h2>
       <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-600">
-        Biasanya dari mana info tugasmu?
+        Mulai dari satu tugas atau jadwal yang paling dekat.
       </p>
       <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
         <Link
@@ -83,7 +83,7 @@ export function EmptyAll({ userTier, className }: EmptyStateProps) {
           className="focus-ring inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-brand-600 px-4 py-3 text-sm font-black text-white transition hover:bg-brand-700"
         >
           <Plus className="h-4 w-4" />
-          Tambah Deadline Pertama
+          Tambah deadline pertama
         </Link>
         {aiLocked ? (
           <button
@@ -127,8 +127,8 @@ export function EmptyOverdue({ userTier, className }: EmptyStateProps) {
             <PartyPopper className="h-5 w-5" />
           </div>
           <div>
-            <h2 className="text-base font-black text-slate-950">Tidak ada yang telat.</h2>
-            <p className="mt-1 text-sm leading-6 text-slate-600">Pertahankan.</p>
+            <h2 className="text-base font-black text-slate-950">Tidak ada deadline yang terlambat.</h2>
+            <p className="mt-1 text-sm leading-6 text-slate-600">Pertahankan ritme ini.</p>
             <UpgradePrompt userTier={userTier} />
           </div>
         </div>
@@ -147,7 +147,7 @@ export function AllDone({ userTier, className }: EmptyStateProps) {
           </div>
           <div>
             <h2 className="text-base font-black text-slate-950">Semua beres hari ini.</h2>
-            <p className="mt-1 text-sm leading-6 text-slate-600">NEXA bangga (sedikit).</p>
+            <p className="mt-1 text-sm leading-6 text-slate-600">Kerja bagus, hari ini aman.</p>
             <UpgradePrompt userTier={userTier} />
           </div>
         </div>

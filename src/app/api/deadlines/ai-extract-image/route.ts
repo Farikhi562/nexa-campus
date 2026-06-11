@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
   const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) {
     return jsonResponse(
-      { error: 'AI feature is not configured yet. Untuk foto, AI wajib aktif — set GEMINI_API_KEY atau pakai input teks.', status: 'locked' },
+      { error: 'Fitur AI belum aktif. Untuk membaca foto, aktifkan GEMINI_API_KEY atau gunakan input teks.', status: 'locked' },
       503
     )
   }

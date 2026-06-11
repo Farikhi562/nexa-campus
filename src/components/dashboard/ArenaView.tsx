@@ -160,7 +160,7 @@ export default function ArenaView({ userId }: { userId: string }) {
   useEffect(() => { void load() }, [load])
 
   async function deletePost(post: ArenaPost) {
-    const ok = window.confirm(`Hapus postingan "${post.title}"? Pelamar di postingan ini ikut hilang. Ya, manusia memang harus dikonfirmasi sebelum menghapus hidup orang lain.`)
+    const ok = window.confirm(`Hapus postingan "${post.title}"? Pelamar di postingan ini juga akan ikut hilang.`)
     if (!ok) return
     setDeletingId(post.id)
     const res = await fetch(`/api/arena/${post.id}`, { method: 'DELETE' })
@@ -641,7 +641,7 @@ function ManageApplicantsModal({ post, onClose, onChanged }: { post: ArenaPost; 
         {loading ? (
           <div className="flex justify-center p-10 text-slate-400"><Loader2 className="h-6 w-6 animate-spin" /></div>
         ) : applications.length === 0 ? (
-          <div className="rounded-3xl border border-slate-200 bg-slate-50 p-8 text-center text-sm text-slate-500">Belum ada pelamar. Sabar, manusia berkualitas kadang loading juga.</div>
+          <div className="rounded-3xl border border-slate-200 bg-slate-50 p-8 text-center text-sm text-slate-500">Belum ada pelamar. Coba lengkapi detail postingan supaya lebih mudah ditemukan.</div>
         ) : (
           <div className="space-y-5">
             <ApplicantSection title="Menunggu Review" items={grouped.pending} actionId={actionId} reviewNote={reviewNote} setReviewNote={setReviewNote} onRespond={respond} />

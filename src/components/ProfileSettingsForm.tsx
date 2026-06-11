@@ -210,7 +210,7 @@ export default function ProfileSettingsForm({ profile }: { profile: Profile }) {
     }
     if (!campusName.trim()) {
       setLoading(false)
-      setError('Nama kampus wajib diisi. Kalau belum ada di daftar, tulis manual aja.')
+      setError('Nama kampus wajib diisi. Jika belum ada di daftar, tulis manual.')
       return
     }
     if (!major.trim()) {
@@ -440,7 +440,7 @@ export default function ProfileSettingsForm({ profile }: { profile: Profile }) {
             <div className="mb-4">
               <p className="text-sm font-black text-slate-950">Profil publik & skill</p>
               <p className="mt-1 text-xs leading-5 text-slate-500">
-                Ini yang muncul saat user lain klik profilmu dari Cari Teman, Leaderboard, atau NEXA Arena. Nama, kampus, jurusan, dan NEXA ID tetap terlihat supaya fitur sosial tidak mati gaya. Deskripsi, skill, minat, online status, dan chat pribadi tetap bisa kamu atur.
+                Bagian ini muncul saat orang lain membuka profilmu dari Cari Teman, Leaderboard, atau NEXA Arena. Nama, kampus, jurusan, dan NEXA ID tetap terlihat, sementara deskripsi, skill, minat, status online, dan chat pribadi tetap bisa kamu atur.
               </p>
             </div>
 

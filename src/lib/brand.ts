@@ -7,5 +7,5 @@ export const BRAND = {
   domain: SITE_URL.replace(/^https?:\/\//, ''),
   siteUrl: SITE_URL,
   disclaimer:
-    'NEXA Campus bukan sistem resmi kampus. Selalu cek informasi final dari kanal resmi kampus.',
+    'NEXA Campus bukan sistem resmi kampus. Informasi final tetap perlu dicek lewat kanal resmi kampus.',
 } as const

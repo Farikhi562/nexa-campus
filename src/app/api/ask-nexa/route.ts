@@ -73,10 +73,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(result)
   } catch (err) {
     console.error('[Ask NEXA] failed', err)
-    // Jangan 500 ke user — kasih jawaban ramah, fitur lain tetap jalan.
+    // Jangan 500 ke pengguna. Beri jawaban ramah, fitur lain tetap berjalan.
     return NextResponse.json({
       answer:
-        'Tanya NEXA lagi tidak bisa menjawab sekarang (kemungkinan konfigurasi AI/GEMINI_API_KEY atau model belum benar). Kamu tetap bisa mencatat & mengelola deadline manual.',
+        'Tanya NEXA belum bisa menjawab sekarang. Kamu tetap bisa mencatat dan mengelola deadline secara manual.',
       provider: 'none' as const,
       model: process.env.GEMINI_MODEL || 'gemini-2.5-flash-lite',
       status: 'error' as const,

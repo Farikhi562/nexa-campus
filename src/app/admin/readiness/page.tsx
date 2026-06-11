@@ -71,7 +71,7 @@ export default async function AdminReadinessPage() {
     { label: 'Supabase Anon Key', ok: Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY), note: 'Client auth Supabase.' },
     { label: 'Service Role Key', ok: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY), note: 'Admin action dan referral reward.' },
     { label: 'Telegram Bot Token', ok: Boolean(process.env.TELEGRAM_BOT_TOKEN), note: 'Test Telegram dan reminder worker.' },
-    { label: 'Gemini API Key', ok: Boolean(process.env.GEMINI_API_KEY), note: 'AI Quick Add beta.' },
+    { label: 'Gemini API Key', ok: Boolean(process.env.GEMINI_API_KEY), note: 'AI Quick Add.' },
     { label: 'Cron Secret', ok: Boolean(process.env.CRON_SECRET), note: 'Proteksi endpoint cron.' },
     { label: 'Admin Emails', ok: adminEmails.length > 0, note: 'Akses admin panel.' },
   ]
@@ -93,7 +93,7 @@ export default async function AdminReadinessPage() {
                 Cek sistem sebelum NEXA dibuka lebih luas.
               </h1>
               <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-300">
-                Status env, integrasi, dan data dasar dalam satu layar. Kalau ada missing, jangan dipaksa viral dulu.
+                Status env, integrasi, dan data dasar dalam satu layar sebelum aplikasi dibuka lebih luas.
               </p>
             </div>
             <div className="rounded-3xl border border-white/10 bg-white/[0.06] p-5 backdrop-blur">
@@ -136,7 +136,7 @@ export default async function AdminReadinessPage() {
               <div>
                 <h2 className="font-black text-slate-950">Environment checklist</h2>
                 <p className="mt-1 text-sm leading-6 text-slate-600">
-                  Missing bukan berarti app mati total, tapi fitur terkait bisa gagal di production.
+                  Status missing tidak selalu membuat aplikasi berhenti, tetapi fitur terkait bisa gagal di production.
                 </p>
               </div>
             </div>

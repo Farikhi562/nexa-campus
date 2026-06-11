@@ -46,7 +46,7 @@ export default function DeadlineList({ deadlines }: { deadlines: AcademicDeadlin
     return (
       <div className="rounded-3xl border border-dashed border-brand-200 bg-white/80 p-8 text-center shadow-xl shadow-slate-200/70">
         <p className="text-lg font-black text-slate-950">Belum ada deadline.</p>
-        <p className="mt-2 text-sm text-slate-500">Entah hidupmu damai atau kamu belum nyatet.</p>
+        <p className="mt-2 text-sm text-slate-500">Belum ada deadline yang tercatat.</p>
         <Link href="/dashboard/deadlines/new" className="mt-5 inline-flex rounded-2xl bg-gradient-to-r from-brand-600 to-cyan-500 px-4 py-2.5 text-sm font-black text-white shadow-lg shadow-brand-500/20 transition hover:-translate-y-0.5">
           Tambah Deadline
         </Link>

@@ -105,7 +105,7 @@ export default function AchievementsView({ userPlan, userId }: Props) {
         <div className="rounded-3xl border border-fuchsia-200 bg-gradient-to-br from-white to-fuchsia-50 p-4 shadow-sm">
           <div className="mb-2 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-fuchsia-100 text-fuchsia-700"><Sparkles className="h-5 w-5" /></div>
           <p className="text-sm font-black text-slate-950">8 Epic Badge</p>
-          <p className="mt-1 text-xs leading-5 text-slate-500">Epic dibuat terbatas biar punya rasa “gue harus kejar ini”, bukan koleksi stiker asal tempel.</p>
+          <p className="mt-1 text-xs leading-5 text-slate-500">Badge Epic dibuat terbatas agar terasa layak dikejar dan punya nilai progres yang jelas.</p>
         </div>
         <div className="rounded-3xl border border-amber-200 bg-gradient-to-br from-white to-amber-50 p-4 shadow-sm">
           <div className="mb-2 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-100 text-amber-700"><Crown className="h-5 w-5" /></div>
@@ -125,7 +125,7 @@ export default function AchievementsView({ userPlan, userId }: Props) {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="font-black text-slate-950">Target badge berikutnya</h2>
-                <p className="mt-1 text-sm leading-6 text-slate-500">Kasih user target dekat. Otak manusia suka progress bar, entah kenapa hidup sampai begini.</p>
+                <p className="mt-1 text-sm leading-6 text-slate-500">Tampilkan target dekat supaya progres pengguna lebih mudah diikuti.</p>
               </div>
               {nextRarest && <BadgeTierLabel tier="rarest" />}
             </div>

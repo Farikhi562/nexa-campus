@@ -6,7 +6,7 @@ import { ArrowRight, BellRing, Infinity as InfinityIcon, LockKeyhole, Sparkles, 
 import type { Plan } from '@/types'
 
 function nextWeeklyDeadline() {
-  // Countdown ke Minggu 23:59 (waktu lokal) — urgency yang reset tiap minggu.
+  // Countdown ke Minggu 23:59 waktu lokal.
   const now = new Date()
   const end = new Date(now)
   const daysUntilSunday = (7 - now.getDay()) % 7
@@ -44,15 +44,15 @@ function Segment({ value, label }: { value: number; label: string }) {
 }
 
 const lockedForRadar = [
-  { icon: InfinityIcon, text: 'Deadline unlimited (Radar dibatasi 5 aktif)' },
-  { icon: BellRing, text: 'Reminder otomatis H-1 & hari-H ke Telegram' },
-  { icon: Sparkles, text: 'AI Quick Add: paste teks → deadline otomatis' },
+  { icon: InfinityIcon, text: 'Deadline aktif tanpa batas' },
+  { icon: BellRing, text: 'Reminder H-1 dan hari-H ke Telegram' },
+  { icon: Sparkles, text: 'AI Quick Add untuk membuat draft deadline dari teks' },
 ]
 
 const lockedForPulse = [
-  { icon: Zap, text: 'Command Focus Plan: prioritas otomatis harian' },
-  { icon: BellRing, text: 'Custom reminder H-7, H-3, H-1 + jam bebas' },
-  { icon: Sparkles, text: 'Akses fitur beta lebih dulu' },
+  { icon: Zap, text: 'Command Focus Plan untuk prioritas harian' },
+  { icon: BellRing, text: 'Custom reminder H-7, H-3, H-1, dan jam pilihan' },
+  { icon: Sparkles, text: 'Akses fitur baru lebih awal' },
 ]
 
 export default function UpgradeCountdownCard({ userTier }: { userTier: Plan }) {
@@ -72,15 +72,15 @@ export default function UpgradeCountdownCard({ userTier }: { userTier: Plan }) {
           <div className="min-w-0">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300/30 bg-amber-300/10 px-3 py-1 text-xs font-black text-amber-200 animate-pulse-glow">
               <Timer className="h-3.5 w-3.5" />
-              Promo beta berakhir
+              Penawaran minggu ini
             </span>
             <h2 className="mt-3 text-xl font-black tracking-tight sm:text-2xl">
-              Buka semua kekuatan NEXA {targetPlan}.
+              Buka fitur NEXA {targetPlan}.
             </h2>
             <p className="mt-1.5 max-w-md text-sm leading-6 text-slate-300">
               {isRadar
-                ? 'Kamu masih di Radar. Banyak fitur penting masih terkunci di bawah ini.'
-                : 'Sedikit lagi. Command membuka kontrol penuh dan fitur paling canggih.'}
+                ? 'Kamu masih di Radar. Beberapa fitur reminder dan AI tersedia di paket berbayar.'
+                : 'Command memberi kontrol reminder yang lebih detail dan akses fitur baru lebih awal.'}
             </p>
           </div>
           <div className="flex gap-2">
@@ -108,14 +108,14 @@ export default function UpgradeCountdownCard({ userTier }: { userTier: Plan }) {
             href="/dashboard/billing"
             className="focus-ring inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-teal-400 px-5 py-3 text-sm font-black text-slate-950 shadow-lg shadow-teal-900/30 transition hover:-translate-y-0.5 hover:bg-teal-300"
           >
-            Upgrade ke {targetPlan} sekarang
+            Upgrade ke {targetPlan}
             <ArrowRight className="h-4 w-4" />
           </Link>
           <Link
             href="/pricing"
             className="focus-ring inline-flex min-h-12 items-center justify-center rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-black text-white transition hover:bg-white/15"
           >
-            Lihat semua benefit
+            Lihat semua fitur
           </Link>
         </div>
       </div>

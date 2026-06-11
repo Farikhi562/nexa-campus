@@ -167,12 +167,12 @@ export default function DeadlineDashboardOverview({
         .map((item) => (item.id === deadline.id ? result.data! : item))
         .sort(sortNearest)
     )
-    setActionMessage(status === 'completed' ? 'Deadline selesai. Satu beban hidup berkurang.' : 'Deadline dibalikin ke pending.')
+    setActionMessage(status === 'completed' ? 'Deadline ditandai selesai.' : 'Deadline dikembalikan ke pending.')
     setBusyId(null)
   }
 
   async function deleteDeadline(deadline: AcademicDeadline) {
-    if (!confirm('Yakin mau hapus deadline ini? Kalau sudah dihapus, NEXA nggak bisa nyelametin dia lagi.')) return
+    if (!confirm('Yakin mau hapus deadline ini? Data yang sudah dihapus tidak bisa dikembalikan.')) return
 
     setBusyId(deadline.id)
     setActionError('')
@@ -190,7 +190,7 @@ export default function DeadlineDashboardOverview({
     }
 
     setDeadlines((current) => current.filter((item) => item.id !== deadline.id))
-    setActionMessage('Deadline dihapus. Dia sudah tidak bisa ganggu dashboard kamu.')
+    setActionMessage('Deadline berhasil dihapus dari dashboard.')
     setBusyId(null)
   }
 
@@ -199,7 +199,7 @@ export default function DeadlineDashboardOverview({
       {showCreatedMessage && (
         <div className="flex gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-emerald-800">
           <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0" />
-          <p>Deadline baru sudah masuk. Sekarang dia resmi kelihatan, jadi susah pura-pura lupa.</p>
+          <p>Deadline baru sudah masuk ke dashboard.</p>
         </div>
       )}
 
@@ -230,7 +230,7 @@ export default function DeadlineDashboardOverview({
               <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
                 {nearestDeadline
                   ? `${formatDeadlineDate(nearestDeadline)}, ${formatDeadlineTime(nearestDeadline)} di ${nearestDeadline.campus} ${nearestDeadline.room}.`
-                  : 'Belum ada deadline aktif. Entah hidupmu damai atau kamu belum nyatet.'}
+                  : 'Belum ada deadline aktif yang tercatat.'}
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap sm:gap-3">

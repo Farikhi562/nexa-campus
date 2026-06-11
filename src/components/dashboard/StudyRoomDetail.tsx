@@ -409,7 +409,7 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
                   </button>
                 )}
                 <p className="text-center text-xs text-slate-400">
-                  Room ini private. Minta izin dulu, jangan main nerobos kayak deadline H-1.
+                  Room ini private. Minta izin untuk bergabung terlebih dahulu.
                 </p>
               </div>
             ) : (

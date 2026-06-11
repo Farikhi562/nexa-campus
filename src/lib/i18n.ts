@@ -24,7 +24,7 @@ const strings = {
   nav_billing:       { id: 'Billing',           en: 'Billing',         zh: '账单'       },
   nav_settings:      { id: 'Pengaturan',        en: 'Settings',        zh: '设置'       },
   nav_support:       { id: 'Support',           en: 'Support',         zh: '支持'       },
-  nav_admin:         { id: 'Admin Beta',        en: 'Admin Beta',      zh: '管理员'     },
+  nav_admin:         { id: 'Admin',        en: 'Admin',      zh: '管理员'     },
   // Common actions
   save:              { id: 'Simpan',            en: 'Save',            zh: '保存'       },
   cancel:            { id: 'Batal',             en: 'Cancel',          zh: '取消'       },

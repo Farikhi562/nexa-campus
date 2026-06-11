@@ -8,9 +8,9 @@ import { PLANS } from '@/lib/nexa-data'
 export default function PricingPage() {
   return (
     <PublicPageShell
-      badge="MVP Beta Pricing"
-      title="Pilih seberapa keras deadline perlu ngejar kamu."
-      description="Mulai gratis dengan Radar. Kalau butuh reminder dan kontrol lebih lengkap, upgrade dilakukan manual dulu agar beta tetap aman dan realistis."
+      badge="Paket NEXA Campus"
+      title="Pilih paket sesuai cara kamu ngatur deadline."
+      description="Mulai gratis dengan Radar. Kalau butuh reminder dan pengaturan yang lebih lengkap, kamu bisa upgrade ke Pulse atau Command."
       primaryCta={{ label: 'Mulai Radar', href: '/login?mode=signup' }}
       secondaryCta={{ label: 'Masuk Dashboard', href: '/dashboard' }}
     >
@@ -24,7 +24,7 @@ export default function PricingPage() {
           >
             {plan.highlighted && (
               <div className="absolute right-4 top-4">
-                <Badge tone="brand">Beta favorite</Badge>
+                <Badge tone="brand">Paling lengkap</Badge>
               </div>
             )}
             <CardContent className="p-5">
@@ -50,7 +50,7 @@ export default function PricingPage() {
                     : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
                 }`}
               >
-                {plan.id === 'radar' ? 'Mulai Radar' : 'Ajukan Upgrade Manual'}
+                {plan.id === 'radar' ? 'Mulai Radar' : 'Ajukan Upgrade'}
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </CardContent>
@@ -61,11 +61,11 @@ export default function PricingPage() {
       <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_0.85fr]">
         <div className="flex gap-3 rounded-3xl border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-900">
           <ReceiptText className="mt-0.5 h-5 w-5 flex-shrink-0" />
-          <p>Payment gateway belum aktif. Untuk MVP beta, upgrade dilakukan melalui request manual dan konfirmasi admin.</p>
+          <p>Untuk saat ini, upgrade diproses melalui request dan konfirmasi admin terlebih dahulu.</p>
         </div>
         <div className="flex gap-3 rounded-3xl border border-slate-200 bg-white p-5 text-sm leading-6 text-slate-600">
           <LockKeyhole className="mt-0.5 h-5 w-5 flex-shrink-0 text-brand-700" />
-          <p>AI Quick Add dan Ask NEXA masih beta/locked preview. Belum ada klaim fitur stabil.</p>
+          <p>AI Quick Add dan Ask NEXA masih tahap uji coba, jadi hasilnya tetap perlu dicek sebelum disimpan.</p>
         </div>
       </div>
     </PublicPageShell>

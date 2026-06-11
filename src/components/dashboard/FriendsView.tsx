@@ -136,7 +136,7 @@ export default function FriendsView() {
           </div>
           <h1 className="text-2xl font-black tracking-tight sm:text-3xl">Belajar lebih seru bareng teman.</h1>
           <p className="mt-2 text-sm leading-6 text-slate-300">
-            Klik profil user lain buat lihat deskripsi publik, skill, badge, dan link portfolio. Akhirnya tombol notifikasi dan profil dipakai juga, bukan cuma dekorasi mahal.
+            Klik profil teman untuk melihat deskripsi publik, skill, badge, dan link portfolio mereka.
           </p>
         </div>
       </section>

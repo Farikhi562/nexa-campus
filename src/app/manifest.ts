@@ -2,10 +2,10 @@ import type { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'NEXA Campus — Anti-Lupa Deadline Kampus',
+    name: 'NEXA Campus — Dashboard Deadline Kampus',
     short_name: 'NEXA Campus',
     description:
-      'Dashboard deadline & reminder akademik untuk mahasiswa. Catat tugas, praktikum, ujian tanpa minta password kampus.',
+      'Dashboard deadline dan reminder akademik untuk mahasiswa. Catat tugas, praktikum, dan ujian tanpa memberikan password kampus.',
     start_url: '/dashboard',
     display: 'standalone',
     background_color: '#0f172a',

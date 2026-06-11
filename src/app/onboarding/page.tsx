@@ -41,7 +41,7 @@ export default async function OnboardingPage({
           <NexaCampusLogo size="sm" />
           <div>
             <p className="text-sm font-black uppercase tracking-[0.18em] text-teal-300">Setup profil</p>
-            <p className="text-sm text-slate-300">Data minimum dulu, biar dashboard nyambung.</p>
+            <p className="text-sm text-slate-300">Lengkapi data dasar agar dashboard bisa disiapkan.</p>
           </div>
         </div>
 

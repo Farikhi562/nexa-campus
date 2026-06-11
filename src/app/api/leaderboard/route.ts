@@ -38,15 +38,15 @@ export async function GET(request: NextRequest) {
 
   if (listError || rankError) {
     console.error('[Leaderboard] rpc error', listError?.message, rankError?.message)
-    // Jangan 500 — fitur belum di-setup. Kembalikan kosong + flag setup.
+    // Jika fitur belum di-setup, kembalikan data kosong dan flag setup.
     return NextResponse.json({ scope, entries: [], me: null, setup: true })
   }
 
   const me = Array.isArray(rankRows) && rankRows.length > 0 ? rankRows[0] : null
   const list = Array.isArray(entries) ? entries : []
 
-  // get_leaderboard RPC tidak membawa email. Enrich sedikit supaya efek verified founder
-  // tetap berbasis email asli, bukan tebak-tebakan nama. Untung masih ada standar waras.
+  // get_leaderboard RPC tidak membawa email. Enrich secukupnya agar status founder
+  // tetap berbasis email asli, bukan tebakan nama.
   const ids = list.map((entry: { user_id?: string }) => entry.user_id).filter(Boolean)
   let emailMap = new Map<string, string | null>()
   if (ids.length > 0) {

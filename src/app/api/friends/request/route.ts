@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  // Notifikasi tidak boleh menggagalkan add friend. Kalau tabel belum migration, request tetap jalan.
+  // Notifikasi tidak boleh menggagalkan proses tambah teman. Jika tabel belum dimigrasi, request tetap berjalan.
   try { await notifyFriendRequest(supabase, receiverId, user.id) } catch (error) { console.error('[Friend Request Notification]', error) }
 
   return NextResponse.json({ data }, { status: 201 })

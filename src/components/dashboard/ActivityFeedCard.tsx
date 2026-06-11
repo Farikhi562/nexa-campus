@@ -86,7 +86,7 @@ export default function ActivityFeedCard() {
               </div>
               <h3 className="mt-3 text-lg font-black text-slate-950">Kampus lagi bergerak.</h3>
               <p className="mt-1 text-sm leading-6 text-slate-500">
-                Aktivitas kecil yang bikin app terasa hidup. Otak manusia suka bukti sosial, sayangnya benar.
+                Aktivitas kecil yang membuat progres belajar dan kolaborasi lebih mudah terlihat.
               </p>
             </div>
             <Link href="/dashboard/leaderboard" className="hidden items-center gap-1 rounded-2xl border border-slate-200 px-3 py-2 text-xs font-black text-slate-600 hover:bg-slate-50 sm:inline-flex">

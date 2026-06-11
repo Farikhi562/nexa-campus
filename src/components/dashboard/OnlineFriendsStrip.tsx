@@ -29,7 +29,7 @@ export default function OnlineFriendsStrip() {
       <div className="mb-3 flex items-center justify-between gap-3">
         <div>
           <p className="flex items-center gap-2 text-sm font-black text-slate-950"><Radio className="h-4 w-4 text-emerald-500" /> Teman online</p>
-          <p className="mt-1 text-xs leading-5 text-slate-500">Kelihatan kalau teman mengizinkan status online di pengaturan privasi. Iya, privasi, konsep yang sering manusia ingat setelah telat.</p>
+          <p className="mt-1 text-xs leading-5 text-slate-500">Status online hanya terlihat jika teman mengizinkannya lewat pengaturan privasi.</p>
         </div>
         <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-black text-emerald-700">{friends.length} online</span>
       </div>

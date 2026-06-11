@@ -39,7 +39,7 @@ export default function ProductPreviewCard({
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_75%_18%,rgba(45,212,191,0.28),transparent_16rem)]" />
             <div className="relative flex items-center justify-between">
               <Badge tone="info" className="bg-cyan-200/10 text-cyan-100 ring-cyan-200/20">
-                Preview Placeholder
+                Contoh tampilan
               </Badge>
               <Radar className="h-5 w-5 text-teal-200" />
             </div>

@@ -13,7 +13,7 @@ export default function PresenceHeartbeat() {
         keepalive: true,
       })
     } catch {
-      // Presence itu fitur kenyamanan. Kalau gagal, jangan bikin user ikut gagal hidupnya.
+      // Presence adalah fitur pendukung. Jika gagal, alur utama pengguna tetap berjalan.
     }
   }, [])
 

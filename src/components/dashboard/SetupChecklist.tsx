@@ -28,14 +28,14 @@ const itemsMeta = [
   {
     key: 'telegram',
     title: 'Aktifkan Telegram',
-    desc: 'Isi chat ID dan kirim pesan test.',
+    desc: 'Isi chat ID dan kirim pesan percobaan.',
     href: '/dashboard/settings/reminders',
     icon: BellRing,
   },
   {
     key: 'share',
     title: 'Ajak teman',
-    desc: 'Bagikan link referral biar teman ikut rapi deadline.',
+    desc: 'Bagikan link referral ke teman yang juga butuh pengingat deadline.',
     href: '#ajak-teman',
     icon: Share2,
   },
@@ -62,10 +62,10 @@ export default function SetupChecklist({
     <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-700">Setup beta</p>
-          <h2 className="mt-1 text-lg font-black text-slate-950">Biar NEXA siap dipakai beneran.</h2>
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-700">Setup awal</p>
+          <h2 className="mt-1 text-lg font-black text-slate-950">Siapkan NEXA supaya enak dipakai harian.</h2>
           <p className="mt-1 text-sm leading-6 text-slate-500">
-            {completedCount}/{total} selesai. Santai, tapi jangan hilang dari radar.
+            {completedCount}/{total} selesai. Lengkapi sedikit lagi supaya dashboard makin berguna.
           </p>
         </div>
         <div className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black uppercase tracking-wide text-slate-700">
@@ -111,7 +111,7 @@ export default function SetupChecklist({
         <div className="mt-4 flex gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
           <Send className="mt-0.5 h-5 w-5 flex-shrink-0" />
           <p>
-            Telegram belum aktif. Kalau bot token sudah ada di env, isi chat ID lalu kirim test message di pengaturan reminder.
+            Telegram belum aktif. Jika bot sudah dikonfigurasi, isi chat ID lalu kirim pesan percobaan di pengaturan reminder.
           </p>
         </div>
       )}

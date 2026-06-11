@@ -12,7 +12,7 @@ export default function DeleteAccountDangerZone({ email }: { email?: string | nu
   async function deleteAccount() {
     setError('')
     if (confirmText.trim().toUpperCase() !== 'HAPUS AKUN') {
-      setError('Ketik HAPUS AKUN dulu biar jelas ini bukan kepencet. Kita bukan sedang hapus chat kosong, ini akun beneran.')
+      setError('Ketik HAPUS AKUN untuk memastikan penghapusan akun dilakukan dengan sengaja.')
       return
     }
     const ok = window.confirm('Akun kamu akan dihapus permanen dari NEXA Campus. Data profil, pertemanan, chat, dan aktivitas akan dibersihkan sejauh database mengizinkan. Lanjut?')

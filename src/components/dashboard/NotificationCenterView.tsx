@@ -139,7 +139,7 @@ export default function NotificationCenterView() {
             <div className="p-10 text-center">
               <Filter className="mx-auto mb-3 h-10 w-10 text-slate-200" />
               <p className="font-black text-slate-950">Belum ada notifikasi di filter ini.</p>
-              <p className="mt-1 text-sm text-slate-500">Tenang, aplikasi belum mati, cuma database sedang hemat drama.</p>
+              <p className="mt-1 text-sm text-slate-500">Belum ada notifikasi yang bisa ditampilkan saat ini.</p>
             </div>
           ) : (
             <div className="divide-y divide-slate-100">

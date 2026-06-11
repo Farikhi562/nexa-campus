@@ -69,7 +69,7 @@ export default function FriendSuggestionsCard({ compact = false }: { compact?: b
               <Sparkles className="h-3.5 w-3.5" /> Rekomendasi teman
             </div>
             <h2 className="font-black text-slate-950">Cocok buat diajak belajar</h2>
-            <p className="text-xs leading-5 text-slate-500">Diprioritaskan dari kampus, jurusan, aktivitas, dan skill. Akhirnya pencarian teman nggak seperti lotre sosial.</p>
+            <p className="text-xs leading-5 text-slate-500">Diprioritaskan dari kampus, jurusan, aktivitas, dan skill supaya rekomendasinya lebih relevan.</p>
           </div>
           {!compact && <Link href="/dashboard/friends" className="text-xs font-black text-teal-700 hover:underline">Cari lagi</Link>}
         </div>

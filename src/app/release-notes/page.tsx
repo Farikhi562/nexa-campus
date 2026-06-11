@@ -8,24 +8,24 @@ import { BRAND } from '@/lib/brand'
 const shipped = [
   'Google OAuth login',
   'Onboarding profil mahasiswa',
-  'Deadline dashboard overview',
-  'Tambah, edit, delete, dan quick complete deadline',
-  'AI Quick Add beta untuk Pulse dan Command',
-  'Telegram reminder settings dan test message',
-  'Referral link dan reward Pulse trial',
+  'Ringkasan dashboard deadline',
+  'Tambah, edit, hapus, dan tandai deadline selesai',
+  'AI Quick Add uji coba untuk Pulse dan Command',
+  'Pengaturan reminder Telegram dan test message',
+  'Referral link dan reward Pulse',
   'Profile settings dengan upload foto',
-  'Admin beta panel dan production readiness check',
+  'Panel admin dan pengecekan kesiapan rilis',
   'Mobile install prompt',
-  'Daily Pulse check-in harian untuk streak dan poin',
-  'Public profile, badge, dan notification social layer',
+  'Daily Pulse untuk check-in, streak, dan poin',
+  'Profil publik, badge, dan notifikasi sosial',
 ]
 
-const betaNotes = [
+const releaseNotes = [
   'NEXA Campus bukan sistem resmi kampus.',
-  'Deadline masih dicatat manual oleh user.',
+  'Deadline masih dicatat manual oleh pengguna.',
   'Telegram reminder butuh scheduler/cron agar berjalan otomatis.',
-  'AI Quick Add bersifat beta dan hasilnya tetap harus dicek user.',
-  'Payment gateway belum aktif, upgrade masih manual via admin.',
+  'AI Quick Add masih tahap uji coba dan hasilnya tetap perlu dicek pengguna.',
+  'Payment gateway belum aktif, upgrade masih melalui admin.',
 ]
 
 export default function ReleaseNotesPage() {
@@ -51,10 +51,10 @@ export default function ReleaseNotesPage() {
       <section className="mx-auto max-w-5xl px-4 py-10">
         <Badge tone="brand">Release v{BRAND.version}</Badge>
         <h1 className="mt-4 max-w-3xl text-4xl font-black tracking-tight text-slate-950">
-          NEXA Campus v1.5.23 mulai fokus bikin user balik setiap hari.
+          NEXA Campus v1.5.23 mulai merapikan pengalaman harian pengguna.
         </h1>
         <p className="mt-4 max-w-3xl text-sm leading-6 text-slate-600">
-          Versi ini mulai nambah retention layer: Daily Pulse, streak, poin check-in, public profile, badge, dan notifikasi sosial yang benar-benar kepakai.
+          Versi ini menambahkan Daily Pulse, streak, poin check-in, profil publik, badge, dan notifikasi sosial supaya pengalaman pengguna terasa lebih hidup.
         </p>
 
         <div className="mt-8 grid gap-4 lg:grid-cols-[1fr_0.9fr]">
@@ -76,9 +76,9 @@ export default function ReleaseNotesPage() {
           <Card>
             <CardContent>
               <ShieldCheck className="mb-4 h-5 w-5 text-brand-700" />
-              <h2 className="text-lg font-black text-slate-950">Catatan beta yang jujur</h2>
+              <h2 className="text-lg font-black text-slate-950">Catatan rilis</h2>
               <ul className="mt-4 space-y-3">
-                {betaNotes.map((item) => (
+                {releaseNotes.map((item) => (
                   <li key={item} className="flex gap-2 text-sm leading-6 text-slate-700">
                     <Sparkles className="mt-0.5 h-4 w-4 flex-shrink-0 text-brand-700" />
                     {item}

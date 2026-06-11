@@ -104,7 +104,7 @@ export default function AskNexaPanel({ deadlines = [] }: AskNexaPanelProps) {
             </p>
           </div>
           <Badge tone={provider === 'gemini' ? 'brand' : 'info'}>
-            {provider === 'gemini' ? 'Powered by Gemini' : 'AI Preview Locked'}
+            {provider === 'gemini' ? 'Gemini aktif' : 'AI belum aktif'}
           </Badge>
         </div>
 
@@ -119,10 +119,10 @@ export default function AskNexaPanel({ deadlines = [] }: AskNexaPanelProps) {
           />
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-xs leading-5 text-slate-500">
-              {loading ? 'NEXA sedang mikir...' : 'NEXA hanya membaca deadline yang kamu input sendiri.'}
+              {loading ? 'NEXA sedang membaca...' : 'NEXA hanya membaca deadline yang kamu input sendiri.'}
             </p>
             <Button type="submit" disabled={loading} className="rounded-2xl">
-              {loading ? 'Mikir...' : 'Tanya NEXA'}
+              {loading ? 'Memproses...' : 'Tanya NEXA'}
               <Send className="h-4 w-4" />
             </Button>
           </div>
@@ -151,14 +151,14 @@ export default function AskNexaPanel({ deadlines = [] }: AskNexaPanelProps) {
           <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-700">
             <div className="mb-2 flex items-center gap-2 text-xs font-black uppercase tracking-wide text-slate-500">
               {status === 'locked' ? <LockKeyhole className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
-              {status === 'locked' ? 'Preview locked' : 'Jawaban Tanya NEXA'}
+              {status === 'locked' ? 'Preview belum aktif' : 'Jawaban Tanya NEXA'}
             </div>
             {answer}
           </div>
         )}
 
         <p className="mt-4 text-xs leading-5 text-slate-500">
-          Tanya NEXA tidak mengambil data dari sistem kampus. Jawaban AI bisa membantu menyusun prioritas, tapi keputusan akhir tetap di pengguna. Selalu cek informasi resmi dari kampus.
+          Tanya NEXA hanya membaca deadline yang kamu input sendiri. Jawaban AI bisa membantu menyusun prioritas, tapi keputusan akhir tetap di kamu. Selalu cek informasi resmi dari kampus.
         </p>
       </CardContent>
     </Card>

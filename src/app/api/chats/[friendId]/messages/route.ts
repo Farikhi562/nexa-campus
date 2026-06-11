@@ -92,7 +92,7 @@ function errorResponse(label: string, error: SupabaseErrorLike, status = 500) {
   if (isMissingPrivateMessagesError(error)) {
     return NextResponse.json(
       {
-        error: 'Tabel private_messages belum kebaca Supabase REST. Pastikan tabel public.private_messages ada, lalu jalankan notify pgrst, reload schema.',
+        error: 'Tabel private_messages belum terbaca oleh Supabase REST. Pastikan tabel public.private_messages sudah ada, lalu jalankan notify pgrst dan reload schema.',
         code: error.code,
         details: error.details,
         hint: error.hint,

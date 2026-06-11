@@ -120,7 +120,7 @@ export default function DeadlineForm({
     setError('')
 
     if (!isEditing && profile.plan === 'radar' && activeCount >= 5) {
-      setError('Paket Radar maksimal 5 active deadlines. Upgrade dulu kalau deadline-mu sudah mulai ramai.')
+      setError('Paket Radar maksimal 5 deadline aktif. Upgrade kalau kamu perlu mencatat lebih banyak deadline.')
       return
     }
 
@@ -190,7 +190,7 @@ export default function DeadlineForm({
 
   async function deleteDeadline() {
     if (!deadline) return
-    if (!confirm('Yakin mau hapus deadline ini? Kalau sudah dihapus, NEXA nggak bisa nyelametin dia lagi.')) return
+    if (!confirm('Yakin mau hapus deadline ini? Data yang sudah dihapus tidak bisa dikembalikan.')) return
 
     setDeleting(true)
     setError('')
@@ -214,7 +214,7 @@ export default function DeadlineForm({
   return (
     <form onSubmit={submit} className="space-y-4 pb-24 sm:pb-0">
       <Section eyebrow="01" title="Info deadline">
-        <Field span helper="Opsional. Kalau kosong, NEXA akan tampilkan otomatis seperti Tugas Algoritma.">
+        <Field span helper="Opsional. Kalau dikosongkan, NEXA akan membuat judul otomatis dari tipe dan mata kuliah.">
           <label className="block">
             <span className="mb-1.5 block text-sm font-bold text-slate-700">Judul</span>
             <input name="title" defaultValue={deadline?.title ?? ''} placeholder="Contoh: Laporan bab 3" className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm" />
@@ -234,7 +234,7 @@ export default function DeadlineForm({
             </select>
           </label>
         </Field>
-        <Field span helper="Masukin sumber deadline biar nanti gampang dicek ulang.">
+        <Field span helper="Isi sumber deadline supaya nanti mudah dicek ulang.">
           <label className="block">
             <span className="mb-1.5 block text-sm font-bold text-slate-700">Sumber</span>
             <select name="source" defaultValue={deadline?.source ?? 'vclass'} required className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm">
@@ -260,7 +260,7 @@ export default function DeadlineForm({
       </Section>
 
       <Section eyebrow="03" title="Lokasi">
-        <Field helper="Kalau online, isi ruangan dengan Online. Simpel aja.">
+        <Field helper="Kalau kegiatan online, isi ruangan dengan Online.">
           <label className="block">
             <span className="mb-1.5 block text-sm font-bold text-slate-700">Kampus</span>
             <input name="campus" defaultValue={deadline?.campus ?? profile.campus_name ?? ''} placeholder="Kampus D, Kampus E, Online..." required className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm" />
@@ -297,12 +297,12 @@ export default function DeadlineForm({
             </select>
           </label>
         </Field>
-        <Field span helper="NEXA cuma nyimpen deadline yang kamu input. Password kampus? Nggak usah, hidup udah cukup ribet.">
+        <Field span helper="NEXA hanya menyimpan deadline yang kamu input sendiri. Password kampus tidak diperlukan.">
           <label className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-bold text-slate-700">
             <input type="checkbox" name="reminder_enabled" defaultChecked={deadline?.reminder_enabled ?? Boolean(profile.telegram_chat_id)} className="mt-0.5" />
             <span>
               Tandai butuh reminder
-              <span className="mt-1 block text-xs font-medium leading-5 text-slate-500">Ini baru status di deadline. Integrasi bot tidak dikerjakan di fitur ini.</span>
+              <span className="mt-1 block text-xs font-medium leading-5 text-slate-500">Ini hanya menandai status reminder pada deadline. Pengaturan bot tetap ada di menu Reminder.</span>
             </span>
           </label>
         </Field>

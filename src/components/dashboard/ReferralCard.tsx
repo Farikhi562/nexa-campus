@@ -37,7 +37,7 @@ export default function ReferralCard({
   const target = nextReferralTarget(referralCount)
   const remaining = Math.max(target.goal - referralCount, 0)
   const progress = target.goal > 0 ? Math.min(100, Math.round((referralCount / target.goal) * 100)) : 100
-  const shareText = `Gue pakai NEXA Campus buat deadline, Daily Pulse, Study Room, badge, sama leaderboard kampus. Join dari link gue biar kita sama-sama dapet reward: ${referralLink}`
+  const shareText = `Aku pakai NEXA Campus untuk mencatat deadline, Daily Pulse, Study Room, badge, dan leaderboard kampus. Join dari link ini supaya kita sama-sama mendapat reward: ${referralLink}`
   const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`
 
   async function copyLink() {

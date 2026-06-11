@@ -42,7 +42,7 @@ export default function BadgeShowcaseCard({ compact = false }: { compact?: boole
           <div>
             <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-fuchsia-100 px-3 py-1 text-xs font-black text-fuchsia-700"><Sparkles className="h-3.5 w-3.5" /> Badge Showcase</div>
             <h2 className="font-black text-slate-950">Pamerin 3 badge terbaik</h2>
-            <p className="mt-1 text-xs leading-5 text-slate-500">Badge tampil di profil publik, leaderboard, room, dan chat. Ya, ini pancingan dopamine yang sopan.</p>
+            <p className="mt-1 text-xs leading-5 text-slate-500">Badge tampil di profil publik, leaderboard, room, dan chat sebagai penanda progresmu.</p>
           </div>
           <Link href="/dashboard/achievements" className="text-xs font-black text-fuchsia-700 hover:underline">Atur</Link>
         </div>

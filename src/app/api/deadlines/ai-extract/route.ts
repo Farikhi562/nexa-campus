@@ -30,7 +30,7 @@ function pad(n: number) {
   return String(n).padStart(2, '0')
 }
 
-// Parser sederhana untuk fallback tanpa Gemini. Tidak sepintar AI, tapi cukup
+// Parser sederhana untuk fallback tanpa Gemini.
 // untuk menarik tanggal & kategori dasar dari teks yang ditempel user.
 function fallbackExtract(text: string): Array<Record<string, unknown>> {
   const today = new Date()
@@ -82,7 +82,7 @@ function fallbackExtract(text: string): Array<Record<string, unknown>> {
 
     const priority = /\b(urgent|penting|deadline|terakhir|hari ini|besok)\b/.test(lower) ? 'high' : 'normal'
 
-    // Buang potongan tanggal dari judul biar lebih rapi.
+    // Hapus potongan tanggal dari judul agar hasil lebih rapi.
     const title = line
       .replace(/(\d{4})-(\d{2})-(\d{2})/, '')
       .replace(/\b\d{1,2}[/\-.]\d{1,2}(?:[/\-.]\d{2,4})?\b/, '')
@@ -180,7 +180,7 @@ export async function POST(request: NextRequest) {
       data,
       provider: 'fallback',
       status: data.length > 0 ? 'fallback' : 'fallback_empty',
-      notice: 'AI feature is not configured yet. Memakai parser sederhana — cek & rapikan hasilnya sebelum simpan.',
+      notice: 'Fitur AI belum aktif. Sistem memakai parser sederhana, jadi cek dan rapikan hasilnya sebelum disimpan.',
     })
   }
 
@@ -262,7 +262,7 @@ export async function POST(request: NextRequest) {
       data,
       provider: 'fallback',
       status: 'fallback',
-      notice: 'AI sedang tidak bisa dihubungi. Memakai parser sederhana — cek & rapikan hasilnya sebelum simpan.',
+      notice: 'AI sedang tidak bisa dihubungi. Sistem memakai parser sederhana, jadi cek dan rapikan hasilnya sebelum disimpan.',
     })
   }
 }
