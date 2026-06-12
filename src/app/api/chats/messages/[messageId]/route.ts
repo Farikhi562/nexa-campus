@@ -69,13 +69,15 @@ export async function DELETE(_request: NextRequest, { params }: Params) {
   const { data, error } = await db
     .from('private_messages')
     .update({
-      content: null,
+      content: '[Pesan dihapus]',
       message_type: 'text',
       attachment_path: null,
       attachment_name: null,
       attachment_size: null,
       attachment_type: null,
+      is_deleted: true,
       deleted_at: new Date().toISOString(),
+      deleted_by: user.id,
     })
     .eq('id', messageId)
     .select('*')

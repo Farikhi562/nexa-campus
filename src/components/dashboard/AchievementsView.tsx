@@ -4,13 +4,8 @@ import { useCallback, useEffect, useState } from 'react'
 import { CheckCircle2, Crown, Flame, Loader2, Lock, Sparkles, Star } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/Card'
 import { BadgeChip, BadgeTierLabel } from '@/components/BadgeChip'
-import { BADGES, badgeRaritySummary, evaluateBadges, type BadgeProgress } from '@/lib/badges'
+import { BADGES, badgeRaritySummary, evaluateBadges, type AchievementStats, type BadgeProgress } from '@/lib/badges'
 import type { Plan } from '@/types'
-
-type AchievementStats = {
-  completed: number; created: number; ontime: number; streak: number
-  points: number; referrals: number; dailyCheckins?: number; isPremium: boolean; plan: Plan
-}
 
 type Props = { userPlan: Plan; userId: string }
 
@@ -77,7 +72,7 @@ export default function AchievementsView({ userPlan, userId }: Props) {
           </div>
           <h1 className="text-2xl font-black tracking-tight sm:text-3xl">Badge & Pencapaian.</h1>
           <p className="mt-2 text-sm leading-6 text-slate-300">
-            Kumpulkan badge, pamerin yang paling kuat di profil, dan kejar badge langka sebelum temanmu sadar fitur ini ada.
+            Kumpulkan badge, pasang yang paling kamu suka di profil, dan kejar badge langka yang progresnya jelas.
           </p>
           <div className="mt-4 grid gap-2 sm:grid-cols-4">
             <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
@@ -90,7 +85,7 @@ export default function AchievementsView({ userPlan, userId }: Props) {
             </div>
             <div className="rounded-2xl border border-amber-300/20 bg-amber-300/10 p-3">
               <p className="text-2xl font-black tabular-nums text-amber-100">{earnedRarest}/{rarity.rarest}</p>
-              <p className="text-xs font-bold text-amber-100/75">badge terlangka</p>
+              <p className="text-xs font-bold text-amber-100/75">badge langka</p>
             </div>
             <div className="rounded-2xl border border-cyan-300/20 bg-cyan-300/10 p-3">
               <p className="text-2xl font-black tabular-nums text-cyan-100">{rarity.animated}</p>
@@ -104,18 +99,18 @@ export default function AchievementsView({ userPlan, userId }: Props) {
       <section className="grid gap-3 lg:grid-cols-3">
         <div className="rounded-3xl border border-fuchsia-200 bg-gradient-to-br from-white to-fuchsia-50 p-4 shadow-sm">
           <div className="mb-2 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-fuchsia-100 text-fuchsia-700"><Sparkles className="h-5 w-5" /></div>
-          <p className="text-sm font-black text-slate-950">8 Epic Badge</p>
-          <p className="mt-1 text-xs leading-5 text-slate-500">Badge Epic dibuat terbatas agar terasa layak dikejar dan punya nilai progres yang jelas.</p>
+          <p className="text-sm font-black text-slate-950">{rarity.epic} Epic Badge</p>
+          <p className="mt-1 text-xs leading-5 text-slate-500">Badge Epic dibuat untuk progres yang kelihatan: streak, referral, dan durasi plan.</p>
         </div>
         <div className="rounded-3xl border border-amber-200 bg-gradient-to-br from-white to-amber-50 p-4 shadow-sm">
           <div className="mb-2 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-100 text-amber-700"><Crown className="h-5 w-5" /></div>
-          <p className="text-sm font-black text-slate-950">1 Badge Terlangka</p>
-          <p className="mt-1 text-xs leading-5 text-slate-500">NEXA Origin cuma satu badge rarity tertinggi. Targetnya: referral 25 teman.</p>
+          <p className="text-sm font-black text-slate-950">{rarity.rarest} Badge Langka</p>
+          <p className="mt-1 text-xs leading-5 text-slate-500">Rarity tertinggi untuk target berat: langganan tahunan, top leaderboard, dan NEXA Origin.</p>
         </div>
         <div className="rounded-3xl border border-orange-200 bg-gradient-to-br from-white to-orange-50 p-4 shadow-sm">
           <div className="mb-2 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-orange-100 text-orange-700"><Flame className="h-5 w-5" /></div>
-          <p className="text-sm font-black text-slate-950">3 Badge Bergerak</p>
-          <p className="mt-1 text-xs leading-5 text-slate-500">Animasi cuma buat NEXA Origin, Command, dan Streak 30. Kalau semua bergerak, itu bukan premium, itu sakit mata.</p>
+          <p className="text-sm font-black text-slate-950">{rarity.animated} Badge Bergerak</p>
+          <p className="mt-1 text-xs leading-5 text-slate-500">Animasi dipakai seperlunya untuk badge yang memang layak terasa spesial.</p>
         </div>
       </section>
 
@@ -188,7 +183,7 @@ export default function AchievementsView({ userPlan, userId }: Props) {
                 <BadgeChip badge={BADGES.find(b => b.id === currentFeaturedBadge.def.id)!} size="md" selected />
                 <div>
                   <p className="text-sm font-black text-slate-950">{currentFeaturedBadge.def.name}</p>
-                  <p className="text-xs text-teal-700">✓ Sedang ditampilkan</p>
+                  <p className="text-xs text-teal-700">Sedang ditampilkan</p>
                 </div>
               </div>
             )}
@@ -249,7 +244,7 @@ export default function AchievementsView({ userPlan, userId }: Props) {
                     </div>
                     <p className="mt-0.5 text-xs leading-4 text-slate-500">{badge.desc}</p>
                     {featuredBadge === p.def.id && (
-                      <p className="mt-1 text-[10px] font-black text-teal-600">★ Ditampilkan</p>
+                      <p className="mt-1 text-[10px] font-black text-teal-600">Ditampilkan</p>
                     )}
                   </div>
                 </div>

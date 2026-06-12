@@ -72,24 +72,74 @@ const BADGE_OVERRIDES: Record<string, { bg: string; ring: string; text: string; 
     glow: 'shadow-lg shadow-fuchsia-200/60',
     emoji: '🧲',
   },
+  pulse_6_months: {
+    bg: 'bg-gradient-to-br from-cyan-400 via-teal-400 to-emerald-400',
+    ring: 'ring-2 ring-teal-200',
+    text: 'text-slate-950',
+    glow: 'shadow-xl shadow-teal-200/70',
+    emoji: '⚡',
+  },
+  command_6_months: {
+    bg: 'bg-gradient-to-br from-amber-300 via-yellow-300 to-orange-400',
+    ring: 'ring-2 ring-amber-200',
+    text: 'text-amber-950',
+    glow: 'shadow-xl shadow-amber-200/70',
+    emoji: '👑',
+  },
+  pulse_12_months: {
+    bg: 'bg-[conic-gradient(from_180deg_at_50%_50%,#06b6d4,#14b8a6,#a7f3d0,#06b6d4)]',
+    ring: 'ring-2 ring-cyan-200',
+    text: 'text-slate-950',
+    glow: 'shadow-2xl shadow-cyan-200/70',
+    emoji: '💎',
+  },
+  command_12_months: {
+    bg: 'bg-[conic-gradient(from_180deg_at_50%_50%,#111827,#f59e0b,#fde68a,#7c2d12,#111827)]',
+    ring: 'ring-2 ring-yellow-200',
+    text: 'text-white',
+    glow: 'shadow-2xl shadow-amber-300/70',
+    emoji: '🏆',
+  },
+  leaderboard_top1_5_months: {
+    bg: 'bg-[conic-gradient(from_180deg_at_50%_50%,#020617,#0ea5e9,#a855f7,#f59e0b,#020617)]',
+    ring: 'ring-2 ring-sky-200',
+    text: 'text-white',
+    glow: 'shadow-2xl shadow-sky-300/60',
+    emoji: '🥇',
+  },
 }
 
 type BadgeSize = 'xs' | 'sm' | 'md' | 'lg'
 
 const SIZE = {
-  xs: { wrap: 'h-6 w-6 rounded-lg text-sm', name: 'text-[10px]', showName: false },
-  sm: { wrap: 'h-8 w-8 rounded-xl text-base', name: 'text-[10px]', showName: false },
-  md: { wrap: 'h-12 w-12 rounded-2xl text-2xl', name: 'text-xs', showName: true },
-  lg: { wrap: 'h-16 w-16 rounded-2xl text-3xl', name: 'text-sm', showName: true },
+  xs: { wrap: 'h-6 w-6 rounded-lg text-sm' },
+  sm: { wrap: 'h-8 w-8 rounded-xl text-base' },
+  md: { wrap: 'h-12 w-12 rounded-2xl text-2xl' },
+  lg: { wrap: 'h-16 w-16 rounded-2xl text-3xl' },
 }
 
 function badgeEmoji(badge: BadgeDef): string {
   if (BADGE_OVERRIDES[badge.id]?.emoji) return BADGE_OVERRIDES[badge.id].emoji
   const iconEmojis: Record<string, string> = {
-    Sparkles: '✨', CheckCircle2: '✅', Rocket: '🚀', CalendarCheck: '📅',
-    Clock: '⏰', Flame: '🔥', Trophy: '🏆', Crown: '👑', UserPlus: '👋',
-    Users: '👥', Gem: '💎', Radar: '🎯', Zap: '⚡', HeartPulse: '💓',
-    Megaphone: '📣', Orbit: '🌌', Handshake: '🤝', Sword: '⚔️', Medal: '🥇',
+    Sparkles: '✨',
+    CheckCircle2: '✅',
+    Rocket: '🚀',
+    CalendarCheck: '📅',
+    Clock: '⏰',
+    Flame: '🔥',
+    Trophy: '🏆',
+    Crown: '👑',
+    UserPlus: '👋',
+    Users: '👥',
+    Gem: '💎',
+    Radar: '🎯',
+    Zap: '⚡',
+    HeartPulse: '💓',
+    Megaphone: '📣',
+    Orbit: '🌌',
+    Handshake: '🤝',
+    Sword: '⚔️',
+    Medal: '🥇',
   }
   return iconEmojis[badge.icon] ?? '🏅'
 }

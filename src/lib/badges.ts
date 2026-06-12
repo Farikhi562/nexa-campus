@@ -1,10 +1,3 @@
-// Definisi badge + evaluasi. Untuk update ini kita bikin sistem rarity yang lebih jelas:
-// - 1 badge terlangka (rarest)
-// - 3 badge bergerak (animated)
-// - 8 badge epic
-// - sisanya common/biasa
-// Tetap dihitung dari data yang sudah ada supaya tidak butuh service mahal dulu.
-
 export type AchievementStats = {
   completed: number
   created: number
@@ -15,6 +8,9 @@ export type AchievementStats = {
   dailyCheckins?: number
   weeklyRank?: number | null
   monthlyRank?: number | null
+  pulseMonths?: number
+  commandMonths?: number
+  monthlyTopOneStreak?: number
   arenaApproved?: number
   arenaCreated?: number
   manualBadgeIds?: string[]
@@ -34,6 +30,9 @@ export type BadgeMetric =
   | 'premium'
   | 'weekly_rank1'
   | 'monthly_rank1'
+  | 'pulse_months'
+  | 'command_months'
+  | 'monthly_top1_streak'
   | 'arena_approved'
   | 'arena_created'
   | 'manual_badge'
@@ -55,11 +54,18 @@ export type BadgeDef = {
   fomo?: string
 }
 
-// Tepat 3 badge animated. Jangan ditambah sembarangan, nanti efek langkanya bocor seperti rahasia grup kelas.
-export const ANIMATED_BADGE_IDS = ['badge_command', 'streak_30', 'nexa_origin'] as const
+export const ANIMATED_BADGE_IDS = [
+  'badge_command',
+  'streak_30',
+  'pulse_6_months',
+  'command_6_months',
+  'pulse_12_months',
+  'command_12_months',
+  'leaderboard_top1_5_months',
+  'nexa_origin',
+] as const
 
 export const BADGES: BadgeDef[] = [
-  // COMMON / BIASA
   { id: 'rookie', name: 'Langkah Pertama', desc: 'Selesaikan deadline pertamamu.', icon: 'Sparkles', metric: 'completed', goal: 1, tier: 'common' },
   { id: 'finisher_5', name: 'Mulai Produktif', desc: 'Selesaikan 5 deadline.', icon: 'CheckCircle2', metric: 'completed', goal: 5, tier: 'common' },
   { id: 'finisher_10', name: 'Produktif', desc: 'Selesaikan 10 deadline.', icon: 'CheckCircle2', metric: 'completed', goal: 10, tier: 'common' },
@@ -76,11 +82,10 @@ export const BADGES: BadgeDef[] = [
   { id: 'arena_creator', name: 'Arena Captain', desc: 'Buat postingan cari tim di NEXA Arena.', icon: 'Sword', metric: 'arena_created', goal: 1, tier: 'common' },
   { id: 'weekly_champion', name: 'Juara Mingguan', desc: 'Pernah jadi rank #1 leaderboard mingguan.', icon: 'Medal', metric: 'weekly_rank1', goal: 1, tier: 'common' },
   { id: 'monthly_champion', name: 'Juara Bulanan', desc: 'Pernah jadi rank #1 leaderboard bulanan.', icon: 'Trophy', metric: 'monthly_rank1', goal: 1, tier: 'common' },
-  { id: 'badge_radar', name: '🎯 NEXA Radar', desc: 'Pengguna setia NEXA Radar. Langkah awal memakai NEXA.', icon: 'Radar', metric: 'tier_radar', goal: 1, tier: 'common' },
-  { id: 'badge_pulse', name: '⚡ NEXA Pulse', desc: 'Naik level ke Pulse untuk reminder yang lebih rapi.', icon: 'Zap', metric: 'tier_pulse', goal: 1, tier: 'common' },
+  { id: 'badge_radar', name: 'NEXA Radar', desc: 'Pengguna setia NEXA Radar. Langkah awal memakai NEXA.', icon: 'Radar', metric: 'tier_radar', goal: 1, tier: 'common' },
+  { id: 'badge_pulse', name: 'NEXA Pulse', desc: 'Naik level ke Pulse untuk reminder yang lebih rapi.', icon: 'Zap', metric: 'tier_pulse', goal: 1, tier: 'common' },
   { id: 'premium', name: 'Member Premium', desc: 'Aktifkan NEXA Pulse atau Command.', icon: 'Gem', metric: 'premium', goal: 1, tier: 'common' },
 
-  // EPIC — tepat 8 badge
   { id: 'finisher_50', name: 'Mesin Deadline', desc: 'Selesaikan 50 deadline.', icon: 'Rocket', metric: 'completed', goal: 50, tier: 'epic', fomo: 'Epic: bukti progres yang konsisten.' },
   { id: 'punctual_25', name: 'Anti Telat', desc: 'Dapatkan 25 bonus tepat waktu.', icon: 'Clock', metric: 'ontime', goal: 25, tier: 'epic', fomo: 'Epic: untuk progres yang disiplin.' },
   { id: 'streak_30', name: 'Tak Terhentikan', desc: 'Streak 30 hari berturut-turut.', icon: 'Flame', metric: 'streak', goal: 30, tier: 'epic', animated: true, fomo: 'Animated Epic: salah satu badge bergerak.' },
@@ -88,17 +93,21 @@ export const BADGES: BadgeDef[] = [
   { id: 'daily_30', name: 'Daily Loyalist', desc: 'Check-in Daily Pulse 30 kali.', icon: 'HeartPulse', metric: 'daily_checkins', goal: 30, tier: 'epic', fomo: 'Epic: terbuka untuk pengguna yang aktif secara konsisten.' },
   { id: 'squad', name: 'Squad Builder', desc: 'Ajak 3 teman lewat referral.', icon: 'Users', metric: 'referrals', goal: 3, tier: 'epic', fomo: 'Epic: mulai membangun komunitas.' },
   { id: 'referral_10', name: 'Campus Magnet', desc: 'Ajak 10 teman lewat referral.', icon: 'Megaphone', metric: 'referrals', goal: 10, tier: 'epic', fomo: 'Epic: referral kamu mulai berdampak.' },
-  { id: 'badge_command', name: '👑 NEXA Command', desc: 'Paket tertinggi dengan akses fitur paling lengkap.', icon: 'Crown', metric: 'tier_command', goal: 1, tier: 'epic', animated: true, fomo: 'Animated Epic: badge khusus Command.' },
+  { id: 'badge_command', name: 'NEXA Command', desc: 'Paket tertinggi dengan akses fitur paling lengkap.', icon: 'Crown', metric: 'tier_command', goal: 1, tier: 'epic', animated: true, fomo: 'Animated Epic: badge khusus Command.' },
+  { id: 'pulse_6_months', name: 'Pulse Half-Year', desc: 'Aktif di NEXA Pulse selama 6 bulan.', icon: 'Zap', metric: 'pulse_months', goal: 6, tier: 'epic', animated: true, fomo: 'Animated Epic: badge loyal Pulse 6 bulan.' },
+  { id: 'command_6_months', name: 'Command Half-Year', desc: 'Aktif di NEXA Command selama 6 bulan.', icon: 'Crown', metric: 'command_months', goal: 6, tier: 'epic', animated: true, fomo: 'Animated Epic: khusus pengguna Command yang tahan lama.' },
 
-  // RAREST — tepat 1 badge
-  { id: 'nexa_origin', name: 'NEXA Origin', desc: 'Badge terlangka. Ajak 25 teman lewat referral dan jadi bagian awal pertumbuhan NEXA Campus.', icon: 'Orbit', metric: 'referrals', goal: 25, tier: 'rarest', animated: true, fomo: 'Rarest: badge paling terbatas di kelas ini.' },
+  { id: 'pulse_12_months', name: 'Pulse Year One', desc: 'Aktif di NEXA Pulse selama 1 tahun.', icon: 'Gem', metric: 'pulse_months', goal: 12, tier: 'rarest', animated: true, fomo: 'Rarest: badge tahunan untuk pengguna Pulse.' },
+  { id: 'command_12_months', name: 'Command Year One', desc: 'Aktif di NEXA Command selama 1 tahun.', icon: 'Crown', metric: 'command_months', goal: 12, tier: 'rarest', animated: true, fomo: 'Rarest: badge tahunan untuk pengguna Command.' },
+  { id: 'leaderboard_top1_5_months', name: 'Five-Month Legend', desc: 'Top 1 leaderboard bulanan selama 5 bulan berturut-turut.', icon: 'Medal', metric: 'monthly_top1_streak', goal: 5, tier: 'rarest', animated: true, fomo: 'Rarest: buat yang konsisten jadi nomor satu.' },
+  { id: 'nexa_origin', name: 'NEXA Origin', desc: 'Badge langka untuk user awal yang bantu NEXA tumbuh. Targetnya: 25 referral.', icon: 'Orbit', metric: 'referrals', goal: 25, tier: 'rarest', animated: true, fomo: 'Rarest: badge paling berat untuk dibuka.' },
 ]
 
 export type BadgeProgress = {
   def: BadgeDef
   current: number
   earned: boolean
-  progress: number // 0..1
+  progress: number
 }
 
 function metricValue(stats: AchievementStats, metric: BadgeMetric): number {
@@ -112,6 +121,9 @@ function metricValue(stats: AchievementStats, metric: BadgeMetric): number {
     case 'daily_checkins': return stats.dailyCheckins ?? 0
     case 'weekly_rank1': return stats.weeklyRank === 1 ? 1 : 0
     case 'monthly_rank1': return stats.monthlyRank === 1 ? 1 : 0
+    case 'pulse_months': return stats.pulseMonths ?? 0
+    case 'command_months': return stats.commandMonths ?? 0
+    case 'monthly_top1_streak': return stats.monthlyTopOneStreak ?? 0
     case 'arena_approved': return stats.arenaApproved ?? 0
     case 'arena_created': return stats.arenaCreated ?? 0
     case 'manual_badge': return 0
