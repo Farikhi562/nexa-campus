@@ -24,6 +24,19 @@ const PLAN_PRICE: Record<Exclude<Plan, 'radar'>, string> = {
   command: 'Rp25.000',
 }
 
+const PLAN_COPY: Record<Exclude<Plan, 'radar'>, { tagline: string; unlocks: string[]; nudge: string }> = {
+  pulse: {
+    tagline: 'Buat deadline yang perlu ngingetin kamu duluan.',
+    unlocks: ['Deadline aktif lebih dari 5 item', 'Reminder H-1 dan hari-H', 'Weekly summary biar minggu depan kebaca'],
+    nudge: 'Cocok kalau kamu mulai sering punya deadline paralel dari kelas, praktikum, dan organisasi.',
+  },
+  command: {
+    tagline: 'Buat jadwal yang padat dan butuh kontrol lebih detail.',
+    unlocks: ['Reminder H-7, H-3, H-1, dan hari-H', 'Jam reminder bisa kamu atur', 'Akses fitur beta lebih awal'],
+    nudge: 'Cocok kalau satu reminder standar sudah kurang buat hidup akademikmu.',
+  },
+}
+
 function loadSnapScript(): Promise<boolean> {
   return new Promise((resolve) => {
     if (typeof window === 'undefined') return resolve(false)
@@ -130,9 +143,26 @@ export default function BillingIntentForm({ profile }: { profile: Profile }) {
           >
             <p className="font-black text-slate-950">{id === 'pulse' ? 'NEXA Pulse' : 'NEXA Command'}</p>
             <p className="mt-1 text-sm text-slate-500">{PLAN_PRICE[id]}/bulan</p>
+            <p className="mt-2 text-xs leading-5 text-slate-500">{PLAN_COPY[id].tagline}</p>
             {profile.plan === id && <p className="mt-1 text-xs font-black text-emerald-600">Plan aktif kamu</p>}
           </button>
         ))}
+      </div>
+
+      <div className="rounded-3xl border border-amber-200 bg-amber-50 p-4">
+        <p className="text-sm font-black text-amber-950">
+          {profile.plan === 'radar'
+            ? 'Radar masih bisa dipakai gratis. Upgrade cuma kalau kamu butuh reminder dan slot lebih lega.'
+            : 'Kamu sudah upgrade. Command hanya perlu kalau butuh kontrol reminder yang lebih detail.'}
+        </p>
+        <div className="mt-3 grid gap-2 sm:grid-cols-3">
+          {PLAN_COPY[plan].unlocks.map((item) => (
+            <div key={item} className="rounded-2xl border border-amber-200 bg-white/70 p-3 text-xs font-bold leading-5 text-amber-900">
+              {item}
+            </div>
+          ))}
+        </div>
+        <p className="mt-3 text-xs leading-5 text-amber-800">{PLAN_COPY[plan].nudge}</p>
       </div>
 
       {/* Bayar otomatis (Midtrans) */}

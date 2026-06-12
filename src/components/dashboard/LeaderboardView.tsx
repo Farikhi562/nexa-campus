@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Crown, Flame, Loader2, Medal, RefreshCw, TrendingUp, Trophy } from 'lucide-react'
+import { Clock3, Crown, Flame, Loader2, Medal, RefreshCw, TrendingUp, Trophy } from 'lucide-react'
 import Badge from '@/components/ui/Badge'
 import { FeaturedBadgePin } from '@/components/BadgeChip'
 import FounderVerifiedBadge from '@/components/FounderVerifiedBadge'
@@ -49,11 +49,45 @@ const podiumStyles = [
   { ring: 'ring-orange-300', bg: 'from-orange-50 to-white', icon: 'text-orange-400', order: 'order-3 mt-4' },
 ]
 
+function getPeriodEnd(scope: LeaderboardScope) {
+  const now = new Date()
+  const end = new Date(now)
+
+  if (scope === 'weekly') {
+    const daysUntilSunday = (7 - now.getDay()) % 7
+    end.setDate(now.getDate() + daysUntilSunday)
+    end.setHours(23, 59, 59, 999)
+    if (end.getTime() <= now.getTime()) end.setDate(end.getDate() + 7)
+    return end
+  }
+
+  if (scope === 'monthly') {
+    end.setMonth(now.getMonth() + 1, 0)
+    end.setHours(23, 59, 59, 999)
+    return end
+  }
+
+  return null
+}
+
+function formatCountdown(ms: number) {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000))
+  const days = Math.floor(totalSeconds / 86400)
+  const hours = Math.floor((totalSeconds % 86400) / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  const seconds = totalSeconds % 60
+
+  if (days > 0) return `${days} hari ${hours} jam`
+  if (hours > 0) return `${hours} jam ${minutes} menit`
+  return `${minutes} menit ${seconds} detik`
+}
+
 export default function LeaderboardView({ currentUserId }: { currentUserId: string }) {
   const [scope, setScope] = useState<LeaderboardScope>('weekly')
   const [data, setData] = useState<ApiResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [now, setNow] = useState(() => Date.now())
 
   const load = useCallback(async (nextScope: LeaderboardScope) => {
     setLoading(true)
@@ -78,6 +112,11 @@ export default function LeaderboardView({ currentUserId }: { currentUserId: stri
     load(scope)
   }, [scope, load])
 
+  useEffect(() => {
+    const interval = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(interval)
+  }, [])
+
   const entries = data?.entries ?? []
   const podium = entries.slice(0, 3)
   const rest = entries.slice(3)
@@ -86,6 +125,14 @@ export default function LeaderboardView({ currentUserId }: { currentUserId: stri
   const aheadPoints =
     me?.rank && me.rank > 1 ? entries[me.rank - 2]?.points ?? null : null
   const pointsToClimb = aheadPoints != null && me ? Math.max(1, aheadPoints - me.points + 1) : 0
+  const periodEnd = getPeriodEnd(scope)
+  const countdownText = periodEnd ? formatCountdown(periodEnd.getTime() - now) : 'Tidak direset'
+  const periodCopy =
+    scope === 'weekly'
+      ? 'Peringkat mingguan ditutup Minggu malam.'
+      : scope === 'monthly'
+        ? 'Peringkat bulanan ditutup akhir bulan.'
+        : 'Semua waktu tidak punya batas reset.'
 
   return (
     <div className="space-y-5">
@@ -99,18 +146,25 @@ export default function LeaderboardView({ currentUserId }: { currentUserId: stri
               <Trophy className="h-3.5 w-3.5" />
               NEXA Leaderboard
             </div>
-            <h1 className="text-2xl font-black tracking-tight sm:text-3xl">Naik peringkat. Jangan ketinggalan.</h1>
+            <h1 className="text-2xl font-black tracking-tight sm:text-3xl">Leaderboard kampusmu, tanpa drama.</h1>
             <p className="mt-2 max-w-xl text-sm leading-6 text-slate-300">
-              Tiap deadline yang kamu catat & selesaikan = poin. Selesai tepat waktu = bonus. Saingi mahasiswa lain.
+              Poin dihitung dari deadline yang kamu catat dan selesaikan. Yang konsisten akan kelihatan.
             </p>
           </div>
-          <button
-            onClick={() => load(scope)}
-            className="focus-ring inline-flex min-h-11 items-center justify-center gap-2 self-start rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm font-black text-white transition hover:bg-white/15"
-          >
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
-          </button>
+          <div className="flex flex-col gap-2 sm:items-end">
+            <div className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3">
+              <p className="flex items-center gap-2 text-xs font-black uppercase tracking-wide text-teal-100"><Clock3 className="h-3.5 w-3.5" /> Sisa waktu</p>
+              <p className="mt-1 text-lg font-black tabular-nums">{countdownText}</p>
+              <p className="mt-1 text-[11px] leading-4 text-slate-400">{periodCopy}</p>
+            </div>
+            <button
+              onClick={() => load(scope)}
+              className="focus-ring inline-flex min-h-11 items-center justify-center gap-2 self-start rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm font-black text-white transition hover:bg-white/15 sm:self-auto"
+            >
+              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+              Refresh
+            </button>
+          </div>
         </div>
       </section>
 

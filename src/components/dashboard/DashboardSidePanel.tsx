@@ -13,9 +13,9 @@ const planColors: Record<Plan, string> = {
 }
 
 const planFeatures: Record<Plan, string[]> = {
-  radar: ['5 active deadlines', 'Dashboard basic', 'Countdown deadline'],
-  pulse: ['Unlimited deadlines', 'Reminder H-1 & hari-H', 'Weekly summary'],
-  command: ['Custom reminder H-7,H-3,H-1', 'AI Quick Add preview', 'Akses fitur baru'],
+  radar: ['Maksimal 5 deadline aktif', 'Dashboard inti', 'Countdown deadline'],
+  pulse: ['Deadline aktif tanpa batas', 'Reminder H-1 dan hari-H', 'Ringkasan mingguan'],
+  command: ['Reminder H-7, H-3, H-1', 'AI Quick Add beta', 'Akses fitur lebih awal'],
 }
 
 const quickActions = [
@@ -30,7 +30,6 @@ export default function DashboardSidePanel({ userTier }: { userTier: Plan }) {
 
   return (
     <div className="flex flex-col gap-3">
-      {/* Quick actions — 2x2 grid, compact */}
       <div className="grid grid-cols-2 gap-2">
         {quickActions.map(({ label, href, icon: Icon }) => (
           <Link
@@ -44,21 +43,19 @@ export default function DashboardSidePanel({ userTier }: { userTier: Plan }) {
         ))}
       </div>
 
-      {/* Plan info — compact */}
       <div className="rounded-2xl border border-slate-200 bg-white p-3">
         <div className="flex items-center justify-between gap-2">
           <div>
             <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Plan Aktif</p>
-            <p className="mt-0.5 text-sm font-black text-slate-950">NEXA {PLAN_LABELS[userTier]}</p>
+            <p className="mt-0.5 text-sm font-black text-slate-950">{PLAN_LABELS[userTier]}</p>
           </div>
           <span className={`rounded-full px-2.5 py-1 text-[11px] font-black ${planColors[userTier]}`}>
             {PLAN_LABELS[userTier].toUpperCase()}
           </span>
         </div>
 
-        {/* Features - collapsible */}
         <button
-          onClick={() => setShowFeatures(v => !v)}
+          onClick={() => setShowFeatures((value) => !value)}
           className="mt-2 flex w-full items-center justify-between text-[11px] font-bold text-slate-500 hover:text-slate-700"
         >
           Fitur aktif
@@ -67,10 +64,10 @@ export default function DashboardSidePanel({ userTier }: { userTier: Plan }) {
 
         {showFeatures && (
           <ul className="mt-2 space-y-1">
-            {planFeatures[userTier].map((f) => (
-              <li key={f} className="flex items-start gap-1.5 text-[11px] text-slate-600">
+            {planFeatures[userTier].map((feature) => (
+              <li key={feature} className="flex items-start gap-1.5 text-[11px] text-slate-600">
                 <span className="mt-0.5 text-teal-500">✓</span>
-                {f}
+                {feature}
               </li>
             ))}
           </ul>
@@ -78,7 +75,7 @@ export default function DashboardSidePanel({ userTier }: { userTier: Plan }) {
 
         {userTier === 'radar' && (
           <Link href="/dashboard/billing" className="mt-3 flex items-center justify-center rounded-xl bg-teal-500 px-3 py-2 text-xs font-black text-white hover:bg-teal-400">
-            Upgrade ke Pulse →
+            Lihat Pulse →
           </Link>
         )}
       </div>
