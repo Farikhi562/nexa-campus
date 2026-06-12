@@ -13,6 +13,18 @@ type Workspace = { owner_task: string | null; team_status: string | null; checkl
 type Post = { id: string; title: string; creator_id: string; status: string; current_team_size: number; team_size_max: number; team_members?: Member[] }
 
 const emptyWorkspace: Workspace = { owner_task: '', team_status: 'ready', checklist: [] }
+const TEAM_STATUS = {
+  ready: { label: 'Ready', copy: 'Tim siap jalan.', tone: 'success' as const },
+  busy: { label: 'Sibuk', copy: 'Ada banyak yang sedang dikerjakan.', tone: 'warning' as const },
+  needs_help: { label: 'Butuh bantuan', copy: 'Tim perlu support tambahan.', tone: 'danger' as const },
+}
+const CHECKLIST_TEMPLATES = [
+  'Baca rulebook lomba',
+  'Bagi role anggota',
+  'Kumpulkan referensi solusi',
+  'Buat draft proposal / pitch',
+  'Cek deadline pendaftaran',
+]
 
 function initials(name?: string | null) { return (name || 'N').slice(0, 1).toUpperCase() }
 
@@ -64,6 +76,17 @@ export default function ArenaTeamWorkspaceView({ postId, userId }: { postId: str
     if (isCreator) void save(next)
   }
 
+  function applyTemplate() {
+    const existing = new Set((workspace.checklist ?? []).map((task) => task.text.toLowerCase()))
+    const additions = CHECKLIST_TEMPLATES
+      .filter((text) => !existing.has(text.toLowerCase()))
+      .map((text) => ({ id: crypto.randomUUID(), text, done: false }))
+    if (additions.length === 0) return
+    const next = { ...workspace, checklist: [...(workspace.checklist ?? []), ...additions] }
+    setWorkspace(next)
+    if (isCreator) void save(next)
+  }
+
   if (loading) return <div className="flex h-64 items-center justify-center text-slate-400"><Loader2 className="h-6 w-6 animate-spin" /></div>
   if (!post || !isMember) return (
     <Card><CardContent className="p-8 text-center"><p className="font-black text-slate-950">Workspace hanya untuk anggota tim yang approved.</p><Link className="mt-3 inline-flex text-sm font-black text-teal-700 underline" href="/dashboard/arena">Balik ke Arena</Link></CardContent></Card>
@@ -93,10 +116,44 @@ export default function ArenaTeamWorkspaceView({ postId, userId }: { postId: str
               <div><h2 className="font-black text-slate-950">Task awal owner</h2><p className="text-sm text-slate-500">Owner bisa memberi arahan awal supaya kerja tim lebih jelas.</p></div>
               {isCreator && <Button onClick={() => save()} disabled={saving} className="rounded-2xl"><Save className="h-4 w-4" /> Simpan</Button>}
             </div>
+
+            <div className="mt-4 rounded-3xl border border-slate-200 bg-white p-3">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-wide text-slate-500">Status tim</p>
+                  <p className="mt-1 text-sm font-bold text-slate-700">
+                    {TEAM_STATUS[(workspace.team_status ?? 'ready') as keyof typeof TEAM_STATUS]?.copy ?? 'Tim siap jalan.'}
+                  </p>
+                </div>
+                {isCreator ? (
+                  <select
+                    value={workspace.team_status ?? 'ready'}
+                    onChange={(e) => setWorkspace({ ...workspace, team_status: e.target.value })}
+                    className="focus-ring rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-black text-slate-700"
+                  >
+                    {Object.entries(TEAM_STATUS).map(([key, item]) => <option key={key} value={key}>{item.label}</option>)}
+                  </select>
+                ) : (
+                  <Badge tone={TEAM_STATUS[(workspace.team_status ?? 'ready') as keyof typeof TEAM_STATUS]?.tone ?? 'success'}>
+                    {TEAM_STATUS[(workspace.team_status ?? 'ready') as keyof typeof TEAM_STATUS]?.label ?? 'Ready'}
+                  </Badge>
+                )}
+              </div>
+            </div>
+
             {isCreator ? <textarea value={workspace.owner_task ?? ''} onChange={(e) => setWorkspace({ ...workspace, owner_task: e.target.value })} rows={5} className="mt-4 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm" placeholder="Contoh: Riset lomba, bagi role, bikin proposal awal..." /> : <p className="mt-4 rounded-2xl bg-slate-50 p-4 text-sm leading-6 text-slate-600">{workspace.owner_task || 'Owner belum menulis task awal.'}</p>}
 
             <div className="mt-5 rounded-3xl border border-slate-200 bg-slate-50 p-4">
-              <div className="mb-3 flex items-center justify-between"><h3 className="font-black text-slate-950">Checklist project</h3><Badge tone={done === total && total > 0 ? 'success' : 'neutral'}>{done}/{total}</Badge></div>
+              <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h3 className="font-black text-slate-950">Checklist project</h3>
+                  <p className="text-xs leading-5 text-slate-500">Biar progress tim nggak cuma hidup di chat.</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge tone={done === total && total > 0 ? 'success' : 'neutral'}>{done}/{total}</Badge>
+                  {isCreator && <button onClick={applyTemplate} className="rounded-2xl bg-white px-3 py-1.5 text-xs font-black text-teal-700 ring-1 ring-teal-100 hover:bg-teal-50">Pakai template</button>}
+                </div>
+              </div>
               <div className="space-y-2">
                 {(workspace.checklist ?? []).map((task) => (
                   <button key={task.id} disabled={!isCreator} onClick={() => toggle(task.id)} className="flex w-full items-center gap-3 rounded-2xl bg-white p-3 text-left text-sm hover:bg-teal-50 disabled:cursor-default">

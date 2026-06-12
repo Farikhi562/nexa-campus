@@ -17,6 +17,20 @@ function skills(value: unknown) {
   return Array.from(new Set(value.map((item) => String(item).trim()).filter(Boolean))).slice(0, 12)
 }
 
+function normalizeSkill(value: string) {
+  return value.trim().toLowerCase()
+}
+
+function matchSkills(needed: unknown, owned: string[]) {
+  const ownedSet = new Set(owned.map(normalizeSkill).filter(Boolean))
+  const neededSkills = skills(needed)
+  const matched = neededSkills.filter((skill) => ownedSet.has(normalizeSkill(skill)))
+  return {
+    matching_skills: matched,
+    match_score: neededSkills.length > 0 ? Math.round((matched.length / neededSkills.length) * 100) : 0,
+  }
+}
+
 function optionalDate(value: unknown) {
   const raw = text(value, 20)
   return raw ? raw : null
@@ -46,6 +60,13 @@ export async function GET(req: NextRequest) {
 
   const q = req.nextUrl.searchParams.get('q')?.trim() ?? ''
   const type = req.nextUrl.searchParams.get('type') ?? ''
+
+  const { data: me } = await supabase
+    .from('profiles')
+    .select('profile_skills')
+    .eq('id', user.id)
+    .maybeSingle()
+  const mySkills = skills((me as { profile_skills?: unknown } | null)?.profile_skills)
 
   let query = supabase
     .from('nexa_arena_posts')
@@ -132,16 +153,20 @@ export async function GET(req: NextRequest) {
   }
 
   return NextResponse.json({
-    data: rows.map((row) => ({
-      ...row,
-      creator_name: creatorMap[row.creator_id]?.full_name ?? null,
-      creator_featured_badge: creatorMap[row.creator_id]?.featured_badge ?? null,
-      has_applied: Boolean(myApplicationMap[row.id]),
-      my_application_status: myApplicationMap[row.id] ?? null,
-      applications_count: applicationCounts[row.id]?.total ?? 0,
-      pending_applications_count: applicationCounts[row.id]?.pending ?? 0,
-      team_members: (memberRowsByPost[row.id] ?? []).map((member) => ({ ...member, profile: memberProfileMap[member.user_id] ?? null })),
-    })),
+    data: rows.map((row) => {
+      const match = matchSkills(row.skills_needed, mySkills)
+      return {
+        ...row,
+        ...match,
+        creator_name: creatorMap[row.creator_id]?.full_name ?? null,
+        creator_featured_badge: creatorMap[row.creator_id]?.featured_badge ?? null,
+        has_applied: Boolean(myApplicationMap[row.id]),
+        my_application_status: myApplicationMap[row.id] ?? null,
+        applications_count: applicationCounts[row.id]?.total ?? 0,
+        pending_applications_count: applicationCounts[row.id]?.pending ?? 0,
+        team_members: (memberRowsByPost[row.id] ?? []).map((member) => ({ ...member, profile: memberProfileMap[member.user_id] ?? null })),
+      }
+    }),
   })
 }
 
