@@ -1,126 +1,88 @@
-# NEXA Campus v1.6.31 - Plan Scope + Feature Gates
+# NEXA Campus v1.6.32 — Command Assistant Page
 
-Patch ini nambah scope final buat 3 plan:
-
-- **Radar** = gratis/basic survival
-- **Pulse** = Rp18.000/bulan/produktif harian
-- **Command** = Rp30.000/bulan/power user, AI, tim, lomba
-
-## Isi patch
+Patch ini nambah halaman khusus:
 
 ```txt
-src/lib/billing/plans.ts
-src/lib/billing/access.ts
-src/lib/billing/server.ts
-src/components/billing/FeatureGate.tsx
-src/components/billing/UpgradePromptCard.tsx
-src/components/billing/UsageLimitBadge.tsx
-src/components/billing/PlanScopeMatrix.tsx
-src/app/pricing/scope/page.tsx
-src/app/api/billing/access/route.ts
-src/app/api/billing/usage/consume/route.ts
-src/app/api/ask-nexa/route.ts
-src/app/dashboard/study-room/[id]/call/page.tsx
-supabase/migrations/20260615_plan_scope_feature_gates.sql
+/dashboard/nexa-assistant
 ```
 
-## Yang langsung aktif
+Nav item `NEXA Assistant` di sidebar/hamburger mobile diarahkan ke halaman baru ini, bukan lagi anchor `#nexa-assistant`.
 
-1. **Plan config lengkap**
-   - Radar, Pulse, Command dengan fitur dan batasan final.
+## Isi fitur
 
-2. **Feature gate helper**
-   - `canUseFeature(plan, featureKey)`
-   - `getDailyLimit(plan, featureKey)`
-   - `PLAN_LIMITS`
-   - `FEATURE_META`
+- Dedicated page NEXA Assistant Command Center.
+- Halaman terkunci khusus plan `command`.
+- Radar/Pulse akan lihat upgrade page.
+- Command user dapat UI overpower:
+  - Command Briefing
+  - Deadline Risk Scan
+  - Study Battle Plan
+  - Deadline Executor
+  - Reminder Architect
+  - Notification Copilot
+  - Arena Coach
+- API baru:
 
-3. **Usage limit harian**
-   - Radar: NEXA Assistant 5 chat/hari, AI Quick Add 0x/hari
-   - Pulse: NEXA Assistant 30 chat/hari, AI Quick Add 10x/hari
-   - Command: NEXA Assistant 100 chat/hari, AI Quick Add 100x/hari
+```txt
+/api/nexa-assistant/command
+```
 
-4. **Ask NEXA gated**
-   - Radar bisa chat 5x/hari.
-   - Radar bisa preview parse deadline, tapi belum bisa save.
-   - Pulse bisa save deadline via AI Quick Add 10x/hari.
-   - Command bisa AI Quick Add 100x/hari.
+API ini ngecek plan user. Kalau bukan Command, return 402 locked.
 
-5. **Study Room call gated**
-   - `/dashboard/study-room/[id]/call` cuma buat Command.
+## File yang ditambah/diubah
 
-6. **Pricing scope page**
-   - Buka `/pricing/scope` buat lihat matrix batasan plan.
+```txt
+src/app/dashboard/nexa-assistant/page.tsx
+src/components/ai/NexaCommandAssistantPage.tsx
+src/app/api/nexa-assistant/command/route.ts
+src/components/dashboard/nav-items.ts
+```
 
-## Cara pasang
+## Cara pasang di CMD Windows
 
 Dari root project:
 
 ```bat
-xcopy /E /Y "nexa_v1_6_31_plan_scope_feature_gates\*" "."
+xcopy /E /Y "nexa_v1_6_32_command_assistant_page\*" "."
+npm run build
+git add -A
+git commit -m "feat: add command only nexa assistant page"
+git push
 ```
 
-Atau extract manual lalu timpa file ke project.
+## Syarat
 
-Jalankan migration ini di Supabase SQL Editor:
+Patch ini idealnya dipasang setelah v1.6.31 karena butuh:
+
+```txt
+src/lib/billing/server.ts
+src/lib/billing/access.ts
+feature_usage_daily
+consume_feature_usage
+```
+
+Kalau belum jalan migration v1.6.31, jalankan dulu:
 
 ```txt
 supabase/migrations/20260615_plan_scope_feature_gates.sql
 ```
 
-Lalu build:
+## Test
 
-```bat
-npm run build
-git add -A
-git commit -m "feat: add plan scope and feature gates"
-git push
+1. Login akun Radar/Pulse, buka `/dashboard/nexa-assistant`, harus muncul upgrade page.
+2. Set profile plan ke Command:
+
+```sql
+update public.profiles
+set plan = 'command', plan_status = 'active', plan_expires_at = now() + interval '30 days'
+where email = 'email_user_lu@gmail.com';
 ```
 
-## Cara pakai FeatureGate di UI
-
-```tsx
-import FeatureGate from '@/components/billing/FeatureGate'
-
-<FeatureGate featureKey="study_room_voice_video" currentPlan={profile.plan}>
-  <VoiceVideoCall />
-</FeatureGate>
-```
-
-Kalau tidak mau passing `currentPlan`, component akan fetch `/api/billing/access` otomatis.
-
-## Contoh cek akses di API
-
-```ts
-import { consumeFeatureUsage } from '@/lib/billing/server'
-
-const usage = await consumeFeatureUsage({
-  userId: user.id,
-  featureKey: 'ai_quick_add',
-})
-
-if (!usage.allowed) {
-  return Response.json({ error: usage.message }, { status: 429 })
-}
-```
-
-## Feature key penting
+3. Buka `/dashboard/nexa-assistant`.
+4. Test module `Command Briefing`.
+5. Test `Deadline Executor` dengan contoh:
 
 ```txt
-nexa_assistant_chat
-ai_quick_add
-ai_quick_add_save
-telegram_notifications
-email_notifications
-custom_reminders
-study_room_voice_video
-friends_qr
-arena_create_team
-arena_team_leaderboard
+tambahin deadline tugas kalkulus besok jam 8 malam prioritas tinggi
 ```
 
-## Catatan penting
-
-- Patch ini aman setelah v1.6.30.
-- Pastikan migration jalan dulu sebelum test Ask NEXA, karena route baru butuh tabel `feature_usage_daily` dan function `consume_feature_usage`.
-- Kalau `profiles` project lo pakai `id` atau `user_id`, helper sudah coba dua-duanya. Ya, database schema manusia memang suka bikin AI ikut terapi.
