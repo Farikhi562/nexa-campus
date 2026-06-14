@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import AIQuickAddDeadline from '@/components/ai/AIQuickAddDeadline'
 import { createClient } from '@/lib/supabase/server'
+import { getEffectivePlan } from '@/lib/plans'
 import type { Profile } from '@/types'
 
 export default async function AIQuickAddPage() {
@@ -12,13 +13,23 @@ export default async function AIQuickAddPage() {
 
   if (!user) redirect('/login')
 
+  // BUG-008 fix: ambil semua field yang dipakai getEffectivePlan, lalu hitung plan EFEKTIF.
+  // Sebelumnya halaman hanya membaca kolom `plan` mentah, sehingga user yang efektif Pulse
+  // (mis. via trial pulse_trial_until, founder email, atau langganan aktif yang kolomnya
+  // belum tersinkron) salah dikunci sebagai 'radar' di UI.
   const { data: profile } = await supabase
     .from('profiles')
-    .select('plan, campus_name')
+    .select(
+      'plan, campus_name, email, pulse_trial_until, plan_expires_at, subscription_expires_at, command_expires_at, lifetime_command'
+    )
     .eq('id', user.id)
     .maybeSingle()
 
-  const typedProfile = profile as Pick<Profile, 'plan' | 'campus_name'> | null
+  const typedProfile = profile as
+    | (Pick<Profile, 'plan' | 'campus_name'> & Record<string, unknown>)
+    | null
+
+  const effectivePlan = getEffectivePlan({ ...(typedProfile ?? {}), email: user.email })
 
   return (
     <div className="space-y-5">
@@ -39,7 +50,7 @@ export default async function AIQuickAddPage() {
       </div>
 
       <AIQuickAddDeadline
-        plan={typedProfile?.plan ?? 'radar'}
+        plan={effectivePlan}
         campusName={typedProfile?.campus_name}
       />
     </div>

@@ -1,6 +1,7 @@
 import 'server-only'
-import { GoogleGenAI } from '@google/genai'
+import { generateText, activeProviderInfo, aiConfigured, LlmFailure, type AiProvider } from '@/lib/ai/llm'
 
+// Dipertahankan untuk kompatibilitas import lama.
 export const DEFAULT_GEMINI_MODEL = 'gemini-2.5-flash-lite'
 
 export const TANYA_NEXA_SYSTEM_INSTRUCTION =
@@ -24,6 +25,13 @@ type AskGeminiInput = {
   userContext?: Record<string, unknown>
 }
 
+export type AskGeminiResult = {
+  answer: string
+  provider: AiProvider | 'none'
+  model: string
+  status: 'success' | 'locked'
+}
+
 function buildPrompt({ question, deadlines = [], userContext }: AskGeminiInput) {
   const context = {
     userContext: userContext ?? null,
@@ -43,39 +51,35 @@ function buildPrompt({ question, deadlines = [], userContext }: AskGeminiInput) 
   ].join('\n')
 }
 
-export async function askGemini(input: AskGeminiInput) {
-  const apiKey = process.env.GEMINI_API_KEY
-  const model = process.env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL
-
-  if (!apiKey) {
+export async function askGemini(input: AskGeminiInput): Promise<AskGeminiResult> {
+  if (!aiConfigured()) {
+    const info = activeProviderInfo()
     return {
       answer: 'Fitur AI belum aktif. Kamu tetap bisa mencatat dan mengelola deadline secara manual.',
-      provider: 'none' as const,
-      model,
-      status: 'locked' as const,
+      provider: 'none',
+      model: info.textModel,
+      status: 'locked',
     }
   }
 
-  const ai = new GoogleGenAI({ apiKey })
-  const response = await ai.models.generateContent({
-    model,
-    contents: buildPrompt(input),
-    config: {
-      systemInstruction: TANYA_NEXA_SYSTEM_INSTRUCTION,
+  try {
+    const { text, provider, model } = await generateText({
+      system: TANYA_NEXA_SYSTEM_INSTRUCTION,
+      user: buildPrompt(input),
       temperature: 0.35,
-      maxOutputTokens: 500,
-    },
-  })
-
-  const answer = response.text?.trim()
-  if (!answer) {
-    throw new Error('gemini_empty_answer')
-  }
-
-  return {
-    answer,
-    provider: 'gemini' as const,
-    model,
-    status: 'success' as const,
+      maxTokens: 500,
+    })
+    return { answer: text, provider, model, status: 'success' }
+  } catch (err) {
+    if (err instanceof LlmFailure && err.info.code === 'not_configured') {
+      const info = activeProviderInfo()
+      return {
+        answer: 'Fitur AI belum aktif. Kamu tetap bisa mencatat dan mengelola deadline secara manual.',
+        provider: 'none',
+        model: info.textModel,
+        status: 'locked',
+      }
+    }
+    throw err
   }
 }

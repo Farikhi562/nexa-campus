@@ -1,19 +1,13 @@
 import 'server-only'
 import { askGemini, type GeminiDeadlineContext } from '@/lib/ai/gemini'
+import type { AiProvider } from '@/lib/ai/llm'
 
-export type AskNexaResult =
-  | {
-      answer: string
-      provider: 'gemini'
-      model: string
-      status: 'success'
-    }
-  | {
-      answer: string
-      provider: 'none'
-      model: string
-      status: 'locked'
-    }
+export type AskNexaResult = {
+  answer: string
+  provider: AiProvider | 'none'
+  model: string
+  status: 'success' | 'locked'
+}
 
 export async function askNexa(input: {
   question: string

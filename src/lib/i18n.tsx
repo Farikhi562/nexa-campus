@@ -1,12 +1,15 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react'
 
 export type Lang = 'id' | 'en' | 'zh'
 
+const STORAGE_KEY = 'nexa_lang'
+const LANG_CHANGE_EVENT = 'nexa_lang_change'
+const SUPPORTED: Lang[] = ['id', 'en', 'zh']
+
 export const translations = {
   id: {
-    // Nav
     dashboard: 'Dashboard',
     leaderboard: 'Leaderboard',
     achievements: 'Pencapaian',
@@ -22,7 +25,6 @@ export const translations = {
     settings: 'Pengaturan',
     support: 'Support',
     logout: 'Logout',
-    // Common
     save: 'Simpan',
     cancel: 'Batal',
     delete: 'Hapus',
@@ -30,23 +32,17 @@ export const translations = {
     saving: 'Menyimpan...',
     error: 'Terjadi kesalahan',
     success: 'Berhasil!',
-    // Deadline
     addDeadlineTitle: 'Tambah Deadline',
     editDeadlineTitle: 'Edit Deadline',
-    // Streak
     streakActive: 'Streak aktif',
     streakDays: 'hari berturut-turut',
     streakDead: 'Streak mati',
-    // Language
     language: 'Bahasa',
-    // Badge
     badgeDisplay: 'Badge yang Ditampilkan',
     selectBadge: 'Pilih badge',
-    // Leaderboard
     liveNow: '🔴 Live',
     rank: 'Rank',
     points: 'poin',
-    // Achievements
     earned: 'Diraih',
     locked: 'Terkunci',
   },
@@ -128,6 +124,12 @@ export const translations = {
 
 type T = typeof translations.id
 
+function readStoredLang(): Lang {
+  if (typeof window === 'undefined') return 'id'
+  const saved = window.localStorage.getItem(STORAGE_KEY)
+  return SUPPORTED.includes(saved as Lang) ? (saved as Lang) : 'id'
+}
+
 const LangCtx = createContext<{ lang: Lang; t: T; setLang: (l: Lang) => void }>({
   lang: 'id',
   t: translations.id,
@@ -137,15 +139,33 @@ const LangCtx = createContext<{ lang: Lang; t: T; setLang: (l: Lang) => void }>(
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>('id')
 
+  // Sinkronisasi awal + dengarkan perubahan dari MANA SAJA:
+  //  - tab lain (event 'storage')
+  //  - komponen yang pakai sistem lama lib/i18n.ts (custom event 'nexa_lang_change')
+  // Ini memperbaiki bug "ganti bahasa tidak konsisten" karena sebelumnya provider
+  // tidak mendengarkan event apa pun, jadi sebagian UI tidak ikut berubah.
   useEffect(() => {
-    const saved = localStorage.getItem('nexa_lang') as Lang | null
-    if (saved && translations[saved]) setLangState(saved)
+    setLangState(readStoredLang())
+
+    const sync = () => setLangState(readStoredLang())
+    window.addEventListener(LANG_CHANGE_EVENT, sync)
+    window.addEventListener('storage', (e) => {
+      if (e.key === STORAGE_KEY) sync()
+    })
+    return () => {
+      window.removeEventListener(LANG_CHANGE_EVENT, sync)
+    }
   }, [])
 
-  function setLang(l: Lang) {
-    setLangState(l)
-    localStorage.setItem('nexa_lang', l)
-  }
+  const setLang = useCallback((l: Lang) => {
+    const next = SUPPORTED.includes(l) ? l : 'id'
+    setLangState(next)
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(STORAGE_KEY, next)
+      // Beri tahu komponen lain (termasuk yang pakai sistem lama) agar ikut re-render.
+      window.dispatchEvent(new Event(LANG_CHANGE_EVENT))
+    }
+  }, [])
 
   return (
     <LangCtx.Provider value={{ lang, t: translations[lang], setLang }}>

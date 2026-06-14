@@ -1,20 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getEffectivePlan } from '@/lib/plans'
+import { generateText, aiConfigured, activeProvider } from '@/lib/ai/llm'
 
-const MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash-lite'
 const MAX_TEXT_LENGTH = 6000
 
 const SYSTEM_PROMPT =
   'Kamu adalah asisten deadline extractor untuk mahasiswa Indonesia. Extract semua deadline dari teks berikut. Return JSON array dengan format: [{title, category (tugas/praktikum/kuis/ujian/pembayaran/lainnya), due_date (ISO 8601), priority (urgent/high/normal/low), source, notes}]. Jika tanggal tidak spesifik, gunakan null. Respond ONLY with JSON array, no markdown.'
-
-type GeminiResponse = {
-  candidates?: Array<{
-    content?: {
-      parts?: Array<{ text?: string }>
-    }
-  }>
-}
 
 function jsonResponse(body: unknown, status = 200) {
   return NextResponse.json(body, { status })
@@ -30,8 +22,7 @@ function pad(n: number) {
   return String(n).padStart(2, '0')
 }
 
-// Parser sederhana untuk fallback tanpa Gemini.
-// untuk menarik tanggal & kategori dasar dari teks yang ditempel user.
+// Parser sederhana untuk fallback tanpa AI.
 function fallbackExtract(text: string): Array<Record<string, unknown>> {
   const today = new Date()
   const year = today.getFullYear()
@@ -82,7 +73,6 @@ function fallbackExtract(text: string): Array<Record<string, unknown>> {
 
     const priority = /\b(urgent|penting|deadline|terakhir|hari ini|besok)\b/.test(lower) ? 'high' : 'normal'
 
-    // Hapus potongan tanggal dari judul agar hasil lebih rapi.
     const title = line
       .replace(/(\d{4})-(\d{2})-(\d{2})/, '')
       .replace(/\b\d{1,2}[/\-.]\d{1,2}(?:[/\-.]\d{2,4})?\b/, '')
@@ -114,6 +104,13 @@ function extractJsonArray(raw: string) {
   try {
     const parsed = JSON.parse(cleaned)
     if (Array.isArray(parsed)) return { data: parsed }
+    // Sebagian model membungkus array dalam objek {deadlines:[...]} / {data:[...]}
+    if (parsed && typeof parsed === 'object') {
+      for (const key of ['deadlines', 'data', 'items', 'result']) {
+        const maybe = (parsed as Record<string, unknown>)[key]
+        if (Array.isArray(maybe)) return { data: maybe }
+      }
+    }
   } catch {
     // Fall through to bracket extraction below.
   }
@@ -172,9 +169,8 @@ export async function POST(request: NextRequest) {
     return jsonResponse({ error: `Teks terlalu panjang. Maksimal ${MAX_TEXT_LENGTH} karakter.` }, 400)
   }
 
-  const apiKey = process.env.GEMINI_API_KEY
-  if (!apiKey) {
-    // Fallback parser sederhana tanpa Gemini: tetap bisa ekstrak deadline kasar.
+  if (!aiConfigured()) {
+    // Fallback parser sederhana tanpa AI: tetap bisa ekstrak deadline kasar.
     const data = fallbackExtract(text)
     return jsonResponse({
       data,
@@ -185,51 +181,13 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(MODEL)}:generateContent?key=${encodeURIComponent(apiKey)}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          systemInstruction: {
-            parts: [{ text: SYSTEM_PROMPT }],
-          },
-          contents: [
-            {
-              role: 'user',
-              parts: [{ text }],
-            },
-          ],
-          generationConfig: {
-            temperature: 0.1,
-            maxOutputTokens: 1200,
-            responseMimeType: 'application/json',
-          },
-        }),
-      }
-    )
-
-    if (!response.ok) {
-      const detail = await response.text().catch(() => '')
-      console.error('[AI Quick Add] Gemini error', response.status, MODEL, detail.slice(0, 500))
-      const data = fallbackExtract(text)
-      return jsonResponse({
-        data,
-        provider: 'fallback',
-        status: 'fallback',
-        notice:
-          `Gemini menolak permintaan (HTTP ${response.status}). Memakai parser sederhana — cek hasilnya. ` +
-          'Cek GEMINI_API_KEY & GEMINI_MODEL kamu.',
-      })
-    }
-
-    const result = (await response.json()) as GeminiResponse
-    const rawResponse =
-      result.candidates?.[0]?.content?.parts
-        ?.map((part) => part.text)
-        .filter(Boolean)
-        .join('\n')
-        .trim() || ''
+    const { text: rawResponse, provider, model } = await generateText({
+      system: SYSTEM_PROMPT,
+      user: text,
+      temperature: 0.1,
+      maxTokens: 1200,
+      json: true,
+    })
 
     if (!rawResponse) {
       return jsonResponse({ error: 'AI tidak mengembalikan hasil. Coba paste teks yang lebih jelas.' }, 502)
@@ -241,8 +199,8 @@ export async function POST(request: NextRequest) {
         {
           error: 'Hasil AI belum bisa diparse otomatis. Kamu bisa edit raw response di form.',
           rawResponse: parsed.rawResponse,
-          provider: 'gemini',
-          model: MODEL,
+          provider,
+          model,
           status: 'parse_failed',
         },
         422
@@ -251,8 +209,8 @@ export async function POST(request: NextRequest) {
 
     return jsonResponse({
       data: parsed.data,
-      provider: 'gemini',
-      model: MODEL,
+      provider,
+      model,
       status: 'success',
     })
   } catch (err) {
@@ -262,7 +220,7 @@ export async function POST(request: NextRequest) {
       data,
       provider: 'fallback',
       status: 'fallback',
-      notice: 'AI sedang tidak bisa dihubungi. Sistem memakai parser sederhana, jadi cek dan rapikan hasilnya sebelum disimpan.',
+      notice: `AI (${activeProvider()}) sedang tidak bisa dihubungi. Sistem memakai parser sederhana, jadi cek dan rapikan hasilnya sebelum disimpan.`,
     })
   }
 }
