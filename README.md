@@ -1,36 +1,91 @@
-# NEXA Campus — v1.6.23 (Batch 2)
+# NEXA Campus v1.6.24 — Batch 3
 
-## ✅ Sudah dikerjakan (file siap timpa)
+Patch ini lanjutan dari `v1.6.23-batch2`.
 
-### 1. Versi 1.6.23 konsisten di semua halaman
-- `src/lib/brand.ts` → `version: '1.6.23'` (sumber tunggal; dipakai header, footer, release-notes).
-- `src/components/dashboard/nav-items.ts` → label sidebar "Release v1.0.0" yang basi diganti jadi **dinamis** `Release v${BRAND.version}` (otomatis ikut versi), + ditambah entri nav **NEXA Assistant**.
+## Yang ditambah
 
-**Patch kecil manual (1 baris) di `src/app/release-notes/page.tsx`:**
-Ganti teks hardcoded:
-```diff
-- NEXA Campus v1.5.23 mulai merapikan pengalaman harian pengguna.
-+ NEXA Campus v1.6.23 — NEXA Assistant chatbot, AI multi-provider, dan perbaikan pengalaman harian.
+### 1. NEXA Assistant lebih hidup
+File timpa:
+- `src/components/ai/AskNexaPanel.tsx`
+- `src/app/api/ask-nexa/route.ts`
+- `src/lib/ai/gemini.ts`
+- `src/lib/ai/ask-nexa.ts`
+
+File baru:
+- `src/lib/ai/deadline-parser.ts`
+
+Hasil:
+- Bubble chat user sekarang bisa tampil nama + avatar asli dari `/api/user/profile`.
+- User bisa ngetik deadline natural language, contoh:
+  - `tambahin deadline tugas kalkulus besok jam 8 malam`
+  - `catat deadline presentasi basis data Jumat pukul 10.30`
+  - `input deadline laporan praktikum 20/06/2026 jam 23:59`
+- API otomatis parse lalu insert ke `academic_deadlines`.
+- Kalau insert gagal, response ngasih data yang berhasil diparse supaya gampang debug schema.
+
+Catatan penting:
+Patch ini asumsi tabel deadline bernama `academic_deadlines` dengan kolom:
+`user_id`, `title`, `course_name`, `type`, `source`, `deadline_date`, `deadline_time`, `priority`, `status`, `reminder_enabled`.
+Kalau schema lo beda, ubah bagian `insertPayload` di `src/app/api/ask-nexa/route.ts`.
+
+### 2. Telegram + in-app notif bukan cuma reminder
+File baru:
+- `src/lib/supabase/admin.ts`
+- `src/lib/notifications/notify-user.ts`
+- `src/app/api/cron/nexa-engagement/route.ts`
+- `supabase/migrations/20260615_nexa_assistant_notifications.sql`
+
+Hasil:
+- Ada tabel `notifications` buat notif di web app.
+- Telegram bot bisa kirim daily digest/nudge, bukan cuma reminder tunggal.
+- Cron route: `/api/cron/nexa-engagement`
+- Proteksi optional pakai `CRON_SECRET`.
+
+Env yang dibutuhkan:
+```env
+SUPABASE_SERVICE_ROLE_KEY=xxxxx
+TELEGRAM_BOT_TOKEN=xxxxx
+CRON_SECRET=bebas-yang-susah-ditebak
+NEXT_PUBLIC_SITE_URL=https://campus.nexatechlabs.my.id
 ```
-(Heading & badge lain di halaman itu sudah pakai `v{BRAND.version}`, jadi otomatis ikut.)
 
-### 2. "Tanya NEXA" → "NEXA Assistant" (chatbot beneran)
-- `src/components/ai/AskNexaPanel.tsx` — **dirombak jadi chatbot**: bubble chat user/assistant, multi-turn (nyambung antar pesan), indikator "mengetik", saran cepat, kirim pakai Enter.
-- `src/app/api/ask-nexa/route.ts` — menerima `history` (riwayat percakapan) untuk konteks multi-turn; semua teks "Tanya NEXA" → "NEXA Assistant".
-- `src/lib/ai/gemini.ts` — system prompt jadi "NEXA Assistant" + dukung history. (Alias lama tetap ada agar import lama tidak rusak.)
-- `src/lib/ai/ask-nexa.ts` — teruskan history.
-- `AskNexaWidget.tsx` tidak perlu diubah (cuma membungkus panel).
+Vercel Cron contoh:
+```json
+{
+  "crons": [
+    {
+      "path": "/api/cron/nexa-engagement?secret=bebas-yang-susah-ditebak",
+      "schedule": "0 23 * * *"
+    }
+  ]
+}
+```
+Jam `0 23 * * *` di Vercel UTC kira-kira jam 06:00 WIB. Karena tentu saja timezone harus ikut bikin hidup ribet.
 
-> Sisa string "Tanya NEXA" yang tinggal teks info (di `app/admin/page.tsx` & `supabase/UPDATE_NOTES.md`) boleh diganti manual kalau mau 100% bersih, tapi tidak memengaruhi fungsi.
+### 3. Study Room voice/video call via Jitsi
+File baru:
+- `src/components/study-room/JitsiRoomCall.tsx`
+- `src/app/dashboard/study-room/[roomId]/call/page.tsx`
 
-> Catatan: Batch 2 ini menumpuk di atas Batch 1 (AI multi-provider). `gemini.ts`, `ask-nexa.ts` di sini adalah versi terbaru yang menggantikan versi Batch 1.
+URL contoh:
+`/dashboard/study-room/room-abc/call`
 
----
+Jitsi ini opsi paling waras buat MVP:
+- tanpa backend media server,
+- tanpa API key,
+- langsung iframe.
 
-## 🟡 Belum dikerjakan — butuh kamu pilih dulu (biar gak salah tebak)
+## Urutan pasang
 
-Untuk **fitur canggih Study Room / NEXA Arena / Tambah Teman** dan **input deadline cepat**,
-aku sengaja belum bangun karena ini menyentuh skema database kamu — kalau ditebak, berisiko gak nyambung.
+1. Copy/timpa semua file ke project utama.
+2. Jalankan SQL migration di Supabase SQL Editor.
+3. Pastikan env di Vercel sudah ada.
+4. Deploy.
+5. Test NEXA Assistant dengan kalimat:
+   `tambahin deadline tugas kalkulus besok jam 8 malam`
+6. Test cron manual:
+   `/api/cron/nexa-engagement?secret=ISI_CRON_SECRET_LO`
 
-Aku sudah siapkan menu opsi konkret (lihat chat). Tinggal pilih, nanti aku bangun yang dipilih
-lengkap dengan SQL + API + UI-nya.
+## Yang belum dipaksa masuk
+
+NEXA Arena team leaderboard + badge kompetisi dan Cari Teman by QR/NEXA ID perlu schema asli project utama. Di zip ini belum ada file arena/friends/database lengkap, jadi kalau dipaksa nebak bisa bentrok. Patch SQL sudah menambah `profiles.nexa_id` sebagai fondasi.

@@ -5,7 +5,7 @@ import { generateText, activeProviderInfo, aiConfigured, LlmFailure, type AiProv
 export const DEFAULT_GEMINI_MODEL = 'gemini-2.5-flash-lite'
 
 export const NEXA_ASSISTANT_SYSTEM_INSTRUCTION =
-  'You are NEXA Assistant, a friendly academic productivity chatbot for NEXA Campus. Help students organize deadlines, prioritize tasks, plan study sessions, and stay motivated. Do not pretend to access campus systems. Only use manually provided data. Be concise, warm, and practical. If data is missing, ask the user to add the deadline manually. Do not provide legal, medical, or harmful advice. Answer in Indonesian by default, but match the user\'s language if they switch.'
+  'You are NEXA Assistant, a friendly academic productivity chatbot for NEXA Campus. Help students organize deadlines, prioritize tasks, plan study sessions, and stay motivated. NEXA can create deadlines only when the API already parsed and saved them; otherwise do not claim that a deadline has been saved. Do not pretend to access official campus systems. Only use manually provided data. Be concise, warm, and practical. If data is missing, ask the user to add the deadline manually or provide the missing date/time/title. Do not provide legal, medical, or harmful advice. Answer in Indonesian by default, but match the user\'s language if they switch.'
 
 // Alias lama supaya import lama tidak rusak.
 export const TANYA_NEXA_SYSTEM_INSTRUCTION = NEXA_ASSISTANT_SYSTEM_INSTRUCTION
@@ -42,6 +42,12 @@ function buildPrompt({ question, deadlines = [], userContext, history = [] }: As
   const context = {
     userContext: userContext ?? null,
     deadlines: deadlines.slice(0, 30),
+    capabilities: [
+      'Chat produktivitas akademik.',
+      'Prioritas deadline dari data manual user.',
+      'Rencana belajar pendek dan praktis.',
+      'Input deadline natural language ditangani API sebelum mode chat biasa.',
+    ],
     rules: [
       'NEXA tidak mengambil data dari sistem kampus.',
       'NEXA hanya membaca deadline yang dimasukkan pengguna secara manual.',
@@ -49,7 +55,6 @@ function buildPrompt({ question, deadlines = [], userContext, history = [] }: As
     ],
   }
 
-  // Sisipkan ringkasan percakapan sebelumnya agar chatbot punya konteks (multi-turn).
   const recent = history.slice(-8)
   const transcript = recent.length
     ? recent.map((t) => `${t.role === 'user' ? 'Pengguna' : 'NEXA Assistant'}: ${t.content}`).join('\n')
@@ -61,7 +66,7 @@ function buildPrompt({ question, deadlines = [], userContext, history = [] }: As
     '',
     `Pesan terbaru pengguna: ${question}`,
     '',
-    'Konteks deadline manual dari NEXA Campus:',
+    'Konteks NEXA Campus:',
     JSON.stringify(context, null, 2),
   ].join('\n')
 }
@@ -82,7 +87,7 @@ export async function askGemini(input: AskGeminiInput): Promise<AskGeminiResult>
       system: NEXA_ASSISTANT_SYSTEM_INSTRUCTION,
       user: buildPrompt(input),
       temperature: 0.4,
-      maxTokens: 600,
+      maxTokens: 650,
     })
     return { answer: text, provider, model, status: 'success' }
   } catch (err) {
