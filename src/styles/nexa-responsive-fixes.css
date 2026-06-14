@@ -1,0 +1,61 @@
+/* NEXA v1.6.34 responsive safety net. Ini bukan sihir, tapi lumayan nahan layout biar gak melebar kayak ego framework JS. */
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+*,
+*::before,
+*::after {
+  min-width: 0;
+}
+
+img,
+video,
+canvas,
+svg,
+iframe,
+object,
+embed {
+  max-width: 100%;
+}
+
+iframe {
+  display: block;
+}
+
+table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+input,
+select,
+textarea,
+button {
+  max-width: 100%;
+}
+
+.nexa-responsive-page,
+.nexa-study-actions {
+  width: 100%;
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .nexa-responsive-page {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .nexa-study-actions {
+    border-radius: 1.5rem;
+  }
+
+  audio {
+    width: 100%;
+  }
+}

@@ -1,5 +1,5 @@
 import BadgeCollection from '@/components/badges/BadgeCollection'
 
-export default function AchievementsPage() {
+export default function BadgesPage() {
   return <BadgeCollection />
 }

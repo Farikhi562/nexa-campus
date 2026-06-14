@@ -1,19 +1,15 @@
-import JitsiRoomCall from '@/components/study-room/JitsiRoomCall'
 import UpgradePromptCard from '@/components/billing/UpgradePromptCard'
+import StudyRoomVoiceNotesPage from '@/components/study-room/StudyRoomVoiceNotesPage'
 import { canUseFeature } from '@/lib/billing/access'
 import { createClient } from '@/lib/supabase/server'
 import { getCurrentUser, getUserPlanAccess } from '@/lib/billing/server'
 
 type PageProps = {
   params: Promise<{ id: string }> | { id: string }
-  searchParams?: Promise<{ mode?: string }> | { mode?: string }
 }
 
-export default async function StudyRoomCallPage({ params, searchParams }: PageProps) {
+export default async function VoiceNotesPage({ params }: PageProps) {
   const resolvedParams = await params
-  const resolvedSearchParams = searchParams ? await searchParams : {}
-  const mode = resolvedSearchParams?.mode === 'audio' ? 'audio' : 'video'
-
   const supabase = await createClient()
   const user = await getCurrentUser(supabase)
   const access = user ? await getUserPlanAccess({ supabase, user }) : null
@@ -24,16 +20,12 @@ export default async function StudyRoomCallPage({ params, searchParams }: PagePr
       <main className="mx-auto w-full max-w-4xl px-4 py-8">
         <UpgradePromptCard
           featureKey="study_room_voice_video"
-          title="Voice/video call khusus NEXA Command"
-          description="Study Room call pakai Jitsi dibuka buat Command. Radar dan Pulse masih bisa belajar, cuma belum bisa cosplay jadi Zoom akademik."
+          title="Voice note Study Room khusus NEXA Command"
+          description="VN Study Room butuh storage audio dan mic permission. Jadi ini dikunci buat Command, bukan buat user gratisan numpang podcast."
         />
       </main>
     )
   }
 
-  return (
-    <main className="mx-auto w-full max-w-6xl px-3 py-4 sm:px-4 sm:py-6">
-      <JitsiRoomCall roomId={resolvedParams.id} mode={mode} displayName={access?.profile?.full_name as string | undefined} />
-    </main>
-  )
+  return <StudyRoomVoiceNotesPage roomId={resolvedParams.id} />
 }
