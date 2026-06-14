@@ -1,58 +1,87 @@
-# NEXA Campus v1.6.36 — Badge Profile Showcase v2
+# NEXA Campus v1.6.38 - Locked Badge + Profile Pin + Public Showcase
 
-Patch ini ngebenerin badge yang sebelumnya terlalu polos/jelek.
+Patch ini memperbaiki badge flow:
 
-## Isi patch
+- Badge yang belum user dapat tampil blur + ikon kunci.
+- Klik badge locked menampilkan syarat unlock.
+- Mythos tetap paling susah dan cuma 1.
+- Klik badge yang sudah kebuka untuk tampil/sembunyi di profile.
+- Maksimal 6 badge tampil di profile.
+- Badge pinned bisa dilihat publik lewat API `/api/badges/[userId]`.
+- Komponen `PublicUserBadges` bisa dipasang di user card, profile publik, friend list, leaderboard, study room, arena, dan halaman lain.
 
-- 30 badge baru dengan distribusi jelas:
-  - Biasa: 3 badge, emoji/basic, tidak animasi.
-  - Langka: 6 badge, static bagus, tidak animasi.
-  - Epic: 15 badge, animasi subtle.
-  - Legend: 5 badge, animasi premium.
-  - Mythos: 1 badge saja, animasi paling kuat.
-- Badge bisa tampil di profile lewat `ProfileBadgeShowcase`.
-- Halaman badge tetap ada di:
-  - `/dashboard/badges`
-  - `/dashboard/achievements`
-  - `/dashboard/profile/badges`
-- API badge:
-  - `/api/badges/me`
-  - `/api/badges/[userId]`
-- Migration:
-  - `supabase/migrations/20260615_badge_profile_showcase_v2.sql`
+## Files utama
 
-## Cara pasang Windows CMD
+```txt
+src/lib/badges/catalog.ts
+src/components/badges/NexaBadgeCard.tsx
+src/components/badges/BadgeCollection.tsx
+src/components/badges/ProfileBadgeShowcase.tsx
+src/components/badges/PublicUserBadges.tsx
+src/components/badges/badgeStyles.tsx
+src/app/api/badges/me/route.ts
+src/app/api/badges/[userId]/route.ts
+src/app/api/badges/pin/route.ts
+src/app/dashboard/badges/page.tsx
+src/app/dashboard/achievements/page.tsx
+src/app/dashboard/profile/badges/page.tsx
+supabase/migrations/20260615_badge_locks_profile_pinning.sql
+scripts/install-v1.6.38.mjs
+```
 
-Dari root project:
+## Install Windows CMD
 
 ```bat
-xcopy /E /Y "nexa_v1_6_36_badge_profile_showcase\*" "."
-node scripts\install-v1.6.36.mjs
+xcopy /E /Y "nexa_v1_6_38_locked_badge_pin_profile\*" "."
+node scripts\install-v1.6.38.mjs
 npm run build
+```
+
+Jalankan migration di Supabase SQL Editor:
+
+```txt
+supabase/migrations/20260615_badge_locks_profile_pinning.sql
+```
+
+Deploy:
+
+```bat
 git add -A
-git commit -m "feat: refresh badge system and profile showcase"
+git commit -m "feat: add locked badges and public profile showcase"
 git push
 ```
 
-Jalankan SQL migration di Supabase SQL Editor:
+## Cara tampilkan badge di profile
 
-```txt
-supabase/migrations/20260615_badge_profile_showcase_v2.sql
+Kalau auto-inject script gagal, tambahkan manual di halaman profile:
+
+```tsx
+import ProfileBadgeShowcase from '@/components/badges/ProfileBadgeShowcase'
+
+<ProfileBadgeShowcase title="Badge yang tampil di profile" limit={6} />
 ```
 
-## Biar akun owner dapat Mythos otomatis di UI
+## Cara tampilkan badge user di semua halaman
 
-Isi env Vercel:
+Pakai komponen ini di user card, leaderboard row, friend list, study room member, arena team member, dll:
 
-```env
-NEXA_OWNER_EMAILS=fauzanalfa36@gmail.com
-COMMAND_LIFETIME_EMAILS=fauzanalfa36@gmail.com
-ADMIN_EMAILS=fauzanalfa36@gmail.com
+```tsx
+import PublicUserBadges from '@/components/badges/PublicUserBadges'
+
+<PublicUserBadges userId={user.id} limit={4} />
 ```
 
-## Kalau mau grant Mythos ke database juga
+## Test flow
 
-Jalankan di Supabase:
+1. Buka `/dashboard/badges`.
+2. Badge yang belum kebuka harus blur + lock.
+3. Klik badge locked, harus muncul syarat.
+4. Klik badge unlocked, harus muncul pesan "tampil di profile".
+5. Buka `/dashboard/profile/badges` atau halaman profile.
+6. Badge pinned harus muncul.
+7. Buka `/api/badges/<user_id>` dari user lain, pinned badge harus kebaca.
+
+## SQL grant Mythos owner
 
 ```sql
 insert into public.nexa_user_badges (user_id, badge_key, source, is_pinned)
@@ -62,21 +91,3 @@ where lower(u.email) = lower('fauzanalfa36@gmail.com')
 on conflict (user_id, badge_key) do update
 set is_pinned = true;
 ```
-
-## Kalau auto inject profile gagal
-
-Tambahkan manual ke halaman/component profile kamu:
-
-```tsx
-import ProfileBadgeShowcase from '@/components/badges/ProfileBadgeShowcase'
-```
-
-Lalu taruh di JSX profile:
-
-```tsx
-<ProfileBadgeShowcase compact limit={6} />
-```
-
-## Catatan
-
-Patch ini tidak pakai framer-motion, jadi tidak nambah dependency. Semua animasi pakai CSS biasa biar build tetap waras dan browser user tidak dijadikan korban ritual.

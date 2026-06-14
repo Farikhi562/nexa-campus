@@ -55,11 +55,14 @@ export async function GET() {
   }
 
   const autoBadges = autoBadgesForPlan(access?.plan, user.email)
+  const pinnedBadges = (badges || []).filter((item) => item.is_pinned)
 
   return NextResponse.json({
     profile: access?.profile ?? null,
     plan: access?.plan ?? 'radar',
     badges: badges || [],
+    pinnedBadges,
     autoBadges,
+    maxPinned: 6,
   })
 }

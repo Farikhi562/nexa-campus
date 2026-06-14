@@ -61,9 +61,12 @@ export async function GET(_req: NextRequest, context: RouteContext) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
+  const rows = badges || []
+
   return NextResponse.json({
     profile: profile ?? null,
-    badges: badges || [],
+    badges: rows,
+    pinnedBadges: rows.filter((item) => item.is_pinned),
     autoBadges: autoBadgesForProfile(profile),
   })
 }
