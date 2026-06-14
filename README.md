@@ -1,76 +1,82 @@
-# NEXA Campus v1.6.35 — Command Assistant Runtime Hotfix
+# NEXA Campus v1.6.36 — Badge Profile Showcase v2
 
-Patch ini ngebenerin error NEXA Assistant Command Center yang cuma muncul:
+Patch ini ngebenerin badge yang sebelumnya terlalu polos/jelek.
 
-```txt
-Command Assistant lagi gagal eksekusi. TypeScript mungkin sedang minta tumbal.
-```
+## Isi patch
 
-## Yang dibenerin
+- 30 badge baru dengan distribusi jelas:
+  - Biasa: 3 badge, emoji/basic, tidak animasi.
+  - Langka: 6 badge, static bagus, tidak animasi.
+  - Epic: 15 badge, animasi subtle.
+  - Legend: 5 badge, animasi premium.
+  - Mythos: 1 badge saja, animasi paling kuat.
+- Badge bisa tampil di profile lewat `ProfileBadgeShowcase`.
+- Halaman badge tetap ada di:
+  - `/dashboard/badges`
+  - `/dashboard/achievements`
+  - `/dashboard/profile/badges`
+- API badge:
+  - `/api/badges/me`
+  - `/api/badges/[userId]`
+- Migration:
+  - `supabase/migrations/20260615_badge_profile_showcase_v2.sql`
 
-- Frontend sekarang nampilin `answer` dari API walaupun HTTP status bukan 200.
-- API `/api/nexa-assistant/command` dibungkus full try/catch biar nggak mati bisu.
-- Usage limit check kalau migration belum jalan tidak langsung bunuh Command Assistant.
-- Kalau AI provider/env belum aktif, Command Assistant tetap jawab pakai **local fallback mode**.
-- Risk Scan, Battle Plan, Reminder Architect, Notification Copilot, Arena Coach tetap jalan walau AI provider lagi kosong/ngambek.
-- Debug endpoint baru:
-
-```txt
-/api/debug/nexa-command
-```
-
-## File yang diubah/ditambah
-
-```txt
-src/app/api/nexa-assistant/command/route.ts
-src/components/ai/NexaCommandAssistantPage.tsx
-src/app/api/debug/nexa-command/route.ts
-```
-
-## Cara pasang di Windows CMD
+## Cara pasang Windows CMD
 
 Dari root project:
 
 ```bat
-xcopy /E /Y "nexa_v1_6_35_command_assistant_runtime_hotfix\*" "."
+xcopy /E /Y "nexa_v1_6_36_badge_profile_showcase\*" "."
+node scripts\install-v1.6.36.mjs
 npm run build
 git add -A
-git commit -m "fix: stabilize command assistant runtime"
+git commit -m "feat: refresh badge system and profile showcase"
 git push
 ```
 
-## Test setelah deploy
-
-1. Buka:
+Jalankan SQL migration di Supabase SQL Editor:
 
 ```txt
-/api/debug/nexa-command
+supabase/migrations/20260615_badge_profile_showcase_v2.sql
 ```
 
-Pastikan `plan` kebaca `command`.
+## Biar akun owner dapat Mythos otomatis di UI
 
-2. Buka:
-
-```txt
-/dashboard/nexa-assistant
-```
-
-3. Coba prompt:
-
-```txt
-Scan semua deadline gue. Kasih risk score, mana yang bahaya, dan cara nyelamatinnya.
-```
-
-Kalau AI key belum ada pun, harus tetap jawab pakai fallback lokal.
-
-## Catatan env
-
-Supaya AI beneran hidup, tetap isi salah satu provider env yang dipakai project lu, misalnya:
+Isi env Vercel:
 
 ```env
-GEMINI_API_KEY=xxxxx
+NEXA_OWNER_EMAILS=fauzanalfa36@gmail.com
+COMMAND_LIFETIME_EMAILS=fauzanalfa36@gmail.com
+ADMIN_EMAILS=fauzanalfa36@gmail.com
 ```
 
-atau env provider lain sesuai `src/lib/ai/llm.ts` project lu.
+## Kalau mau grant Mythos ke database juga
 
-Kalau belum isi AI key, patch ini tetap bikin Command Center jalan, tapi jawabannya local fallback, bukan model AI penuh.
+Jalankan di Supabase:
+
+```sql
+insert into public.nexa_user_badges (user_id, badge_key, source, is_pinned)
+select u.id, 'mythos_architect', 'owner_manual', true
+from auth.users u
+where lower(u.email) = lower('fauzanalfa36@gmail.com')
+on conflict (user_id, badge_key) do update
+set is_pinned = true;
+```
+
+## Kalau auto inject profile gagal
+
+Tambahkan manual ke halaman/component profile kamu:
+
+```tsx
+import ProfileBadgeShowcase from '@/components/badges/ProfileBadgeShowcase'
+```
+
+Lalu taruh di JSX profile:
+
+```tsx
+<ProfileBadgeShowcase compact limit={6} />
+```
+
+## Catatan
+
+Patch ini tidak pakai framer-motion, jadi tidak nambah dependency. Semua animasi pakai CSS biasa biar build tetap waras dan browser user tidak dijadikan korban ritual.
