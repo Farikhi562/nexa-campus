@@ -1,8 +1,9 @@
 import {
-  Award, BellRing, CalendarDays, CreditCard, HelpCircle, Home,
+  Award, BellRing, Bot, CalendarDays, CreditCard, HelpCircle, Home,
   Plus, Rocket, Settings, ShieldCheck, Sparkles, Sword, Timer,
   Trophy, UserRound, Users,
 } from 'lucide-react'
+import { BRAND } from '@/lib/brand'
 
 export type NavItem = {
   label: string; href: string; icon: typeof Home; hot?: boolean; soon?: boolean
@@ -10,6 +11,7 @@ export type NavItem = {
 
 export const DASHBOARD_NAV: NavItem[] = [
   { label: 'Dashboard', href: '/dashboard', icon: Home },
+  { label: 'NEXA Assistant', href: '/dashboard#nexa-assistant', icon: Bot, hot: true },
   { label: 'Leaderboard', href: '/dashboard/leaderboard', icon: Trophy, hot: true },
   { label: 'Pencapaian', href: '/dashboard/achievements', icon: Award, hot: true },
   { label: 'Focus Mode', href: '/dashboard/focus', icon: Timer, hot: true },
@@ -25,6 +27,6 @@ export const DASHBOARD_NAV: NavItem[] = [
   { label: 'Billing', href: '/dashboard/billing', icon: CreditCard },
   { label: 'Pengaturan', href: '/dashboard/settings', icon: Settings },
   { label: 'Support', href: '/support', icon: HelpCircle },
-  { label: 'Release v1.0.0', href: '/release-notes', icon: Rocket },
+  { label: `Release v${BRAND.version}`, href: '/release-notes', icon: Rocket },
   { label: 'Admin', href: '/admin', icon: ShieldCheck },
 ]

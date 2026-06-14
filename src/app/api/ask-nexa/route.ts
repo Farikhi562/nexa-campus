@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { askNexa } from '@/lib/ai/ask-nexa'
-import type { GeminiDeadlineContext } from '@/lib/ai/gemini'
+import type { GeminiDeadlineContext, ChatTurn } from '@/lib/ai/gemini'
 import { createClient } from '@/lib/supabase/server'
 
 const MAX_QUESTION_LENGTH = 1000
@@ -10,6 +10,7 @@ type AskNexaBody = {
   message?: unknown
   deadlines?: unknown
   userContext?: unknown
+  history?: unknown
 }
 
 function sanitizeDeadlines(value: unknown): GeminiDeadlineContext[] {
@@ -31,6 +32,19 @@ function sanitizeDeadlines(value: unknown): GeminiDeadlineContext[] {
   })
 }
 
+function sanitizeHistory(value: unknown): ChatTurn[] {
+  if (!Array.isArray(value)) return []
+  return value
+    .slice(-12)
+    .map((item) => {
+      const o = typeof item === 'object' && item !== null ? (item as Record<string, unknown>) : {}
+      const role = o.role === 'assistant' ? 'assistant' : 'user'
+      const content = typeof o.content === 'string' ? o.content.slice(0, 1000) : ''
+      return { role, content } as ChatTurn
+    })
+    .filter((t) => t.content.length > 0)
+}
+
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
   const {
@@ -38,7 +52,7 @@ export async function POST(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    return NextResponse.json({ error: 'Kamu perlu login dulu untuk pakai Tanya NEXA.' }, { status: 401 })
+    return NextResponse.json({ error: 'Kamu perlu login dulu untuk pakai NEXA Assistant.' }, { status: 401 })
   }
 
   let body: AskNexaBody
@@ -52,11 +66,11 @@ export async function POST(request: NextRequest) {
   const question = typeof questionSource === 'string' ? questionSource.trim() : ''
 
   if (!question) {
-    return NextResponse.json({ error: 'Tulis pertanyaan dulu ya.' }, { status: 400 })
+    return NextResponse.json({ error: 'Tulis pesan dulu ya.' }, { status: 400 })
   }
 
   if (question.length > MAX_QUESTION_LENGTH) {
-    return NextResponse.json({ error: 'Pertanyaannya kepanjangan. Coba ringkas maksimal 1000 karakter.' }, { status: 400 })
+    return NextResponse.json({ error: 'Pesannya kepanjangan. Coba ringkas maksimal 1000 karakter.' }, { status: 400 })
   }
 
   const userContext = typeof body.userContext === 'object' && body.userContext !== null
@@ -68,17 +82,17 @@ export async function POST(request: NextRequest) {
       question,
       deadlines: sanitizeDeadlines(body.deadlines),
       userContext,
+      history: sanitizeHistory(body.history),
     })
 
     return NextResponse.json(result)
   } catch (err) {
-    console.error('[Ask NEXA] failed', err)
-    // Jangan 500 ke pengguna. Beri jawaban ramah, fitur lain tetap berjalan.
+    console.error('[NEXA Assistant] failed', err)
     return NextResponse.json({
       answer:
-        'Tanya NEXA belum bisa menjawab sekarang. Kamu tetap bisa mencatat dan mengelola deadline secara manual.',
+        'NEXA Assistant belum bisa menjawab sekarang. Kamu tetap bisa mencatat dan mengelola deadline secara manual.',
       provider: 'none' as const,
-      model: process.env.GEMINI_MODEL || 'gemini-2.5-flash-lite',
+      model: process.env.AI_TEXT_MODEL || 'auto',
       status: 'error' as const,
     })
   }
