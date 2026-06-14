@@ -1,73 +1,43 @@
 import Link from 'next/link'
-import { ArrowRight, CheckCircle2, LockKeyhole, ReceiptText } from 'lucide-react'
-import PublicPageShell from '@/components/layout/PublicPageShell'
-import Badge from '@/components/ui/Badge'
-import { Card, CardContent } from '@/components/ui/Card'
-import { PLANS } from '@/lib/nexa-data'
+import { BILLING_PLANS } from '@/lib/billing/plans'
 
 export default function PricingPage() {
   return (
-    <PublicPageShell
-      badge="Paket NEXA Campus"
-      title="Pilih paket sesuai cara kamu ngatur deadline."
-      description="Mulai gratis dengan Radar. Kalau butuh reminder dan pengaturan yang lebih lengkap, kamu bisa upgrade ke Pulse atau Command."
-      primaryCta={{ label: 'Mulai Radar', href: '/login?mode=signup' }}
-      secondaryCta={{ label: 'Masuk Dashboard', href: '/dashboard' }}
-    >
-      <div className="grid gap-4 md:grid-cols-3">
-        {PLANS.map((plan) => (
-          <Card
-            key={plan.id}
-            className={`relative overflow-hidden border-slate-200 bg-white ${
-              plan.highlighted ? 'ring-2 ring-teal-200' : ''
-            }`}
-          >
-            {plan.highlighted && (
-              <div className="absolute right-4 top-4">
-                <Badge tone="brand">Paling lengkap</Badge>
-              </div>
-            )}
-            <CardContent className="p-5">
-              <h2 className="pr-24 text-lg font-black text-slate-950">{plan.name}</h2>
-              <p className="mt-1 min-h-12 text-sm leading-6 text-slate-500">{plan.positioning}</p>
-              <p className="mt-5 text-3xl font-black text-slate-950">
-                {plan.price}
-                <span className="text-sm font-semibold text-slate-500">{plan.suffix}</span>
-              </p>
-              <ul className="mt-6 space-y-3">
-                {plan.features.map((feature) => (
-                  <li key={feature} className="flex gap-2 text-sm leading-5 text-slate-700">
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-600" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-              <Link
-                href={plan.id === 'radar' ? '/login?mode=signup' : '/dashboard/billing'}
-                className={`mt-6 inline-flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-black transition ${
-                  plan.highlighted
-                    ? 'bg-slate-950 text-white hover:bg-slate-800'
-                    : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
-                }`}
-              >
-                {plan.id === 'radar' ? 'Mulai Radar' : 'Ajukan Upgrade'}
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </CardContent>
-          </Card>
-        ))}
+    <main className="mx-auto w-full max-w-6xl px-4 py-12">
+      <div className="text-center">
+        <p className="text-sm font-black uppercase tracking-[0.22em] text-teal-600">Pricing</p>
+        <h1 className="mt-3 text-4xl font-black text-slate-950">Pilih mode NEXA lo</h1>
+        <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-slate-500">
+          Radar gratis, Pulse Rp18.000, Command Rp30.000. Midtrans belum dipakai dulu, jadi checkout diarahkan ke manual payment.
+        </p>
       </div>
 
-      <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_0.85fr]">
-        <div className="flex gap-3 rounded-3xl border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-900">
-          <ReceiptText className="mt-0.5 h-5 w-5 flex-shrink-0" />
-          <p>Untuk saat ini, upgrade diproses melalui request dan konfirmasi admin terlebih dahulu.</p>
-        </div>
-        <div className="flex gap-3 rounded-3xl border border-slate-200 bg-white p-5 text-sm leading-6 text-slate-600">
-          <LockKeyhole className="mt-0.5 h-5 w-5 flex-shrink-0 text-brand-700" />
-          <p>AI Quick Add dan Ask NEXA masih tahap uji coba, jadi hasilnya tetap perlu dicek sebelum disimpan.</p>
-        </div>
+      <div className="mt-8 grid gap-4 md:grid-cols-3">
+        {Object.values(BILLING_PLANS).map((plan) => (
+          <div key={plan.id} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <h2 className="text-xl font-black text-slate-950">{plan.name}</h2>
+            <p className="mt-2 min-h-12 text-sm leading-6 text-slate-500">{plan.description}</p>
+            <div className="mt-5 flex items-end gap-2">
+              <span className="text-3xl font-black text-slate-950">{plan.priceLabel}</span>
+              <span className="pb-1 text-sm font-bold text-slate-400">/{plan.period}</span>
+            </div>
+            <ul className="mt-5 space-y-2 text-sm text-slate-600">
+              {plan.features.map((feature) => (
+                <li key={feature}>✓ {feature}</li>
+              ))}
+            </ul>
+            {plan.id === 'radar' ? (
+              <Link href="/dashboard" className="mt-6 inline-flex w-full justify-center rounded-2xl border border-slate-200 px-4 py-3 text-sm font-black text-slate-700">
+                Masuk Dashboard
+              </Link>
+            ) : (
+              <Link href="/dashboard/billing" className="mt-6 inline-flex w-full justify-center rounded-2xl bg-teal-600 px-4 py-3 text-sm font-black text-white hover:bg-teal-700">
+                {plan.cta}
+              </Link>
+            )}
+          </div>
+        ))}
       </div>
-    </PublicPageShell>
+    </main>
   )
 }

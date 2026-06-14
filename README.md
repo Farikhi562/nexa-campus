@@ -1,91 +1,101 @@
-# NEXA Campus v1.6.24 — Batch 3
+# NEXA Campus v1.6.26 — Batch 4 Fix Payment Methods
 
-Patch ini lanjutan dari `v1.6.23-batch2`.
+Patch ini memperbaiki Batch 4: metode pembayaran sekarang bukan cuma Bank Jago, tapi ada 2 metode:
 
-## Yang ditambah
+1. **Bank Jago Transfer**
+   - Nomor rekening: `100157134050`
+   - Nama: `Muhamad Fauzan Al Farikhi`
 
-### 1. NEXA Assistant lebih hidup
-File timpa:
-- `src/components/ai/AskNexaPanel.tsx`
-- `src/app/api/ask-nexa/route.ts`
-- `src/lib/ai/gemini.ts`
-- `src/lib/ai/ask-nexa.ts`
+2. **BRI QRIS / BRImo**
+   - Nomor/ID QR: `0335 0110 7723 508`
+   - Nama: `Muhamad Fauzan Al Farikhi`
+   - File QR default: `/public/payment/bri-qris.jpg`
 
-File baru:
-- `src/lib/ai/deadline-parser.ts`
+## Harga aktif
 
-Hasil:
-- Bubble chat user sekarang bisa tampil nama + avatar asli dari `/api/user/profile`.
-- User bisa ngetik deadline natural language, contoh:
-  - `tambahin deadline tugas kalkulus besok jam 8 malam`
-  - `catat deadline presentasi basis data Jumat pukul 10.30`
-  - `input deadline laporan praktikum 20/06/2026 jam 23:59`
-- API otomatis parse lalu insert ke `academic_deadlines`.
-- Kalau insert gagal, response ngasih data yang berhasil diparse supaya gampang debug schema.
+- NEXA Radar: Rp0
+- NEXA Pulse: Rp18.000 / bulan
+- NEXA Command: Rp30.000 / bulan
 
-Catatan penting:
-Patch ini asumsi tabel deadline bernama `academic_deadlines` dengan kolom:
-`user_id`, `title`, `course_name`, `type`, `source`, `deadline_date`, `deadline_time`, `priority`, `status`, `reminder_enabled`.
-Kalau schema lo beda, ubah bagian `insertPayload` di `src/app/api/ask-nexa/route.ts`.
+## File yang berubah
 
-### 2. Telegram + in-app notif bukan cuma reminder
-File baru:
-- `src/lib/supabase/admin.ts`
-- `src/lib/notifications/notify-user.ts`
-- `src/app/api/cron/nexa-engagement/route.ts`
-- `supabase/migrations/20260615_nexa_assistant_notifications.sql`
+- `src/lib/billing/plans.ts`
+- `src/components/billing/ManualPaymentCard.tsx`
+- `src/app/api/billing/manual-payment/route.ts`
+- `src/app/api/billing/manual-payment/[orderId]/route.ts`
+- `src/app/api/admin/billing/manual-payment/route.ts`
+- `supabase/migrations/20260615_manual_payment_two_methods.sql`
+- `public/payment/bri-qris.jpg`
 
-Hasil:
-- Ada tabel `notifications` buat notif di web app.
-- Telegram bot bisa kirim daily digest/nudge, bukan cuma reminder tunggal.
-- Cron route: `/api/cron/nexa-engagement`
-- Proteksi optional pakai `CRON_SECRET`.
+## Cara pasang
 
-Env yang dibutuhkan:
+1. Copy semua file ke project utama.
+2. Jalankan migration SQL:
+   - `supabase/migrations/20260615_manual_payment_two_methods.sql`
+3. Isi env di Vercel.
+4. Deploy ulang.
+5. Test `/dashboard/billing`.
+
+## Env Vercel
+
 ```env
-SUPABASE_SERVICE_ROLE_KEY=xxxxx
-TELEGRAM_BOT_TOKEN=xxxxx
-CRON_SECRET=bebas-yang-susah-ditebak
-NEXT_PUBLIC_SITE_URL=https://campus.nexatechlabs.my.id
+NEXT_PUBLIC_BANK_JAGO_NAME=Bank Jago
+NEXT_PUBLIC_BANK_JAGO_ACCOUNT_NUMBER=100157134050
+NEXT_PUBLIC_BANK_JAGO_ACCOUNT_NAME=Muhamad Fauzan Al Farikhi
+
+NEXT_PUBLIC_BRI_QRIS_BANK_NAME=BRI
+NEXT_PUBLIC_BRI_QRIS_NUMBER=0335 0110 7723 508
+NEXT_PUBLIC_BRI_QRIS_ACCOUNT_NAME=Muhamad Fauzan Al Farikhi
+NEXT_PUBLIC_BRI_QRIS_IMAGE_URL=/payment/bri-qris.jpg
+
+NEXT_PUBLIC_NEXA_PAYMENT_WHATSAPP=628xxxxxxxxxx
+ADMIN_EMAILS=emailadmin1@gmail.com,emailadmin2@gmail.com
 ```
 
-Vercel Cron contoh:
-```json
+## Flow user
+
+1. User buka `/pricing` atau `/dashboard/billing`.
+2. User pilih Pulse atau Command.
+3. User pilih metode pembayaran: Bank Jago atau BRI QRIS.
+4. App create order ke `/api/billing/manual-payment`.
+5. User bayar sesuai nominal.
+6. User konfirmasi ke admin via WhatsApp dengan Order ID.
+7. Admin approve via API admin.
+8. Sistem update `profiles.plan`, `profiles.plan_status`, `profiles.plan_started_at`, `profiles.plan_expires_at`.
+
+## Request create order
+
+```http
+POST /api/billing/manual-payment
+Content-Type: application/json
+
 {
-  "crons": [
-    {
-      "path": "/api/cron/nexa-engagement?secret=bebas-yang-susah-ditebak",
-      "schedule": "0 23 * * *"
-    }
-  ]
+  "plan": "pulse",
+  "payment_method": "bank_jago"
 }
 ```
-Jam `0 23 * * *` di Vercel UTC kira-kira jam 06:00 WIB. Karena tentu saja timezone harus ikut bikin hidup ribet.
 
-### 3. Study Room voice/video call via Jitsi
-File baru:
-- `src/components/study-room/JitsiRoomCall.tsx`
-- `src/app/dashboard/study-room/[roomId]/call/page.tsx`
+Atau:
 
-URL contoh:
-`/dashboard/study-room/room-abc/call`
+```http
+POST /api/billing/manual-payment
+Content-Type: application/json
 
-Jitsi ini opsi paling waras buat MVP:
-- tanpa backend media server,
-- tanpa API key,
-- langsung iframe.
+{
+  "plan": "command",
+  "payment_method": "bri_qris"
+}
+```
 
-## Urutan pasang
+## Catatan penting soal QR
 
-1. Copy/timpa semua file ke project utama.
-2. Jalankan SQL migration di Supabase SQL Editor.
-3. Pastikan env di Vercel sudah ada.
-4. Deploy.
-5. Test NEXA Assistant dengan kalimat:
-   `tambahin deadline tugas kalkulus besok jam 8 malam`
-6. Test cron manual:
-   `/api/cron/nexa-engagement?secret=ISI_CRON_SECRET_LO`
+Screenshot QR yang dikasih punya teks berlaku 24 jam dan 1x transaksi. Kalau itu memang QR dinamis BRImo, jangan dipakai permanen buat publik. Untuk sementara patch ini tetap masukin QR ke `/public/payment/bri-qris.jpg`, tapi kalau sudah punya QRIS statis beneran, ganti file itu. Jangan sampai user bayar ke QR expired terus semua pihak pura-pura jadi korban teknologi. ANJJJ 😭
 
-## Yang belum dipaksa masuk
+## Dependensi
 
-NEXA Arena team leaderboard + badge kompetisi dan Cari Teman by QR/NEXA ID perlu schema asli project utama. Di zip ini belum ada file arena/friends/database lengkap, jadi kalau dipaksa nebak bisa bentrok. Patch SQL sudah menambah `profiles.nexa_id` sebagai fondasi.
+Patch ini masih depend ke Batch 3 untuk:
+
+- `src/lib/notifications/notify-user.ts`
+- `src/lib/supabase/admin.ts`
+
+Kalau belum pasang Batch 3, pasang dulu. Jangan skip batch, ini codebase bukan episode filler anime.
