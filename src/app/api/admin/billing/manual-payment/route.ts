@@ -4,6 +4,36 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { BILLING_PLANS, isPaidPlan } from '@/lib/billing/plans'
 import { notifyUser } from '@/lib/notifications/notify-user'
 
+export const runtime = 'nodejs'
+
+type AdminUser = {
+  id: string
+  email?: string | null
+}
+
+type ManualPaymentOrder = {
+  id: string
+  order_code: string
+  user_id: string
+  plan: string
+  amount: number
+  status: string
+  payment_method?: string | null
+  bank_name?: string | null
+  account_number?: string | null
+  account_name?: string | null
+  buyer_name?: string | null
+  buyer_whatsapp?: string | null
+  proof_url?: string | null
+  notes?: string | null
+  rejection_reason?: string | null
+  metadata?: Record<string, unknown> | null
+  created_at?: string | null
+  updated_at?: string | null
+  expires_at?: string | null
+  approved_at?: string | null
+}
+
 function parseAdmins() {
   return (process.env.ADMIN_EMAILS || process.env.NEXT_PUBLIC_ADMIN_EMAILS || '')
     .split(',')
@@ -21,10 +51,13 @@ async function requireAdmin() {
   const email = user?.email?.toLowerCase() || ''
 
   if (!user || !email || !admins.includes(email)) {
-    return { ok: false as const, response: NextResponse.json({ error: 'Admin only. Jangan jadi admin dadakan, nanti chaos.' }, { status: 403 }) }
+    return {
+      ok: false as const,
+      response: NextResponse.json({ error: 'Admin only. Masuk list ADMIN_EMAILS dulu, bos kecil.' }, { status: 403 }),
+    }
   }
 
-  return { ok: true as const, user }
+  return { ok: true as const, user: { id: user.id, email: user.email } as AdminUser }
 }
 
 function addOneMonth(date = new Date()) {
@@ -33,30 +66,98 @@ function addOneMonth(date = new Date()) {
   return result.toISOString()
 }
 
-export async function GET() {
+function cleanText(value: unknown, max = 500) {
+  if (typeof value !== 'string') return null
+  const text = value.trim().slice(0, max)
+  return text || null
+}
+
+async function writeAuditLog(params: {
+  supabase: ReturnType<typeof createAdminClient>
+  orderId: string
+  admin: AdminUser
+  action: string
+  notes?: string | null
+  metadata?: Record<string, unknown>
+}) {
+  const { error } = await params.supabase.from('payment_audit_logs').insert({
+    order_id: params.orderId,
+    admin_user_id: params.admin.id,
+    admin_email: params.admin.email || null,
+    action: params.action,
+    notes: params.notes || null,
+    metadata: params.metadata || {},
+  })
+
+  if (error) console.error('[admin manual-payment] audit log failed', error)
+}
+
+export async function GET(request: NextRequest) {
   const admin = await requireAdmin()
   if (!admin.ok) return admin.response
 
   const supabase = createAdminClient()
-  const { data, error } = await supabase
+  const status = request.nextUrl.searchParams.get('status')
+  const limitParam = Number(request.nextUrl.searchParams.get('limit') || '80')
+  const limit = Number.isFinite(limitParam) ? Math.min(Math.max(limitParam, 1), 200) : 80
+
+  let query = supabase
     .from('manual_payment_orders')
-    .select('id,order_code,user_id,plan,amount,status,payment_method,bank_name,account_number,account_name,buyer_name,buyer_whatsapp,proof_url,notes,rejection_reason,metadata,created_at,expires_at,approved_at')
+    .select('id,order_code,user_id,plan,amount,status,payment_method,bank_name,account_number,account_name,buyer_name,buyer_whatsapp,proof_url,notes,rejection_reason,metadata,created_at,updated_at,expires_at,approved_at')
     .order('created_at', { ascending: false })
-    .limit(50)
+    .limit(limit)
+
+  if (status && status !== 'all') query = query.eq('status', status)
+
+  const { data, error } = await query
 
   if (error) {
     console.error('[admin manual-payment] list failed', error)
     return NextResponse.json({ error: 'Gagal load pembayaran manual.' }, { status: 500 })
   }
 
-  return NextResponse.json({ orders: data ?? [] })
+  const orders = (data ?? []) as ManualPaymentOrder[]
+  const userIds = Array.from(new Set(orders.map((order) => order.user_id).filter(Boolean)))
+  const profileById: Record<string, unknown> = {}
+
+  if (userIds.length > 0) {
+    const { data: profiles, error: profileError } = await supabase
+      .from('profiles')
+      .select('id,full_name,email,avatar_url,plan,plan_status,plan_expires_at')
+      .in('id', userIds)
+
+    if (profileError) {
+      console.error('[admin manual-payment] profiles lookup failed', profileError)
+    } else {
+      for (const profile of profiles ?? []) {
+        if (profile?.id) profileById[profile.id] = profile
+      }
+    }
+  }
+
+  const enriched = orders.map((order) => ({
+    ...order,
+    user_profile: profileById[order.user_id] || null,
+  }))
+
+  const stats = enriched.reduce(
+    (acc, order) => {
+      acc.total += 1
+      acc.amount += typeof order.amount === 'number' ? order.amount : 0
+      acc.by_status[order.status] = (acc.by_status[order.status] || 0) + 1
+      return acc
+    },
+    { total: 0, amount: 0, by_status: {} as Record<string, number> },
+  )
+
+  return NextResponse.json({ orders: enriched, stats })
 }
 
 export async function PATCH(request: NextRequest) {
   const admin = await requireAdmin()
   if (!admin.ok) return admin.response
 
-  let body: { order_id?: unknown; status?: unknown; rejection_reason?: unknown }
+  let body: { order_id?: unknown; status?: unknown; rejection_reason?: unknown; notes?: unknown }
   try {
     body = await request.json()
   } catch {
@@ -74,21 +175,17 @@ export async function PATCH(request: NextRequest) {
 
   const { data: order, error: orderError } = await supabase
     .from('manual_payment_orders')
-    .select('id,order_code,user_id,plan,amount,status')
+    .select('id,order_code,user_id,plan,amount,status,proof_url')
     .eq('id', orderId)
-    .maybeSingle()
+    .single()
 
-  if (orderError) {
+  if (orderError || !order) {
     console.error('[admin manual-payment] get order failed', orderError)
-    return NextResponse.json({ error: 'Gagal ambil order.' }, { status: 500 })
-  }
-
-  if (!order) {
     return NextResponse.json({ error: 'Order tidak ditemukan.' }, { status: 404 })
   }
 
   if (!['pending', 'under_review'].includes(order.status)) {
-    return NextResponse.json({ error: `Order status ${order.status} sudah tidak bisa diproses.` }, { status: 400 })
+    return NextResponse.json({ error: `Order status ${order.status}, tidak bisa diproses ulang.` }, { status: 409 })
   }
 
   if (status === 'approved') {
@@ -113,14 +210,15 @@ export async function PATCH(request: NextRequest) {
 
     if (profileError) {
       console.error('[admin manual-payment] profile update failed', profileError)
-      return NextResponse.json({ error: 'Pembayaran valid, tapi gagal update plan user. Cek kolom profiles plan_* dan updated_at.' }, { status: 500 })
+      return NextResponse.json({ error: 'Pembayaran valid, tapi gagal update plan user. Cek kolom profiles plan_*.' }, { status: 500 })
     }
 
     const { data: updated, error: updateError } = await supabase
       .from('manual_payment_orders')
       .update({ status: 'approved', approved_at: now, updated_at: now, rejection_reason: null })
       .eq('id', order.id)
-      .select('id,order_code,plan,amount,status,approved_at')
+      .in('status', ['pending', 'under_review'])
+      .select('id,order_code,user_id,plan,amount,status,payment_method,bank_name,account_number,account_name,buyer_name,buyer_whatsapp,proof_url,notes,rejection_reason,metadata,created_at,updated_at,expires_at,approved_at')
       .single()
 
     if (updateError) {
@@ -128,12 +226,21 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Gagal approve order.' }, { status: 500 })
     }
 
+    await writeAuditLog({
+      supabase,
+      orderId: order.id,
+      admin: admin.user,
+      action: 'approved',
+      notes: cleanText(body.notes, 500),
+      metadata: { plan: plan.id, amount: order.amount, expires_at: expiresAt },
+    })
+
     await notifyUser({
       supabase,
       userId: order.user_id,
       type: 'billing_manual_payment_approved',
       title: 'Pembayaran NEXA disetujui ✅',
-      body: `${plan.name} aktif sampai ${expiresAt.slice(0, 10)}. Silakan buka dashboard, jangan cuma dibayar terus ditinggal kayak niat belajar Januari.`,
+      body: `${plan.name} aktif sampai ${expiresAt.slice(0, 10)}. Silakan buka dashboard. Akhirnya teknologi dan transferan berdamai.`,
       url: '/dashboard',
       dedupeKey: `manual-payment-approved-${order.id}`,
       metadata: { order_id: order.id, plan: plan.id, expires_at: expiresAt },
@@ -143,21 +250,29 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ order: updated })
   }
 
-  const reason = typeof body.rejection_reason === 'string' && body.rejection_reason.trim()
-    ? body.rejection_reason.trim().slice(0, 500)
-    : 'Bukti pembayaran belum valid.'
-
+  const reason = cleanText(body.rejection_reason, 500) || 'Bukti pembayaran belum valid.'
+  const now = new Date().toISOString()
   const { data: rejected, error: rejectError } = await supabase
     .from('manual_payment_orders')
-    .update({ status: 'rejected', rejection_reason: reason, updated_at: new Date().toISOString() })
+    .update({ status: 'rejected', rejection_reason: reason, updated_at: now })
     .eq('id', order.id)
-    .select('id,order_code,plan,amount,status,rejection_reason')
+    .in('status', ['pending', 'under_review'])
+    .select('id,order_code,user_id,plan,amount,status,payment_method,bank_name,account_number,account_name,buyer_name,buyer_whatsapp,proof_url,notes,rejection_reason,metadata,created_at,updated_at,expires_at,approved_at')
     .single()
 
   if (rejectError) {
     console.error('[admin manual-payment] reject failed', rejectError)
     return NextResponse.json({ error: 'Gagal reject order.' }, { status: 500 })
   }
+
+  await writeAuditLog({
+    supabase,
+    orderId: order.id,
+    admin: admin.user,
+    action: 'rejected',
+    notes: reason,
+    metadata: { amount: order.amount, old_status: order.status },
+  })
 
   await notifyUser({
     supabase,
