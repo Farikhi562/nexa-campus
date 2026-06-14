@@ -27,6 +27,7 @@ export type UserPlanAccess = {
   limits: ReturnType<typeof getPlanLimits>
   features: Record<FeatureKey, boolean>
   usageToday: Partial<Record<FeatureKey, number>>
+  ownerOverride?: boolean
 }
 
 export type ConsumeFeatureResult = {
@@ -40,28 +41,71 @@ export type ConsumeFeatureResult = {
   requiredPlan: BillingPlanId
 }
 
+const PROFILE_SELECT = [
+  'id',
+  'full_name',
+  'name',
+  'email',
+  'avatar_url',
+  'nexa_id',
+  'plan',
+  'plan_status',
+  'plan_started_at',
+  'plan_expires_at',
+].join(',')
+
 function todayKey() {
   return new Date().toISOString().slice(0, 10)
 }
 
-async function getProfileByUserId(supabase: SupabaseLike, userId: string) {
-  const select = 'id,user_id,full_name,name,email,avatar_url,nexa_id,plan,plan_status,plan_started_at,plan_expires_at'
+function normalizeEmail(email?: string | null) {
+  return (email || '').trim().toLowerCase()
+}
 
+function envEmailList(value?: string) {
+  return (value || '')
+    .split(',')
+    .map((item) => normalizeEmail(item))
+    .filter(Boolean)
+}
+
+function isOwnerCommandEmail(email?: string | null) {
+  const normalized = normalizeEmail(email)
+  if (!normalized) return false
+
+  const ownerEmails = [
+    ...envEmailList(process.env.NEXA_OWNER_EMAILS),
+    ...envEmailList(process.env.COMMAND_LIFETIME_EMAILS),
+    ...envEmailList(process.env.ADMIN_EMAILS),
+  ]
+
+  return ownerEmails.includes(normalized)
+}
+
+async function getProfileByUserId(supabase: SupabaseLike, userId: string, email?: string | null) {
+  // Schema NEXA Campus lo sekarang pakai profiles.id = auth.users.id.
+  // Jangan select user_id di sini. Kalau kolom user_id tidak ada, Supabase error dan plan kebaca radar.
   const byId = await supabase
     .from('profiles')
-    .select(select)
+    .select(PROFILE_SELECT)
     .eq('id', userId)
     .maybeSingle()
 
-  if (byId.data || !byId.error) return byId.data ?? null
+  if (byId.data) return byId.data
 
-  const byUserId = await supabase
-    .from('profiles')
-    .select(select)
-    .eq('user_id', userId)
-    .maybeSingle()
+  // Fallback by email untuk jaga-jaga kalau row profile pernah dibuat pakai email duluan.
+  // Ini tidak wajib, tapi lumayan buat ngerapihin database yang pernah hidup liar.
+  if (email) {
+    const byEmail = await supabase
+      .from('profiles')
+      .select(PROFILE_SELECT)
+      .ilike('email', email)
+      .maybeSingle()
 
-  return byUserId.data ?? null
+    if (byEmail.data) return byEmail.data
+  }
+
+  return null
 }
 
 export async function getCurrentUser(supabase?: SupabaseLike): Promise<AuthUser | null> {
@@ -79,8 +123,9 @@ export async function getUserPlanAccess(params: {
   const user = params.user ?? await getCurrentUser(supabase)
   if (!user) return null
 
-  const profile = await getProfileByUserId(supabase, user.id)
-  const plan = resolveEffectivePlan(profile)
+  const profile = await getProfileByUserId(supabase, user.id, user.email)
+  const ownerOverride = isOwnerCommandEmail(user.email)
+  const plan: BillingPlanId = ownerOverride ? 'command' : resolveEffectivePlan(profile)
   const limits = getPlanLimits(plan)
 
   const features = Object.keys(FEATURE_META).reduce((acc, key) => {
@@ -110,6 +155,7 @@ export async function getUserPlanAccess(params: {
     limits,
     features,
     usageToday,
+    ownerOverride,
   }
 }
 

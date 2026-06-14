@@ -1,88 +1,91 @@
-# NEXA Campus v1.6.32 — Command Assistant Page
+# NEXA Campus v1.6.33 — Profile Plan Access Hotfix
 
-Patch ini nambah halaman khusus:
+Fix untuk kasus `/dashboard/nexa-assistant` masih membaca plan `radar` padahal akun sudah diset `command`.
 
-```txt
-/dashboard/nexa-assistant
+## Penyebab
+
+`src/lib/billing/server.ts` lama men-select kolom `user_id` dari `public.profiles`:
+
+```ts
+.select('id,user_id,full_name,...')
 ```
 
-Nav item `NEXA Assistant` di sidebar/hamburger mobile diarahkan ke halaman baru ini, bukan lagi anchor `#nexa-assistant`.
-
-## Isi fitur
-
-- Dedicated page NEXA Assistant Command Center.
-- Halaman terkunci khusus plan `command`.
-- Radar/Pulse akan lihat upgrade page.
-- Command user dapat UI overpower:
-  - Command Briefing
-  - Deadline Risk Scan
-  - Study Battle Plan
-  - Deadline Executor
-  - Reminder Architect
-  - Notification Copilot
-  - Arena Coach
-- API baru:
+Di schema NEXA Campus kamu, `profiles.user_id` tidak ada. Yang dipakai adalah:
 
 ```txt
-/api/nexa-assistant/command
+profiles.id = auth.users.id
 ```
 
-API ini ngecek plan user. Kalau bukan Command, return 402 locked.
+Akibatnya query profile gagal, `getUserPlanAccess()` mengembalikan profile null, lalu plan fallback ke `radar`.
 
-## File yang ditambah/diubah
+## Isi patch
 
-```txt
-src/app/dashboard/nexa-assistant/page.tsx
-src/components/ai/NexaCommandAssistantPage.tsx
-src/app/api/nexa-assistant/command/route.ts
-src/components/dashboard/nav-items.ts
+- `src/lib/billing/server.ts`
+  - tidak lagi select `user_id`
+  - baca profile pakai `profiles.id = auth.users.id`
+  - fallback by email
+  - owner/admin email bisa dianggap Command via env
+- `src/app/api/debug/plan/route.ts`
+  - endpoint debug untuk cek plan yang dibaca aplikasi
+
+## Env yang disarankan
+
+Isi salah satu atau semuanya di Vercel:
+
+```env
+NEXA_OWNER_EMAILS=fauzanalfa36@gmail.com
+COMMAND_LIFETIME_EMAILS=fauzanalfa36@gmail.com
+ADMIN_EMAILS=fauzanalfa36@gmail.com
 ```
 
-## Cara pasang di CMD Windows
+`NEXA_OWNER_EMAILS` paling bersih untuk owner lifetime.
 
-Dari root project:
+## SQL owner lifetime
+
+```sql
+update public.profiles
+set
+  plan = 'command',
+  plan_status = 'active',
+  plan_started_at = coalesce(plan_started_at, now()),
+  plan_expires_at = '2099-12-31 23:59:59+07'
+where id = (
+  select id
+  from auth.users
+  where lower(email) = lower('fauzanalfa36@gmail.com')
+  limit 1
+);
+```
+
+## Cara pasang Windows CMD
 
 ```bat
-xcopy /E /Y "nexa_v1_6_32_command_assistant_page\*" "."
+xcopy /E /Y "nexa_v1_6_33_profile_plan_access_hotfix\*" "."
 npm run build
 git add -A
-git commit -m "feat: add command only nexa assistant page"
+git commit -m "fix: read profile plan from id schema"
 git push
-```
-
-## Syarat
-
-Patch ini idealnya dipasang setelah v1.6.31 karena butuh:
-
-```txt
-src/lib/billing/server.ts
-src/lib/billing/access.ts
-feature_usage_daily
-consume_feature_usage
-```
-
-Kalau belum jalan migration v1.6.31, jalankan dulu:
-
-```txt
-supabase/migrations/20260615_plan_scope_feature_gates.sql
 ```
 
 ## Test
 
-1. Login akun Radar/Pulse, buka `/dashboard/nexa-assistant`, harus muncul upgrade page.
-2. Set profile plan ke Command:
-
-```sql
-update public.profiles
-set plan = 'command', plan_status = 'active', plan_expires_at = now() + interval '30 days'
-where email = 'email_user_lu@gmail.com';
-```
-
-3. Buka `/dashboard/nexa-assistant`.
-4. Test module `Command Briefing`.
-5. Test `Deadline Executor` dengan contoh:
+Buka:
 
 ```txt
-tambahin deadline tugas kalkulus besok jam 8 malam prioritas tinggi
+/api/debug/plan
 ```
 
+Harus muncul:
+
+```json
+{
+  "plan": "command",
+  "ownerOverride": true
+}
+```
+
+Lalu buka:
+
+```txt
+/dashboard/nexa-assistant
+```
