@@ -3,37 +3,10 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getCurrentUser, getUserPlanAccess } from '@/lib/billing/server'
 import { BADGE_BY_KEY } from '@/lib/badges/catalog'
+import { autoBadgesForPlan } from '@/lib/badges/owner'
+import { syncUnlockedBadgesForUser } from '@/lib/badges/sync'
 
 const MAX_PINNED_BADGES = 6
-
-function normalizeEmail(email?: string | null) {
-  return (email || '').trim().toLowerCase()
-}
-
-function envEmailList(value?: string) {
-  return (value || '')
-    .split(',')
-    .map((item) => normalizeEmail(item))
-    .filter(Boolean)
-}
-
-function ownerEmails() {
-  return [
-    ...envEmailList(process.env.NEXA_OWNER_EMAILS),
-    ...envEmailList(process.env.COMMAND_LIFETIME_EMAILS),
-    ...envEmailList(process.env.ADMIN_EMAILS),
-  ]
-}
-
-function autoBadgesForPlan(plan?: string | null, email?: string | null) {
-  const badges = new Set<string>()
-  const normalizedEmail = normalizeEmail(email)
-
-  if (plan === 'command') badges.add('command_elite')
-  if (ownerEmails().includes(normalizedEmail)) badges.add('mythos_architect')
-
-  return Array.from(badges)
-}
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
@@ -53,6 +26,9 @@ export async function POST(req: NextRequest) {
 
   const admin = createAdminClient()
   const access = await getUserPlanAccess({ supabase, user })
+
+  // Sync dulu, biar user yang sudah memenuhi syarat tidak ditolak cuma gara-gara badge belum pernah diinsert. Teknologi jangan jadi tukang PHP-in user.
+  const sync = await syncUnlockedBadgesForUser({ admin, user, profile: access?.profile ?? null })
   const autoBadges = autoBadgesForPlan(access?.plan, user.email)
 
   const { data: existingRows, error: existingError } = await admin
@@ -65,10 +41,10 @@ export async function POST(req: NextRequest) {
   }
 
   const existing = existingRows || []
-  const earnedKeys = new Set([...existing.map((item) => item.badge_key), ...autoBadges])
+  const earnedKeys = new Set([...existing.map((item) => item.badge_key), ...autoBadges, ...(sync.unlockedKeys || [])])
 
   if (!earnedKeys.has(badgeKey)) {
-    return NextResponse.json({ error: 'Badge ini belum kebuka. Ikutin syaratnya dulu, jangan nyolong prestasi digital.' }, { status: 403 })
+    return NextResponse.json({ error: 'Badge ini belum kebuka. Klik badge buat lihat syaratnya dulu, jangan cosplay jadi legenda prematur.' }, { status: 403 })
   }
 
   if (pinned) {

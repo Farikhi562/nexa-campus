@@ -1,37 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { autoBadgesForPlan } from '@/lib/badges/owner'
 
 type RouteContext = {
   params: Promise<{ userId: string }> | { userId: string }
-}
-
-function normalizeEmail(email?: string | null) {
-  return (email || '').trim().toLowerCase()
-}
-
-function envEmailList(value?: string) {
-  return (value || '')
-    .split(',')
-    .map((item) => normalizeEmail(item))
-    .filter(Boolean)
-}
-
-function ownerEmails() {
-  return [
-    ...envEmailList(process.env.NEXA_OWNER_EMAILS),
-    ...envEmailList(process.env.COMMAND_LIFETIME_EMAILS),
-    ...envEmailList(process.env.ADMIN_EMAILS),
-  ]
-}
-
-function autoBadgesForProfile(profile: any) {
-  const badges = new Set<string>()
-  const email = normalizeEmail(profile?.email)
-
-  if (profile?.plan === 'command' && profile?.plan_status === 'active') badges.add('command_elite')
-  if (ownerEmails().includes(email)) badges.add('mythos_architect')
-
-  return Array.from(badges)
 }
 
 export async function GET(_req: NextRequest, context: RouteContext) {
@@ -62,11 +34,13 @@ export async function GET(_req: NextRequest, context: RouteContext) {
   }
 
   const rows = badges || []
+  const autoBadges = autoBadgesForPlan(profile?.plan, profile?.email)
 
+  // Publik tetap hanya menampilkan pinned + auto mythos owner, bukan semua badge orang dibocorin kayak aib grup WA.
   return NextResponse.json({
     profile: profile ?? null,
     badges: rows,
     pinnedBadges: rows.filter((item) => item.is_pinned),
-    autoBadges: autoBadgesForProfile(profile),
+    autoBadges: autoBadges.filter((key) => key === 'mythos_architect'),
   })
 }

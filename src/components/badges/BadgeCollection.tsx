@@ -30,6 +30,7 @@ export default function BadgeCollection() {
   const [message, setMessage] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [savingKey, setSavingKey] = useState<string | null>(null)
+  const [syncing, setSyncing] = useState(false)
 
   useEffect(() => {
     let alive = true
@@ -64,6 +65,31 @@ export default function BadgeCollection() {
   const counts = useMemo(() => getBadgeCounts(), [])
   const earnedSet = useMemo(() => new Set(earnedKeys), [earnedKeys])
   const pinnedSet = useMemo(() => new Set(pinnedKeys), [pinnedKeys])
+
+
+  async function syncBadges() {
+    setSyncing(true)
+    setMessage(null)
+    try {
+      const res = await fetch('/api/badges/sync', { method: 'POST' })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(json.error || 'Gagal sync badge.')
+
+      const me = await fetch('/api/badges/me', { cache: 'no-store' })
+      const meJson = (await me.json().catch(() => ({}))) as BadgeApiResponse
+      if (!me.ok) throw new Error(meJson.error || 'Gagal reload badge.')
+
+      const manual = meJson.badges || []
+      const auto = meJson.autoBadges || []
+      setEarnedKeys(Array.from(new Set([...manual.map((item) => item.badge_key), ...auto].filter(Boolean))))
+      setPinnedKeys(Array.from(new Set(manual.filter((item) => item.is_pinned).map((item) => item.badge_key))))
+      setMessage(`Badge disync. ${json.unlockedKeys?.length || 0} badge kebaca eligible. Sistem akhirnya sadar diri, ANJJJ.`)
+    } catch (err: any) {
+      setMessage(err?.message || 'Gagal sync badge.')
+    } finally {
+      setSyncing(false)
+    }
+  }
 
   async function togglePin(badge: NexaBadge) {
     if (!earnedSet.has(badge.key)) {
@@ -106,11 +132,11 @@ export default function BadgeCollection() {
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
             <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-fuchsia-300/30 bg-fuchsia-300/10 px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-fuchsia-100">
-              Badge System v3
+              Badge System v4
             </div>
             <h1 className="text-3xl font-black tracking-tight sm:text-4xl lg:text-5xl">Badge NEXA, sekarang nggak bocor ke semua orang gratisan</h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300 sm:text-base">
-              Badge yang belum kebuka bakal blur + dikunci. Klik badge untuk lihat syarat. Kalau sudah kebuka, klik buat tampil/sembunyiin di profile publik.
+              Badge yang belum kebuka bakal blur + dikunci. Klik badge untuk lihat syarat. Kalau syarat sudah terpenuhi, klik Sync Badge biar sistem ngecek ulang dan unlock otomatis.
             </p>
           </div>
 
@@ -144,8 +170,18 @@ export default function BadgeCollection() {
           <div className="text-sm font-black text-slate-950 dark:text-white">Profile Showcase</div>
           <p className="text-sm text-slate-500 dark:text-slate-400">Badge yang dipilih akan tampil di profile dan bisa dilihat orang lain di user card/page yang memakai komponen public badge.</p>
         </div>
-        <div className="text-sm font-black text-teal-700 dark:text-teal-300">
-          {loading ? 'Loading badge...' : `${earnedKeys.length} kebuka · ${pinnedKeys.length}/6 tampil`}
+        <div className="flex flex-col gap-2 sm:items-end">
+          <div className="text-sm font-black text-teal-700 dark:text-teal-300">
+            {loading ? 'Loading badge...' : `${earnedKeys.length} kebuka · ${pinnedKeys.length}/6 tampil`}
+          </div>
+          <button
+            type="button"
+            onClick={syncBadges}
+            disabled={syncing}
+            className="rounded-2xl bg-slate-950 px-4 py-2 text-xs font-black text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-teal-300 dark:text-slate-950"
+          >
+            {syncing ? 'Syncing...' : 'Sync Badge'}
+          </button>
         </div>
       </div>
 

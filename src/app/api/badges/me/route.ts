@@ -2,35 +2,8 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getCurrentUser, getUserPlanAccess } from '@/lib/billing/server'
-
-function normalizeEmail(email?: string | null) {
-  return (email || '').trim().toLowerCase()
-}
-
-function envEmailList(value?: string) {
-  return (value || '')
-    .split(',')
-    .map((item) => normalizeEmail(item))
-    .filter(Boolean)
-}
-
-function ownerEmails() {
-  return [
-    ...envEmailList(process.env.NEXA_OWNER_EMAILS),
-    ...envEmailList(process.env.COMMAND_LIFETIME_EMAILS),
-    ...envEmailList(process.env.ADMIN_EMAILS),
-  ]
-}
-
-function autoBadgesForPlan(plan?: string | null, email?: string | null) {
-  const badges = new Set<string>()
-  const normalizedEmail = normalizeEmail(email)
-
-  if (plan === 'command') badges.add('command_elite')
-  if (ownerEmails().includes(normalizedEmail)) badges.add('mythos_architect')
-
-  return Array.from(badges)
-}
+import { autoBadgesForPlan } from '@/lib/badges/owner'
+import { syncUnlockedBadgesForUser } from '@/lib/badges/sync'
 
 export async function GET() {
   const supabase = await createClient()
@@ -43,9 +16,12 @@ export async function GET() {
   const access = await getUserPlanAccess({ supabase, user })
   const admin = createAdminClient()
 
+  // Auto-sync setiap user buka halaman badge. Jadi kalau syarat udah terpenuhi, badge kebuka tanpa nunggu admin meniup terompet database.
+  const sync = await syncUnlockedBadgesForUser({ admin, user, profile: access?.profile ?? null })
+
   const { data: badges, error } = await admin
     .from('nexa_user_badges')
-    .select('badge_key,unlocked_at,is_pinned,source')
+    .select('badge_key,unlocked_at,is_pinned,source,metadata')
     .eq('user_id', user.id)
     .order('is_pinned', { ascending: false })
     .order('unlocked_at', { ascending: false })
@@ -54,15 +30,18 @@ export async function GET() {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
+  const rows = badges || []
   const autoBadges = autoBadgesForPlan(access?.plan, user.email)
-  const pinnedBadges = (badges || []).filter((item) => item.is_pinned)
 
   return NextResponse.json({
     profile: access?.profile ?? null,
     plan: access?.plan ?? 'radar',
-    badges: badges || [],
-    pinnedBadges,
-    autoBadges,
+    badges: rows,
+    pinnedBadges: rows.filter((item) => item.is_pinned),
+    autoBadges: Array.from(new Set([...(sync.autoBadges || []), ...autoBadges])),
+    syncedUnlockedKeys: sync.unlockedKeys,
+    stats: sync.stats,
+    syncError: sync.error,
     maxPinned: 6,
   })
 }
