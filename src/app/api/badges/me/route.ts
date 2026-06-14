@@ -28,6 +28,17 @@ function uniqueRows(rows: BadgeRow[]) {
   return out
 }
 
+
+function readProfileEmail(profile: unknown): string | null {
+  if (!profile || typeof profile !== 'object') return null
+  const maybeEmail = (profile as { email?: unknown }).email
+  return typeof maybeEmail === 'string' ? maybeEmail : null
+}
+
+function readUserEmail(email: unknown): string | null {
+  return typeof email === 'string' ? email : null
+}
+
 function defaultPinned(rows: BadgeRow[], limit = 6) {
   const pinned = rows.filter((item) => item.is_pinned)
   if (pinned.length) return pinned.slice(0, limit)
@@ -61,8 +72,12 @@ export async function GET() {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  const owner = isOwnerEmail(user.email || access?.profile?.email)
-  const autoBadges = owner ? ALL_BADGE_KEYS : autoBadgesForPlan(access?.plan, user.email)
+  const userEmail = readUserEmail(user.email)
+  const profileEmail = readProfileEmail(access?.profile)
+  const effectiveEmail = userEmail ?? profileEmail
+
+  const owner = isOwnerEmail(effectiveEmail)
+  const autoBadges = owner ? ALL_BADGE_KEYS : autoBadgesForPlan(access?.plan, effectiveEmail)
   const allRows = uniqueRows([...(badges || []), ...rowsFromKeys(autoBadges, owner ? 'owner_me_auto' : 'plan_me_auto')])
   const pinnedBadges = defaultPinned(allRows, 6)
 
