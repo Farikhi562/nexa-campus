@@ -1,143 +1,126 @@
-# NEXA Campus v1.6.30 — Billing Admin Suite
+# NEXA Campus v1.6.31 - Plan Scope + Feature Gates
 
-Patch ini nge-upgrade manual payment biar nggak lagi approve lewat endpoint doang, karena Postman bukan admin panel, itu ritual HTTP. ANJJJ 😭
+Patch ini nambah scope final buat 3 plan:
 
-## Yang ditambah
+- **Radar** = gratis/basic survival
+- **Pulse** = Rp18.000/bulan/produktif harian
+- **Command** = Rp30.000/bulan/power user, AI, tim, lomba
 
-### 1. Admin Payment Dashboard
-File baru:
-- `src/app/admin/payments/page.tsx`
-- `src/components/admin/AdminPaymentsPanel.tsx`
+## Isi patch
 
-URL:
-- `/admin/payments`
-
-Fitur:
-- list order manual payment
-- filter status
-- search order/nama/WA/email
-- lihat bukti transfer
-- approve order
-- reject order + alasan
-- statistik total/pending/approved
-
-### 2. Upload bukti transfer user
-File baru:
-- `src/app/api/billing/manual-payment/[orderId]/proof/route.ts`
-
-File ditimpa:
-- `src/components/billing/ManualPaymentCard.tsx`
-
-Flow user:
-1. Buka `/dashboard/billing`
-2. Pilih Pulse/Command
-3. Pilih Bank Jago atau BRI QRIS
-4. Buat order
-5. Bayar
-6. Upload bukti JPG/PNG/WEBP/PDF maksimal 5MB
-7. Status jadi `under_review`
-8. Admin approve dari `/admin/payments`
-
-### 3. Admin API lebih rapi
-File ditimpa:
-- `src/app/api/admin/billing/manual-payment/route.ts`
-
-Fitur:
-- GET list orders + profile user
-- PATCH approve/reject
-- anti approve ulang order yang sudah final
-- auto update `profiles.plan`, `plan_status`, `plan_started_at`, `plan_expires_at`
-- notif user via `notifyUser`
-- audit log ke `payment_audit_logs`
-
-### 4. Expire order otomatis
-File baru:
-- `src/app/api/cron/expire-payment-orders/route.ts`
-
-Vercel Cron contoh:
-```json
-{
-  "crons": [
-    {
-      "path": "/api/cron/expire-payment-orders?secret=ISI_CRON_SECRET_LU",
-      "schedule": "0 * * * *"
-    }
-  ]
-}
+```txt
+src/lib/billing/plans.ts
+src/lib/billing/access.ts
+src/lib/billing/server.ts
+src/components/billing/FeatureGate.tsx
+src/components/billing/UpgradePromptCard.tsx
+src/components/billing/UsageLimitBadge.tsx
+src/components/billing/PlanScopeMatrix.tsx
+src/app/pricing/scope/page.tsx
+src/app/api/billing/access/route.ts
+src/app/api/billing/usage/consume/route.ts
+src/app/api/ask-nexa/route.ts
+src/app/dashboard/study-room/[id]/call/page.tsx
+supabase/migrations/20260615_plan_scope_feature_gates.sql
 ```
 
-### 5. Feature gate helper
-File baru:
-- `src/lib/billing/access.ts`
+## Yang langsung aktif
 
-Ini helper buat ngunci fitur per plan:
-- Radar: basic
-- Pulse: unlimited deadline, weekly summary, Telegram
-- Command: custom reminder, AI quick add, Ask NEXA premium, WhatsApp/email notif
+1. **Plan config lengkap**
+   - Radar, Pulse, Command dengan fitur dan batasan final.
 
-## SQL Migration
-Jalankan di Supabase SQL Editor:
+2. **Feature gate helper**
+   - `canUseFeature(plan, featureKey)`
+   - `getDailyLimit(plan, featureKey)`
+   - `PLAN_LIMITS`
+   - `FEATURE_META`
 
-- `supabase/migrations/20260615_billing_admin_suite.sql`
+3. **Usage limit harian**
+   - Radar: NEXA Assistant 5 chat/hari, AI Quick Add 0x/hari
+   - Pulse: NEXA Assistant 30 chat/hari, AI Quick Add 10x/hari
+   - Command: NEXA Assistant 100 chat/hari, AI Quick Add 100x/hari
 
-Yang dibuat:
-- hardening `manual_payment_orders`
-- tabel `payment_audit_logs`
-- bucket Storage `payment-proofs`
-- index tambahan
-- RLS policy aman buat user order
+4. **Ask NEXA gated**
+   - Radar bisa chat 5x/hari.
+   - Radar bisa preview parse deadline, tapi belum bisa save.
+   - Pulse bisa save deadline via AI Quick Add 10x/hari.
+   - Command bisa AI Quick Add 100x/hari.
 
-## ENV wajib
-Tambahin di Vercel:
+5. **Study Room call gated**
+   - `/dashboard/study-room/[id]/call` cuma buat Command.
 
-```env
-ADMIN_EMAILS=emailadminlu@gmail.com
-SUPABASE_SERVICE_ROLE_KEY=xxxxx
-CRON_SECRET=xxxxx
-NEXT_PUBLIC_NEXA_PAYMENT_WHATSAPP=628xxxxxxxxxx
-
-NEXT_PUBLIC_BANK_JAGO_NAME=Bank Jago
-NEXT_PUBLIC_BANK_JAGO_ACCOUNT_NUMBER=100157134050
-NEXT_PUBLIC_BANK_JAGO_ACCOUNT_NAME=Muhamad Fauzan Al Farikhi
-
-NEXT_PUBLIC_BRI_QRIS_BANK_NAME=BRI QRIS / BRImo
-NEXT_PUBLIC_BRI_QRIS_NUMBER=0335 0110 7723 508
-NEXT_PUBLIC_BRI_QRIS_ACCOUNT_NAME=Muhamad Fauzan Al Farikhi
-NEXT_PUBLIC_BRI_QRIS_IMAGE_URL=/payment/bri-qris.jpg
-```
-
-`ADMIN_EMAILS` harus email akun lu yang login di NEXA Campus. Kalau nggak, `/admin/payments` bakal 403. Ya gimana, admin tanpa daftar admin itu namanya warga random.
+6. **Pricing scope page**
+   - Buka `/pricing/scope` buat lihat matrix batasan plan.
 
 ## Cara pasang
 
-1. Extract zip.
-2. Copy semua file ke project utama.
-3. Jalankan SQL migration di Supabase.
-4. Isi env Vercel.
-5. Jalankan lokal:
-   ```bash
-   npm run build
-   ```
-6. Kalau aman:
-   ```bash
-   git add -A
-   git commit -m "feat: add manual payment admin dashboard"
-   git push
-   ```
-7. Test:
-   - `/dashboard/billing`
-   - buat order Pulse + Bank Jago
-   - upload bukti
-   - buka `/admin/payments`
-   - approve
-   - cek `profiles.plan` berubah
+Dari root project:
+
+```bat
+xcopy /E /Y "nexa_v1_6_31_plan_scope_feature_gates\*" "."
+```
+
+Atau extract manual lalu timpa file ke project.
+
+Jalankan migration ini di Supabase SQL Editor:
+
+```txt
+supabase/migrations/20260615_plan_scope_feature_gates.sql
+```
+
+Lalu build:
+
+```bat
+npm run build
+git add -A
+git commit -m "feat: add plan scope and feature gates"
+git push
+```
+
+## Cara pakai FeatureGate di UI
+
+```tsx
+import FeatureGate from '@/components/billing/FeatureGate'
+
+<FeatureGate featureKey="study_room_voice_video" currentPlan={profile.plan}>
+  <VoiceVideoCall />
+</FeatureGate>
+```
+
+Kalau tidak mau passing `currentPlan`, component akan fetch `/api/billing/access` otomatis.
+
+## Contoh cek akses di API
+
+```ts
+import { consumeFeatureUsage } from '@/lib/billing/server'
+
+const usage = await consumeFeatureUsage({
+  userId: user.id,
+  featureKey: 'ai_quick_add',
+})
+
+if (!usage.allowed) {
+  return Response.json({ error: usage.message }, { status: 429 })
+}
+```
+
+## Feature key penting
+
+```txt
+nexa_assistant_chat
+ai_quick_add
+ai_quick_add_save
+telegram_notifications
+email_notifications
+custom_reminders
+study_room_voice_video
+friends_qr
+arena_create_team
+arena_team_leaderboard
+```
 
 ## Catatan penting
 
-Patch ini depend ke Batch 3 dan Batch 4 sebelumnya:
-- `src/lib/supabase/server`
-- `src/lib/supabase/admin`
-- `src/lib/notifications/notify-user`
-- `src/lib/billing/plans`
-
-Kalau file itu belum ada, pasang batch sebelumnya dulu. Jangan loncat batch kayak nonton tutorial terus skip bagian install dependency, nanti nangis ke TypeScript.
+- Patch ini aman setelah v1.6.30.
+- Pastikan migration jalan dulu sebelum test Ask NEXA, karena route baru butuh tabel `feature_usage_daily` dan function `consume_feature_usage`.
+- Kalau `profiles` project lo pakai `id` atau `user_id`, helper sudah coba dua-duanya. Ya, database schema manusia memang suka bikin AI ikut terapi.
