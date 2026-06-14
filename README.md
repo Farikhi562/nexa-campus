@@ -1,47 +1,47 @@
-# NEXA Campus v1.6.28 Study Room Slug Hotfix
+# NEXA Campus v1.6.29 - Billing Plan Type Hotfix
 
-Fix untuk error Vercel/Next.js:
+Fix build error:
 
-> You cannot use different slug names for the same dynamic path ('id' !== 'roomId').
-
-Penyebab:
-Next.js tidak mengizinkan path sibling dynamic yang sama tapi nama param beda, misalnya:
-
-- `src/app/dashboard/study-room/[id]/...`
-- `src/app/dashboard/study-room/[roomId]/call/...`
-
-Solusi:
-Pakai satu nama segment saja: `[id]`.
-
-## Cara pasang manual
-
-1. Hapus folder lama:
-
-```bash
-rm -rf "src/app/dashboard/study-room/[roomId]"
+```txt
+Type error: Argument of type 'BillingPlanId' is not assignable to parameter of type 'SetStateAction<PaidBillingPlanId>'.
+Type '"radar"' is not assignable to type 'SetStateAction<PaidBillingPlanId>'.
 ```
 
-2. Copy folder `src/app/dashboard/study-room/[id]/call` dari patch ini ke project.
+## Penyebab
 
-3. Build test:
+`BILLING_PLANS[planId]` masih dianggap TypeScript sebagai `BillingPlan`, dan `plan.id` bertipe `BillingPlanId` (`radar | pulse | command`).
+Padahal state `selectedPlan` cuma boleh `PaidBillingPlanId` (`pulse | command`).
+
+## Fix
+
+Di `src/components/billing/ManualPaymentCard.tsx`, handler pilih plan diganti dari:
+
+```tsx
+onClick={() => setSelectedPlan(plan.id)}
+```
+
+menjadi:
+
+```tsx
+onClick={() => setSelectedPlan(planId)}
+```
+
+Karena `planId` berasal dari `(['pulse', 'command'] as const)`, TypeScript tahu nilainya pasti paid plan, bukan `radar`.
+
+## Cara pasang
+
+1. Copy folder `src` ke root project.
+2. Timpa file lama.
+3. Jalankan:
 
 ```bash
 npm run build
 ```
 
-4. Commit dan push:
+4. Kalau sukses:
 
 ```bash
-git add .
-git commit -m "fix: align study room dynamic route slug"
+git add -A
+git commit -m "fix: manual payment selected plan type"
 git push
-```
-
-## Cara pasang via script
-
-Dari root project:
-
-```bash
-bash scripts/fix-study-room-slug.sh
-npm run build
 ```

@@ -92,9 +92,9 @@ export default function ManualPaymentCard() {
           const active = selectedPlan === planId
           return (
             <button
-              key={plan.id}
+              key={planId}
               type="button"
-              onClick={() => setSelectedPlan(plan.id)}
+              onClick={() => setSelectedPlan(planId)}
               className={`rounded-3xl border p-5 text-left transition ${
                 active ? 'border-teal-500 bg-teal-50 shadow-sm' : 'border-slate-200 bg-white hover:border-teal-200'
               }`}
