@@ -10,6 +10,6 @@ type Props = {
   label?: string
 }
 
-export default function CurrentUserBadges({ limit = 6, className = '', size = 'sm', empty = 'placeholder', label }: Props) {
+export default function CurrentUserBadges({ limit = 1, className = '', size = 'sm', empty = 'placeholder', label }: Props) {
   return <UnifiedBadgeStrip limit={limit} className={className} size={size} empty={empty} label={label} />
 }

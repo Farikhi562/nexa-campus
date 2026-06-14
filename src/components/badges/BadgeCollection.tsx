@@ -45,7 +45,7 @@ export default function BadgeCollection() {
         const manual = json.badges || []
         const auto = json.autoBadges || []
         setEarnedKeys(Array.from(new Set([...manual.map((item) => item.badge_key), ...auto].filter(Boolean))))
-        setPinnedKeys(Array.from(new Set(manual.filter((item) => item.is_pinned).map((item) => item.badge_key))))
+        setPinnedKeys(Array.from(new Set(manual.filter((item) => item.is_pinned).map((item) => item.badge_key))).slice(0, 1))
       })
       .catch((err) => setMessage(err?.message || 'Gagal baca badge user.'))
       .finally(() => {
@@ -82,7 +82,7 @@ export default function BadgeCollection() {
       const manual = meJson.badges || []
       const auto = meJson.autoBadges || []
       setEarnedKeys(Array.from(new Set([...manual.map((item) => item.badge_key), ...auto].filter(Boolean))))
-      setPinnedKeys(Array.from(new Set(manual.filter((item) => item.is_pinned).map((item) => item.badge_key))))
+      setPinnedKeys(Array.from(new Set(manual.filter((item) => item.is_pinned).map((item) => item.badge_key))).slice(0, 1))
       setMessage(`Badge disync. ${json.unlockedKeys?.length || 0} badge kebaca eligible. Sistem akhirnya sadar diri, ANJJJ.`)
     } catch (err: any) {
       setMessage(err?.message || 'Gagal sync badge.')
@@ -110,13 +110,8 @@ export default function BadgeCollection() {
       const json = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(json.error || 'Gagal update badge profile.')
 
-      setPinnedKeys((prev) => {
-        const set = new Set(prev)
-        if (nextPinned) set.add(badge.key)
-        else set.delete(badge.key)
-        return Array.from(set)
-      })
-      setMessage(nextPinned ? `${badge.name} tampil di profile.` : `${badge.name} disembunyikan dari profile.`)
+      setPinnedKeys(nextPinned ? [badge.key] : [])
+      setMessage(nextPinned ? `${badge.name} jadi satu-satunya badge utama di profile.` : `${badge.name} disembunyikan dari profile.`)
     } catch (err: any) {
       setMessage(err?.message || 'Gagal update badge profile.')
     } finally {
@@ -167,12 +162,12 @@ export default function BadgeCollection() {
 
       <div className="mt-5 flex flex-col gap-3 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-slate-950 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <div className="text-sm font-black text-slate-950 dark:text-white">Profile Showcase</div>
-          <p className="text-sm text-slate-500 dark:text-slate-400">Badge yang dipilih akan tampil di profile dan bisa dilihat orang lain di user card/page yang memakai komponen public badge.</p>
+          <div className="text-sm font-black text-slate-950 dark:text-white">Profile Main Badge</div>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Pilih 1 badge utama buat tampil di profile dan semua user card publik. Klik badge lain untuk langsung ganti, bukan numpuk 6 biji kayak etalase pasar malam.</p>
         </div>
         <div className="flex flex-col gap-2 sm:items-end">
           <div className="text-sm font-black text-teal-700 dark:text-teal-300">
-            {loading ? 'Loading badge...' : `${earnedKeys.length} kebuka · ${pinnedKeys.length}/6 tampil`}
+            {loading ? 'Loading badge...' : `${earnedKeys.length} kebuka · ${pinnedKeys.length}/1 tampil`}
           </div>
           <button
             type="button"

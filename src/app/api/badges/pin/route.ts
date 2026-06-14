@@ -6,7 +6,7 @@ import { BADGE_BY_KEY } from '@/lib/badges/catalog'
 import { autoBadgesForPlan } from '@/lib/badges/owner'
 import { syncUnlockedBadgesForUser } from '@/lib/badges/sync'
 
-const MAX_PINNED_BADGES = 6
+const MAX_PINNED_BADGES = 1
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
   const admin = createAdminClient()
   const access = await getUserPlanAccess({ supabase, user })
 
-  // Sync dulu, biar user yang sudah memenuhi syarat tidak ditolak cuma gara-gara badge belum pernah diinsert. Teknologi jangan jadi tukang PHP-in user.
+  // Sync dulu, biar user yang sudah memenuhi syarat tidak ditolak cuma gara-gara badge belum pernah diinsert.
   const sync = await syncUnlockedBadgesForUser({ admin, user, profile: access?.profile ?? null })
   const autoBadges = autoBadgesForPlan(access?.plan, user.email)
 
@@ -47,11 +47,26 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Badge ini belum kebuka. Klik badge buat lihat syaratnya dulu, jangan cosplay jadi legenda prematur.' }, { status: 403 })
   }
 
-  if (pinned) {
-    const pinnedCount = existing.filter((item) => item.is_pinned && item.badge_key !== badgeKey).length
-    if (pinnedCount >= MAX_PINNED_BADGES) {
-      return NextResponse.json({ error: `Maksimal ${MAX_PINNED_BADGES} badge tampil di profile. Sembunyikan salah satu dulu.` }, { status: 400 })
-    }
+  if (!pinned) {
+    const { error } = await admin
+      .from('nexa_user_badges')
+      .update({ is_pinned: false })
+      .eq('user_id', user.id)
+      .eq('badge_key', badgeKey)
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+    return NextResponse.json({ ok: true, badge_key: badgeKey, pinned: false, maxPinned: MAX_PINNED_BADGES })
+  }
+
+  // Single-showcase rule: pilih 1 badge utama saja. Semua badge lama dipadamkan dulu, baru badge ini dinyalakan.
+  const { error: unpinError } = await admin
+    .from('nexa_user_badges')
+    .update({ is_pinned: false })
+    .eq('user_id', user.id)
+
+  if (unpinError) {
+    return NextResponse.json({ error: unpinError.message }, { status: 500 })
   }
 
   const { error } = await admin
@@ -60,8 +75,8 @@ export async function POST(req: NextRequest) {
       {
         user_id: user.id,
         badge_key: badgeKey,
-        source: autoBadges.includes(badgeKey) ? 'auto_pin' : 'user_pin',
-        is_pinned: pinned,
+        source: autoBadges.includes(badgeKey) ? 'auto_main_badge' : 'user_main_badge',
+        is_pinned: true,
       },
       { onConflict: 'user_id,badge_key' }
     )
@@ -70,5 +85,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  return NextResponse.json({ ok: true, badge_key: badgeKey, pinned })
+  return NextResponse.json({ ok: true, badge_key: badgeKey, pinned: true, maxPinned: MAX_PINNED_BADGES })
 }

@@ -29,7 +29,7 @@ function rowsFromKeys(keys: string[], source = 'auto_public'): BadgeRow[] {
   return keys.map((badge_key) => ({ badge_key, unlocked_at: ts, is_pinned: false, source }))
 }
 
-function defaultPinned(rows: BadgeRow[], limit = 6) {
+function defaultPinned(rows: BadgeRow[], limit = 1) {
   const pinned = rows.filter((item) => item.is_pinned)
   if (pinned.length) return pinned.slice(0, limit)
   const topKeys = getProfileShowcaseBadges(rows.map((item) => item.badge_key), limit).map((badge) => badge.key)
@@ -68,7 +68,7 @@ export async function GET(_req: NextRequest, context: RouteContext) {
   const dbRows = (badges || []) as BadgeRow[]
   const autoBadges = owner ? ALL_BADGE_KEYS : autoBadgesForPlan(profile?.plan, profile?.email)
   const allRows = uniqueRows([...dbRows, ...rowsFromKeys(autoBadges, owner ? 'owner_public_auto' : 'plan_public_auto')])
-  const pinnedBadges = defaultPinned(allRows, 6)
+  const pinnedBadges = defaultPinned(allRows, 1)
 
   return NextResponse.json({
     profile: profile ?? null,

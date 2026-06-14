@@ -40,13 +40,13 @@ function normalizeBadgeKeys(json: BadgeResponse) {
   const auto = json.autoBadges || []
   const pinned = unique([...pinnedRows.map((item) => item.badge_key), ...auto.filter((key) => key === 'mythos_architect' || key === 'referral_mythos_100')])
   const fallback = unique([...allRows.map((item) => item.badge_key), ...auto])
-  return pinned.length ? pinned : fallback
+  return (pinned.length ? pinned : fallback).slice(0, 1)
 }
 
 export default function UnifiedBadgeStrip({
   userId,
   badgeKeys,
-  limit = 4,
+  limit = 1,
   size = 'sm',
   variant = 'pills',
   className = '',

@@ -29,7 +29,7 @@ export default function ProfileBadgeShowcase({
   userId,
   title = 'Badge Profile',
   compact = false,
-  limit = 6,
+  limit = 1,
   showLockedPreview = true,
   publicMode = Boolean(userId),
 }: ProfileBadgeShowcaseProps) {
@@ -54,7 +54,7 @@ export default function ProfileBadgeShowcase({
         const pinnedRows = json.pinnedBadges || allRows.filter((item) => item.is_pinned)
         const auto = json.autoBadges || []
         const earned = Array.from(new Set([...allRows.map((item) => item.badge_key), ...auto].filter(Boolean)))
-        const pinned = Array.from(new Set([...pinnedRows.map((item) => item.badge_key), ...auto.filter((key) => key === 'mythos_architect')].filter(Boolean)))
+        const pinned = Array.from(new Set([...pinnedRows.map((item) => item.badge_key), ...auto.filter((key) => key === 'mythos_architect')].filter(Boolean))).slice(0, 1)
         setEarnedKeys(earned)
         setPinnedKeys(pinned)
         setError(null)
@@ -95,7 +95,7 @@ export default function ProfileBadgeShowcase({
           <p className="text-[11px] font-black uppercase tracking-[0.2em] text-teal-600 dark:text-teal-300">NEXA Identity</p>
           <h2 className="text-xl font-black tracking-tight text-slate-950 dark:text-white">{title}</h2>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            {publicMode ? 'Badge yang dipilih user untuk tampil di profile publik.' : 'Klik badge di halaman badge buat nampilin/nyembunyiin di profile publik.'}
+            {publicMode ? 'Badge utama yang dipilih user untuk tampil di profile publik.' : 'Klik badge di halaman badge buat milih 1 badge utama di profile publik.'}
           </p>
         </div>
 
@@ -111,7 +111,7 @@ export default function ProfileBadgeShowcase({
 
       {loading ? (
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: compact ? 3 : 6 }).map((_, idx) => (
+          {Array.from({ length: 1 }).map((_, idx) => (
             <div key={idx} className="h-24 animate-pulse rounded-2xl bg-slate-100 dark:bg-white/10" />
           ))}
         </div>
@@ -121,10 +121,10 @@ export default function ProfileBadgeShowcase({
         </div>
       ) : showcasedBadges.length === 0 ? (
         <div className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-300">
-          {publicMode ? 'User ini belum menampilkan badge di profile.' : 'Belum ada badge tampil di profile. Buka halaman badge, klik badge yang sudah kebuka, terus jadikan showcase.'}
+          {publicMode ? 'User ini belum menampilkan badge di profile.' : 'Belum ada badge utama tampil di profile. Buka halaman badge, klik satu badge yang sudah kebuka buat dipamerin.'}
         </div>
       ) : (
-        <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-4 grid gap-3">
           {showcasedBadges.map((badge) => (
             <NexaBadgeCard key={badge.key} badge={badge} compact={compact} showDescription={!compact} showRequirement={false} pinned />
           ))}

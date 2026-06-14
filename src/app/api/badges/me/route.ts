@@ -39,7 +39,7 @@ function readUserEmail(email: unknown): string | null {
   return typeof email === 'string' ? email : null
 }
 
-function defaultPinned(rows: BadgeRow[], limit = 6) {
+function defaultPinned(rows: BadgeRow[], limit = 1) {
   const pinned = rows.filter((item) => item.is_pinned)
   if (pinned.length) return pinned.slice(0, limit)
   const topKeys = getProfileShowcaseBadges(rows.map((item) => item.badge_key), limit).map((badge) => badge.key)
@@ -79,7 +79,7 @@ export async function GET() {
   const owner = isOwnerEmail(effectiveEmail)
   const autoBadges = owner ? ALL_BADGE_KEYS : autoBadgesForPlan(access?.plan, effectiveEmail)
   const allRows = uniqueRows([...(badges || []), ...rowsFromKeys(autoBadges, owner ? 'owner_me_auto' : 'plan_me_auto')])
-  const pinnedBadges = defaultPinned(allRows, 6)
+  const pinnedBadges = defaultPinned(allRows, 1)
 
   return NextResponse.json({
     profile: access?.profile ?? null,
