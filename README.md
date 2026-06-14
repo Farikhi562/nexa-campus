@@ -1,59 +1,76 @@
-# NEXA Campus v1.6.34 — Study Room Call Buttons, Voice Note, Responsive Guard, 30 Badges
+# NEXA Campus v1.6.35 — Command Assistant Runtime Hotfix
 
-Patch ini nambahin:
+Patch ini ngebenerin error NEXA Assistant Command Center yang cuma muncul:
 
-- Tombol Study Room: **Video Call**, **Voice Only**, **Voice Note**
-- Halaman `/dashboard/study-room/[id]/voice-notes`
-- API upload/list voice note: `/api/study-room/[id]/voice-notes`
-- Jitsi call support mode video/audio
-- Voice note pakai MediaRecorder + Supabase Storage bucket `study-room-voice-notes`
-- Responsive safety CSS global
-- 30 badge baru: Biasa, Langka, Epic, Legend, Mythos
-- Page badge: `/dashboard/achievements` dan `/dashboard/badges`
+```txt
+Command Assistant lagi gagal eksekusi. TypeScript mungkin sedang minta tumbal.
+```
+
+## Yang dibenerin
+
+- Frontend sekarang nampilin `answer` dari API walaupun HTTP status bukan 200.
+- API `/api/nexa-assistant/command` dibungkus full try/catch biar nggak mati bisu.
+- Usage limit check kalau migration belum jalan tidak langsung bunuh Command Assistant.
+- Kalau AI provider/env belum aktif, Command Assistant tetap jawab pakai **local fallback mode**.
+- Risk Scan, Battle Plan, Reminder Architect, Notification Copilot, Arena Coach tetap jalan walau AI provider lagi kosong/ngambek.
+- Debug endpoint baru:
+
+```txt
+/api/debug/nexa-command
+```
+
+## File yang diubah/ditambah
+
+```txt
+src/app/api/nexa-assistant/command/route.ts
+src/components/ai/NexaCommandAssistantPage.tsx
+src/app/api/debug/nexa-command/route.ts
+```
 
 ## Cara pasang di Windows CMD
 
 Dari root project:
 
 ```bat
-xcopy /E /Y "nexa_v1_6_34_study_room_voice_badges_responsive\*" "."
-node scripts\install-v1.6.34.mjs
+xcopy /E /Y "nexa_v1_6_35_command_assistant_runtime_hotfix\*" "."
 npm run build
-```
-
-Jalankan migration SQL di Supabase:
-
-```txt
-supabase/migrations/20260615_study_room_voice_notes_badges.sql
-```
-
-Lalu commit deploy:
-
-```bat
 git add -A
-git commit -m "feat: add study room calls voice notes responsive badges"
+git commit -m "fix: stabilize command assistant runtime"
 git push
 ```
 
-## Test
+## Test setelah deploy
 
-1. Pastikan akun lu Command.
-2. Buka detail Study Room.
-3. Harus muncul tombol **Video Call**, **Voice Only**, **Voice Note**.
-4. Klik Video Call: `/dashboard/study-room/[id]/call`.
-5. Klik Voice Only: `/dashboard/study-room/[id]/call?mode=audio`.
-6. Klik Voice Note: `/dashboard/study-room/[id]/voice-notes`.
-7. Buka `/dashboard/achievements`, harus muncul 30 badge.
+1. Buka:
 
-## Catatan
-
-Kalau tombol belum muncul di StudyRoomDetail, berarti script auto-inject gagal karena struktur file beda. Tambahkan manual di file:
-
-```tsx
-import StudyRoomCommandActions from '@/components/study-room/StudyRoomCommandActions'
-
-// letakkan di bagian atas JSX detail room
-<StudyRoomCommandActions />
+```txt
+/api/debug/nexa-command
 ```
 
-Voice note dan call dikunci Command karena mengikuti feature gate `study_room_voice_video`.
+Pastikan `plan` kebaca `command`.
+
+2. Buka:
+
+```txt
+/dashboard/nexa-assistant
+```
+
+3. Coba prompt:
+
+```txt
+Scan semua deadline gue. Kasih risk score, mana yang bahaya, dan cara nyelamatinnya.
+```
+
+Kalau AI key belum ada pun, harus tetap jawab pakai fallback lokal.
+
+## Catatan env
+
+Supaya AI beneran hidup, tetap isi salah satu provider env yang dipakai project lu, misalnya:
+
+```env
+GEMINI_API_KEY=xxxxx
+```
+
+atau env provider lain sesuai `src/lib/ai/llm.ts` project lu.
+
+Kalau belum isi AI key, patch ini tetap bikin Command Center jalan, tapi jawabannya local fallback, bukan model AI penuh.

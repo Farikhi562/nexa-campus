@@ -110,6 +110,209 @@ function prettyDate(date?: string | null, time?: string | null) {
   return `${date}${time ? ` jam ${time}` : ''}`
 }
 
+function todayJakarta() {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Jakarta',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(new Date())
+
+  const year = Number(parts.find((part) => part.type === 'year')?.value)
+  const month = Number(parts.find((part) => part.type === 'month')?.value)
+  const day = Number(parts.find((part) => part.type === 'day')?.value)
+  return new Date(Date.UTC(year, month - 1, day))
+}
+
+function daysUntil(date?: string | null) {
+  if (!date) return null
+  const target = new Date(`${date}T00:00:00Z`)
+  if (Number.isNaN(target.getTime())) return null
+  const today = todayJakarta()
+  return Math.ceil((target.getTime() - today.getTime()) / 86400000)
+}
+
+function priorityWeight(priority?: string | null) {
+  if (priority === 'high') return 18
+  if (priority === 'medium') return 10
+  if (priority === 'low') return 4
+  return 8
+}
+
+function riskScore(deadline: GeminiDeadlineContext) {
+  const days = daysUntil(deadline.due_date)
+  let base = 35
+  if (days === null) base = 45
+  else if (days < 0) base = 100
+  else if (days === 0) base = 95
+  else if (days === 1) base = 88
+  else if (days <= 3) base = 75
+  else if (days <= 7) base = 55
+  else if (days <= 14) base = 38
+  else base = 22
+
+  return Math.min(100, Math.max(0, base + priorityWeight(deadline.priority)))
+}
+
+function activeDeadlines(deadlines: GeminiDeadlineContext[]) {
+  return deadlines
+    .filter((deadline) => deadline.status !== 'done' && deadline.status !== 'completed')
+    .map((deadline) => ({ ...deadline, risk: riskScore(deadline), days: daysUntil(deadline.due_date) }))
+    .sort((a, b) => b.risk - a.risk)
+}
+
+function deadlineLine(deadline: GeminiDeadlineContext & { risk?: number; days?: number | null }, index: number) {
+  const daysText = deadline.days === null || deadline.days === undefined
+    ? 'tanpa tanggal jelas'
+    : deadline.days < 0
+      ? `telat ${Math.abs(deadline.days)} hari`
+      : deadline.days === 0
+        ? 'hari ini'
+        : `${deadline.days} hari lagi`
+
+  return `${index + 1}. ${deadline.title || 'Deadline tanpa judul'} (${deadline.course || '-'})\n   Risk: ${deadline.risk ?? riskScore(deadline)}/100 | ${prettyDate(deadline.due_date, deadline.due_time)} | ${daysText} | priority: ${deadline.priority || 'medium'}`
+}
+
+function buildFallbackAnswer(params: {
+  action: CommandAction
+  message: string
+  deadlines: GeminiDeadlineContext[]
+  warning?: string | null
+}) {
+  const ranked = activeDeadlines(params.deadlines)
+  const top = ranked.slice(0, 5)
+  const urgent = ranked.filter((deadline) => (deadline.days ?? 99) <= 3)
+  const warningText = params.warning ? `\n\nCatatan sistem: ${params.warning}` : ''
+
+  if (params.action === 'deadline_executor') {
+    return [
+      'Deadline Executor aktif, tapi pesan ini belum cukup kebaca sebagai perintah simpan deadline.',
+      '',
+      'Format paling aman:',
+      '“tambahin deadline tugas kalkulus besok jam 8 malam prioritas tinggi”',
+      '',
+      'Kalau mau custom reminder Command:',
+      '“tambahin deadline laporan AI Jumat jam 20.00, ingetin H-3 H-1 dan hari-H jam 09.00”',
+      '',
+      'AI boleh pinter, tapi jangan disuruh nebak tanggal kayak dukun kalender kos-kosan.',
+      warningText,
+    ].join('\n')
+  }
+
+  if (ranked.length === 0) {
+    return [
+      'Command Center aktif, tapi gue belum nerima deadline yang bisa discan.',
+      '',
+      'Yang harus lu lakukan:',
+      '1. Masukin deadline dulu dari Quick Add atau Deadline Executor.',
+      '2. Tulis minimal judul + tanggal.',
+      '3. Balik lagi ke Risk Scan / Battle Plan.',
+      '',
+      'Tanpa deadline, risk scan cuma jadi ramalan zodiak akademik. Lucu, tapi nggak guna. ANJJJ 😭',
+      warningText,
+    ].join('\n')
+  }
+
+  if (params.action === 'risk_scan') {
+    return [
+      'Deadline Risk Scan selesai. Ini hasil mode fallback lokal, jadi tetap jalan walau AI provider lagi ngambek.',
+      '',
+      `Total aktif: ${ranked.length}`,
+      `Area bahaya 0-3 hari: ${urgent.length}`,
+      `Risk tertinggi: ${top[0]?.risk ?? 0}/100`,
+      '',
+      'Top risiko:',
+      ...top.map((deadline, index) => deadlineLine(deadline, index)),
+      '',
+      'Cara nyelametin:',
+      '1. Kerjain risk tertinggi dulu, bukan yang paling “mood”. Mood itu penipu bersertifikat.',
+      '2. Pecah tiap deadline jadi 3 task: riset/bahan, eksekusi, final check.',
+      '3. Untuk deadline <= 3 hari, target minimal versi submit-able dulu. Bagus belakangan, selamat dulu.',
+      '4. Set reminder H-1 + hari-H. Kalau Command, tambah H-3 buat yang risk >= 75.',
+      warningText,
+    ].join('\n')
+  }
+
+  if (params.action === 'battle_plan') {
+    return [
+      'Study Battle Plan 7 hari:',
+      '',
+      ...top.slice(0, 3).map((deadline, index) => (
+        `D-${index + 1}: ${deadline.title || 'Deadline'}\n- Fokus: ${deadline.course || 'general'}\n- Target: bikin progres minimal 60%, jangan nunggu “inspirasi”. Inspirasi itu biasanya datang setelah panik.`
+      )),
+      '',
+      'Template harian:',
+      '- Sesi 1: 45 menit ngerjain bagian paling susah.',
+      '- Break: 10 menit, jangan berubah jadi 2 jam TikTok, manusia lemah.',
+      '- Sesi 2: 45 menit rapihin output.',
+      '- Malam: 15 menit cek deadline besok.',
+      warningText,
+    ].join('\n')
+  }
+
+  if (params.action === 'reminder_architect') {
+    return [
+      'Reminder Architecture Command:',
+      '',
+      ...top.slice(0, 5).map((deadline, index) => (
+        `${index + 1}. ${deadline.title || 'Deadline'}\n- H-7: mulai cicil bahan\n- H-3: wajib 50% jadi\n- H-1: finalisasi + cek format\n- Hari-H pagi: submit/siapkan file\n- Channel: in-app + Telegram${deadline.risk >= 75 ? ' + Gmail' : ''}`
+      )),
+      '',
+      'Rule brutal: deadline high risk harus punya minimal 3 reminder. Satu reminder doang itu bukan sistem, itu harapan.',
+      warningText,
+    ].join('\n')
+  }
+
+  if (params.action === 'notification_copilot') {
+    return [
+      'Notification copy siap:',
+      '',
+      'In-app:',
+      `Deadline paling rawan: ${top[0]?.title || 'deadline kamu'}. Buka NEXA sekarang dan selesaikan step pertama sebelum panik jadi fitur permanen.`,
+      '',
+      'Telegram:',
+      `🚨 NEXA Alert: ${top[0]?.title || 'Deadline'} masuk zona risiko. Target hari ini: bikin progres minimal 30%. Buka dashboard NEXA buat battle plan.`,
+      '',
+      'Gmail subject:',
+      `[NEXA Command] Deadline risk scan: ${urgent.length} tugas butuh perhatian`,
+      '',
+      'Gmail body:',
+      'Ada deadline yang mulai rawan. Buka NEXA Campus untuk lihat prioritas, reminder, dan rencana eksekusi. Jangan tunggu chaos jadi budaya organisasi pribadi.',
+      warningText,
+    ].join('\n')
+  }
+
+  if (params.action === 'arena_coach') {
+    return [
+      'NEXA Arena Coach:',
+      '',
+      'Strategi menang:',
+      '1. Bentuk tim kecil 3-5 orang. Kebanyakan orang = rapat banyak, kerja sedikit. Klasik.',
+      '2. Bagi role: lead, executor, researcher, designer, QA.',
+      '3. Kejar badge mingguan dulu sebelum leaderboard besar.',
+      '4. Pakai Study Room buat koordinasi dan call Command.',
+      '5. Set target: 1 deliverable kecil tiap 24 jam.',
+      '',
+      'Badge target: konsistensi dulu, mythos belakangan. Jangan baru daftar langsung cosplay legenda.',
+      warningText,
+    ].join('\n')
+  }
+
+  return [
+    'Command Center aktif ✅',
+    '',
+    'Lu bisa pakai:',
+    '- “Scan semua deadline gue” buat risk score.',
+    '- “Bikin battle plan 7 hari” buat jadwal eksekusi.',
+    '- “Rancang reminder custom” buat H-7/H-3/H-1/hari-H.',
+    '- “Tambahin deadline tugas kalkulus besok jam 8 malam” buat save deadline.',
+    '',
+    `Deadline aktif kebaca: ${ranked.length}`,
+    ranked.length ? `Paling bahaya: ${top[0]?.title || '-'} (${top[0]?.risk ?? 0}/100)` : '',
+    warningText,
+  ].filter(Boolean).join('\n')
+}
+
 function buildCommandQuestion(params: {
   action: CommandAction
   message: string
@@ -149,155 +352,213 @@ function buildCommandQuestion(params: {
   ].join('\n')
 }
 
-export async function POST(request: NextRequest) {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    return NextResponse.json({ error: 'Login dulu buat pakai NEXA Command Assistant.' }, { status: 401 })
-  }
-
-  let body: CommandBody
+async function safeConsumeFeatureUsage(params: { userId: string; featureKey: 'nexa_assistant_actions' | 'ai_quick_add' }) {
   try {
-    body = await request.json() as CommandBody
-  } catch {
-    return NextResponse.json({ error: 'Request tidak valid.' }, { status: 400 })
+    const usage = await consumeFeatureUsage(params)
+
+    // Kalau migration usage belum jalan, jangan bikin Command Assistant mati total.
+    // Biarkan Command jalan, tapi kirim warning buat admin.
+    if (usage.status === 'error') {
+      return { allowed: true, warning: usage.message, usage }
+    }
+
+    return { allowed: usage.allowed, warning: null as string | null, usage }
+  } catch (error) {
+    console.error('[NEXA Command Assistant] usage check crashed', error)
+    return {
+      allowed: true,
+      warning: 'Usage limit gagal dicek, jadi sementara dilewati biar Command Assistant tetap hidup.',
+      usage: null,
+    }
   }
+}
 
-  const action = isCommandAction(body.action) ? body.action : 'free_chat'
-  const messageSource = typeof body.message === 'string' ? body.message : body.question
-  const message = typeof messageSource === 'string' ? messageSource.trim() : ''
+export async function POST(request: NextRequest) {
+  try {
+    const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
 
-  if (!message) {
-    return NextResponse.json({ error: 'Tulis instruksi dulu.' }, { status: 400 })
-  }
+    if (!user) {
+      return NextResponse.json({ error: 'Login dulu buat pakai NEXA Command Assistant.' }, { status: 401 })
+    }
 
-  if (message.length > 1800) {
-    return NextResponse.json({ error: 'Instruksi kepanjangan. Maksimal 1800 karakter dulu, biar AI nggak mimisan digital.' }, { status: 400 })
-  }
+    let body: CommandBody
+    try {
+      body = await request.json() as CommandBody
+    } catch {
+      return NextResponse.json({ error: 'Request tidak valid.' }, { status: 400 })
+    }
 
-  const access = await getUserPlanAccess({ supabase, user: { id: user.id, email: user.email } })
-  if (!access || access.plan !== 'command') {
-    return NextResponse.json({
-      answer:
-        'NEXA Command Assistant cuma buat plan Command. Radar/Pulse tetap dapat assistant basic, tapi mode overpower ini dikunci. Ya, kapitalisme SaaS mengetuk pintu, ANJJJ 😭',
-      status: 'locked',
-      required_plan: 'command',
-      action,
-    }, { status: 402 })
-  }
+    const action = isCommandAction(body.action) ? body.action : 'free_chat'
+    const messageSource = typeof body.message === 'string' ? body.message : body.question
+    const message = typeof messageSource === 'string' ? messageSource.trim() : ''
 
-  const actionUsage = await consumeFeatureUsage({ userId: user.id, featureKey: 'nexa_assistant_actions' })
-  if (!actionUsage.allowed) {
-    return NextResponse.json({
-      answer: actionUsage.message,
-      status: actionUsage.status === 'locked' ? 'locked' : 'error',
-      action,
-      usage: actionUsage,
-    }, { status: actionUsage.status === 'locked' ? 402 : 429 })
-  }
+    if (!message) {
+      return NextResponse.json({ error: 'Tulis instruksi dulu.' }, { status: 400 })
+    }
 
-  const deadlines = sanitizeDeadlines(body.deadlines)
-  const history = sanitizeHistory(body.history)
-  const profile = {
-    ...sanitizeProfile(body.profile),
-    plan: access.plan,
-    plan_status: 'active',
-  }
+    if (message.length > 1800) {
+      return NextResponse.json({ error: 'Instruksi kepanjangan. Maksimal 1800 karakter dulu, biar AI nggak mimisan digital.' }, { status: 400 })
+    }
 
-  if (action === 'deadline_executor') {
-    const parsed = await parseDeadlineFromText(message)
+    const access = await getUserPlanAccess({ supabase, user: { id: user.id, email: user.email } })
+    if (!access || access.plan !== 'command') {
+      return NextResponse.json({
+        answer:
+          'NEXA Command Assistant cuma buat plan Command. Kalau akun lo owner tapi masih kekunci, cek COMMAND_LIFETIME_EMAILS / NEXA_OWNER_EMAILS di Vercel. Kapitalisme SaaS jangan sampai nge-lock foundernya sendiri, ANJJJ 😭',
+        status: 'locked',
+        required_plan: 'command',
+        action,
+      }, { status: 402 })
+    }
 
-    if (parsed.isDeadlineIntent) {
-      const deadline = parsed.deadline
-      if (!deadline || deadline.missing_fields.length > 0) {
+    const deadlines = sanitizeDeadlines(body.deadlines)
+    const history = sanitizeHistory(body.history)
+    const profile = {
+      ...sanitizeProfile(body.profile),
+      plan: access.plan,
+      plan_status: 'active',
+    }
+
+    const actionUsage = await safeConsumeFeatureUsage({ userId: user.id, featureKey: 'nexa_assistant_actions' })
+    if (!actionUsage.allowed) {
+      return NextResponse.json({
+        answer: actionUsage.usage?.message || 'Command usage tidak diizinkan.',
+        status: actionUsage.usage?.status === 'locked' ? 'locked' : 'error',
+        action,
+        usage: actionUsage.usage,
+      }, { status: actionUsage.usage?.status === 'locked' ? 402 : 429 })
+    }
+
+    if (action === 'deadline_executor') {
+      const parsed = await parseDeadlineFromText(message)
+
+      if (parsed.isDeadlineIntent) {
+        const deadline = parsed.deadline
+        if (!deadline || deadline.missing_fields.length > 0) {
+          return NextResponse.json({
+            answer:
+              `Gue nangkep ini perintah bikin deadline, tapi field-nya belum lengkap: ${deadline?.missing_fields.join(', ') || 'detail deadline'}.\n\nFormat aman: “tambahin deadline tugas kalkulus Jumat jam 20.00 prioritas tinggi”. Jangan bikin AI nebak kalender kayak dukun kos-kosan, ANJJJ 😭`,
+            status: 'error',
+            action,
+            parsed_deadline: deadline ?? null,
+            provider: parsed.provider,
+            model: parsed.model,
+          })
+        }
+
+        const quickAddUsage = await safeConsumeFeatureUsage({ userId: user.id, featureKey: 'ai_quick_add' })
+        if (!quickAddUsage.allowed) {
+          return NextResponse.json({
+            answer: quickAddUsage.usage?.message || 'AI Quick Add tidak diizinkan.',
+            status: quickAddUsage.usage?.status === 'locked' ? 'locked' : 'error',
+            action,
+            usage: quickAddUsage.usage,
+          }, { status: quickAddUsage.usage?.status === 'locked' ? 402 : 429 })
+        }
+
+        const insertPayload = {
+          user_id: user.id,
+          title: deadline.title,
+          course_name: deadline.course_name,
+          type: deadline.type || 'assignment',
+          source: 'nexa_command_assistant',
+          deadline_date: deadline.deadline_date,
+          deadline_time: deadline.deadline_time,
+          priority: deadline.priority || 'medium',
+          status: 'pending',
+          reminder_enabled: true,
+        }
+
+        const { data: created, error } = await supabase
+          .from('academic_deadlines')
+          .insert(insertPayload)
+          .select('id,title,course_name,type,deadline_date,deadline_time,priority,status,reminder_enabled,source')
+          .single()
+
+        if (error) {
+          console.error('[NEXA Command Assistant] deadline insert failed', error)
+          return NextResponse.json({
+            answer:
+              `Command berhasil parse deadline, tapi gagal simpan ke database. Kemungkinan schema academic_deadlines beda.\n\nYang kebaca:\n- Judul: ${deadline.title}\n- Matkul: ${deadline.course_name || '-'}\n- Waktu: ${prettyDate(deadline.deadline_date, deadline.deadline_time)}\n- Prioritas: ${deadline.priority || 'medium'}\n\nDatabase lu lagi cosplay jadi labirin. Cek kolom academic_deadlines: user_id, title, course_name, deadline_date, deadline_time.`,
+            status: 'error',
+            action,
+            provider: parsed.provider,
+            model: parsed.model,
+            db_error: error.message,
+          })
+        }
+
         return NextResponse.json({
           answer:
-            `Gue nangkep ini perintah bikin deadline, tapi field-nya belum lengkap: ${deadline?.missing_fields.join(', ') || 'detail deadline'}.\n\nFormat aman: “tambahin deadline tugas kalkulus Jumat jam 20.00 prioritas tinggi”. Jangan bikin AI nebak kalender kayak dukun kos-kosan, ANJJJ 😭`,
-          status: 'error',
-          action,
-          parsed_deadline: deadline ?? null,
+            `Command executed ✅\n\nDeadline berhasil disimpan:\n- Judul: ${created.title}\n- Matkul: ${created.course_name || '-'}\n- Waktu: ${prettyDate(created.deadline_date, created.deadline_time)}\n- Prioritas: ${created.priority || 'medium'}\n\nReminder aktif. Kalau mau reminder custom H-7/H-3/H-1/jam custom, pakai module Reminder Architect.`,
+          status: 'success',
+          action: 'deadline_created',
+          deadline: created,
           provider: parsed.provider,
           model: parsed.model,
-        }, { status: 400 })
+          warning: quickAddUsage.warning || actionUsage.warning,
+        })
       }
+    }
 
-      const quickAddUsage = await consumeFeatureUsage({ userId: user.id, featureKey: 'ai_quick_add' })
-      if (!quickAddUsage.allowed) {
+    const fallback = buildFallbackAnswer({
+      action,
+      message,
+      deadlines,
+      warning: actionUsage.warning,
+    })
+
+    try {
+      const result = await askNexa({
+        question: buildCommandQuestion({ action, message, deadlines }),
+        deadlines,
+        userContext: profile,
+        history,
+      })
+
+      // Kalau AI belum dikonfigurasi, jangan balikin jawaban "belum aktif" doang.
+      // Command harus tetap terasa hidup pakai fallback lokal.
+      if (result.status === 'locked' || result.provider === 'none') {
         return NextResponse.json({
-          answer: quickAddUsage.message,
-          status: quickAddUsage.status === 'locked' ? 'locked' : 'error',
+          answer: fallback,
+          provider: 'local-fallback',
+          model: 'nexa-command-fallback-v1',
+          status: 'success',
           action,
-          usage: quickAddUsage,
-        }, { status: quickAddUsage.status === 'locked' ? 402 : 429 })
-      }
-
-      const insertPayload = {
-        user_id: user.id,
-        title: deadline.title,
-        course_name: deadline.course_name,
-        type: deadline.type || 'assignment',
-        source: 'nexa_command_assistant',
-        deadline_date: deadline.deadline_date,
-        deadline_time: deadline.deadline_time,
-        priority: deadline.priority || 'medium',
-        status: 'pending',
-        reminder_enabled: true,
-      }
-
-      const { data: created, error } = await supabase
-        .from('academic_deadlines')
-        .insert(insertPayload)
-        .select('id,title,course_name,type,deadline_date,deadline_time,priority,status,reminder_enabled,source')
-        .single()
-
-      if (error) {
-        console.error('[NEXA Command Assistant] deadline insert failed', error)
-        return NextResponse.json({
-          answer:
-            `Command berhasil parse deadline, tapi gagal simpan ke database. Kemungkinan schema academic_deadlines beda.\n\nYang kebaca:\n- Judul: ${deadline.title}\n- Matkul: ${deadline.course_name || '-'}\n- Waktu: ${prettyDate(deadline.deadline_date, deadline.deadline_time)}\n- Prioritas: ${deadline.priority || 'medium'}\n\nDatabase lu lagi cosplay jadi labirin, cek nama kolomnya dulu.`,
-          status: 'error',
-          action,
-          provider: parsed.provider,
-          model: parsed.model,
-        }, { status: 500 })
+          warning: actionUsage.warning || 'AI provider belum aktif, fallback lokal dipakai.',
+        })
       }
 
       return NextResponse.json({
-        answer:
-          `Command executed ✅\n\nDeadline berhasil disimpan:\n- Judul: ${created.title}\n- Matkul: ${created.course_name || '-'}\n- Waktu: ${prettyDate(created.deadline_date, created.deadline_time)}\n- Prioritas: ${created.priority || 'medium'}\n\nReminder aktif. Kalau mau reminder custom H-7/H-3/H-1/jam custom, pakai module Reminder Architect.`,
+        answer: result.answer || fallback,
+        provider: result.provider,
+        model: result.model,
+        status: result.status,
+        action,
+        warning: actionUsage.warning,
+      })
+    } catch (error) {
+      console.error('[NEXA Command Assistant] AI command failed, fallback used', error)
+      return NextResponse.json({
+        answer: fallback,
+        provider: 'local-fallback',
+        model: 'nexa-command-fallback-v1',
         status: 'success',
-        action: 'deadline_created',
-        deadline: created,
-        provider: parsed.provider,
-        model: parsed.model,
+        action,
+        warning: actionUsage.warning || 'AI provider error, fallback lokal dipakai.',
       })
     }
-  }
-
-  try {
-    const result = await askNexa({
-      question: buildCommandQuestion({ action, message, deadlines }),
-      deadlines,
-      userContext: profile,
-      history,
-    })
-
-    return NextResponse.json({
-      answer: result.answer,
-      provider: result.provider,
-      model: result.model,
-      status: result.status,
-      action,
-    })
   } catch (error) {
-    console.error('[NEXA Command Assistant] command failed', error)
+    console.error('[NEXA Command Assistant] fatal route error', error)
     return NextResponse.json({
-      answer: 'NEXA Command lagi gagal jawab. Cek konfigurasi AI provider atau server log. Bahkan robot premium pun bisa keseleo kalau env-nya kosong.',
+      answer:
+        'Command Assistant error fatal di server. Ini bukan salah prompt lu. Cek Vercel Runtime Logs bagian /api/nexa-assistant/command. Minimal sekarang error-nya kebaca, bukan cuma “TypeScript minta tumbal”.',
       status: 'error',
-      action,
+      action: 'free_chat',
+      error: error instanceof Error ? error.message : 'Unknown error',
     }, { status: 500 })
   }
 }

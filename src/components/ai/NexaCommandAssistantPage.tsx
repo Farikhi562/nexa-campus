@@ -277,13 +277,27 @@ export default function NexaCommandAssistantPage({ profile, deadlines }: Props) 
 
       const data = (await response.json().catch(() => null)) as CommandResponse | null
 
-      if (!response.ok || !data || (data.error && !data.answer)) {
+      if (!data) {
         setMessages((prev) => [
           ...prev,
           {
             id: uid(),
             role: 'assistant',
-            content: data?.error || 'Command Assistant lagi gagal eksekusi. TypeScript mungkin sedang minta tumbal.',
+            content: `Command Assistant gagal nerima JSON dari API. HTTP ${response.status}. Biasanya route belum deploy, middleware mental, atau server balas HTML error. Cek Vercel Runtime Logs /api/nexa-assistant/command.`,
+            status: 'error',
+            action,
+          },
+        ])
+        return
+      }
+
+      if (!response.ok && !data.answer) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: uid(),
+            role: 'assistant',
+            content: data.error || `Command Assistant gagal. HTTP ${response.status}. API ngambek tanpa pesan yang manusiawi.`,
             status: 'error',
             action,
           },
@@ -297,8 +311,8 @@ export default function NexaCommandAssistantPage({ profile, deadlines }: Props) 
         {
           id: uid(),
           role: 'assistant',
-          content: data.answer || 'Command selesai, tapi jawabannya kosong. Ini AI apa printer rusak.',
-          status: data.status ?? 'success',
+          content: data.answer || data.error || 'Command selesai, tapi jawabannya kosong. Ini AI apa printer rusak.',
+          status: data.status ?? (response.ok ? 'success' : 'error'),
           action,
         },
       ])
