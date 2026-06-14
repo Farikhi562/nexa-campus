@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { BILLING_PLANS } from '@/lib/billing/plans'
+import { BILLING_PLANS, isPaidPlan } from '@/lib/billing/plans'
 import { notifyUser } from '@/lib/notifications/notify-user'
 
 function parseAdmins() {
@@ -76,19 +76,27 @@ export async function PATCH(request: NextRequest) {
     .from('manual_payment_orders')
     .select('id,order_code,user_id,plan,amount,status')
     .eq('id', orderId)
-    .single()
+    .maybeSingle()
 
-  if (orderError || !order) {
+  if (orderError) {
     console.error('[admin manual-payment] get order failed', orderError)
+    return NextResponse.json({ error: 'Gagal ambil order.' }, { status: 500 })
+  }
+
+  if (!order) {
     return NextResponse.json({ error: 'Order tidak ditemukan.' }, { status: 404 })
   }
 
+  if (!['pending', 'under_review'].includes(order.status)) {
+    return NextResponse.json({ error: `Order status ${order.status} sudah tidak bisa diproses.` }, { status: 400 })
+  }
+
   if (status === 'approved') {
-    const plan = BILLING_PLANS[order.plan as 'pulse' | 'command']
-    if (!plan || plan.id === 'radar') {
+    if (!isPaidPlan(order.plan)) {
       return NextResponse.json({ error: 'Plan order tidak valid.' }, { status: 400 })
     }
 
+    const plan = BILLING_PLANS[order.plan]
     const now = new Date().toISOString()
     const expiresAt = addOneMonth()
 
@@ -105,7 +113,7 @@ export async function PATCH(request: NextRequest) {
 
     if (profileError) {
       console.error('[admin manual-payment] profile update failed', profileError)
-      return NextResponse.json({ error: 'Pembayaran valid, tapi gagal update plan user. Cek kolom profiles plan_*.' }, { status: 500 })
+      return NextResponse.json({ error: 'Pembayaran valid, tapi gagal update plan user. Cek kolom profiles plan_* dan updated_at.' }, { status: 500 })
     }
 
     const { data: updated, error: updateError } = await supabase
@@ -135,7 +143,10 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ order: updated })
   }
 
-  const reason = typeof body.rejection_reason === 'string' ? body.rejection_reason.slice(0, 500) : 'Bukti pembayaran belum valid.'
+  const reason = typeof body.rejection_reason === 'string' && body.rejection_reason.trim()
+    ? body.rejection_reason.trim().slice(0, 500)
+    : 'Bukti pembayaran belum valid.'
+
   const { data: rejected, error: rejectError } = await supabase
     .from('manual_payment_orders')
     .update({ status: 'rejected', rejection_reason: reason, updated_at: new Date().toISOString() })

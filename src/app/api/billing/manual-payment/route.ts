@@ -4,10 +4,30 @@ import {
   BILLING_PLANS,
   buildOrderCode,
   getManualPaymentMethod,
+  isManualPaymentMethod,
   isPaidPlan,
   MANUAL_PAYMENT,
 } from '@/lib/billing/plans'
 import { notifyUser } from '@/lib/notifications/notify-user'
+
+type CreateManualPaymentBody = {
+  plan?: unknown
+  payment_method?: unknown
+  buyer_name?: unknown
+  buyer_whatsapp?: unknown
+  notes?: unknown
+}
+
+function cleanText(value: unknown, max = 500) {
+  if (typeof value !== 'string') return null
+  const text = value.trim().slice(0, max)
+  return text || null
+}
+
+function errorMessage(error: unknown) {
+  if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') return error.message
+  return 'Unknown error'
+}
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
@@ -19,7 +39,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Login dulu sebelum checkout. Bayar doang tanpa akun itu sedekah random, ANJJJ 😭' }, { status: 401 })
   }
 
-  let body: { plan?: unknown; payment_method?: unknown; buyer_name?: unknown; buyer_whatsapp?: unknown; notes?: unknown }
+  let body: CreateManualPaymentBody
   try {
     body = await request.json()
   } catch {
@@ -30,13 +50,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Plan tidak valid. Pilih pulse atau command.' }, { status: 400 })
   }
 
-  const plan = BILLING_PLANS[body.plan]
-  const paymentMethod = getManualPaymentMethod(body.payment_method)
-  const orderCode = buildOrderCode()
+  const requestedMethod = body.payment_method ?? 'bank_jago'
+  if (!isManualPaymentMethod(requestedMethod)) {
+    return NextResponse.json({ error: 'Metode pembayaran tidak valid. Pilih bank_jago atau bri_qris.' }, { status: 400 })
+  }
 
-  const payload = {
+  const plan = BILLING_PLANS[body.plan]
+  const paymentMethod = getManualPaymentMethod(requestedMethod)
+
+  const basePayload = {
     user_id: user.id,
-    order_code: orderCode,
     plan: plan.id,
     amount: plan.price,
     status: 'pending',
@@ -44,25 +67,49 @@ export async function POST(request: NextRequest) {
     bank_name: paymentMethod.bankName,
     account_number: paymentMethod.accountNumber,
     account_name: paymentMethod.accountName,
-    buyer_name: typeof body.buyer_name === 'string' ? body.buyer_name.slice(0, 120) : null,
-    buyer_whatsapp: typeof body.buyer_whatsapp === 'string' ? body.buyer_whatsapp.slice(0, 40) : null,
-    notes: typeof body.notes === 'string' ? body.notes.slice(0, 500) : null,
+    buyer_name: cleanText(body.buyer_name, 120),
+    buyer_whatsapp: cleanText(body.buyer_whatsapp, 40),
+    notes: cleanText(body.notes, 500),
     metadata: {
       payment_label: paymentMethod.label,
       payment_type: paymentMethod.type,
       qr_image_url: paymentMethod.qrImageUrl || null,
+      payment_bank_name: paymentMethod.bankName,
+      payment_account_number: paymentMethod.accountNumber,
+      payment_account_name: paymentMethod.accountName,
     },
   }
 
-  const { data: order, error } = await supabase
-    .from('manual_payment_orders')
-    .insert(payload)
-    .select('id,order_code,plan,amount,status,payment_method,bank_name,account_number,account_name,metadata,created_at,expires_at')
-    .single()
+  let order = null
+  let insertError: unknown = null
 
-  if (error) {
-    console.error('[manual-payment] create order failed', error)
-    return NextResponse.json({ error: 'Gagal bikin order manual payment. Cek migration manual_payment_orders.' }, { status: 500 })
+  // Retry kecil buat jaga-jaga order_code tabrakan. Kecil kemungkinannya, tapi database suka cari drama.
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const { data, error } = await supabase
+      .from('manual_payment_orders')
+      .insert({ ...basePayload, order_code: buildOrderCode() })
+      .select('id,order_code,plan,amount,status,payment_method,bank_name,account_number,account_name,metadata,created_at,expires_at')
+      .single()
+
+    if (!error) {
+      order = data
+      insertError = null
+      break
+    }
+
+    insertError = error
+    if (error.code !== '23505') break
+  }
+
+  if (!order) {
+    console.error('[manual-payment] create order failed', insertError)
+    return NextResponse.json(
+      {
+        error: 'Gagal bikin order manual payment. Cek migration manual_payment_orders.',
+        detail: process.env.NODE_ENV === 'development' ? errorMessage(insertError) : undefined,
+      },
+      { status: 500 },
+    )
   }
 
   await notifyUser({

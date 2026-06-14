@@ -97,7 +97,7 @@ export const MANUAL_PAYMENT_METHODS: Record<ManualPaymentMethodId, ManualPayment
     label: 'BRI QRIS / BRImo',
     shortLabel: 'BRI QRIS',
     type: 'qris',
-    bankName: process.env.NEXT_PUBLIC_BRI_QRIS_BANK_NAME || 'BRI',
+    bankName: process.env.NEXT_PUBLIC_BRI_QRIS_BANK_NAME || 'BRI QRIS / BRImo',
     accountNumber: process.env.NEXT_PUBLIC_BRI_QRIS_NUMBER || '0335 0110 7723 508',
     accountName: process.env.NEXT_PUBLIC_BRI_QRIS_ACCOUNT_NAME || 'Muhamad Fauzan Al Farikhi',
     instruction: 'Scan QR BRI/BRImo, bayar sesuai nominal order, lalu kirim bukti pembayaran ke admin.',
@@ -113,9 +113,8 @@ export function isManualPaymentMethod(method: unknown): method is ManualPaymentM
   return method === 'bank_jago' || method === 'bri_qris'
 }
 
-export function getManualPaymentMethod(method: unknown): ManualPaymentMethod {
-  if (isManualPaymentMethod(method)) return MANUAL_PAYMENT_METHODS[method]
-  return MANUAL_PAYMENT_METHODS.bank_jago
+export function getManualPaymentMethod(method: ManualPaymentMethodId): ManualPaymentMethod {
+  return MANUAL_PAYMENT_METHODS[method]
 }
 
 export function rupiah(value: number) {
@@ -127,6 +126,7 @@ export function rupiah(value: number) {
 }
 
 export function buildOrderCode() {
-  const part = Math.random().toString(36).slice(2, 8).toUpperCase()
-  return `NEXA-${part}`
+  const timePart = Date.now().toString(36).toUpperCase()
+  const randomPart = Math.random().toString(36).slice(2, 7).toUpperCase()
+  return `NEXA-${timePart}-${randomPart}`
 }

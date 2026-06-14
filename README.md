@@ -1,15 +1,22 @@
-# NEXA Campus v1.6.26 — Batch 4 Fix Payment Methods
+# NEXA Campus v1.6.27 — Batch 4 Payment Methods Hotfix
 
-Patch ini memperbaiki Batch 4: metode pembayaran sekarang bukan cuma Bank Jago, tapi ada 2 metode:
+Patch ini ngebenerin manual payment biar lebih aman dan nggak default Bank Jago terus pas user pilih QRIS. Drama kecil database, seperti biasa manusia menambah tabel lalu berharap semesta paham sendiri.
 
-1. **Bank Jago Transfer**
-   - Nomor rekening: `100157134050`
-   - Nama: `Muhamad Fauzan Al Farikhi`
+## Yang difix
 
-2. **BRI QRIS / BRImo**
-   - Nomor/ID QR: `0335 0110 7723 508`
-   - Nama: `Muhamad Fauzan Al Farikhi`
-   - File QR default: `/public/payment/bri-qris.jpg`
+- Payment method sekarang divalidasi ketat: cuma `bank_jago` atau `bri_qris`.
+- Kalau frontend lama nggak kirim `payment_method`, fallback tetap `bank_jago` biar nggak langsung KO.
+- Kalau frontend kirim metode ngawur, API balikin `400`.
+- Data order BRI QRIS sekarang jelas masuk sebagai:
+  - `payment_method`: `bri_qris`
+  - `bank_name`: `BRI QRIS / BRImo`
+  - `account_number`: `0335 0110 7723 508`
+  - `account_name`: `Muhamad Fauzan Al Farikhi`
+- `metadata` order ditambah detail payment lengkap.
+- `order_code` dibuat lebih unik: `NEXA-<timestamp>-<random>`.
+- Submit bukti bayar tidak lagi nge-null-in field lain kalau field itu nggak dikirim.
+- Admin approve/reject lebih aman: order yang sudah approved/rejected nggak diproses ulang.
+- SQL hardening nambah constraint `payment_method` dan trigger `updated_at`.
 
 ## Harga aktif
 
@@ -17,33 +24,36 @@ Patch ini memperbaiki Batch 4: metode pembayaran sekarang bukan cuma Bank Jago, 
 - NEXA Pulse: Rp18.000 / bulan
 - NEXA Command: Rp30.000 / bulan
 
-## File yang berubah
+## Metode pembayaran
 
-- `src/lib/billing/plans.ts`
-- `src/components/billing/ManualPaymentCard.tsx`
-- `src/app/api/billing/manual-payment/route.ts`
-- `src/app/api/billing/manual-payment/[orderId]/route.ts`
-- `src/app/api/admin/billing/manual-payment/route.ts`
-- `supabase/migrations/20260615_manual_payment_two_methods.sql`
-- `public/payment/bri-qris.jpg`
+### Bank Jago
+
+- No: `100157134050`
+- a.n. `Muhamad Fauzan Al Farikhi`
+
+### BRI QRIS / BRImo
+
+- ID/No QR: `0335 0110 7723 508`
+- a.n. `Muhamad Fauzan Al Farikhi`
+- Image: `/public/payment/bri-qris.jpg`
 
 ## Cara pasang
 
-1. Copy semua file ke project utama.
-2. Jalankan migration SQL:
-   - `supabase/migrations/20260615_manual_payment_two_methods.sql`
-3. Isi env di Vercel.
-4. Deploy ulang.
-5. Test `/dashboard/billing`.
+1. Copy semua file di patch ini ke project utama.
+2. Jalankan SQL migration baru:
 
-## Env Vercel
+```sql
+supabase/migrations/20260615_manual_payment_methods_hardening.sql
+```
+
+3. Pastikan env Vercel sudah ada:
 
 ```env
 NEXT_PUBLIC_BANK_JAGO_NAME=Bank Jago
 NEXT_PUBLIC_BANK_JAGO_ACCOUNT_NUMBER=100157134050
 NEXT_PUBLIC_BANK_JAGO_ACCOUNT_NAME=Muhamad Fauzan Al Farikhi
 
-NEXT_PUBLIC_BRI_QRIS_BANK_NAME=BRI
+NEXT_PUBLIC_BRI_QRIS_BANK_NAME=BRI QRIS / BRImo
 NEXT_PUBLIC_BRI_QRIS_NUMBER=0335 0110 7723 508
 NEXT_PUBLIC_BRI_QRIS_ACCOUNT_NAME=Muhamad Fauzan Al Farikhi
 NEXT_PUBLIC_BRI_QRIS_IMAGE_URL=/payment/bri-qris.jpg
@@ -52,18 +62,11 @@ NEXT_PUBLIC_NEXA_PAYMENT_WHATSAPP=628xxxxxxxxxx
 ADMIN_EMAILS=emailadmin1@gmail.com,emailadmin2@gmail.com
 ```
 
-## Flow user
+4. Deploy ulang Vercel.
+5. Test bikin order Pulse dengan Bank Jago.
+6. Test bikin order Command dengan BRI QRIS.
 
-1. User buka `/pricing` atau `/dashboard/billing`.
-2. User pilih Pulse atau Command.
-3. User pilih metode pembayaran: Bank Jago atau BRI QRIS.
-4. App create order ke `/api/billing/manual-payment`.
-5. User bayar sesuai nominal.
-6. User konfirmasi ke admin via WhatsApp dengan Order ID.
-7. Admin approve via API admin.
-8. Sistem update `profiles.plan`, `profiles.plan_status`, `profiles.plan_started_at`, `profiles.plan_expires_at`.
-
-## Request create order
+## Test request
 
 ```http
 POST /api/billing/manual-payment
@@ -75,8 +78,6 @@ Content-Type: application/json
 }
 ```
 
-Atau:
-
 ```http
 POST /api/billing/manual-payment
 Content-Type: application/json
@@ -87,15 +88,23 @@ Content-Type: application/json
 }
 ```
 
-## Catatan penting soal QR
+## Query cek hasil
 
-Screenshot QR yang dikasih punya teks berlaku 24 jam dan 1x transaksi. Kalau itu memang QR dinamis BRImo, jangan dipakai permanen buat publik. Untuk sementara patch ini tetap masukin QR ke `/public/payment/bri-qris.jpg`, tapi kalau sudah punya QRIS statis beneran, ganti file itu. Jangan sampai user bayar ke QR expired terus semua pihak pura-pura jadi korban teknologi. ANJJJ 😭
+```sql
+select
+  order_code,
+  plan,
+  amount,
+  status,
+  payment_method,
+  bank_name,
+  account_number,
+  account_name,
+  metadata,
+  created_at
+from public.manual_payment_orders
+order by created_at desc
+limit 10;
+```
 
-## Dependensi
-
-Patch ini masih depend ke Batch 3 untuk:
-
-- `src/lib/notifications/notify-user.ts`
-- `src/lib/supabase/admin.ts`
-
-Kalau belum pasang Batch 3, pasang dulu. Jangan skip batch, ini codebase bukan episode filler anime.
+Kalau order QRIS masih kebaca Bank Jago, berarti frontend lama belum ketimpa atau API route belum ke-deploy. Ya, deploy itu bukan mitos, harus beneran dipencet/push.
