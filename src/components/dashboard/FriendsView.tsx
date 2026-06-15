@@ -8,6 +8,8 @@ import Badge from '@/components/ui/Badge'
 import { FeaturedBadgePin } from '@/components/BadgeChip'
 import SmartEmptyState from '@/components/dashboard/SmartEmptyState'
 import FriendSuggestionsCard from '@/components/dashboard/FriendSuggestionsCard'
+import MyNexaQrCard from '@/components/friends/MyNexaQrCard'
+import NexaQrScanner from '@/components/friends/NexaQrScanner'
 import FounderVerifiedBadge from '@/components/FounderVerifiedBadge'
 import type { FriendRequest, PublicProfile } from '@/types'
 
@@ -52,8 +54,11 @@ function UserCard({ user, action }: { user: PublicProfile; action: ReactNode }) 
   )
 }
 
+type MyProfileQr = { nexa_id: string | null; full_name?: string | null }
+
 export default function FriendsView() {
   const [q, setQ] = useState('')
+  const [myProfile, setMyProfile] = useState<MyProfileQr | null>(null)
   const [searchResults, setSearchResults] = useState<PublicProfile[]>([])
   const [searching, setSearching] = useState(false)
   const [friends, setFriends] = useState<FriendRequest[]>([])
@@ -75,6 +80,25 @@ export default function FriendsView() {
   }, [])
 
   useEffect(() => { void loadFriends() }, [loadFriends])
+
+  useEffect(() => {
+    let alive = true
+    fetch('/api/profile/me', { cache: 'no-store' })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json) => {
+        if (alive && json) setMyProfile({ nexa_id: json.nexa_id ?? null, full_name: json.full_name ?? null })
+      })
+      .catch(() => {
+        if (alive) setMyProfile(null)
+      })
+    return () => { alive = false }
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const add = new URLSearchParams(window.location.search).get('add')?.trim()
+    if (add && /^\d{4,8}$/.test(add)) setQ(add)
+  }, [])
 
   useEffect(() => {
     if (!q.trim()) { setSearchResults([]); return }
@@ -140,6 +164,18 @@ export default function FriendsView() {
           </p>
         </div>
       </section>
+
+
+      <div className="grid gap-3 lg:grid-cols-[1.2fr_0.8fr]">
+        <MyNexaQrCard nexaId={myProfile?.nexa_id ?? null} fullName={myProfile?.full_name ?? null} />
+        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+          <p className="mb-3 text-sm font-black text-slate-950">Tambah teman via QR</p>
+          <NexaQrScanner onFound={(nexaId) => setQ(nexaId)} />
+          <p className="mt-3 text-[11px] leading-4 text-slate-400">
+            Habis scan, hasilnya masuk ke search. Tinggal klik Add. Sosialisasi akhirnya bisa semi-otomatis, peradaban mulai membaik dikit.
+          </p>
+        </div>
+      </div>
 
       <div className="relative">
         <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />

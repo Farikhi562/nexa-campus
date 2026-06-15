@@ -14,6 +14,7 @@ import type { StudyRoom, StudyRoomMember, StudyRoomMessage, StudyRoomJoinRequest
 import Link from 'next/link'
 import FounderVerifiedBadge from '@/components/FounderVerifiedBadge'
 import StudyRoomWorkspaceCard from '@/components/dashboard/StudyRoomWorkspaceCard'
+import StudyRoomCommandActions from '@/components/study-room/StudyRoomCommandActions'
 
 function initials(name?: string | null) {
   if (!name) return 'N'
@@ -435,7 +436,9 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
   }
 
   return (
-    <div className="flex h-[calc(100vh-8rem)] flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl">
+    <div className="space-y-4">
+      <StudyRoomCommandActions />
+      <div className="flex h-[calc(100vh-12rem)] flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl">
       {/* Header */}
       <div className="flex flex-shrink-0 items-center justify-between gap-3 border-b border-slate-100 bg-white px-4 py-3">
         <div className="flex min-w-0 items-center gap-3">
@@ -741,6 +744,7 @@ Nama anggota selalu terlihat untuk satu grup room. Yang mengikuti privasi hanya 
           onSaved={() => { setShowSettings(false); void loadAll() }}
         />
       )}
+      </div>
     </div>
   )
 }
