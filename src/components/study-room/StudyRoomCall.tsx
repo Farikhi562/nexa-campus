@@ -19,13 +19,20 @@ import { Video, PhoneOff, Loader2 } from 'lucide-react'
 
 const JITSI_DOMAIN = 'meet.jit.si'
 
+type JitsiMeetAPI = {
+  dispose: () => void
+  addEventListener: (event: string, cb: (...args: unknown[]) => void) => void
+  executeCommand: (cmd: string, ...args: unknown[]) => void
+}
+
+type JitsiMeetExternalAPIConstructor = new (
+  domain: string,
+  options: Record<string, unknown>
+) => JitsiMeetAPI
+
 declare global {
   interface Window {
-    JitsiMeetExternalAPI?: new (domain: string, options: Record<string, unknown>) => {
-      dispose: () => void
-      addEventListener: (e: string, cb: (...args: unknown[]) => void) => void
-      executeCommand: (cmd: string, ...args: unknown[]) => void
-    }
+    JitsiMeetExternalAPI?: JitsiMeetExternalAPIConstructor
   }
 }
 
@@ -59,8 +66,7 @@ export default function StudyRoomCall({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const containerRef = useRef<HTMLDivElement>(null)
-  const apiRef = useRef<ReturnType<NonNullable<Window['JitsiMeetExternalAPI']>['dispose']> | null>(null)
-  const apiInstance = useRef<InstanceType<NonNullable<Window['JitsiMeetExternalAPI']>> | null>(null)
+  const apiInstance = useRef<JitsiMeetAPI | null>(null)
 
   // Nama ruang unik & sulit ditebak (prefix produk + roomId).
   const jitsiRoom = `nexa-campus-study-${roomId}`
