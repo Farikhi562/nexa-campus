@@ -23,8 +23,8 @@ function UserCard({ user, action }: { user: PublicProfile; action: ReactNode }) 
   const skills = visibleSkills(user)
   return (
     <Card>
-      <CardContent className="flex items-center gap-3 p-4">
-        <Link href={`/dashboard/profile/${user.id}`} className="group flex min-w-0 flex-1 items-center gap-3 rounded-2xl outline-none transition hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-2">
+      <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
+        <Link href={`/dashboard/profile/${user.id}`} className="group flex w-full min-w-0 flex-1 items-center gap-3 rounded-2xl outline-none transition hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-2">
           <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-100 text-base font-black text-slate-600">
             {user.avatar_url ? (
               <img src={user.avatar_url} alt="" className="h-full w-full object-cover" />
@@ -48,7 +48,9 @@ function UserCard({ user, action }: { user: PublicProfile; action: ReactNode }) 
             {user.nexa_id && <p className="mt-1 text-[10px] font-bold text-slate-400">#{user.nexa_id}</p>}
           </div>
         </Link>
-        {action}
+        <div className="flex w-full shrink-0 justify-stretch sm:w-auto sm:justify-end [&>*]:w-full sm:[&>*]:w-auto">
+          {action}
+        </div>
       </CardContent>
     </Card>
   )
@@ -148,12 +150,10 @@ export default function FriendsView() {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="nexa-responsive-page space-y-5">
       <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-slate-950 p-5 text-white shadow-xl sm:p-7">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(45,212,191,0.26),transparent_18rem)]" />
-        <FriendSuggestionsCard />
-
-      <div className="relative">
+        <div className="relative">
           <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-teal-300/20 bg-teal-300/10 px-3 py-1.5 text-xs font-black text-teal-100">
             <UserPlus className="h-3.5 w-3.5" />
             Cari Teman
@@ -166,7 +166,7 @@ export default function FriendsView() {
       </section>
 
 
-      <div className="grid gap-3 lg:grid-cols-[1.2fr_0.8fr]">
+      <div className="grid items-start gap-3 lg:grid-cols-[minmax(0,1.2fr)_minmax(280px,0.8fr)]">
         <MyNexaQrCard nexaId={myProfile?.nexa_id ?? null} fullName={myProfile?.full_name ?? null} />
         <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
           <p className="mb-3 text-sm font-black text-slate-950">Tambah teman via QR</p>
@@ -177,13 +177,15 @@ export default function FriendsView() {
         </div>
       </div>
 
+      <FriendSuggestionsCard />
+
       <div className="relative">
         <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Cari nama, kampus, atau ketik Nexa ID 6 angka..."
-          className="focus-ring w-full rounded-2xl border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm"
+          className="focus-ring min-w-0 w-full rounded-2xl border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm"
         />
         {searching && <Loader2 className="absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-slate-400" />}
       </div>

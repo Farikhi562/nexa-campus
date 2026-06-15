@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getEffectivePlan, isFounderEmail } from '@/lib/plans'
 import { BADGES } from '@/lib/badges'
+import { getArenaProfileVerification } from '@/lib/profile-verification'
 
 type MissingItem = { key: string; label: string; href: string }
 
@@ -83,6 +84,7 @@ export async function GET() {
 
   const profile = (data ?? null) as ProfileMeRow | null
   const founder = isFounderEmail(user.email) || Boolean(profile?.founder_verified)
+  const arenaVerification = getArenaProfileVerification(profile)
 
   return NextResponse.json({
     ...(profile ?? {}),
@@ -90,5 +92,7 @@ export async function GET() {
     founder_verified: founder,
     badges: founder ? BADGES.map((badge) => badge.id) : (profile?.badges ?? []),
     profile_completion: getProfileCompletion(profile),
+    arena_verified: arenaVerification.verified,
+    arena_profile_verification: arenaVerification,
   })
 }

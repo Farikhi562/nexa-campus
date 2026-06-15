@@ -37,6 +37,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
   const action = body.action === 'accept' ? 'accept' : body.action === 'reject' ? 'reject' : null
   if (!action) return NextResponse.json({ error: 'Action tidak valid.' }, { status: 400 })
+  const reviewNote = text(body.review_note)
 
   const { data: post, error: postError } = await supabase
     .from('nexa_arena_posts')
@@ -74,13 +75,16 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     if (body.competency_confirmed !== true) {
       return NextResponse.json({ error: 'Kamu wajib konfirmasi bahwa skill/latar belakang pelamar sudah dicek.' }, { status: 400 })
     }
+    if (reviewNote.length < 20) {
+      return NextResponse.json({ error: 'Catatan review minimal 20 karakter saat menerima pelamar.' }, { status: 400 })
+    }
   }
 
   const { data, error } = await supabase
     .from('nexa_arena_applications')
     .update({
       status: action === 'accept' ? 'accepted' : 'rejected',
-      review_note: text(body.review_note) || null,
+      review_note: reviewNote || null,
       competency_confirmed: action === 'accept',
       reviewed_by: user.id,
       reviewed_at: new Date().toISOString(),

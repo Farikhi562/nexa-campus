@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
+import { getArenaProfileVerification } from '@/lib/profile-verification'
 
 const NEXA_FOUNDER_EMAIL = 'fauzanalfa36@gmail.com'
 function founderVerified(email: unknown) { return String(email ?? '').trim().toLowerCase() === NEXA_FOUNDER_EMAIL }
@@ -24,6 +25,12 @@ type ProfileRow = {
   plan: string | null
   nexa_id: string | null
   featured_badge: string | null
+  public_profile_headline?: string | null
+  profile_bio?: string | null
+  profile_skills?: string[] | null
+  portfolio_url?: string | null
+  github_url?: string | null
+  linkedin_url?: string | null
 }
 
 export async function GET(_req: NextRequest, { params }: Params) {
@@ -60,12 +67,19 @@ export async function GET(_req: NextRequest, { params }: Params) {
     const db = dataClient(supabase)
     const { data: profiles, error: profileError } = await db
       .from('profiles')
-      .select('id, email, founder_verified, full_name, campus_name, major, semester, avatar_url, plan, nexa_id, featured_badge')
+      .select('id, email, founder_verified, full_name, campus_name, major, semester, avatar_url, plan, nexa_id, featured_badge, public_profile_headline, profile_bio, profile_skills, portfolio_url, github_url, linkedin_url')
       .in('id', applicantIds)
 
     if (profileError) return NextResponse.json({ error: profileError.message }, { status: 500 })
     for (const profile of (profiles ?? []) as ProfileRow[]) {
-      profileMap[profile.id] = { ...profile, email: null, founder_verified: founderVerified(profile.email) || Boolean(profile.founder_verified) }
+      const arenaVerification = getArenaProfileVerification(profile)
+      profileMap[profile.id] = {
+        ...profile,
+        email: null,
+        founder_verified: founderVerified(profile.email) || Boolean(profile.founder_verified),
+        arena_verified: arenaVerification.verified,
+        arena_profile_verification: arenaVerification,
+      } as ProfileRow
     }
   }
 

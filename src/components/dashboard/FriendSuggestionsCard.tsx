@@ -75,7 +75,7 @@ export default function FriendSuggestionsCard({ compact = false }: { compact?: b
         </div>
         <div className="grid gap-2 sm:grid-cols-2">
           {items.slice(0, compact ? 4 : 8).map((user) => (
-            <div key={user.id} className="flex items-center justify-between gap-3 rounded-2xl border border-white bg-white/85 p-3 shadow-sm">
+            <div key={user.id} className="flex flex-col gap-3 rounded-2xl border border-white bg-white/85 p-3 shadow-sm sm:flex-row sm:items-center sm:justify-between">
               <Link href={`/dashboard/profile/${user.id}`} className="flex min-w-0 flex-1 items-center gap-3">
                 <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-100 text-xs font-black text-slate-600">
                   {user.avatar_url ? <img src={user.avatar_url} alt="" className="h-full w-full object-cover" /> : initials(user.full_name)}
@@ -90,15 +90,17 @@ export default function FriendSuggestionsCard({ compact = false }: { compact?: b
                   <p className="mt-1 text-[10px] font-black text-teal-700">{user.reason}</p>
                 </div>
               </Link>
-              {user.status === 'friend' ? (
-                <Link href={`/dashboard/messages/${user.id}`} className="flex h-9 w-9 items-center justify-center rounded-2xl bg-teal-100 text-teal-700 hover:bg-teal-200"><MessageCircle className="h-4 w-4" /></Link>
-              ) : user.status === 'pending' ? (
-                <Badge tone="neutral">Pending</Badge>
-              ) : (
-                <Button onClick={() => addFriend(user.id)} disabled={busyId === user.id} className="h-9 min-h-9 rounded-2xl px-3">
-                  {busyId === user.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
-                </Button>
-              )}
+              <div className="flex w-full justify-stretch sm:w-auto sm:justify-end [&>*]:w-full sm:[&>*]:w-auto">
+                {user.status === 'friend' ? (
+                  <Link href={`/dashboard/messages/${user.id}`} className="flex h-9 w-full items-center justify-center rounded-2xl bg-teal-100 text-teal-700 hover:bg-teal-200 sm:w-9"><MessageCircle className="h-4 w-4" /></Link>
+                ) : user.status === 'pending' ? (
+                  <Badge tone="neutral">Pending</Badge>
+                ) : (
+                  <Button onClick={() => addFriend(user.id)} disabled={busyId === user.id} className="h-9 min-h-9 rounded-2xl px-3">
+                    {busyId === user.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
+                  </Button>
+                )}
+              </div>
             </div>
           ))}
         </div>

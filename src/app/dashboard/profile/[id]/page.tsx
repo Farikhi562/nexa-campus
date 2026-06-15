@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getEffectivePlan } from '@/lib/plans'
 import { BADGES } from '@/lib/badges'
+import { getArenaProfileVerification } from '@/lib/profile-verification'
 
 const NEXA_FOUNDER_EMAIL = 'fauzanalfa36@gmail.com'
 function founderVerified(email: unknown, cached?: unknown) {
@@ -113,6 +114,7 @@ export default async function UserProfilePage({ params }: Params) {
     (profile as { email?: string | null }).email,
     (profile as { founder_verified?: boolean | null }).founder_verified,
   )
+  const arenaVerification = getArenaProfileVerification(profile)
   const safeProfile = {
     ...(profile as Record<string, unknown>),
     email: null,
@@ -120,6 +122,8 @@ export default async function UserProfilePage({ params }: Params) {
     plan: getEffectivePlan(profile as never),
     badges: isFounder ? BADGES.map((badge) => badge.id) : ((profile as { badges?: unknown }).badges ?? []),
     friend_count: friendCount ?? 0,
+    arena_verified: arenaVerification.verified,
+    arena_profile_verification: arenaVerification,
   }
 
   return <PublicUserProfileView profile={safeProfile as never} isOwnProfile={profile.id === user.id} canMessage={canMessage} />

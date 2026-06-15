@@ -101,7 +101,7 @@ export default function LandingPage() {
           <div className="relative mx-auto grid max-w-7xl gap-8 px-4 py-12 lg:grid-cols-[1.02fr_0.98fr] lg:py-16">
             <div className="flex flex-col justify-center">
               <Badge tone="brand" className="mb-5 w-fit border-teal-300/20 bg-teal-300/10 text-teal-100">
-                Early Access · NEXA Tech Labs
+                Siap Dipakai - NEXA Tech Labs
               </Badge>
               <h1 className="max-w-3xl text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
                 Tempat rapi untuk mencatat deadline kampus
@@ -114,7 +114,7 @@ export default function LandingPage() {
                   href="/login?mode=signup"
                   className="inline-flex items-center justify-center gap-2 rounded-2xl bg-teal-400 px-5 py-3 text-sm font-black text-slate-950 shadow-lg shadow-teal-950/30 transition hover:bg-teal-300"
                 >
-                  Coba Early Access
+                  Mulai Pakai Gratis
                   <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link
@@ -166,7 +166,7 @@ export default function LandingPage() {
                 <div className="mt-4 flex flex-wrap gap-2">
                   <Badge tone="success">Telegram siap diuji</Badge>
                   <Badge tone="warning">WhatsApp menyusul</Badge>
-                  <Badge tone="info">AI preview</Badge>
+                  <Badge tone="info">NEXA Assistant aktif</Badge>
                 </div>
               </div>
             </div>
@@ -179,7 +179,7 @@ export default function LandingPage() {
               <p className="text-sm font-bold uppercase tracking-wide text-brand-700">Lihat sekilas</p>
               <h2 className="mt-2 text-3xl font-black">Tampilan inti NEXA Campus.</h2>
               <p className="mt-3 text-sm leading-6 text-slate-600">
-                Beberapa bagian masih bisa berubah, tapi alur utamanya sudah kelihatan
+                Alur utama sudah bisa dipakai untuk mencatat, mengingatkan, dan mengatur deadline harian
               </p>
             </div>
             <div className="grid gap-4 lg:grid-cols-3">
@@ -285,7 +285,7 @@ export default function LandingPage() {
                 href="/login?mode=signup"
                 className="mt-6 inline-flex items-center justify-center gap-2 rounded-2xl bg-teal-400 px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-teal-300"
               >
-                Coba Early Access
+                Mulai Pakai Gratis
                 <Sparkles className="h-4 w-4" />
               </Link>
             </div>

@@ -21,6 +21,7 @@ import {
   X,
 } from 'lucide-react'
 import { FeaturedBadgePin } from '@/components/BadgeChip'
+import ProfileVerifiedBadge from '@/components/ProfileVerifiedBadge'
 import { Card, CardContent } from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
@@ -80,7 +81,24 @@ type ArenaApplication = {
     plan: string | null
     nexa_id: string | null
     featured_badge: string | null
+    arena_verified?: boolean | null
+    arena_profile_verification?: ArenaProfileVerification | null
   } | null
+}
+
+type ArenaProfileVerification = {
+  verified: boolean
+  score: number
+  missing: string[]
+  checks: Array<{ key: string; label: string; done: boolean }>
+}
+
+type ProfileMeForArena = {
+  portfolio_url?: string | null
+  github_url?: string | null
+  linkedin_url?: string | null
+  arena_verified?: boolean | null
+  arena_profile_verification?: ArenaProfileVerification | null
 }
 
 type ArenaForm = {
@@ -117,6 +135,21 @@ function arenaTypeEmoji(type: string) {
 function normalizeSkills(value: unknown): string[] {
   if (!Array.isArray(value)) return []
   return value.map((item) => String(item).trim()).filter(Boolean).slice(0, 12)
+}
+
+function normalizeSkill(value: string) {
+  return value.trim().toLowerCase()
+}
+
+function findMatchingSkills(needed: string[], offered: string[]) {
+  const offeredSet = new Set(offered.map(normalizeSkill).filter(Boolean))
+  return needed.filter((skill) => offeredSet.has(normalizeSkill(skill)))
+}
+
+function firstProfileProof(profile?: ProfileMeForArena | null) {
+  return [profile?.portfolio_url, profile?.github_url, profile?.linkedin_url]
+    .map((value) => (typeof value === 'string' ? value.trim() : ''))
+    .find(Boolean) || ''
 }
 
 function formatDate(date: string | null | undefined) {
@@ -608,6 +641,27 @@ function ApplyArenaModal({ post, onClose, onApplied }: { post: ArenaPost; onClos
   const [background, setBackground] = useState('')
   const [message, setMessage] = useState('')
   const [portfolioUrl, setPortfolioUrl] = useState('')
+  const [profile, setProfile] = useState<ProfileMeForArena | null>(null)
+  const [profileLoading, setProfileLoading] = useState(true)
+
+  useEffect(() => {
+    let alive = true
+    fetch('/api/profile/me', { cache: 'no-store' })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json: ProfileMeForArena | null) => {
+        if (!alive) return
+        setProfile(json)
+        const proof = firstProfileProof(json)
+        if (proof) setPortfolioUrl((current) => current || proof)
+      })
+      .catch(() => {
+        if (alive) setProfile(null)
+      })
+      .finally(() => {
+        if (alive) setProfileLoading(false)
+      })
+    return () => { alive = false }
+  }, [])
 
   function addSkill() {
     const skill = skillInput.trim()
@@ -617,13 +671,43 @@ function ApplyArenaModal({ post, onClose, onApplied }: { post: ArenaPost; onClos
     }
   }
 
+  function addSkillValue(value: string) {
+    const skill = value.trim()
+    if (skill && !skills.some((item) => normalizeSkill(item) === normalizeSkill(skill))) {
+      setSkills((prev) => [...prev, skill])
+    }
+  }
+
+  const neededSkills = normalizeSkills(post.skills_needed)
+  const matchedSkills = findMatchingSkills(neededSkills, skills)
+  const proofUrl = portfolioUrl.trim() || firstProfileProof(profile)
+  const backgroundReady = background.trim().length >= 80
+  const skillsReady = skills.length >= 2
+  const proofReady = Boolean(proofUrl)
+  const skillMatchReady = neededSkills.length === 0 || matchedSkills.length > 0
+  const profileVerification = profile?.arena_profile_verification ?? null
+  const profileCoreReady = !profileVerification || !profileVerification.checks.some((item) => ['name', 'campus', 'major', 'semester'].includes(item.key) && !item.done)
+  const submitReady = profileCoreReady && backgroundReady && skillsReady && proofReady && skillMatchReady
+
   async function submit() {
-    if (!background.trim()) {
-      alert('Isi latar belakang dulu. Owner perlu tahu kamu siapa, bukan cuma avatar dan harapan.')
+    if (!profileCoreReady) {
+      alert('Lengkapi profil inti dulu: nama, kampus, jurusan, dan semester.')
       return
     }
-    if (skills.length === 0) {
-      alert('Minimal isi 1 skill yang kamu tawarkan.')
+    if (!backgroundReady) {
+      alert('Latar belakang minimal 80 karakter supaya owner bisa menilai pengalamanmu.')
+      return
+    }
+    if (!skillsReady) {
+      alert('Minimal isi 2 skill yang kamu tawarkan.')
+      return
+    }
+    if (!proofReady) {
+      alert('Portfolio, GitHub, atau LinkedIn wajib diisi.')
+      return
+    }
+    if (!skillMatchReady) {
+      alert('Minimal 1 skill harus cocok dengan kebutuhan tim.')
       return
     }
     setLoading(true)
@@ -634,7 +718,7 @@ function ApplyArenaModal({ post, onClose, onApplied }: { post: ArenaPost; onClos
         message,
         applicant_background: background,
         skills_offered: skills,
-        portfolio_url: portfolioUrl,
+        portfolio_url: proofUrl,
       }),
     })
     const json = await res.json().catch(() => ({}))
@@ -658,12 +742,46 @@ function ApplyArenaModal({ post, onClose, onApplied }: { post: ArenaPost; onClos
         <p className="mt-1 text-sm leading-6 text-slate-500">Isi data yang bisa dinilai owner. Bukan CV sepanjang skripsi, tapi cukup buat kelihatan kamu beneran bisa.</p>
 
         <div className="mt-4 space-y-4">
-          <div>
-            <label className={label}>Latar belakang singkat *</label>
-            <textarea value={background} onChange={(e) => setBackground(e.target.value)} rows={4} className={input} placeholder="Cth: Mahasiswa Informatika, pernah bikin dashboard React + Supabase, biasa handle frontend dan pitch deck..." />
+          <div className="rounded-2xl border border-blue-100 bg-blue-50 p-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <ProfileVerifiedBadge verified={profile?.arena_verified} />
+              <p className="text-xs font-black text-blue-800">
+                {profileLoading
+                  ? 'Mengecek profil Arena...'
+                  : profile?.arena_verified
+                    ? 'Centang biru aktif. Profilmu lengkap untuk dinilai owner.'
+                    : `Lengkapi profil untuk centang biru${profileVerification?.score ? ` (${profileVerification.score}%)` : ''}.`}
+              </p>
+            </div>
+            {!profileLoading && !profile?.arena_verified && profileVerification?.missing?.length ? (
+              <p className="mt-2 text-[11px] leading-4 text-blue-700">
+                Kurang: {profileVerification.missing.slice(0, 3).join(', ')}{profileVerification.missing.length > 3 ? ', ...' : ''}.
+              </p>
+            ) : null}
           </div>
           <div>
-            <label className={label}>Skill yang kamu tawarkan *</label>
+            <label className={label}>Latar belakang singkat * <span className="normal-case tracking-normal text-slate-400">min. 80 karakter</span></label>
+            <textarea value={background} onChange={(e) => setBackground(e.target.value)} rows={4} className={input} placeholder="Cth: Mahasiswa Informatika, pernah bikin dashboard React + Supabase, biasa handle frontend dan pitch deck..." />
+            <p className={`mt-1 text-[11px] font-bold ${backgroundReady ? 'text-emerald-600' : 'text-slate-400'}`}>{background.trim().length}/80 karakter</p>
+          </div>
+          <div>
+            <label className={label}>Skill yang kamu tawarkan * <span className="normal-case tracking-normal text-slate-400">min. 2 skill</span></label>
+            {neededSkills.length > 0 && (
+              <div className="mb-2 flex flex-wrap gap-1.5">
+                {neededSkills.map((skill) => (
+                  <button
+                    key={skill}
+                    type="button"
+                    onClick={() => addSkillValue(skill)}
+                    className={`rounded-full px-2.5 py-1 text-[11px] font-black ring-1 ${
+                      matchedSkills.includes(skill) ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' : 'bg-slate-50 text-slate-600 ring-slate-200'
+                    }`}
+                  >
+                    {skill}
+                  </button>
+                ))}
+              </div>
+            )}
             <div className="flex gap-2">
               <input value={skillInput} onChange={(e) => setSkillInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addSkill() } }} placeholder="Cth: React, UI/UX, Python..." className={`${input} flex-1`} />
               <button type="button" onClick={addSkill} className="rounded-2xl bg-teal-500 px-3 py-2 text-sm font-black text-white hover:bg-teal-400">+</button>
@@ -680,17 +798,32 @@ function ApplyArenaModal({ post, onClose, onApplied }: { post: ArenaPost; onClos
             )}
           </div>
           <div>
-            <label className={label}>Portfolio / GitHub / LinkedIn</label>
+            <label className={label}>Portfolio / GitHub / LinkedIn *</label>
             <input type="url" value={portfolioUrl} onChange={(e) => setPortfolioUrl(e.target.value)} placeholder="https://..." className={input} />
           </div>
           <div>
             <label className={label}>Pesan tambahan</label>
             <textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={3} className={input} placeholder="Kenapa kamu cocok masuk tim ini?" />
           </div>
+
+          <div className="grid gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-3 text-[11px] font-black text-slate-600 sm:grid-cols-2">
+            {[
+              ['Profil inti lengkap', profileCoreReady],
+              ['Background jelas', backgroundReady],
+              ['Minimal 2 skill', skillsReady],
+              ['Skill cocok kebutuhan', skillMatchReady],
+              ['Link bukti valid', proofReady],
+            ].map(([item, done]) => (
+              <div key={String(item)} className={`flex items-center gap-2 ${done ? 'text-emerald-700' : 'text-slate-400'}`}>
+                <Check className="h-3.5 w-3.5" />
+                <span>{item}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="mt-5 flex gap-2">
-          <Button onClick={submit} disabled={loading} className="flex-1 rounded-2xl">
+          <Button onClick={submit} disabled={loading || !submitReady} className="flex-1 rounded-2xl">
             {loading ? 'Mengirim...' : 'Kirim Lamaran'}
           </Button>
           <Button onClick={onClose} variant="outline" className="rounded-2xl">Batal</Button>
@@ -724,7 +857,12 @@ function ManageApplicantsModal({ post, onClose, onChanged }: { post: ArenaPost; 
 
   async function respond(application: ArenaApplication, action: 'accept' | 'reject') {
     if (action === 'accept') {
-      const ok = window.confirm('Terima pelamar ini hanya kalau kamu sudah cek latar belakang, skill, dan merasa dia beneran kompeten. Konfirmasi?')
+      const note = (reviewNote[application.id] ?? '').trim()
+      if (note.length < 20) {
+        alert('Catatan review minimal 20 karakter saat menerima pelamar.')
+        return
+      }
+      const ok = window.confirm('Terima pelamar ini hanya kalau kamu sudah cek profil, portfolio, skill, dan catatan review sudah jelas. Konfirmasi?')
       if (!ok) return
     }
     setActionId(application.id)
@@ -734,7 +872,7 @@ function ManageApplicantsModal({ post, onClose, onChanged }: { post: ArenaPost; 
       body: JSON.stringify({
         action,
         competency_confirmed: action === 'accept',
-        review_note: reviewNote[application.id] ?? '',
+        review_note: reviewNote[application.id]?.trim() ?? '',
       }),
     })
     const json = await res.json().catch(() => ({}))
@@ -811,6 +949,7 @@ function ApplicantSection({
                     ) : (
                       <p className="font-black text-slate-950">Mahasiswa NEXA</p>
                     )}
+                    <ProfileVerifiedBadge verified={applicant?.arena_verified} compact />
                     <FeaturedBadgePin badgeId={applicant?.featured_badge} />
                     <Badge tone={application.status === 'accepted' ? 'success' : application.status === 'rejected' ? 'danger' : 'warning'}>{application.status}</Badge>
                   </div>
@@ -818,6 +957,11 @@ function ApplicantSection({
                     {[applicant?.campus_name, applicant?.major, applicant?.semester ? `Semester ${applicant.semester}` : null].filter(Boolean).join(' · ') || 'Profil belum lengkap'}
                   </p>
                   {applicant?.nexa_id && <p className="mt-0.5 text-[10px] font-bold text-slate-400">#{applicant.nexa_id}</p>}
+                  {applicant?.arena_profile_verification && !applicant.arena_verified && (
+                    <p className="mt-1 text-[10px] font-bold text-blue-600">
+                      Profil Arena {applicant.arena_profile_verification.score}% lengkap
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -856,7 +1000,7 @@ function ApplicantSection({
                     value={reviewNote[application.id] ?? ''}
                     onChange={(e) => setReviewNote((prev) => ({ ...prev, [application.id]: e.target.value }))}
                     rows={2}
-                    placeholder="Catatan review opsional. Cth: cocok frontend, portfolio sudah dicek."
+                    placeholder="Wajib jika menerima. Cth: portfolio sudah dicek, cocok frontend, komunikasi jelas."
                     className="focus-ring w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm"
                   />
                   <div className="grid gap-2 sm:grid-cols-2">

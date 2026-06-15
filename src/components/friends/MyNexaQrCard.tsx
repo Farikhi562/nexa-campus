@@ -52,8 +52,8 @@ export default function MyNexaQrCard({
       <h3 className="mb-3 flex items-center gap-2 text-sm font-black text-slate-950">
         <QrCode className="h-4 w-4 text-teal-600" /> NEXA ID kamu
       </h3>
-      <div className="flex items-center gap-4">
-        <div className="rounded-2xl border border-slate-200 bg-white p-2.5">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+        <div className="w-fit rounded-2xl border border-slate-200 bg-white p-2.5">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={qrUrl}
@@ -63,9 +63,9 @@ export default function MyNexaQrCard({
             className="h-28 w-28 rounded-xl"
           />
         </div>
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           {fullName ? <p className="truncate text-sm font-black text-slate-950">{fullName}</p> : null}
-          <p className="mt-0.5 text-2xl font-black tracking-widest text-teal-700">#{nexaId}</p>
+          <p className="mt-0.5 break-all text-xl font-black tracking-widest text-teal-700 sm:text-2xl">#{nexaId}</p>
           <div className="mt-2 flex flex-wrap gap-2">
             <button
               type="button"

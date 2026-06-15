@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getEffectivePlan } from '@/lib/plans'
 import { BADGES } from '@/lib/badges'
+import { getArenaProfileVerification } from '@/lib/profile-verification'
 
 const NEXA_FOUNDER_EMAIL = 'fauzanalfa36@gmail.com'
 function founderVerified(email: unknown) { return String(email ?? '').trim().toLowerCase() === NEXA_FOUNDER_EMAIL }
@@ -59,6 +60,7 @@ function hidePrivate(profile: Record<string, unknown>, isOwnProfile: boolean) {
   if (copy.profile_bio_visibility === 'private') copy.profile_bio = null
   if (copy.profile_skills_visibility === 'private') copy.profile_skills = []
   if (copy.profile_interests_visibility === 'private') copy.profile_interests = []
+  copy.arena_profile_verification = null
   return copy
 }
 
@@ -88,6 +90,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
   ])
 
   const founder = founderVerified((data as { email?: string | null }).email) || Boolean((data as { founder_verified?: boolean | null }).founder_verified)
+  const arenaVerification = getArenaProfileVerification(data)
   const safeProfile = {
     ...(data as Record<string, unknown>),
     email: null,
@@ -95,6 +98,8 @@ export async function GET(_request: NextRequest, { params }: Params) {
     plan: getEffectivePlan(data as never),
     badges: founder ? BADGES.map((badge) => badge.id) : ((data as { badges?: unknown }).badges ?? []),
     friend_count: friendCount ?? 0,
+    arena_verified: arenaVerification.verified,
+    arena_profile_verification: arenaVerification,
   }
 
   return NextResponse.json({ data: hidePrivate(safeProfile, isOwnProfile) })

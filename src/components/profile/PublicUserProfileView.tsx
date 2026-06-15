@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { ArrowLeft, ExternalLink, Lock, MessageCircle, Radio, ShieldCheck, Sparkles, UserRound, Users } from 'lucide-react'
 import { BadgeChip, BadgeTierLabel, FeaturedBadgePin } from '@/components/BadgeChip'
 import FounderVerifiedBadge from '@/components/FounderVerifiedBadge'
+import ProfileVerifiedBadge from '@/components/ProfileVerifiedBadge'
 import { Card, CardContent } from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import { BADGES, type BadgeDef } from '@/lib/badges'
@@ -38,6 +39,7 @@ type ViewProfile = {
   online_status_visibility?: 'public' | 'friends' | 'private' | null
   study_room_presence_visibility?: 'members' | 'private' | null
   dm_privacy?: 'friends' | 'none' | null
+  arena_verified?: boolean | null
   created_at: string
 }
 
@@ -129,7 +131,11 @@ export default function PublicUserProfileView({ profile, isOwnProfile, canMessag
                 <span className="inline-flex items-center gap-1 rounded-full bg-emerald-400/15 px-2.5 py-1 text-[11px] font-black text-emerald-100"><Radio className="h-3 w-3" /> Bisa tampil online</span>
               )}
             </div>
-            <h1 className="flex flex-wrap items-center gap-2 text-2xl font-black tracking-tight sm:text-3xl"><span>{profile.full_name ?? 'Mahasiswa NEXA'}</span><FounderVerifiedBadge founderVerified={profile.founder_verified} email={profile.email} /></h1>
+            <h1 className="flex flex-wrap items-center gap-2 text-2xl font-black tracking-tight sm:text-3xl">
+              <span>{profile.full_name ?? 'Mahasiswa NEXA'}</span>
+              <FounderVerifiedBadge founderVerified={profile.founder_verified} email={profile.email} />
+              <ProfileVerifiedBadge verified={profile.arena_verified} />
+            </h1>
             {profile.public_profile_headline && <p className="mt-2 max-w-2xl text-sm font-bold leading-6 text-teal-100">{profile.public_profile_headline}</p>}
             <p className="mt-2 text-sm leading-6 text-slate-300">
               {[profile.campus_name, profile.major, profile.semester ? `Semester ${profile.semester}` : null].filter(Boolean).join(' · ') || 'Profil akademik belum lengkap'}
