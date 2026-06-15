@@ -1,5 +1,6 @@
 'use client'
 
+/* eslint-disable react/no-unescaped-entities */
 import { useEffect, useState } from 'react'
 import { Bell, BellOff, BellRing, Loader2, CheckCircle2, AlertTriangle } from 'lucide-react'
 
