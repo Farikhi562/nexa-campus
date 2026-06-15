@@ -21,7 +21,6 @@ export async function extractTextFromFile(base64: string, mimeType: string, file
       // Import dinamis: hindari memuat pdf-parse kalau tidak dipakai.
       // pdf-parse punya CJS/ESM interop quirk — .default ada di CJS, tapi tidak
       // di ESM export. Pakai fallback supaya jalan di kedua mode.
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const mod = await import('pdf-parse') as any
       const pdfParse: (buf: Buffer) => Promise<{ text: string }> = mod.default ?? mod
       const result = await pdfParse(buffer)
