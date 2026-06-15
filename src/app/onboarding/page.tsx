@@ -52,7 +52,7 @@ export default async function OnboardingPage({
             </span>
             <h1 className="mt-3 text-2xl font-black text-slate-950 sm:text-3xl">Kenalan sebentar.</h1>
             <p className="mt-2 max-w-xl text-sm leading-6 text-slate-600">
-              NEXA butuh profil dasar untuk label kampus, reminder, dan batas paket. Password platform kampus tidak pernah diminta.
+              NEXA butuh profil dasar untuk label kampus, reminder, dan batas paket. Password platform kampus tidak pernah diminta
             </p>
           </div>
           <div className="p-5 sm:p-7">
@@ -64,7 +64,7 @@ export default async function OnboardingPage({
         </div>
 
         <p className="mt-5 text-center text-xs leading-5 text-slate-400">
-          NEXA Campus bukan sistem resmi kampus. Selalu cek informasi final dari kanal resmi kampus.
+          NEXA Campus bukan sistem resmi kampus. Selalu cek informasi final dari kanal resmi kampus
         </p>
       </div>
     </main>

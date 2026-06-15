@@ -25,7 +25,7 @@ export default async function StudyRoomCallPage({ params, searchParams }: PagePr
         <UpgradePromptCard
           featureKey="study_room_voice_video"
           title="Voice/video call khusus NEXA Command"
-          description="Study Room call pakai Jitsi dibuka buat Command. Radar dan Pulse masih bisa belajar, cuma belum bisa cosplay jadi Zoom akademik."
+          description="Study Room call pakai Jitsi dibuka buat Command. Radar dan Pulse masih bisa belajar, cuma belum bisa cosplay jadi Zoom akademik"
         />
       </main>
     )

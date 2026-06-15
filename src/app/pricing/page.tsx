@@ -8,7 +8,7 @@ export default function PricingPage() {
         <p className="text-sm font-black uppercase tracking-[0.22em] text-teal-600">Pricing</p>
         <h1 className="mt-3 text-4xl font-black text-slate-950">Pilih mode NEXA lo</h1>
         <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-slate-500">
-          Radar gratis, Pulse Rp18.000, Command Rp30.000. Midtrans belum dipakai dulu, jadi checkout diarahkan ke manual payment.
+          Radar gratis, Pulse Rp18.000, Command Rp30.000. Payment Gateway belom siap dipake dulu, jadi checkout diarahkan ke manual payment
         </p>
       </div>
 

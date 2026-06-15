@@ -27,7 +27,7 @@ export default async function ReminderSettingsPage() {
             <p className="text-sm font-black uppercase tracking-wide text-brand-700">Reminder Settings</p>
             <h1 className="mt-1 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">Pengaturan Telegram</h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-              Aktifkan reminder Telegram untuk deadline yang kamu input manual. Jika token sudah ada di env, restart server dev/deploy agar token terbaca.
+              Aktifkan reminder Telegram untuk deadline yang kamu input manual. Jika token udah ada di env, restart server dev/deploy biar tokennya ke baca
             </p>
           </div>
           <Link

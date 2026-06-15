@@ -8,7 +8,7 @@ export default function BillingPage() {
         <p className="text-sm font-black uppercase tracking-[0.22em] text-teal-600">NEXA Billing</p>
         <h1 className="mt-2 text-3xl font-black text-slate-950">Upgrade plan</h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-          Untuk sementara pembayaran pakai manual payment. Midtrans libur dulu, karena bahkan payment gateway pun kadang butuh drama.
+          Untuk sementara pembayaran pakai manual payment. Midtrans libur dulu, karena payment gateway belom di atur.
         </p>
       </div>
 

@@ -66,14 +66,14 @@ function UpgradeToCommand({ currentPlan }: { currentPlan: string }) {
             NEXA Assistant Command Center
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
-            Halaman ini sengaja dikunci buat NEXA Command. Ini bukan chatbot biasa yang jawab “semangat ya” lalu kabur. Mode ini buat bikin battle plan deadline, risk scan, reminder custom, sampai strategi Arena.
+            Halaman ini sengaja dikunci buat NEXA Command. Ini bukan chatbot biasa yang jawab “semangat ya” lalu kabur. Mode ini buat bikin battle plan deadline, risk scan, reminder custom, sampe strategi Arena
           </p>
 
           <div className="mt-6 grid gap-3 sm:grid-cols-3">
             {[
-              ['AI Autopilot', 'Bikin prioritas + jadwal eksekusi.'],
-              ['Risk Scanner', 'Deteksi deadline yang rawan kebakar.'],
-              ['Reminder Architect', 'Rancang H-7/H-3/H-1/jam custom.'],
+              ['AI Autopilot', 'Bikin prioritas + jadwal eksekusi'],
+              ['Risk Scanner', 'Deteksi deadline yang rawan kebakar'],
+              ['Reminder Architect', 'Rancang H-7/H-3/H-1/jam custom'],
             ].map(([title, desc]) => (
               <div key={title} className="rounded-3xl border border-white/10 bg-white/[0.05] p-4">
                 <div className="text-sm font-black text-white">{title}</div>
@@ -111,9 +111,9 @@ function UpgradeToCommand({ currentPlan }: { currentPlan: string }) {
 
           <div className="mt-6 space-y-3 text-sm text-slate-200">
             {[
-              'Radar/Pulse tetap bisa pakai Assistant basic sesuai limit.',
-              'Command unlock action mode: save deadline, summary, risk score, notification copy, dan strategi belajar.',
-              'Fitur ini dibuat premium karena AI cost itu nyata, bukan mitos urban developer jam 4 pagi.',
+              'Radar/Pulse tetep bisa pake Assistant basic sesuai limit',
+              'Command unlock action mode: save deadline, summary, risk score, notification copy, dan strategi belajar',
+              'Fitur ini dibuat premium karena AI cost itu pake duit',
             ].map((item) => (
               <div key={item} className="flex gap-3 rounded-2xl bg-slate-950/35 p-3">
                 <Sparkles className="mt-0.5 h-4 w-4 flex-none text-teal-300" />

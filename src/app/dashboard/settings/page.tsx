@@ -10,10 +10,10 @@ import type { Profile } from '@/types'
 import { getEffectivePlan, planExpiresLabel } from '@/lib/plans'
 
 const settingItems = [
-  { title: 'Edit Profil', desc: 'Ubah nama, kampus, provinsi, gender opsional, dan foto profil.', href: '/dashboard/settings/profile', icon: UserRound },
-  { title: 'Reminder Telegram', desc: 'Atur chat ID, jam reminder, dan kapan NEXA perlu mengingatkan.', href: '/dashboard/settings/reminders', icon: BellRing },
-  { title: 'Billing & Upgrade', desc: 'Ajukan upgrade manual ke Pulse atau Command.', href: '/dashboard/billing', icon: CreditCard },
-  { title: 'Privacy', desc: 'Cek data apa saja yang NEXA simpan dan tidak simpan.', href: '/privacy', icon: ShieldCheck },
+  { title: 'Edit Profil', desc: 'Ubah nama, kampus, provinsi, gender opsional, dan foto profil', href: '/dashboard/settings/profile', icon: UserRound },
+  { title: 'Reminder Telegram', desc: 'Atur chat ID, jam reminder, dan kapan NEXA perlu mengingatkan', href: '/dashboard/settings/reminders', icon: BellRing },
+  { title: 'Billing & Upgrade', desc: 'Ajukan upgrade manual ke Pulse atau Command', href: '/dashboard/billing', icon: CreditCard },
+  { title: 'Privacy', desc: 'Cek data apa aja yang NEXA simpan dan tidak simpan', href: '/privacy', icon: ShieldCheck },
 ]
 
 export default async function SettingsPage() {

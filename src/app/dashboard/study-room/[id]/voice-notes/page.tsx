@@ -21,7 +21,7 @@ export default async function VoiceNotesPage({ params }: PageProps) {
         <UpgradePromptCard
           featureKey="study_room_voice_video"
           title="Voice note Study Room khusus NEXA Command"
-          description="VN Study Room butuh storage audio dan mic permission. Jadi ini dikunci buat Command, bukan buat user gratisan numpang podcast."
+          description="VN Study Room butuh storage audio dan mic permission. Jadi ini dikunci buat Command, bukan buat user radar"
         />
       </main>
     )

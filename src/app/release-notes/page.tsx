@@ -54,7 +54,7 @@ export default function ReleaseNotesPage() {
           NEXA Campus v1.5.23 mulai merapikan pengalaman harian pengguna.
         </h1>
         <p className="mt-4 max-w-3xl text-sm leading-6 text-slate-600">
-          Versi ini menambahkan Daily Pulse, streak, poin check-in, profil publik, badge, dan notifikasi sosial supaya pengalaman pengguna terasa lebih hidup.
+          Versi ini menambahkan Daily Pulse, streak, poin check-in, profil publik, badge, dan notifikasi sosial supaya pengalaman pengguna terasa lebih hidup
         </p>
 
         <div className="mt-8 grid gap-4 lg:grid-cols-[1fr_0.9fr]">

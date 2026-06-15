@@ -28,38 +28,38 @@ const sampleDeadlines = [
 ]
 
 const steps = [
-  'Masukkan tugas dari VClass, iLab, dosen, grup WA, atau catatan kampus lain.',
-  'Lihat mana yang paling dekat dan paling penting.',
-  'Nyalakan reminder supaya tidak baru ingat pas sudah mepet.',
+  'Masukkan tugas dari VClass, iLab, dosen, grup WA, atau catatan kampus lain',
+  'Lihat mana yang paling dekat dan paling penting',
+  'Nyalakan reminder supaya tidak baru ingat pas udah mepet',
 ]
 
 const features = [
-  ['Ringkasan Deadline', 'Tugas hari ini, minggu ini, yang terlambat, dan yang belum punya reminder tampil dalam satu tempat.'],
-  ['Tambah Cepat', 'Catat tugas, praktikum, kuis, ujian, pembayaran, atau agenda kampus lain tanpa banyak langkah.'],
-  ['Pengingat Fleksibel', 'Mulai dari reminder Telegram, lalu bisa diperluas ke channel lain setelah sistem utama stabil.'],
-  ['Prioritas & Kategori', 'Tandai mana yang urgent, high, normal, atau low supaya urutan kerja lebih enak dibaca.'],
-  ['Ringkasan Mingguan', 'Lihat gambaran tugas yang perlu dibereskan dalam beberapa hari ke depan.'],
-  ['Input Aman', 'NEXA tidak meminta password kampus dan tidak mengambil data dari sistem kampus tanpa izin.'],
+  ['Ringkasan Deadline', 'Tugas hari ini, minggu ini, yang terlambat, dan yang belum punya reminder tampil dalam satu tempat'],
+  ['Tambah Cepat', 'Catat tugas, praktikum, kuis, ujian, pembayaran, atau agenda kampus lain tanpa banyak langkah'],
+  ['Pengingat Fleksibel', 'Mulai dari reminder Telegram, lalu bisa diperluas ke channel lain setelah sistem utama stabil'],
+  ['Prioritas & Kategori', 'Tandai mana yang urgent, high, normal, atau low supaya urutan kerja lebih enak dibaca'],
+  ['Ringkasan Mingguan', 'Lihat gambaran tugas yang perlu dibereskan dalam beberapa hari ke depan'],
+  ['Input Aman', 'NEXA tidak meminta password kampus dan tidak mengambil data dari sistem kampus tanpa izin'],
 ]
 
 const previewCards = [
   {
     title: 'Tampilan Dashboard',
-    description: 'Ringkasan tugas yang perlu dikerjakan hari ini, minggu ini, dan yang sudah terlambat.',
+    description: 'Ringkasan tugas yang perlu dikerjakan hari ini, minggu ini, dan yang sudah terlambat',
     imageSrc: '/screenshots/nexa-campus-dashboard.png',
     placeholderLabel: 'Contoh tampilan dashboard',
     alt: 'Tampilan dashboard NEXA Campus',
   },
   {
     title: 'Tambah Deadline',
-    description: 'Form sederhana untuk mencatat tugas, praktikum, ujian, pembayaran UKT, dan agenda akademik lain.',
+    description: 'Form sederhana untuk mencatat tugas, praktikum, ujian, pembayaran UKT, dan agenda akademik lain',
     imageSrc: '/screenshots/nexa-campus-add-deadline.png',
     placeholderLabel: 'Contoh form tambah deadline',
     alt: 'Tampilan tambah deadline NEXA Campus',
   },
   {
     title: 'Pengingat Deadline',
-    description: 'Pengingat sederhana supaya deadline penting tidak lewat begitu saja.',
+    description: 'Pengingat sederhana supaya deadline penting tidak lewat begitu saja',
     imageSrc: '/screenshots/nexa-campus-reminder.png',
     placeholderLabel: 'Contoh tampilan reminder',
     alt: 'Tampilan reminder NEXA Campus',
@@ -67,12 +67,12 @@ const previewCards = [
 ]
 
 const faqs = [
-  ['Apakah NEXA Campus aplikasi resmi kampus?', 'Bukan. NEXA Campus adalah produk independen dari NEXA Tech Labs. Informasi final tetap harus dicek lewat kanal resmi kampus.'],
-  ['Apakah NEXA meminta password kampus?', 'Tidak. NEXA tidak meminta password VClass, iLab, Studentsite, NPM, atau akun kampus lain.'],
-  ['Apakah deadline otomatis masuk dari VClass atau iLab?', 'Belum. Saat ini NEXA fokus ke input manual yang aman. Integrasi hanya akan dibuat jika ada izin yang jelas.'],
-  ['Apakah reminder WhatsApp sudah aktif?', 'Belum. Untuk tahap awal, reminder disiapkan lewat Telegram. WhatsApp akan dipertimbangkan setelah sistem utama stabil.'],
-  ['Apa beda Radar, Pulse, dan Command?', 'Radar untuk mulai mencatat deadline, Pulse untuk reminder dasar, dan Command untuk pengaturan reminder yang lebih detail.'],
-  ['Bagaimana cara menghapus data?', 'Kamu bisa menghubungi support NEXA untuk meminta penghapusan data. Detailnya ada di halaman Privacy dan Support.'],
+  ['Apakah NEXA Campus aplikasi resmi kampus?', 'Bukan, NEXA Campus adalah produk independen dari NEXA Tech Labs. Informasi final tetap harus dicek lewat kanal resmi kampus'],
+  ['Apakah NEXA meminta password kampus?', 'Tidak, NEXA tidak meminta password VClass, iLab, Studentsite, NPM, atau akun kampus lain'],
+  ['Apakah deadline otomatis masuk dari VClass atau iLab?', 'Belum, saat ini NEXA fokus ke input manual yang aman, integrasi hanya akan dibuat jika ada izin yang jelas'],
+  ['Apakah reminder WhatsApp sudah aktif?', 'Belum, untuk tahap awal, reminder disiapkan lewat Telegram, WhatsApp akan dipertimbangkan setelah sistem utama stabil'],
+  ['Apa beda Radar, Pulse, dan Command?', 'Radar untuk mulai mencatat deadline, Pulse untuk reminder dasar, dan Command untuk pengaturan reminder yang lebih detail'],
+  ['Bagaimana cara menghapus data?', 'Kamu bisa menghubungi support NEXA untuk meminta penghapusan data. Detailnya ada di halaman Privacy dan Support'],
 ]
 
 export default function LandingPage() {
@@ -104,10 +104,10 @@ export default function LandingPage() {
                 Early Access · NEXA Tech Labs
               </Badge>
               <h1 className="max-w-3xl text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
-                Tempat rapi untuk mencatat deadline kampus.
+                Tempat rapi untuk mencatat deadline kampus
               </h1>
               <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
-                Simpan tugas, praktikum, ujian, pembayaran, dan pengingat kuliah dalam satu dashboard yang gampang dicek lagi.
+                Simpan tugas, praktikum, ujian, pembayaran, dan pengingat kuliah dalam satu dashboard yang gampang dicek lagi
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link
@@ -126,7 +126,7 @@ export default function LandingPage() {
               </div>
               <div className="mt-6 flex max-w-xl gap-3 rounded-2xl border border-teal-200/15 bg-teal-200/[0.06] p-4 text-sm leading-6 text-teal-50">
                 <ShieldCheck className="mt-0.5 h-5 w-5 flex-shrink-0 text-teal-200" />
-                <p>NEXA tidak meminta password kampus. Semua deadline dicatat sendiri oleh pengguna.</p>
+                <p>NEXA tidak meminta password kampus. Semua deadline dicatat sendiri oleh pengguna</p>
               </div>
             </div>
 
@@ -179,7 +179,7 @@ export default function LandingPage() {
               <p className="text-sm font-bold uppercase tracking-wide text-brand-700">Lihat sekilas</p>
               <h2 className="mt-2 text-3xl font-black">Tampilan inti NEXA Campus.</h2>
               <p className="mt-3 text-sm leading-6 text-slate-600">
-                Beberapa bagian masih bisa berubah, tapi alur utamanya sudah kelihatan.
+                Beberapa bagian masih bisa berubah, tapi alur utamanya sudah kelihatan
               </p>
             </div>
             <div className="grid gap-4 lg:grid-cols-3">
@@ -194,7 +194,7 @@ export default function LandingPage() {
           <div className="mx-auto max-w-7xl px-4 py-14">
             <div className="mb-8 max-w-2xl">
               <p className="text-sm font-bold uppercase tracking-wide text-brand-700">Cara Kerja</p>
-              <h2 className="mt-2 text-3xl font-black">Dari info yang tercecer jadi daftar yang jelas.</h2>
+              <h2 className="mt-2 text-3xl font-black">Dari info yang tercecer jadi daftar yang jelas</h2>
             </div>
             <div className="grid gap-4 md:grid-cols-3">
               {steps.map((step, index) => (
@@ -215,7 +215,7 @@ export default function LandingPage() {
           <div className="mx-auto max-w-7xl px-4 py-14">
             <div className="mb-8 max-w-2xl">
               <p className="text-sm font-bold uppercase tracking-wide text-brand-700">Fitur utama</p>
-              <h2 className="mt-2 text-3xl font-black">Fokus ke hal yang paling sering bikin mahasiswa kelupaan.</h2>
+              <h2 className="mt-2 text-3xl font-black">Fokus ke hal yang paling sering bikin mahasiswa kelupaan</h2>
             </div>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {features.map(([title, desc]) => (
@@ -240,9 +240,9 @@ export default function LandingPage() {
             </div>
             <div className="grid gap-3">
               {[
-                'NEXA tidak meminta password VClass, iLab, Studentsite, atau akun kampus lain.',
-                'NEXA tidak mengambil data dari sistem kampus tanpa izin.',
-                'Data yang disimpan hanya profil, deadline yang kamu masukkan sendiri, kontak reminder opsional, dan status paket.',
+                'NEXA tidak meminta password VClass, iLab, Studentsite, atau akun kampus lain',
+                'NEXA tidak mengambil data dari sistem kampus tanpa izin',
+                'Data yang disimpan hanya profil, deadline yang kamu masukkan sendiri, kontak reminder opsional, dan status paket',
               ].map((item) => (
                 <div key={item} className="flex gap-3 rounded-2xl border border-white/10 bg-white/[0.055] p-4 text-sm leading-6 text-slate-300">
                   <LockKeyhole className="mt-0.5 h-5 w-5 flex-shrink-0 text-teal-200" />
@@ -257,7 +257,7 @@ export default function LandingPage() {
           <div className="mx-auto max-w-7xl px-4 py-14">
             <div className="mb-8 max-w-2xl">
               <p className="text-sm font-bold uppercase tracking-wide text-brand-700">FAQ</p>
-              <h2 className="mt-2 text-3xl font-black">Jawaban singkat untuk hal yang sering ditanyakan.</h2>
+              <h2 className="mt-2 text-3xl font-black">Jawaban singkat untuk hal yang sering ditanyakan</h2>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               {faqs.map(([question, answer]) => (
@@ -277,9 +277,9 @@ export default function LandingPage() {
           <div className="mx-auto max-w-7xl px-4 py-12">
             <div className="rounded-[2rem] border border-white/10 bg-white/[0.055] p-6 text-center backdrop-blur sm:p-10">
               <Layers3 className="mx-auto mb-4 h-7 w-7 text-teal-200" />
-              <h2 className="text-3xl font-black">Mulai dari NEXA Radar, gratis.</h2>
+              <h2 className="text-3xl font-black">Mulai dari NEXA Radar, gratis</h2>
               <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-300">
-                Catat deadline pertama, lihat mana yang paling dekat, lalu biasakan cek dashboard sebelum tugas menumpuk.
+                Catet deadline pertama, lihat mana yang paling dekat, lalu biasakan cek dashboard sebelum tugas menumpuk
               </p>
               <Link
                 href="/login?mode=signup"
