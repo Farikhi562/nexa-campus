@@ -20,7 +20,6 @@ type DashboardProfile = Pick<
   | 'profile_completed'
   | 'telegram_chat_id'
   | 'nexa_id'
-  | 'university'
 >
 
 export default async function DashboardPage({
@@ -38,7 +37,7 @@ export default async function DashboardPage({
   const { data: profile } = await supabase
     .from('profiles')
     .select(
-      'full_name, email, plan, pulse_trial_until, plan_expires_at, subscription_expires_at, command_expires_at, lifetime_command, referral_code, profile_completed, telegram_chat_id, nexa_id, university'
+      'full_name, email, plan, pulse_trial_until, plan_expires_at, subscription_expires_at, command_expires_at, lifetime_command, referral_code, profile_completed, telegram_chat_id, nexa_id'
     )
     .eq('id', user.id)
     .maybeSingle()
@@ -77,7 +76,7 @@ export default async function DashboardPage({
   return (
     <>
       <div className="mb-6">
-        <SmartInputBox plan={plan} defaultCampus={dashboardProfile?.university || 'Kampus'} />
+        <SmartInputBox plan={plan} defaultCampus="Kampus" />
       </div>
 
       <DeadlineDashboardOverview
