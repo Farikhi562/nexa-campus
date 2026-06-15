@@ -6,12 +6,18 @@ import {
 import { BRAND } from '@/lib/brand'
 
 export type NavItem = {
-  label: string; href: string; icon: typeof Home; hot?: boolean; soon?: boolean
+  label: string
+  href: string
+  icon: typeof Home
+  hot?: boolean
+  soon?: boolean
+  /** hanya untuk pengguna NEXA Command */
+  command?: boolean
 }
 
 export const DASHBOARD_NAV: NavItem[] = [
   { label: 'Dashboard', href: '/dashboard', icon: Home },
-  { label: 'NEXA Assistant', href: '/dashboard/nexa-assistant', icon: Bot, hot: true },
+  { label: 'NEXA Assistant', href: '/dashboard/nexa-assistant', icon: Bot, hot: true, command: true },
   { label: 'Leaderboard', href: '/dashboard/leaderboard', icon: Trophy, hot: true },
   { label: 'Pencapaian', href: '/dashboard/achievements', icon: Award, hot: true },
   { label: 'Focus Mode', href: '/dashboard/focus', icon: Timer, hot: true },

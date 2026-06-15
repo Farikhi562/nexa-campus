@@ -10,29 +10,22 @@ import { Video, PhoneOff, Loader2 } from 'lucide-react'
  * Cara pasang di StudyRoomDetail:
  *   import StudyRoomCall from '@/components/study-room/StudyRoomCall'
  *   <StudyRoomCall roomId={roomId} displayName={profile?.full_name ?? 'Mahasiswa'} />
- *
- * Catatan:
- * - Domain default: meet.jit.si (publik, gratis). Untuk privasi/branding lebih, bisa
- *   self-host Jitsi atau pakai 8x8 JaaS lalu ganti `JITSI_DOMAIN`.
- * - Di iOS Safari, kamera/mic minta izin saat tombol "Gabung" ditekan.
  */
 
 const JITSI_DOMAIN = 'meet.jit.si'
 
-type JitsiMeetAPI = {
+// Bentuk instance Jitsi yang kita pakai (bukan tipe constructor-nya).
+type JitsiApi = {
   dispose: () => void
-  addEventListener: (event: string, cb: (...args: unknown[]) => void) => void
-  executeCommand: (cmd: string, ...args: unknown[]) => void
+  addEventListener: (event: string, listener: (...args: unknown[]) => void) => void
+  executeCommand: (command: string, ...args: unknown[]) => void
 }
 
-type JitsiMeetExternalAPIConstructor = new (
-  domain: string,
-  options: Record<string, unknown>
-) => JitsiMeetAPI
+type JitsiConstructor = new (domain: string, options: Record<string, unknown>) => JitsiApi
 
 declare global {
   interface Window {
-    JitsiMeetExternalAPI?: JitsiMeetExternalAPIConstructor
+    JitsiMeetExternalAPI?: JitsiConstructor
   }
 }
 
@@ -66,7 +59,7 @@ export default function StudyRoomCall({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const containerRef = useRef<HTMLDivElement>(null)
-  const apiInstance = useRef<JitsiMeetAPI | null>(null)
+  const apiInstance = useRef<JitsiApi | null>(null)
 
   // Nama ruang unik & sulit ditebak (prefix produk + roomId).
   const jitsiRoom = `nexa-campus-study-${roomId}`
