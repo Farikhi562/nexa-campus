@@ -4,10 +4,23 @@ import { sortNearest } from '@/lib/deadline-utils'
 import { redirect } from 'next/navigation'
 import type { AcademicDeadline, Profile } from '@/types'
 import { getEffectivePlan } from '@/lib/plans'
+import SmartInputBox from '@/components/smart-input/SmartInputBox'
 
 type DashboardProfile = Pick<
   Profile,
-  'full_name' | 'email' | 'plan' | 'pulse_trial_until' | 'plan_expires_at' | 'subscription_expires_at' | 'command_expires_at' | 'lifetime_command' | 'referral_code' | 'profile_completed' | 'telegram_chat_id' | 'nexa_id'
+  | 'full_name'
+  | 'email'
+  | 'plan'
+  | 'pulse_trial_until'
+  | 'plan_expires_at'
+  | 'subscription_expires_at'
+  | 'command_expires_at'
+  | 'lifetime_command'
+  | 'referral_code'
+  | 'profile_completed'
+  | 'telegram_chat_id'
+  | 'nexa_id'
+  | 'university'
 >
 
 export default async function DashboardPage({
@@ -24,7 +37,9 @@ export default async function DashboardPage({
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('full_name, email, plan, pulse_trial_until, plan_expires_at, subscription_expires_at, command_expires_at, lifetime_command, referral_code, profile_completed, telegram_chat_id, nexa_id')
+    .select(
+      'full_name, email, plan, pulse_trial_until, plan_expires_at, subscription_expires_at, command_expires_at, lifetime_command, referral_code, profile_completed, telegram_chat_id, nexa_id, university'
+    )
     .eq('id', user.id)
     .maybeSingle()
 
@@ -57,20 +72,27 @@ export default async function DashboardPage({
   }
 
   const dashboardProfile = profile as DashboardProfile | null
+  const plan = getEffectivePlan({ ...(dashboardProfile ?? {}), email: user.email })
 
   return (
-    <DeadlineDashboardOverview
-      initialDeadlines={((deadlines ?? []) as AcademicDeadline[]).sort(sortNearest)}
-      userName={dashboardProfile?.full_name}
-      userTier={getEffectivePlan({ ...(dashboardProfile ?? {}), email: user.email })}
-      referralCode={dashboardProfile?.referral_code}
-      nexaId={dashboardProfile?.nexa_id ?? null}
-      referralCount={referralStats.count ?? 0}
-      profileCompleted={Boolean(dashboardProfile?.profile_completed)}
-      hasTelegramChatId={Boolean(dashboardProfile?.telegram_chat_id)}
-      showCreatedMessage={searchParams?.created === 'deadline'}
-      showUpdatedMessage={searchParams?.updated === 'deadline'}
-      showDeletedMessage={searchParams?.deleted === 'deadline'}
-    />
+    <>
+      <div className="mb-6">
+        <SmartInputBox plan={plan} defaultCampus={dashboardProfile?.university || 'Kampus'} />
+      </div>
+
+      <DeadlineDashboardOverview
+        initialDeadlines={((deadlines ?? []) as AcademicDeadline[]).sort(sortNearest)}
+        userName={dashboardProfile?.full_name}
+        userTier={plan}
+        referralCode={dashboardProfile?.referral_code}
+        nexaId={dashboardProfile?.nexa_id ?? null}
+        referralCount={referralStats.count ?? 0}
+        profileCompleted={Boolean(dashboardProfile?.profile_completed)}
+        hasTelegramChatId={Boolean(dashboardProfile?.telegram_chat_id)}
+        showCreatedMessage={searchParams?.created === 'deadline'}
+        showUpdatedMessage={searchParams?.updated === 'deadline'}
+        showDeletedMessage={searchParams?.deleted === 'deadline'}
+      />
+    </>
   )
 }
