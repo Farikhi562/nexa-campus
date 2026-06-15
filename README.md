@@ -1,37 +1,65 @@
-# NEXA Campus — Fitur Baru (Batch 3)
+# NEXA Campus — Fitur Baru (Batch 4)
 
-## ✅ Sudah dibangun (siap pasang)
+## ✅ 3. NEXA Arena — Leaderboard Tim & Badge Kompetisi
 
-### 1. Input deadline cepat — 1 baris natural language
-- `src/app/api/deadlines/quick-nl/route.ts` **(BARU)** — terima teks bebas, parse pakai AI (kalau aktif) atau parser lokal, lengkapi field wajib otomatis (kampus dari profil, jam default 23:59, ruang "Online"/"Menyusul"), validasi pakai validator yang sama dengan form, lalu simpan ke `academic_deadlines`.
-- `src/components/deadlines/QuickDeadlineBar.tsx` **(BARU)** — input 1 baris + Enter untuk submit.
+**Langkah 1 — DB:** jalankan `docs/MIGRATION_arena_leaderboard_badges.sql` di Supabase → SQL Editor.
+Membuat:
+- `nexa_arena_results` — creator mencatat hasil lomba timnya (juara_1/2/3, finalist, participant).
+- View `nexa_arena_team_leaderboard` — ranking tim = bobot placement + total poin anggota (pakai `points_events` yang sudah ada).
+- View `nexa_arena_user_badges` — badge kompetisi per user dari placement tim yang diikuti.
+- RLS: hasil hanya bisa ditulis oleh creator post; leaderboard bisa dibaca semua user login.
 
-**Cara pasang:** taruh `<QuickDeadlineBar />` di atas dashboard / halaman Semua Deadline.
-Contoh input: `tugas kalkulus bab 3 jumat jam 5 sore vclass`, `bayar ukt 20 juni`, `kuis fisika besok jam 9 pagi`.
+**Langkah 2 — API (drop-in):**
+- `src/app/api/arena/leaderboard/route.ts` — `GET /api/arena/leaderboard?type=&limit=` → daftar tim + badge milikmu.
+- `src/app/api/arena/[id]/result/route.ts` — `POST` (creator) catat placement timnya.
 
-### 2. Study Room — Voice / Video Call
-- `src/components/study-room/StudyRoomCall.tsx` **(BARU)** — panggilan grup audio/video via **Jitsi** (gratis, tanpa server sendiri, tanpa API key). Tiap room punya ruang unik `nexa-campus-study-{roomId}`.
-
-**Cara pasang** di `components/study-room/StudyRoomDetail.tsx`:
-```tsx
-import StudyRoomCall from '@/components/study-room/StudyRoomCall'
-// di dalam render, mis. di kolom kanan room:
-<StudyRoomCall roomId={roomId} displayName={/* nama user */ 'Mahasiswa'} />
-```
-> Default pakai `meet.jit.si` (publik). Kalau mau privat/branding, bisa self-host Jitsi atau pakai 8x8 JaaS lalu ganti `JITSI_DOMAIN` di komponen. Tidak ada biaya untuk meet.jit.si.
+**Langkah 3 — UI:**
+- `src/components/arena/ArenaLeaderboard.tsx` — leaderboard tim + filter kategori + badge kompetisi user.
+  Pasang di `app/dashboard/arena/page.tsx` atau tab khusus:
+  ```tsx
+  import ArenaLeaderboard from '@/components/arena/ArenaLeaderboard'
+  <ArenaLeaderboard />
+  ```
+- Untuk creator mencatat hasil, panggil dari halaman detail tim:
+  ```ts
+  await fetch(`/api/arena/${postId}/result`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ placement: 'juara_1', note: 'Nasional 2026' }),
+  })
+  ```
 
 ---
 
-## 🔜 Dua fitur sisanya — perlu langkah tambahan (kukerjakan batch berikutnya)
+## ✅ 4. Tambah Teman — Cari by NEXA ID / QR
 
-### 3. Tambah Teman — Cari by NEXA ID / QR
-Kabar baik: **cari by NEXA ID sudah JALAN** di backend (`/api/friends/search` sudah mendeteksi input 6 digit → cari `nexa_id`). Yang perlu ditambah cuma sisi **QR**:
-- Kartu "NEXA ID + QR kamu" (untuk dibagikan).
-- Scanner kamera untuk baca QR teman → langsung cari.
-- Butuh 2 dependency kecil: `qrcode.react` (bikin QR) + `html5-qrcode` (scan). Karena nambah dependency & perlu `npm install`, kupisah ke batch berikutnya biar kamu setujui dulu.
+> Cari by NEXA ID **sudah jalan** di `/api/friends/search` (otomatis deteksi input angka → cari `nexa_id`). Batch ini menambah sisi QR.
 
-### 4. NEXA Arena — Leaderboard tim & badge kompetisi
-Ini butuh aku **lihat skema tabel arena/tim kamu dulu** (nama tabel tim, anggota, skor) supaya query-nya akurat. Kalau kamu kasih lampu hijau, aku intip skema arena lalu kirim: SQL (view leaderboard tim + tabel badge), API, dan UI leaderboard + badge.
-
-> Mau lanjut #3 dan #4 sekarang? Bilang aja, nanti kukerjakan. Untuk #4 aku perlu konfirmasi nama tabel arena kamu (atau aku tebak dari kode `app/dashboard/arena`).
+**Langkah 1 — install 2 dependency:**
+```bash
+npm i qrcode.react html5-qrcode
 ```
+
+**Langkah 2 — UI (drop-in):**
+- `src/components/friends/MyNexaQrCard.tsx` — kartu NEXA ID + QR kamu (untuk dibagikan/discan).
+  ```tsx
+  <MyNexaQrCard nexaId={profile.nexa_id} fullName={profile.full_name} />
+  ```
+- `src/components/friends/NexaQrScanner.tsx` — scan QR teman → keluarkan nexaId.
+  ```tsx
+  <NexaQrScanner onFound={(nexaId) => setQuery(nexaId) /* lalu jalankan search */} />
+  ```
+
+**Langkah 3 (opsional) — auto-add via link QR:**
+QR berisi link `.../dashboard/friends?add=<nexaId>`. Di halaman Friends, baca `searchParams.add`
+lalu otomatis jalankan pencarian/tampilkan tombol "Tambah". (Kecil; bisa kutambahkan kalau mau.)
+
+---
+
+## Ringkasan semua batch
+- Batch 1: AI multi-provider gratis + i18n + fix BUG-002/008 (+patch 001/007/009)
+- Batch 2: versi 1.6.23 + NEXA Assistant (chatbot)
+- Batch 3: input deadline 1 baris (NL) + Study Room voice/video (Jitsi)
+- Batch 4 (ini): Arena leaderboard tim + badge, Friends QR (NEXA ID search sudah ada)
+
+Selamat — keempat permintaan fitur sudah tercakup. Tinggal pasang, set ENV AI, jalankan 2 migration (presence + arena), dan `npm i` 2 dependency QR.
