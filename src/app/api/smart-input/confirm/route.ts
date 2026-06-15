@@ -80,8 +80,9 @@ export async function POST(request: NextRequest) {
     })
 
     if ('error' in parsed) {
-      errors.push({ index: i, error: parsed.error })
-      finalCandidates.push({ ...c, _error: parsed.error })
+      const errorMessage = parsed.error ?? 'Data deadline tidak valid.'
+      errors.push({ index: i, error: errorMessage })
+      finalCandidates.push({ ...c, _error: errorMessage })
       continue
     }
 
