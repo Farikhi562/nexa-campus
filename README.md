@@ -1,192 +1,86 @@
-# NEXA Campus — Batch 7: Smart Input Engine (Integrated & Hardened)
+# NEXA Campus — Batch 8: Fix Hamburger Mobile + Bahasa di Seluruh Navigasi
 
-Status: **terpasang langsung ke dashboard**, **diuji runtime** (97 assertion, 7 skenario,
-real execution — bukan cuma syntax check), **`next build` produksi sungguhan sukses**.
-3 bug ditemukan & diperbaiki selama proses ini (detail di §6).
+## 🔴 1. Fix bug hamburger mobile — "gak bisa liat semua halaman"
 
----
+**Akar masalah:** di Batch 5, drawer hamburger (`MobileNavMenu.tsx`) di-rewrite dan
+kehilangan constraint tinggi yang benar (`h-dvh` + `min-h-0`) yang ada di versi original.
+Tanpa itu, di sejumlah browser mobile area `<nav>` yang seharusnya `overflow-y-auto` tidak
+benar-benar ter-constrain tingginya, jadi tidak bisa di-scroll — item paling bawah
+(Pengaturan, Support, Rilis, Admin) jadi tidak terjangkau. Ini makin kerasa sekarang karena
+daftar menu sudah nambah jadi 19 item (dulu ~15).
 
-## 1. File yang berubah
+**Fix:** `components/MobileNavMenu.tsx` — drawer sekarang pakai `h-dvh` (dynamic viewport
+height, ngikutin tinggi layar yang BENERAN kelihatan di mobile, robust terhadap address bar
+collapse/expand) + `min-h-0` di container flex-nya + header dibikin `flex-shrink-0` eksplisit.
+Pola ini sama persis dengan yang dipakai versi original sebelum Batch 5 — sekarang dikembalikan
+dan diperkuat.
 
-### Baru (additive, tidak menyentuh fitur lama)
-| File | Fungsi |
-|---|---|
-| `docs/MIGRATION_smart_input_logs.sql` | Tabel `smart_input_logs`, RLS per-user |
-| `src/lib/smart-input/types.ts` | Tipe `SmartInputCandidate`, `RawCandidate`, `ExtractResult` |
-| `src/lib/smart-input/normalize.ts` | Normalisasi hasil mentah → kandidat siap-preview |
-| `src/lib/smart-input/local-parser.ts` | Parser lokal tanpa AI (fallback), regex Bahasa Indonesia |
-| `src/lib/smart-input/extract.ts` | Layer ekstraksi AI (teks & gambar) + timeout 15-25 detik + fallback otomatis |
-| `src/lib/smart-input/file-extract.ts` | Ekstrak teks PDF (`pdfjs-dist`) & DOCX (`mammoth`) |
-| `src/app/api/ai/parse-text/route.ts` | `POST` parse teks bebas → kandidat (Node runtime eksplisit) |
-| `src/app/api/ai/parse-image/route.ts` | `POST` parse gambar (vision AI) → kandidat (Node runtime eksplisit) |
-| `src/app/api/ai/parse-file/route.ts` | `POST` parse PDF/DOCX → kandidat (Node runtime eksplisit) |
-| `src/app/api/smart-input/confirm/route.ts` | `POST` validasi + simpan ke `academic_deadlines` |
-| `src/components/smart-input/SmartInputBox.tsx` | Komponen utama — 4 tab, timeout client-side, pre-check ukuran file |
-| `src/components/smart-input/SmartInputPreview.tsx` | Preview/edit kandidat sebelum simpan |
-| `src/components/smart-input/SmartManualForm.tsx` | Form manual ringkas |
-| `.env.smart-input.example` | Catatan ENV + dependency |
-| `docs/TESTING_CHECKLIST_smart_input.md` | Hasil pengujian aktual + checklist manual sisa |
+**Bonus fix kecil:** desktop sidebar (`CollapsibleSidebar.tsx`) sebelumnya **tidak** menyaring
+item khusus NEXA Command (beda dari hamburger mobile yang sudah benar) — jadi user non-Command
+tetap lihat link "NEXA Assistant" di sidebar desktop (klik baru kena upgrade screen). Sekarang
+disamakan: kedua nav (desktop & mobile) konsisten menyaring item Command-only. `AppShell.tsx`
+diupdate untuk meneruskan `isCommand` ke `CollapsibleSidebar` juga.
 
-### Diubah — integrasi dashboard sungguhan (file lengkap siap timpa, bukan snippet)
+## ✨ 2. Bahasa beneran ganti di semua navigasi — bukan cuma dropdown avatar
+
+**Penyebab sebenarnya:** ada **2 sistem bahasa yang gak nyambung**:
+- `lib/i18n.tsx` — context terpisah, dipasang tapi **tidak dipakai komponen manapun** (dead code).
+- `components/LanguageProvider.tsx` — context yang BENERAN aktif (dipasang di `app/layout.tsx`),
+  tapi **cuma dikonsumsi oleh `AvatarMenu.tsx`** (dropdown avatar di pojok kanan atas) untuk 6
+  string kecil (Lihat Profil, Leaderboard, Pencapaian, Pengaturan, Bahasa, Keluar).
+
+Sementara itu, **semua label navigasi** (sidebar desktop, hamburger mobile, bottom nav mobile,
+`DashboardNavigation`) hardcode teks Bahasa Indonesia langsung di `nav-items.ts` — sama sekali
+tidak terhubung ke sistem bahasa. Makanya ganti bahasa di Settings cuma ngubah dropdown avatar,
+sisanya tetap Indonesia. Persis seperti yang kamu laporkan.
+
+**Fix:** keempat permukaan navigasi (yang nempel di **setiap halaman dashboard**) sekarang
+benar-benar terhubung ke sistem bahasa:
+
 | File | Perubahan |
 |---|---|
-| `src/app/dashboard/page.tsx` | + `campus_name` ke query profil & tipe `DashboardProfile`; teruskan `defaultCampus` ke overview. 3 baris berubah dari file asli (lihat diff §2). |
-| `src/components/dashboard/DeadlineDashboardOverview.tsx` | + import & render `<SmartInputBox plan={userTier} defaultCampus={...} />` di bawah hero section. 4 titik perubahan, sisanya identik. |
+| `components/LanguageProvider.tsx` | Dictionary ditambah ~17 key baru: nav_assistant, nav_notifications, nav_release, bottom_*, section_*, badge_* |
+| `components/dashboard/nav-items.ts` | Tiap item nav dapat `labelKey` (kunci terjemahan); `label` lama dipertahankan sebagai fallback, tidak ada yang dihapus |
+| `components/MobileNavMenu.tsx` | Render via `t(labelKey)` — sekaligus fix bug scroll di atas |
+| `components/dashboard/CollapsibleSidebar.tsx` | Render via `t(labelKey)`, header "Navigasi" ikut diterjemahkan |
+| `components/MobileBottomNav.tsx` | Render via `t(labelKey)` dengan label pendek khusus (Home/Arena/Teman/Study/Tambah) |
+| `components/dashboard/DashboardNavigation.tsx` | Ikut diupdate untuk konsistensi (komponen ini sebenarnya tidak dipakai di mana pun saat ini — orphan — tapi tetap disertakan biar tidak ada kode usang yang nyangkut kalau suatu saat dipakai) |
+| `components/AppShell.tsx` | Teruskan `isCommand` ke `CollapsibleSidebar` (lihat bonus fix di atas) |
 
-Kedua file di atas diberikan utuh — tinggal timpa langsung, tidak perlu cari tempat sisip sendiri.
-
----
-
-## 2. Diff persis terhadap file asli (untuk review cepat)
-
-`app/dashboard/page.tsx`:
-```diff
--  'full_name' | 'email' | 'plan' | ... | 'telegram_chat_id' | 'nexa_id'
-+  'full_name' | 'email' | 'plan' | ... | 'telegram_chat_id' | 'nexa_id' | 'campus_name'
-
--  .select('full_name, email, plan, ..., telegram_chat_id, nexa_id')
-+  .select('full_name, email, plan, ..., telegram_chat_id, nexa_id, campus_name')
-
-       hasTelegramChatId={Boolean(dashboardProfile?.telegram_chat_id)}
-+      defaultCampus={dashboardProfile?.campus_name || 'Kampus'}
-```
-
-`components/dashboard/DeadlineDashboardOverview.tsx`:
-```diff
- import AskNexaWidget from '@/components/dashboard/AskNexaWidget'
-+import SmartInputBox from '@/components/smart-input/SmartInputBox'
- ...
-   hasTelegramChatId?: boolean
-+  defaultCampus?: string | null
- ...
-   hasTelegramChatId = false,
-+  defaultCampus,
- ...
-       </section>
-+
-+      <SmartInputBox plan={userTier} defaultCampus={defaultCampus || 'Kampus'} />
-+
-       <DailyPulseCard />
-```
-
-`userTier` sudah ada sebagai prop existing di komponen ini (dipakai untuk gating fitur lain) —
-langsung dipakai ulang sebagai `plan` untuk `SmartInputBox`. Komponen aslinya sudah memberi
-default `userTier = 'radar'`, jadi kalau user belum punya plan, otomatis fallback ke Radar/free
-sesuai permintaan.
+**Hasil:** ganti bahasa di Settings (atau dari dropdown avatar) sekarang langsung mengubah label
+di sidebar desktop, hamburger mobile, bottom nav mobile, dan dropdown avatar — semuanya
+serempak, tanpa reload (context React, sinkron lewat custom event + localStorage seperti
+sebelumnya).
 
 ---
 
-## 3. Migration SQL final
+## ⚠️ Yang BELUM tercakup — perlu kamu putuskan skopenya
 
-`docs/MIGRATION_smart_input_logs.sql` — tidak berubah dari draft sebelumnya, sudah aman:
-- `smart_input_logs` dengan FK ke `profiles(id)` (terverifikasi cocok skema asli, `profiles.id`
-  adalah PK yang sama dipakai tabel lain).
-- RLS: `using (auth.uid() = user_id) with check (auth.uid() = user_id)` — user hanya bisa
-  baca/tulis baris miliknya sendiri.
-- Tidak mengubah tabel/kolom lain apa pun.
+Yang saya kerjakan adalah **navigasi/chrome** (yang nempel di semua halaman). **Isi/konten tiap
+halaman** (kartu-kartu di Dashboard, deskripsi & form di Arena, chat di Study Room, form di
+Friends/Deadlines/Settings/Billing, dst) **masih hardcoded Bahasa Indonesia** — ini PR yang jauh
+lebih besar: puluhan halaman, ratusan string teks, masing-masing perlu dibaca & ditranslate
+satu per satu. Saya sengaja tidak menebak/main asal translate semuanya sekaligus karena
+risikonya tinggi (salah konteks, kepanjangan dari layout, dll).
 
-Jalankan di Supabase SQL Editor, idempotent (aman dijalankan ulang).
-
----
-
-## 4. Dependency baru
-
-```
-npm i pdfjs-dist mammoth
-```
-
-Berubah dari draft sebelumnya — brief awal menyebut `pdf-parse`, tapi setelah diuji langsung
-dengan PDF asli, paket itu terbukti tidak reliable (lihat §6 bug #1). Sudah diganti `pdfjs-dist`
-(pdf.js resmi Mozilla). Jangan install `pdf-parse` — tidak dipakai lagi.
-
-`web-push` (Batch 6) tetap dibutuhkan kalau belum terpasang.
+Kalau kamu mau lanjut ke translate isi halaman, kasih tau halaman mana yang paling prioritas
+(mis. Dashboard dulu, atau Arena dulu), nanti saya kerjakan bertahap per halaman dengan cara
+yang sama (baca isi asli → bikin translation key → wire `t()` → verifikasi).
 
 ---
 
-## 5. ENV baru
+## Cara pasang
+1. Timpa 7 file di atas.
+2. `npm run build` — sudah divalidasi hijau (full `tsc --noEmit` + `next build` produksi
+   terhadap source asli kamu + overlay ini, 73/73 halaman, 0 error).
+3. Test cepat: buka hamburger mobile di layar kecil → scroll ke bawah → pastikan
+   Pengaturan/Support/Rilis/Admin kelihatan & bisa diklik. Lalu buka Settings → ganti bahasa ke
+   English/中文 → cek sidebar & hamburger & bottom nav ikut berubah seketika.
 
-Tidak ada ENV baru. Smart Input Engine reuse penuh `AI_PROVIDER`/`AI_API_KEY` dari Batch 1.
-Lihat `.env.smart-input.example` untuk detail & perilaku tanpa AI (semua tab tetap berfungsi
-dengan fallback, kecuali Upload Gambar yang butuh AI vision).
-
----
-
-## 6. Bug ditemukan & diperbaiki selama hardening
-
-1. **[KRITIKAL] `pdf-parse` diganti `pdfjs-dist`.** Diuji dengan PDF asli: `pdf-parse`
-   membundel pdf.js v1.10.100 (2017) dengan module-level state. PDF kosong yang diproses tepat
-   setelah PDF berteks mengembalikan teks dari PDF sebelumnya — bukan error, salah ambil data.
-   Risiko nyata di Vercel serverless yang warm (berpotensi "bocor" isi PDF antar user). Diganti
-   `pdfjs-dist`, diuji ulang berulang kali (termasuk interleaved), selalu benar.
-2. **[SEDANG] Limit upload gambar/file: 5MB/8MB diturunkan ke 3MB.** Vercel Serverless
-   Functions punya hard limit 4.5MB untuk request body (tidak bisa dikonfigurasi naik). Base64
-   menambah ~33% ukuran — limit lama akan gagal HTTP 413 di production walau lolos validasi
-   kode. Diturunkan ke batas aman + ditambah pre-check di client (feedback instan).
-3. **[KECIL] Pembersihan `course_name` di parser lokal** — urutan regex salah membuat
-   "jam 23.59" ter-parse parsial. Diperbaiki, diverifikasi sebelum/sesudah.
-4. **[KECIL] Type error** di `confirm/route.ts` (`'error' in parsed` gagal di-narrow TS) —
-   diperbaiki jadi pola yang sama dengan `/api/deadlines` asli.
-
-Juga ditambahkan secara proaktif untuk poin performance di briefmu:
-- Timeout 15-25 detik di semua pemanggilan AI server-side — AI yang hang otomatis fallback ke
-  parser lokal (teks) atau pesan jelas (gambar), tidak pernah menggantung tanpa batas.
-- Timeout 32 detik di client (`AbortController`) — UI berhenti nunggu dan kasih pesan jelas,
-  bukan spinner selamanya.
-- `runtime = 'nodejs'` + `maxDuration` eksplisit di keempat route API (`pdfjs-dist`/`mammoth`
-  butuh Node API, tidak jalan di Edge Runtime).
-
----
-
-## 7. Hasil pengujian runtime (ringkas — detail penuh di docs/TESTING_CHECKLIST_smart_input.md)
-
-| Validasi | Metode | Hasil |
-|---|---|---|
-| Logic murni (parser, normalize, validasi) | 97 assertion, real execution via tsx | 97/97 PASS |
-| Jalur AI aktif (teks & gambar) | fetch di-mock meniru respons Groq asli, termasuk error/timeout/network-down | semua skenario PASS |
-| Ekstraksi PDF/DOCX | File PDF & DOCX asli (reportlab/python-docx), termasuk PDF kosong (simulasi scan) | semua benar, tanpa kontaminasi data |
-| Typecheck | tsc --noEmit strict, seluruh source asli + overlay Batch 7 | 0 error |
-| Build produksi | next build Next.js 14.2.35, seluruh route asli + baru | sukses, 73/73 halaman, 0 error |
-| Integrasi dashboard | Diff manual terhadap file asli | minimal & presisi (lihat §2) |
-
-Yang tidak bisa dijalankan dari sandbox ini (perlu kredensial/infra asli kamu): Supabase
-sungguhan, AI provider dengan API key asli, deploy Vercel asli, device mobile fisik. Checklist
-manual untuk ini ada di docs/TESTING_CHECKLIST_smart_input.md bagian 2.
-
----
-
-## 8. Cara pasang
-
-1. Jalankan `docs/MIGRATION_smart_input_logs.sql` di Supabase SQL Editor.
-2. `npm i pdfjs-dist mammoth`.
-3. Timpa semua file di §1 (baru dan diubah), termasuk `app/dashboard/page.tsx` dan
-   `components/dashboard/DeadlineDashboardOverview.tsx` (sudah lengkap, langsung timpa).
-4. `npm run build` (sudah divalidasi hijau di sandbox), lalu deploy seperti biasa.
-5. Verifikasi cepat: buka `/dashboard` → SmartInputBox muncul di bawah hero → coba tab Manual →
-   coba tab Bahasa Natural (kalau AI aktif) → jalankan checklist manual di §2 testing checklist.
-
----
-
-## 9. Limitasi yang masih ada
-
-1. Upload dibatasi 3MB — batas keras platform Vercel, bukan pilihan. Solusi jangka panjang
-   (upload langsung ke Supabase Storage) adalah perubahan arsitektur terpisah, belum dikerjakan.
-2. Parser lokal (fallback non-AI) kualitasnya di bawah AI untuk teks panjang tanpa baris baru.
-   Field krusial (tanggal/jam/jenis) tetap benar; user tetap review di preview.
-3. Beberapa stopword Indonesia ("ada", dll) belum dibersihkan dari course_name di parser lokal —
-   kosmetik, tidak memengaruhi data inti.
-4. Validasi `next build` di sandbox memakai next.config.js/tailwind.config.js minimal (PWA
-   dinonaktifkan, palet warna stub) karena config asli project tidak ada di file yang diupload.
-   Risiko konflik dengan config asli kamu kecil, tapi tetap jalankan `npm run build` sekali lagi
-   di environment kamu sendiri sebagai langkah terakhir.
-5. Vision AI & ekstraksi PDF/DOCX sudah diuji dengan file asli tapi API key mock (bukan provider
-   asli) — sarankan 1-2 kali tes manual dengan API key & file tugas sungguhan sebelum dianggap
-   production-ready 100%.
-
----
-
-## Berikutnya: Batch 7.1 — NEXA Arena Trust & Verification System
-
-Smart Input Engine sudah solid (terpasang + teruji). Siap lanjut ke 7.1 sesuai urutan yang kamu
-minta — bilang "lanjut" dan saya mulai dengan membaca skema tabel Arena yang sudah ada
-(nexa_arena_posts, nexa_arena_team_members, dll dari batch sebelumnya) supaya
-arena_applications/user_verifications/user_skill_evidence nyambung rapi, bukan duplikat.
+## Catatan teknis
+- Tidak ada migration SQL, tidak ada ENV baru.
+- `lib/i18n.tsx` (sistem lama yang dead code) **tidak disentuh** — aman dibiarkan, tidak
+  memengaruhi apa pun karena memang tidak dipakai di manapun. Bisa dihapus kapan saja kalau mau
+  beres-beres, tapi tidak mendesak.
+- Diverifikasi dengan 17 test assertion runtime: kelengkapan terjemahan tiap nav item di 3
+  bahasa, filtering admin/Command per item, dan perilaku fallback.

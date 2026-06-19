@@ -5,15 +5,25 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { DASHBOARD_NAV } from '@/components/dashboard/nav-items'
+import { useT } from '@/components/LanguageProvider'
 import { BRAND } from '@/lib/brand'
 
-export default function CollapsibleSidebar({ isAdmin = false }: { isAdmin?: boolean }) {
+export default function CollapsibleSidebar({
+  isAdmin = false,
+  isCommand = false,
+}: {
+  isAdmin?: boolean
+  isCommand?: boolean
+}) {
   const [collapsed, setCollapsed] = useState(false)
   const pathname = usePathname()
+  const { t } = useT()
 
-  const navItems = isAdmin
-    ? DASHBOARD_NAV
-    : DASHBOARD_NAV.filter((item) => item.href !== '/admin')
+  const navItems = DASHBOARD_NAV.filter((item) => {
+    if (item.href === '/admin' && !isAdmin) return false
+    if (item.command && !isCommand) return false
+    return true
+  })
 
   // Persist collapse state
   useEffect(() => {
@@ -43,12 +53,15 @@ export default function CollapsibleSidebar({ isAdmin = false }: { isAdmin?: bool
         <nav className="overflow-hidden rounded-3xl border border-white/80 bg-white/90 shadow-xl shadow-slate-200/70 ring-1 ring-slate-950/[0.03]">
           {!collapsed && (
             <p className="px-4 pb-0 pt-3 text-xs font-black uppercase tracking-[0.18em] text-brand-700">
-              Navigasi
+              {t('section_navigation')}
             </p>
           )}
           <div className={`grid gap-0.5 ${collapsed ? 'p-2' : 'p-2'}`}>
-            {navItems.map(({ label, href, icon: Icon, hot, soon }) => {
+            {navItems.map((item) => {
+              const { href, icon: Icon, hot, soon, command, versioned, labelKey } = item
               const active = isActive(href)
+              const label = versioned ? `${t(labelKey)} v${BRAND.version}` : t(labelKey)
+
               return (
                 <Link
                   key={href}
@@ -72,14 +85,19 @@ export default function CollapsibleSidebar({ isAdmin = false }: { isAdmin?: bool
                   {!collapsed && (
                     <>
                       <span className="flex-1 truncate">{label}</span>
-                      {hot && (
+                      {command && (
+                        <span className="rounded-full bg-gradient-to-r from-amber-400 to-amber-500 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-amber-950">
+                          {t('badge_command')}
+                        </span>
+                      )}
+                      {hot && !command && (
                         <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-amber-700">
-                          Baru
+                          {t('badge_new')}
                         </span>
                       )}
                       {soon && (
                         <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-slate-500">
-                          Soon
+                          {t('badge_soon')}
                         </span>
                       )}
                     </>

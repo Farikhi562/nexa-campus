@@ -72,7 +72,7 @@ export default function AppShell({
       </header>
 
       <div className="mx-auto flex max-w-7xl gap-5 px-3 py-4 pb-28 sm:px-4 sm:py-5 lg:pb-8">
-        <CollapsibleSidebar isAdmin={isAdmin} />
+        <CollapsibleSidebar isAdmin={isAdmin} isCommand={isCommand} />
         <main className="min-w-0 flex-1 space-y-4 sm:space-y-5">{children}</main>
       </div>
 

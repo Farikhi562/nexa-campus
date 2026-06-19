@@ -4,17 +4,19 @@ import { Suspense } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Home, Plus, Sword, UserRound, Users } from 'lucide-react'
+import { useT, type TranslationKey } from '@/components/LanguageProvider'
 
-const NAV = [
-  { label: 'Home', href: '/dashboard', icon: Home },
-  { label: 'Arena', href: '/dashboard/arena', icon: Sword },
-  { label: 'Teman', href: '/dashboard/friends', icon: UserRound },
-  { label: 'Study', href: '/dashboard/study-room', icon: Users },
-  { label: 'Tambah', href: '/dashboard/deadlines/new', icon: Plus },
+const NAV: Array<{ labelKey: TranslationKey; href: string; icon: typeof Home }> = [
+  { labelKey: 'bottom_home', href: '/dashboard', icon: Home },
+  { labelKey: 'bottom_arena', href: '/dashboard/arena', icon: Sword },
+  { labelKey: 'bottom_friends', href: '/dashboard/friends', icon: UserRound },
+  { labelKey: 'bottom_study', href: '/dashboard/study-room', icon: Users },
+  { labelKey: 'bottom_add', href: '/dashboard/deadlines/new', icon: Plus },
 ]
 
 function NavItems() {
   const pathname = usePathname()
+  const { t } = useT()
 
   function isActive(href: string) {
     if (href === '/dashboard') return pathname === '/dashboard'
@@ -23,8 +25,9 @@ function NavItems() {
 
   return (
     <>
-      {NAV.map(({ label, href, icon: Icon }) => {
+      {NAV.map(({ labelKey, href, icon: Icon }) => {
         const active = isActive(href)
+        const label = t(labelKey)
 
         return (
           <Link
@@ -47,14 +50,13 @@ export default function MobileBottomNav() {
   return (
     <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/97 px-2 pb-[calc(env(safe-area-inset-bottom)+0.25rem)] pt-1.5 shadow-lg backdrop-blur-xl lg:hidden">
       <div className="mx-auto grid max-w-md grid-cols-5 gap-0.5">
-        <Suspense fallback={
-          NAV.map(({ label, icon: Icon }) => (
-            <div key={label} className="flex min-h-14 flex-col items-center justify-center gap-1 text-[10px] font-black text-slate-400">
+        <Suspense
+          fallback={NAV.map(({ labelKey, icon: Icon }) => (
+            <div key={labelKey} className="flex min-h-14 flex-col items-center justify-center gap-1 text-[10px] font-black text-slate-400">
               <Icon className="h-5 w-5" />
-              <span>{label}</span>
             </div>
-          ))
-        }>
+          ))}
+        >
           <NavItems />
         </Suspense>
       </div>

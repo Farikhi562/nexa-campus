@@ -19,6 +19,8 @@ const STRINGS = {
   nav_study:         { id: 'Study Room',        en: 'Study Room',      zh: '学习室'     },
   nav_friends:       { id: 'Cari Teman',        en: 'Find Friends',    zh: '找朋友'     },
   nav_arena:         { id: 'NEXA Arena',        en: 'NEXA Arena',      zh: 'NEXA 竞技场' },
+  nav_assistant:     { id: 'NEXA Assistant',    en: 'NEXA Assistant',  zh: 'NEXA 助手'  },
+  nav_notifications: { id: 'Notifikasi',        en: 'Notifications',   zh: '通知'       },
   nav_add_deadline:  { id: 'Tambah Deadline',   en: 'Add Deadline',    zh: '添加截止日' },
   nav_ai:            { id: 'AI Quick Add',      en: 'AI Quick Add',    zh: 'AI 快速添加' },
   nav_deadlines:     { id: 'Semua Deadline',    en: 'All Deadlines',   zh: '所有截止日' },
@@ -27,7 +29,25 @@ const STRINGS = {
   nav_billing:       { id: 'Billing',           en: 'Billing',         zh: '账单'       },
   nav_settings:      { id: 'Pengaturan',        en: 'Settings',        zh: '设置'       },
   nav_support:       { id: 'Support',           en: 'Support',         zh: '支持'       },
-  nav_admin:         { id: 'Admin',        en: 'Admin',      zh: '管理员'     },
+  nav_release:       { id: 'Rilis',             en: 'Release',         zh: '版本'       },
+  nav_admin:         { id: 'Admin',             en: 'Admin',           zh: '管理员'     },
+
+  // Bottom nav (label pendek, ruang sempit di 5 kolom)
+  bottom_home:       { id: 'Home',              en: 'Home',            zh: '首页'       },
+  bottom_arena:      { id: 'Arena',             en: 'Arena',           zh: '竞技场'     },
+  bottom_friends:    { id: 'Teman',             en: 'Friends',         zh: '好友'       },
+  bottom_study:      { id: 'Study',             en: 'Study',           zh: '学习'       },
+  bottom_add:        { id: 'Tambah',            en: 'Add',             zh: '添加'       },
+
+  // Section headers (sidebar / hamburger menu)
+  section_navigation:{ id: 'Navigasi',          en: 'Navigation',      zh: '导航'       },
+  section_main:      { id: 'Fitur Utama',       en: 'Main Features',   zh: '主要功能'   },
+  section_all:       { id: 'Semua Halaman',     en: 'All Pages',       zh: '所有页面'   },
+
+  // Badge kecil di item nav
+  badge_new:         { id: 'Baru',              en: 'New',             zh: '新'         },
+  badge_soon:        { id: 'Segera',            en: 'Soon',            zh: '即将推出'   },
+  badge_command:     { id: 'Command',           en: 'Command',         zh: 'Command'    },
 
   // Common actions
   save:              { id: 'Simpan',            en: 'Save',            zh: '保存'       },
