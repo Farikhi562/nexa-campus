@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { verifyFileContent } from '@/lib/file-signature'
 
 const BUCKET = 'profile-photos'
 const MAX_FILE_SIZE = 2 * 1024 * 1024
@@ -45,6 +46,10 @@ export async function POST(request: NextRequest) {
 
   const path = `${user.id}/avatar-${Date.now()}.${extension}`
   const bytes = await file.arrayBuffer()
+
+  if (!verifyFileContent(Buffer.from(bytes), file.type)) {
+    return NextResponse.json({ error: 'Isi file tidak sesuai dengan tipe yang diklaim.' }, { status: 400 })
+  }
 
   const { error: uploadError } = await supabase.storage
     .from(BUCKET)

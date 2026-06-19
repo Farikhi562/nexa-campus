@@ -1,5 +1,5 @@
 import 'server-only'
-import { createHash } from 'crypto'
+import { createHash, timingSafeEqual } from 'crypto'
 
 export type MidtransConfig = {
   serverKey: string
@@ -79,5 +79,12 @@ export function verifyMidtransSignature(params: {
   const expected = createHash('sha512')
     .update(params.orderId + params.statusCode + params.grossAmount + params.serverKey)
     .digest('hex')
-  return expected === params.signatureKey
+
+  // timingSafeEqual dipakai sebagai praktik baik (defense in depth) untuk
+  // perbandingan signature — mencegah timing attack secara teoretis, walau
+  // untuk hash SHA-512 hex 128 karakter risiko praktiknya sangat rendah.
+  const expectedBuf = Buffer.from(expected, 'utf8')
+  const actualBuf = Buffer.from(params.signatureKey, 'utf8')
+  if (expectedBuf.length !== actualBuf.length) return false
+  return timingSafeEqual(expectedBuf, actualBuf)
 }

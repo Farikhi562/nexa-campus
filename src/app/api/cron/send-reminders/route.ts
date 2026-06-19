@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { sendTelegramMessage, buildReminderMessage } from '@/lib/telegram'
-import { sendWebPush, pushConfigured } from '@/lib/push/web-push'
-import { buildPushPayload } from '@/lib/reminders/push-message'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
@@ -12,7 +10,13 @@ type ReminderType = 'h7' | 'h3' | 'h1' | 'day'
 function isAuthorized(req: NextRequest): boolean {
   const cronSecret = process.env.CRON_SECRET
   if (cronSecret && req.headers.get('authorization') === `Bearer ${cronSecret}`) return true
-  if (req.headers.get('x-vercel-cron') === '1') return true
+  // CATATAN KEAMANAN: SEBELUMNYA ada juga `if (req.headers.get('x-vercel-cron') === '1') return true`
+  // di sini. Itu DIHAPUS karena header HTTP biasa bisa dipalsukan siapa saja
+  // (curl -H "x-vercel-cron: 1" ...) — Vercel TIDAK menjamin/strip header ini
+  // dari request eksternal. Satu-satunya mekanisme yang didokumentasikan resmi
+  // oleh Vercel sebagai aman adalah CRON_SECRET via Authorization Bearer header
+  // (lihat https://vercel.com/docs/cron-jobs/manage-cron-jobs). Pastikan
+  // CRON_SECRET sudah diset di environment variables Vercel.
   if (process.env.NODE_ENV === 'development') return true
   return false
 }
@@ -39,16 +43,6 @@ const WINDOWS: Array<{ days: number; type: ReminderType; enabledField: 'h7_enabl
   { days: 0, type: 'day', enabledField: 'day_enabled' },
 ]
 
-type ReminderPref = {
-  user_id: string
-  channel: string
-  reminder_time: string
-  h7_enabled: boolean
-  h3_enabled: boolean
-  h1_enabled: boolean
-  day_enabled: boolean
-}
-
 export async function GET(request: NextRequest) {
   if (!isAuthorized(request)) {
     return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 })
@@ -56,12 +50,9 @@ export async function GET(request: NextRequest) {
 
   const db = createServiceClient()
   const { dateStr, hour } = wibNow()
-  const pushReady = pushConfigured()
-
   let totalSent = 0, totalFailed = 0, totalAttempts = 0
-  let pushSent = 0, pushFailed = 0, pushAttempts = 0, pushRemoved = 0
 
-  console.log(`[Cron] Reminder start — WIB date=${dateStr} hour=${hour} pushReady=${pushReady}`)
+  console.log(`[Cron] Reminder start — WIB date=${dateStr} hour=${hour}`)
 
   for (const win of WINDOWS) {
     const targetDate = addDays(dateStr, win.days)
@@ -76,7 +67,7 @@ export async function GET(request: NextRequest) {
 
     if (dErr || !deadlines?.length) continue
 
-    // 2) Kumpulkan user_id unik, fetch profil + reminder_preferences (semua channel)
+    // 2) Kumpulkan user_id unik, fetch profil + reminder_preferences
     const userIds = Array.from(new Set(deadlines.map((d) => d.user_id as string)))
 
     const { data: profiles } = await db
@@ -89,183 +80,85 @@ export async function GET(request: NextRequest) {
       .from('reminder_preferences')
       .select('user_id, channel, reminder_time, h7_enabled, h3_enabled, h1_enabled, day_enabled')
       .in('user_id', userIds)
-      .in('channel', ['telegram', 'push'])
-
-    // 3) Subscription push milik user-user ini (1 user bisa banyak device)
-    const { data: pushSubs } = await db
-      .from('push_subscriptions')
-      .select('id, user_id, endpoint, p256dh, auth')
-      .in('user_id', userIds)
+      .eq('channel', 'telegram')
 
     const profileMap = new Map((profiles ?? []).map((p: Record<string, unknown>) => [p.id as string, p]))
-
-    const telegramPrefMap = new Map<string, ReminderPref>()
-    const pushPrefMap = new Map<string, ReminderPref>()
-    for (const p of (prefs ?? []) as ReminderPref[]) {
-      if (p.channel === 'telegram') telegramPrefMap.set(p.user_id, p)
-      else if (p.channel === 'push') pushPrefMap.set(p.user_id, p)
-    }
-
-    const pushSubsByUser = new Map<string, Array<{ id: string; endpoint: string; p256dh: string; auth: string }>>()
-    for (const s of (pushSubs ?? []) as Array<{ id: string; user_id: string; endpoint: string; p256dh: string; auth: string }>) {
-      const list = pushSubsByUser.get(s.user_id) ?? []
-      list.push(s)
-      pushSubsByUser.set(s.user_id, list)
-    }
+    const prefMap = new Map((prefs ?? []).map((p: Record<string, unknown>) => [p.user_id as string, p]))
 
     for (const dl of deadlines) {
-      const userId = dl.user_id as string
-      const deadlineInfo = {
+      const profile = profileMap.get(dl.user_id as string)
+      const pref = prefMap.get(dl.user_id as string)
+
+      if (!profile || !pref) continue
+
+      const chatId = profile.telegram_chat_id as string
+      if (!chatId?.trim()) continue
+
+      // Cek apakah reminder window ini diaktifkan user
+      if (!pref[win.enabledField]) continue
+
+      // Cek jam: reminder hanya dikirim di jam yang sesuai reminder_time
+      const reminderHour = parseInt((pref.reminder_time as string).slice(0, 2), 10)
+      if (reminderHour !== hour) continue
+
+      totalAttempts++
+
+      // Dedup: sudah pernah dikirim?
+      const { data: existing } = await db
+        .from('reminder_logs')
+        .select('id')
+        .eq('deadline_id', dl.id as string)
+        .eq('channel', 'telegram')
+        .eq('reminder_type', win.type)
+        .eq('status', 'sent')
+        .maybeSingle()
+
+      if (existing) continue
+
+      const text = buildReminderMessage(win.type, {
         title: dl.title as string | null,
         course_name: dl.course_name as string,
         deadline_date: dl.deadline_date as string,
         deadline_time: dl.deadline_time as string,
         campus: dl.campus as string,
         room: dl.room as string,
-      }
+      })
 
-      // ---------------- TELEGRAM (existing logic) ----------------
-      const profile = profileMap.get(userId)
-      const telegramPref = telegramPrefMap.get(userId)
+      const result = await sendTelegramMessage(chatId.trim(), text)
 
-      if (profile && telegramPref) {
-        const chatId = (profile.telegram_chat_id as string)?.trim()
-        const reminderHour = parseInt(telegramPref.reminder_time.slice(0, 2), 10)
+      if (result.ok) {
+        await db.from('reminder_logs').insert({
+          user_id: dl.user_id,
+          deadline_id: dl.id,
+          channel: 'telegram',
+          reminder_type: win.type,
+          status: 'sent',
+          sent_at: new Date().toISOString(),
+        }).then(() => null, () => null)
 
-        if (chatId && telegramPref[win.enabledField] && reminderHour === hour) {
-          totalAttempts++
+        await db.from('notifications').insert({
+          user_id: dl.user_id,
+          type: 'deadline_reminder',
+          title: `Reminder: ${dl.course_name as string}`,
+          message: `Deadline ${win.days === 0 ? 'hari ini' : `dalam ${win.days} hari`}: ${(dl.title as string | null) ?? (dl.course_name as string)}`,
+          link: '/dashboard',
+        }).then(() => null, () => null)
 
-          const { data: existing } = await db
-            .from('reminder_logs')
-            .select('id')
-            .eq('deadline_id', dl.id as string)
-            .eq('channel', 'telegram')
-            .eq('reminder_type', win.type)
-            .eq('status', 'sent')
-            .maybeSingle()
-
-          if (!existing) {
-            const text = buildReminderMessage(win.type, deadlineInfo)
-            const result = await sendTelegramMessage(chatId, text)
-
-            if (result.ok) {
-              await db.from('reminder_logs').insert({
-                user_id: userId,
-                deadline_id: dl.id,
-                channel: 'telegram',
-                reminder_type: win.type,
-                status: 'sent',
-                sent_at: new Date().toISOString(),
-              }).then(() => null, () => null)
-
-              await db.from('notifications').insert({
-                user_id: userId,
-                type: 'deadline_reminder',
-                title: `Reminder: ${deadlineInfo.course_name}`,
-                message: `Deadline ${win.days === 0 ? 'hari ini' : `dalam ${win.days} hari`}: ${deadlineInfo.title ?? deadlineInfo.course_name}`,
-                link: '/dashboard',
-              }).then(() => null, () => null)
-
-              totalSent++
-            } else {
-              await db.from('reminder_logs').insert({
-                user_id: userId,
-                deadline_id: dl.id,
-                channel: 'telegram',
-                reminder_type: win.type,
-                status: 'failed',
-                provider_message: result.error,
-              }).then(() => null, () => null)
-              totalFailed++
-            }
-          }
-        }
-      }
-
-      // ---------------- WEB PUSH ----------------
-      const pushPref = pushPrefMap.get(userId)
-      const subs = pushSubsByUser.get(userId)
-
-      if (pushReady && pushPref && subs?.length) {
-        const reminderHour = parseInt(pushPref.reminder_time.slice(0, 2), 10)
-
-        if (pushPref[win.enabledField] && reminderHour === hour) {
-          pushAttempts++
-
-          const { data: existing } = await db
-            .from('reminder_logs')
-            .select('id')
-            .eq('deadline_id', dl.id as string)
-            .eq('channel', 'push')
-            .eq('reminder_type', win.type)
-            .eq('status', 'sent')
-            .maybeSingle()
-
-          if (!existing) {
-            const payload = buildPushPayload(win.type, deadlineInfo)
-            let anySent = false
-            let lastError: string | undefined
-
-            for (const sub of subs) {
-              const result = await sendWebPush(
-                { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
-                payload
-              )
-              if (result.ok) {
-                anySent = true
-              } else if (result.gone) {
-                await db.from('push_subscriptions').delete().eq('id', sub.id).then(() => null, () => null)
-                pushRemoved++
-              } else {
-                lastError = result.error
-              }
-            }
-
-            if (anySent) {
-              await db.from('reminder_logs').insert({
-                user_id: userId,
-                deadline_id: dl.id,
-                channel: 'push',
-                reminder_type: win.type,
-                status: 'sent',
-                sent_at: new Date().toISOString(),
-              }).then(() => null, () => null)
-
-              await db.from('notifications').insert({
-                user_id: userId,
-                type: 'deadline_reminder',
-                title: `Reminder: ${deadlineInfo.course_name}`,
-                message: `Deadline ${win.days === 0 ? 'hari ini' : `dalam ${win.days} hari`}: ${deadlineInfo.title ?? deadlineInfo.course_name}`,
-                link: '/dashboard',
-              }).then(() => null, () => null)
-
-              pushSent++
-            } else {
-              await db.from('reminder_logs').insert({
-                user_id: userId,
-                deadline_id: dl.id,
-                channel: 'push',
-                reminder_type: win.type,
-                status: 'failed',
-                provider_message: lastError ?? 'Semua device gagal/expired.',
-              }).then(() => null, () => null)
-              pushFailed++
-            }
-          }
-        }
+        totalSent++
+      } else {
+        await db.from('reminder_logs').insert({
+          user_id: dl.user_id,
+          deadline_id: dl.id,
+          channel: 'telegram',
+          reminder_type: win.type,
+          status: 'failed',
+          provider_message: result.error,
+        }).then(() => null, () => null)
+        totalFailed++
       }
     }
   }
 
-  console.log(
-    `[Cron] Done — telegram sent=${totalSent} failed=${totalFailed} attempts=${totalAttempts} | push sent=${pushSent} failed=${pushFailed} attempts=${pushAttempts} removed=${pushRemoved}`
-  )
-
-  return NextResponse.json({
-    ok: true,
-    date: dateStr,
-    hour,
-    telegram: { sent: totalSent, failed: totalFailed, attempted: totalAttempts },
-    push: { ready: pushReady, sent: pushSent, failed: pushFailed, attempted: pushAttempts, removed: pushRemoved },
-  })
+  console.log(`[Cron] Done — sent=${totalSent} failed=${totalFailed} attempts=${totalAttempts}`)
+  return NextResponse.json({ ok: true, date: dateStr, hour, sent: totalSent, failed: totalFailed, attempted: totalAttempts })
 }

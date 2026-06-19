@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { verifyFileContent } from '@/lib/file-signature'
 
 const MAX_SIZE = 50 * 1024 * 1024 // 50MB
 const ALLOWED_MIME = new Set([
@@ -41,6 +42,10 @@ export async function POST(request: NextRequest, { params }: Params) {
   const ext = file.name.split('.').pop() ?? 'bin'
   const path = `${id}/${user.id}/${Date.now()}.${ext}`
   const buffer = Buffer.from(await file.arrayBuffer())
+
+  if (!verifyFileContent(buffer, file.type)) {
+    return NextResponse.json({ error: 'Isi file tidak sesuai dengan tipe yang diklaim.' }, { status: 400 })
+  }
 
   const { error: uploadError } = await supabase.storage
     .from('room-attachments')

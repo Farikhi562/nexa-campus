@@ -169,7 +169,6 @@ export async function POST(request: NextRequest) {
 
   await supabase.rpc('award_points', {
     p_kind: 'daily_checkin',
-    p_points: pointsAwarded,
     p_ref: `daily_checkin:${today}`,
   })
 

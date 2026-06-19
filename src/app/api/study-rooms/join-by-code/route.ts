@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { checkRateLimit, rateLimitMessage } from '@/lib/rate-limit'
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Login required.' }, { status: 401 })
+
+  // Rate limit ketat (10/5 menit) — endpoint ini rawan brute-force kode room
+  // (lihat docs/MIGRATION_security_hardening.sql untuk perluasan alfabet kode).
+  const rl = await checkRateLimit(supabase, 'study-room-join-code', 10, 300)
+  if (!rl.allowed) return NextResponse.json({ error: rateLimitMessage(rl.retryAfterSeconds) }, { status: 429 })
 
   let body: { code?: unknown }
   try { body = await request.json() } catch { return NextResponse.json({ error: 'Invalid request.' }, { status: 400 }) }

@@ -11,7 +11,7 @@ export async function POST() {
   // Poin fokus dibatasi 1x per hari (ref = tanggal) supaya tidak bisa di-spam.
   const today = new Date().toISOString().slice(0, 10)
   await supabase
-    .rpc('award_points', { p_kind: 'focus_session', p_points: 5, p_ref: `focus-${today}` })
+    .rpc('award_points', { p_kind: 'focus_session', p_ref: `focus-${today}` })
     .then(undefined, () => null)
 
   return NextResponse.json({ ok: true })

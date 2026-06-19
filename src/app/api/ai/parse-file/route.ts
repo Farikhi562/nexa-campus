@@ -4,6 +4,7 @@ import { getEffectivePlan } from '@/lib/plans'
 import { extractFromText, extractFromImage } from '@/lib/smart-input/extract'
 import { extractTextFromFile } from '@/lib/smart-input/file-extract'
 import { normalizeCandidates } from '@/lib/smart-input/normalize'
+import { checkRateLimit, rateLimitMessage } from '@/lib/rate-limit'
 
 // pdf-parse & mammoth butuh Node APIs (Buffer/fs) — paksa Node runtime,
 // jangan Edge. maxDuration disesuaikan kalau plan Vercel mendukung (Hobby
@@ -22,6 +23,9 @@ export async function POST(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Kamu perlu login dulu.' }, { status: 401 })
+
+  const rl = await checkRateLimit(supabase, 'smart-input-file', 15, 3600)
+  if (!rl.allowed) return NextResponse.json({ error: rateLimitMessage(rl.retryAfterSeconds) }, { status: 429 })
 
   const { data: profile } = await supabase
     .from('profiles')

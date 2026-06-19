@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getEffectivePlan } from '@/lib/plans'
 import { extractFromText } from '@/lib/smart-input/extract'
 import { normalizeCandidates } from '@/lib/smart-input/normalize'
+import { checkRateLimit, rateLimitMessage } from '@/lib/rate-limit'
 
 export const runtime = 'nodejs'
 export const maxDuration = 20
@@ -15,6 +16,9 @@ export async function POST(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Kamu perlu login dulu.' }, { status: 401 })
+
+  const rl = await checkRateLimit(supabase, 'smart-input-text', 20, 3600)
+  if (!rl.allowed) return NextResponse.json({ error: rateLimitMessage(rl.retryAfterSeconds) }, { status: 429 })
 
   const { data: profile } = await supabase
     .from('profiles')

@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
     finalCandidates.push({ ...parsed.data, id: data.id })
 
     // Poin leaderboard, selaras dengan /api/deadlines — diabaikan kalau gagal.
-    await supabase.rpc('award_points', { p_kind: 'create_deadline', p_points: 2, p_ref: data.id }).then(undefined, () => null)
+    await supabase.rpc('award_points', { p_kind: 'create_deadline', p_ref: data.id }).then(undefined, () => null)
   }
 
   // Catat hasil akhir ke smart_input_logs.

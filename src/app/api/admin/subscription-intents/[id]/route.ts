@@ -1,23 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
+import { isAdminEmail } from '@/lib/admin'
 import type { Plan, SubscriptionIntentStatus } from '@/types'
 
-function getAdminEmails() {
-  return (process.env.ADMIN_EMAILS || '')
-    .split(',')
-    .map((email) => email.trim().toLowerCase())
-    .filter(Boolean)
-}
-
+// CATATAN: sebelumnya file ini punya getAdminEmails()/requireAdmin() sendiri
+// yang HANYA membaca process.env.ADMIN_EMAILS tanpa fallback — berbeda dari
+// lib/admin.ts yang dipakai halaman /admin (yang punya fallback admin email).
+// Bukan celah keamanan (fail-closed kalau env kosong), tapi inkonsisten dan
+// rawan membingungkan saat maintenance. Disatukan ke lib/admin.ts.
 async function requireAdmin() {
   const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
-  const isAdmin = Boolean(user?.email && getAdminEmails().includes(user.email.toLowerCase()))
-  return { user, isAdmin }
+  return { user, isAdmin: isAdminEmail(user?.email) }
 }
 
 export async function PATCH(

@@ -1,86 +1,120 @@
-# NEXA Campus — Batch 8: Fix Hamburger Mobile + Bahasa di Seluruh Navigasi
+# NEXA Campus — Batch 9: Security Hardening
 
-## 🔴 1. Fix bug hamburger mobile — "gak bisa liat semua halaman"
+Fix untuk **semua 9 temuan** dari audit keamanan sebelumnya. 23 file (1 migration SQL +
+2 lib baru + 20 route yang dipatch). Semua diverifikasi `tsc --noEmit` (0 error, full source
+asli) dan `next build` produksi (sukses, semua route ter-bundle).
 
-**Akar masalah:** di Batch 5, drawer hamburger (`MobileNavMenu.tsx`) di-rewrite dan
-kehilangan constraint tinggi yang benar (`h-dvh` + `min-h-0`) yang ada di versi original.
-Tanpa itu, di sejumlah browser mobile area `<nav>` yang seharusnya `overflow-y-auto` tidak
-benar-benar ter-constrain tingginya, jadi tidak bisa di-scroll — item paling bawah
-(Pengaturan, Support, Rilis, Admin) jadi tidak terjangkau. Ini makin kerasa sekarang karena
-daftar menu sudah nambah jadi 19 item (dulu ~15).
+## 🔴 Kritis
 
-**Fix:** `components/MobileNavMenu.tsx` — drawer sekarang pakai `h-dvh` (dynamic viewport
-height, ngikutin tinggi layar yang BENERAN kelihatan di mobile, robust terhadap address bar
-collapse/expand) + `min-h-0` di container flex-nya + header dibikin `flex-shrink-0` eksplisit.
-Pola ini sama persis dengan yang dipakai versi original sebelum Batch 5 — sekarang dikembalikan
-dan diperkuat.
+### 1. `payment_orders` — RLS tidak pernah enable
+**Fix:** `docs/MIGRATION_security_hardening.sql` §1 — enable RLS + policy SELECT-own-only.
+Sengaja TIDAK ada policy insert/update/delete untuk `authenticated` (order hanya dibuat/diupdate
+lewat service-role client di server, client tidak pernah butuh tulis langsung).
 
-**Bonus fix kecil:** desktop sidebar (`CollapsibleSidebar.tsx`) sebelumnya **tidak** menyaring
-item khusus NEXA Command (beda dari hamburger mobile yang sudah benar) — jadi user non-Command
-tetap lihat link "NEXA Assistant" di sidebar desktop (klik baru kena upgrade screen). Sekarang
-disamakan: kedua nav (desktop & mobile) konsisten menyaring item Command-only. `AppShell.tsx`
-diupdate untuk meneruskan `isCommand` ke `CollapsibleSidebar` juga.
+### 2. `award_points` RPC bisa dipanggil bebas dari client
+**Fix:** `docs/MIGRATION_security_hardening.sql` §2 — function di-redefinisi: parameter
+`p_points` **dihapus total** (poin sekarang hardcode di server via whitelist 5 kind), dan
+`p_ref` **wajib diisi** (dedup selalu aktif, tidak bisa di-spam).
+**5 call site di kode diupdate** (hapus `p_points` dari pemanggilan, sesuai signature baru):
+`focus/complete`, `smart-input/confirm`, `daily-pulse`, `deadlines` (create), `deadlines/[id]`
+(complete + ontime_bonus).
+**Diverifikasi:** 10 test assertion mensimulasikan logic SQL di JS — termasuk skenario exploit
+asli (kirim `p_points: 999999999` → diabaikan; loop 1000x tanpa ref → 0 yang berhasil insert).
 
-## ✨ 2. Bahasa beneran ganti di semua navigasi — bukan cuma dropdown avatar
+### 3. Cron reminder — header `x-vercel-cron` bisa dipalsukan (bug saya sendiri dari Batch 6)
+**Fix:** `src/app/api/cron/send-reminders/route.ts` — baris pengecekan header itu dihapus.
+Sekarang murni `CRON_SECRET` via `Authorization: Bearer`, sesuai dokumentasi resmi Vercel.
 
-**Penyebab sebenarnya:** ada **2 sistem bahasa yang gak nyambung**:
-- `lib/i18n.tsx` — context terpisah, dipasang tapi **tidak dipakai komponen manapun** (dead code).
-- `components/LanguageProvider.tsx` — context yang BENERAN aktif (dipasang di `app/layout.tsx`),
-  tapi **cuma dikonsumsi oleh `AvatarMenu.tsx`** (dropdown avatar di pojok kanan atas) untuk 6
-  string kecil (Lihat Profil, Leaderboard, Pencapaian, Pengaturan, Bahasa, Keluar).
+## 🟠 Tinggi
 
-Sementara itu, **semua label navigasi** (sidebar desktop, hamburger mobile, bottom nav mobile,
-`DashboardNavigation`) hardcode teks Bahasa Indonesia langsung di `nav-items.ts` — sama sekali
-tidak terhubung ke sistem bahasa. Makanya ganti bahasa di Settings cuma ngubah dropdown avatar,
-sisanya tetap Indonesia. Persis seperti yang kamu laporkan.
+### 4. Telegram webhook fail-open kalau env kosong
+**Fix:** `src/app/api/telegram/webhook/route.ts` — sekarang fail-**closed**. Kalau
+`TELEGRAM_WEBHOOK_SECRET` belum diset, endpoint menolak (503) alih-alih melewati validasi.
 
-**Fix:** keempat permukaan navigasi (yang nempel di **setiap halaman dashboard**) sekarang
-benar-benar terhubung ke sistem bahasa:
+### 5. Nol rate limiting di seluruh aplikasi
+**Fix:** Infrastruktur baru — `docs/MIGRATION_security_hardening.sql` §4 (tabel `rate_limits` +
+function `check_rate_limit`, atomic via `insert ... on conflict ... do update ... returning`,
+tidak butuh Redis/layanan eksternal) + `src/lib/rate-limit.ts` (wrapper TS).
+**Dipasang di 8 endpoint:**
 
-| File | Perubahan |
+| Endpoint | Limit |
 |---|---|
-| `components/LanguageProvider.tsx` | Dictionary ditambah ~17 key baru: nav_assistant, nav_notifications, nav_release, bottom_*, section_*, badge_* |
-| `components/dashboard/nav-items.ts` | Tiap item nav dapat `labelKey` (kunci terjemahan); `label` lama dipertahankan sebagai fallback, tidak ada yang dihapus |
-| `components/MobileNavMenu.tsx` | Render via `t(labelKey)` — sekaligus fix bug scroll di atas |
-| `components/dashboard/CollapsibleSidebar.tsx` | Render via `t(labelKey)`, header "Navigasi" ikut diterjemahkan |
-| `components/MobileBottomNav.tsx` | Render via `t(labelKey)` dengan label pendek khusus (Home/Arena/Teman/Study/Tambah) |
-| `components/dashboard/DashboardNavigation.tsx` | Ikut diupdate untuk konsistensi (komponen ini sebenarnya tidak dipakai di mana pun saat ini — orphan — tapi tetap disertakan biar tidak ada kode usang yang nyangkut kalau suatu saat dipakai) |
-| `components/AppShell.tsx` | Teruskan `isCommand` ke `CollapsibleSidebar` (lihat bonus fix di atas) |
+| `ai-extract` | 20/jam |
+| `ai-extract-image` | 15/jam |
+| `ask-nexa` (chatbot) | 30/jam |
+| `quick-nl` | 30/jam |
+| `smart-input/parse-text` | 20/jam |
+| `smart-input/parse-image` | 15/jam |
+| `smart-input/parse-file` | 15/jam |
+| `study-rooms/join-by-code` | 10/5 menit (anti brute-force) |
 
-**Hasil:** ganti bahasa di Settings (atau dari dropdown avatar) sekarang langsung mengubah label
-di sidebar desktop, hamburger mobile, bottom nav mobile, dan dropdown avatar — semuanya
-serempak, tanpa reload (context React, sinkron lewat custom event + localStorage seperti
-sebelumnya).
+**PENTING:** `checkRateLimit()` **fail-open** kalau RPC belum ada (migration belum dijalankan)
+— supaya kode tidak mematikan fitur AI sebelum migration jalan. Begitu migration dieksekusi,
+proteksi otomatis aktif tanpa redeploy kode. **Jalankan migration SEGERA setelah deploy kode ini.**
+
+## 🟡 Sedang
+
+### 6. Kode join Study Room cuma 16,7 juta kombinasi (hex 6 karakter)
+**Fix:** `docs/MIGRATION_security_hardening.sql` §3 — alfabet diperlebar jadi 34 karakter
+(alfanumerik tanpa I/O) → ~1,5 miliar kombinasi. Panjang tetap 6 karakter (UI sudah ada
+`maxLength={6}`, sengaja tidak diubah). Digabung dengan rate limit #5 di atas.
+
+### 7. `is_public_profile` tidak ditegakkan
+**Fix:** `src/app/api/profile/[id]/route.ts` — sekarang dicek. Kalau bukan pemilik profil DAN
+bukan teman DAN `is_public_profile === false`, response dipangkas jadi minimal (`id`,
+`full_name`, `avatar_url`, `private: true`).
+**Asumsi yang saya buat** (tolong dikoreksi kalau beda dari maksud aslinya): teman tetap bisa
+lihat profil lengkap meski `is_public_profile=false` — mirip pola `dm_privacy` di tempat lain.
+`is_public_profile` null/undefined (data lama) dianggap public, supaya tidak mematahkan profil
+yang belum pernah set nilai eksplisit.
+
+### 8. MIME upload cuma dicek dari `file.type` (header client, gampang dipalsukan)
+**Fix:** `src/lib/file-signature.ts` (baru) — verifikasi magic byte (isi file sebenarnya).
+Dipasang di 3 route upload: `chats/[friendId]/upload`, `study-rooms/[id]/upload`,
+`profile/photo`. Cakupan: JPEG/PNG/GIF/WEBP/PDF/ZIP (docx/xlsx terdeteksi sebagai ZIP, ini
+wajar). Video & text/plain tidak ada signature sederhana yang reliable, jadi tetap lolos di
+lapis ini (mengandalkan validasi MIME header yang sudah ada sebagai lapis pertama).
+**Diverifikasi:** 16 test assertion dengan byte signature asli, termasuk kasus utama — file
+PDF yang diklaim `image/png` berhasil terdeteksi & ditolak.
+
+## ⚪ Rendah
+
+### 9a. Admin route `subscription-intents` punya logic sendiri yang gak sinkron
+**Fix:** `src/app/api/admin/subscription-intents/[id]/route.ts` — sekarang pakai
+`isAdminEmail()` dari `lib/admin.ts` (satu sumber kebenaran), bukan implementasi duplikat.
+
+### 9b. Signature Midtrans pakai `===` bukan `timingSafeEqual`
+**Fix:** `src/lib/payments/midtrans.ts` — pakai `crypto.timingSafeEqual` (defense in depth).
 
 ---
 
-## ⚠️ Yang BELUM tercakup — perlu kamu putuskan skopenya
+## ✅ Yang sudah diverifikasi
+- `tsc --noEmit` strict, full source asli + semua patch Batch 9: **0 error**.
+- `next build` produksi (Next.js 14.2.35): **sukses**, semua route (termasuk yang dipatch)
+  ter-bundle normal.
+- 16 test assertion runtime untuk `file-signature.ts` (byte signature asli).
+- 10 test assertion untuk logic `award_points` baru (simulasi JS dari logic SQL).
 
-Yang saya kerjakan adalah **navigasi/chrome** (yang nempel di semua halaman). **Isi/konten tiap
-halaman** (kartu-kartu di Dashboard, deskripsi & form di Arena, chat di Study Room, form di
-Friends/Deadlines/Settings/Billing, dst) **masih hardcoded Bahasa Indonesia** — ini PR yang jauh
-lebih besar: puluhan halaman, ratusan string teks, masing-masing perlu dibaca & ditranslate
-satu per satu. Saya sengaja tidak menebak/main asal translate semuanya sekaligus karena
-risikonya tinggi (salah konteks, kepanjangan dari layout, dll).
+## ⚠️ Yang TIDAK bisa saya verifikasi dari sandbox ini
+- **Migration SQL belum pernah dieksekusi ke Postgres sungguhan** (tidak ada koneksi database
+  live di sini). Logic-nya sudah saya tulis hati-hati & disimulasikan di JS, tapi **wajib
+  ditest di Supabase SQL Editor kamu** sebelum production — terutama:
+  - Pastikan `drop function if exists public.award_points(text, integer, text);` berhasil
+    (kalau ada dependency lain yang masih merujuk overload lama, mungkin perlu penyesuaian).
+  - Test manual: buat 1 deadline baru, complete-kan, cek `points_events` bertambah dengan
+    angka yang benar (2, lalu 10+5 kalau on-time).
+  - Test `generate_room_code()`: buat beberapa room baru, pastikan kode 6 karakter ter-generate
+    tanpa error.
+- Rate limiting: logic-nya benar secara desain (atomic SQL), tapi belum pernah benar-benar
+  dipanggil 20+ kali berturut-turut terhadap Postgres sungguhan untuk lihat perilaku window
+  reset-nya persis seperti yang diharapkan — sarankan test manual setelah deploy.
 
-Kalau kamu mau lanjut ke translate isi halaman, kasih tau halaman mana yang paling prioritas
-(mis. Dashboard dulu, atau Arena dulu), nanti saya kerjakan bertahap per halaman dengan cara
-yang sama (baca isi asli → bikin translation key → wire `t()` → verifikasi).
-
----
-
-## Cara pasang
-1. Timpa 7 file di atas.
-2. `npm run build` — sudah divalidasi hijau (full `tsc --noEmit` + `next build` produksi
-   terhadap source asli kamu + overlay ini, 73/73 halaman, 0 error).
-3. Test cepat: buka hamburger mobile di layar kecil → scroll ke bawah → pastikan
-   Pengaturan/Support/Rilis/Admin kelihatan & bisa diklik. Lalu buka Settings → ganti bahasa ke
-   English/中文 → cek sidebar & hamburger & bottom nav ikut berubah seketika.
-
-## Catatan teknis
-- Tidak ada migration SQL, tidak ada ENV baru.
-- `lib/i18n.tsx` (sistem lama yang dead code) **tidak disentuh** — aman dibiarkan, tidak
-  memengaruhi apa pun karena memang tidak dipakai di manapun. Bisa dihapus kapan saja kalau mau
-  beres-beres, tapi tidak mendesak.
-- Diverifikasi dengan 17 test assertion runtime: kelengkapan terjemahan tiap nav item di 3
-  bahasa, filtering admin/Command per item, dan perilaku fallback.
+## 📋 Cara pasang (urutan penting)
+1. **Backup database dulu** (perubahan ini menyentuh fungsi inti poin & pembayaran).
+2. Jalankan `docs/MIGRATION_security_hardening.sql` di Supabase SQL Editor.
+3. Timpa 21 file kode + 2 lib baru.
+4. Pastikan env `CRON_SECRET` dan `TELEGRAM_WEBHOOK_SECRET` sudah diset di Vercel (kalau belum,
+   cron reminder & Telegram webhook akan berhenti berfungsi sampai diisi — ini **disengaja**,
+   bagian dari fix #3 dan #4 di atas).
+5. `npm run build` (sudah divalidasi hijau di sandbox).
+6. Test manual sesuai daftar di atas (poin, room code, rate limit, upload file disguised).

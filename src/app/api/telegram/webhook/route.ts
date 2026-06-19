@@ -24,9 +24,24 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   const expectedSecret = process.env.TELEGRAM_WEBHOOK_SECRET
-  const incomingSecret = request.headers.get('x-telegram-bot-api-secret-token')
 
-  if (expectedSecret && incomingSecret !== expectedSecret) {
+  // CATATAN KEAMANAN: SEBELUMNYA, kalau TELEGRAM_WEBHOOK_SECRET belum diset,
+  // pengecekan ini dilewati sepenuhnya (fail-open) — siapa pun bisa POST ke
+  // endpoint ini dengan chat.id sembarang dan membuat bot mengirim pesan ke
+  // chat Telegram mana pun (open relay/spam memakai bot project ini).
+  // Sekarang fail-CLOSED: kalau secret belum diset, endpoint ditolak sampai
+  // diisi. Set TELEGRAM_WEBHOOK_SECRET di env, lalu daftarkan secret yang
+  // sama saat memanggil Telegram setWebhook (parameter secret_token).
+  if (!expectedSecret) {
+    console.error('[telegram/webhook] TELEGRAM_WEBHOOK_SECRET belum diset di environment — webhook ditolak demi keamanan.')
+    return NextResponse.json(
+      { error: 'Webhook belum dikonfigurasi. Set TELEGRAM_WEBHOOK_SECRET di environment.' },
+      { status: 503 }
+    )
+  }
+
+  const incomingSecret = request.headers.get('x-telegram-bot-api-secret-token')
+  if (incomingSecret !== expectedSecret) {
     return NextResponse.json({ error: 'Unauthorized webhook.' }, { status: 401 })
   }
 

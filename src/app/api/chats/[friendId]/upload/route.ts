@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { verifyFileContent } from '@/lib/file-signature'
 
 const MAX_SIZE = 50 * 1024 * 1024
 const ALLOWED_MIME = new Set([
@@ -46,6 +47,13 @@ export async function POST(request: NextRequest, { params }: Params) {
   const pair = [user.id, friendId].sort().join('_')
   const path = `${pair}/${user.id}/${Date.now()}.${ext}`
   const buffer = Buffer.from(await file.arrayBuffer())
+
+  // Verifikasi isi file sebenarnya (magic byte), bukan cuma percaya file.type
+  // dari client (header itu gampang dipalsukan). Lapis tambahan di atas
+  // validasi MIME header yang sudah ada di atas.
+  if (!verifyFileContent(buffer, file.type)) {
+    return NextResponse.json({ error: 'Isi file tidak sesuai dengan tipe yang diklaim.' }, { status: 400 })
+  }
 
   const { error: uploadError } = await supabase.storage
     .from('private-chat-attachments')

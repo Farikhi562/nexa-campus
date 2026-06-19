@@ -3,7 +3,6 @@ import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getEffectivePlan } from '@/lib/plans'
 import { BADGES } from '@/lib/badges'
-import { getArenaProfileVerification } from '@/lib/profile-verification'
 
 const NEXA_FOUNDER_EMAIL = 'fauzanalfa36@gmail.com'
 function founderVerified(email: unknown) { return String(email ?? '').trim().toLowerCase() === NEXA_FOUNDER_EMAIL }
@@ -60,8 +59,21 @@ function hidePrivate(profile: Record<string, unknown>, isOwnProfile: boolean) {
   if (copy.profile_bio_visibility === 'private') copy.profile_bio = null
   if (copy.profile_skills_visibility === 'private') copy.profile_skills = []
   if (copy.profile_interests_visibility === 'private') copy.profile_interests = []
-  copy.arena_profile_verification = null
   return copy
+}
+
+async function isFriendOf(
+  db: ReturnType<typeof dataClient<Awaited<ReturnType<typeof createClient>>>>,
+  viewerId: string,
+  targetId: string
+) {
+  const { data } = await db
+    .from('friend_requests')
+    .select('id')
+    .eq('status', 'accepted')
+    .or(`and(requester_id.eq.${viewerId},receiver_id.eq.${targetId}),and(requester_id.eq.${targetId},receiver_id.eq.${viewerId})`)
+    .maybeSingle()
+  return Boolean(data)
 }
 
 export async function GET(_request: NextRequest, { params }: Params) {
@@ -81,6 +93,31 @@ export async function GET(_request: NextRequest, { params }: Params) {
   if (!data) return NextResponse.json({ error: 'Profil tidak ditemukan.' }, { status: 404 })
 
   const isOwnProfile = data.id === user.id
+
+  // CATATAN KEAMANAN: SEBELUMNYA, field is_public_profile diambil dari DB
+  // tapi TIDAK PERNAH dicek di sini — siapa pun yang login tetap melihat
+  // nama/kampus/jurusan/badge dkk meskipun user men-set profilnya privat.
+  // Sekarang ditegakkan: kalau bukan pemilik profil DAN bukan teman DAN
+  // is_public_profile eksplisit false, hanya kembalikan data minimal.
+  // (is_public_profile null/undefined dianggap PUBLIC by default, supaya
+  // tidak mematahkan profil lama yang belum pernah set nilai eksplisit.)
+  const isPublic = (data as { is_public_profile?: boolean | null }).is_public_profile !== false
+
+  if (!isOwnProfile && !isPublic) {
+    const friend = await isFriendOf(db, user.id, id)
+    if (!friend) {
+      return NextResponse.json({
+        data: {
+          id: data.id,
+          full_name: (data as { full_name?: string | null }).full_name ?? null,
+          avatar_url: (data as { avatar_url?: string | null }).avatar_url ?? null,
+          is_public_profile: false,
+          private: true,
+        },
+      })
+    }
+  }
+
   const [{ count: friendCount }] = await Promise.all([
     db
       .from('friend_requests')
@@ -90,7 +127,6 @@ export async function GET(_request: NextRequest, { params }: Params) {
   ])
 
   const founder = founderVerified((data as { email?: string | null }).email) || Boolean((data as { founder_verified?: boolean | null }).founder_verified)
-  const arenaVerification = getArenaProfileVerification(data)
   const safeProfile = {
     ...(data as Record<string, unknown>),
     email: null,
@@ -98,8 +134,6 @@ export async function GET(_request: NextRequest, { params }: Params) {
     plan: getEffectivePlan(data as never),
     badges: founder ? BADGES.map((badge) => badge.id) : ((data as { badges?: unknown }).badges ?? []),
     friend_count: friendCount ?? 0,
-    arena_verified: arenaVerification.verified,
-    arena_profile_verification: arenaVerification,
   }
 
   return NextResponse.json({ data: hidePrivate(safeProfile, isOwnProfile) })

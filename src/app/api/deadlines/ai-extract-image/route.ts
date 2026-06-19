@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getEffectivePlan } from '@/lib/plans'
+import { checkRateLimit, rateLimitMessage } from '@/lib/rate-limit'
 import { generateFromImage, aiConfigured, activeProviderInfo, LlmFailure } from '@/lib/ai/llm'
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024 // 5MB
@@ -46,6 +47,9 @@ export async function POST(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) return jsonResponse({ error: 'Kamu perlu login dulu.' }, 401)
+
+  const rl = await checkRateLimit(supabase, 'ai-extract-image', 15, 3600)
+  if (!rl.allowed) return jsonResponse({ error: rateLimitMessage(rl.retryAfterSeconds) }, 429)
 
   const { data: profile } = await supabase
     .from('profiles')

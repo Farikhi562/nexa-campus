@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getEffectivePlan } from '@/lib/plans'
+import { checkRateLimit, rateLimitMessage } from '@/lib/rate-limit'
 import { generateText, aiConfigured, activeProvider } from '@/lib/ai/llm'
 
 const MAX_TEXT_LENGTH = 6000
@@ -138,6 +139,11 @@ export async function POST(request: NextRequest) {
 
   if (!user) {
     return jsonResponse({ error: 'Kamu perlu login dulu.' }, 401)
+  }
+
+  const rl = await checkRateLimit(supabase, 'ai-extract', 20, 3600)
+  if (!rl.allowed) {
+    return jsonResponse({ error: rateLimitMessage(rl.retryAfterSeconds) }, 429)
   }
 
   const { data: profile } = await supabase

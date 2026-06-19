@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { generateText, aiConfigured } from '@/lib/ai/llm'
 import { parseDeadlinePayload } from '@/lib/deadline-validation'
+import { checkRateLimit, rateLimitMessage } from '@/lib/rate-limit'
 
 /**
  * Quick Add 1 baris (natural language).
@@ -148,6 +149,9 @@ export async function POST(request: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Kamu perlu login dulu.' }, { status: 401 })
+
+  const rl = await checkRateLimit(supabase, 'quick-nl', 30, 3600)
+  if (!rl.allowed) return NextResponse.json({ error: rateLimitMessage(rl.retryAfterSeconds) }, { status: 429 })
 
   let body: { text?: unknown }
   try { body = await request.json() } catch { return NextResponse.json({ error: 'Request tidak valid.' }, { status: 400 }) }
