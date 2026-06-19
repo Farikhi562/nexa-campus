@@ -108,10 +108,15 @@ function parsePriority(text: string): string {
 function cleanCourseName(original: string): string {
   return original
     .replace(/\b\d{4}-\d{2}-\d{2}\b/g, '')
-    .replace(/\b\d{1,2}[/\-.]\d{1,2}(?:[/\-.]\d{2,4})?\b/g, '')
+    // PENTING: hapus pola "jam HH.MM"/"jam HH:MM" SEBELUM regex tanggal d/m/y
+    // generik. Kalau dibalik, "23.59" pada "jam 23.59" bisa lebih dulu "dimakan"
+    // oleh regex tanggal (karena bentuknya mirip d.m), menyisakan kata "jam"
+    // nyangkut sendirian di hasil akhir.
     .replace(/jam\s+\d{1,2}([.:]\d{2})?\s*(pagi|siang|sore|malam)?/gi, '')
+    .replace(/\b\d{1,2}[/\-.]\d{1,2}(?:[/\-.]\d{2,4})?\b/g, '')
     .replace(/\b([01]?\d|2[0-3]):([0-5]\d)\b/g, '')
     .replace(/\b(hari ini|besok|lusa|minggu depan|senin|selasa|rabu|kamis|jumat|jum'at|sabtu|minggu)\b/gi, '')
+    .replace(/\bhari\b/gi, '')
     .replace(/\s{2,}/g, ' ')
     .replace(/[,\-–—:]\s*$/, '')
     .trim()

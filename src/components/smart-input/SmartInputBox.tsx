@@ -37,6 +37,36 @@ function fileToBase64(file: File): Promise<string> {
   })
 }
 
+// Client-side timeout: kalau server tidak respons dalam waktu ini, hentikan
+// request dan tampilkan pesan ramah — jangan biarkan user stuck di spinner.
+// Sedikit di atas batas server (`maxDuration`) supaya server biasanya sempat
+// merespons (termasuk lewat jalur fallback) duluan.
+const CLIENT_TIMEOUT_MS = 32_000
+
+// Harus konsisten dengan MAX_IMAGE_BYTES/MAX_FILE_BYTES di route handler —
+// dicek di sisi client juga supaya user dapat feedback instan tanpa harus
+// menunggu upload+roundtrip dulu (file besar tetap akan ditolak server kalau
+// constant di sini tidak sinkron, tapi UX-nya jadi lebih cepat kalau sinkron).
+const MAX_IMAGE_MB = 3
+const MAX_FILE_MB = 3
+
+async function fetchJsonWithTimeout(url: string, body: unknown): Promise<{ ok: boolean; data: unknown }> {
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), CLIENT_TIMEOUT_MS)
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    })
+    const data = await res.json().catch(() => null)
+    return { ok: res.ok, data }
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
 export default function SmartInputBox({ plan, defaultCampus }: { plan: Plan; defaultCampus: string }) {
   const [tab, setTab] = useState<TabId>('manual')
   const [text, setText] = useState('')
@@ -54,13 +84,8 @@ export default function SmartInputBox({ plan, defaultCampus }: { plan: Plan; def
     setError('')
     setPreview(null)
     try {
-      const res = await fetch('/api/ai/parse-text', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: value }),
-      })
-      const data = await res.json().catch(() => null)
-      if (!res.ok || !data) {
+      const { ok, data } = await fetchJsonWithTimeout('/api/ai/parse-text', { text: value }) as { ok: boolean; data: { error?: string; candidates?: SmartInputCandidate[]; source?: PreviewState['source']; logId?: string | null } | null }
+      if (!ok || !data) {
         setError(data?.error || 'Gagal memproses teks.')
         return
       }
@@ -68,58 +93,69 @@ export default function SmartInputBox({ plan, defaultCampus }: { plan: Plan; def
         setError('Belum kebaca ada tugas/jadwal dari teks ini. Coba lebih spesifik atau pakai input Manual.')
         return
       }
-      setPreview({ candidates: data.candidates, source: data.source, logId: data.logId, inputType: 'nlp' })
+      setPreview({ candidates: data.candidates, source: data.source ?? 'ai', logId: data.logId ?? null, inputType: 'nlp' })
       setText('')
-    } catch {
-      setError('Koneksi bermasalah. Coba lagi.')
+    } catch (err) {
+      setError(err instanceof DOMException && err.name === 'AbortError'
+        ? 'AI butuh waktu terlalu lama merespons. Coba lagi, atau pakai input Manual.'
+        : 'Koneksi bermasalah. Coba lagi.')
     } finally {
       setLoading(false)
     }
   }
 
   async function runImage(file: File) {
+    if (file.size > MAX_IMAGE_MB * 1024 * 1024) {
+      setError(`Ukuran gambar maksimal ${MAX_IMAGE_MB}MB. File kamu ${(file.size / 1024 / 1024).toFixed(1)}MB — kompres/crop dulu ya.`)
+      return
+    }
     setLoading(true)
     setError('')
     setPreview(null)
     try {
       const base64 = await fileToBase64(file)
-      const res = await fetch('/api/ai/parse-image', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: base64, mimeType: file.type || 'image/jpeg' }),
-      })
-      const data = await res.json().catch(() => null)
-      if (!res.ok || !data) {
+      const { ok, data } = await fetchJsonWithTimeout('/api/ai/parse-image', {
+        image: base64,
+        mimeType: file.type || 'image/jpeg',
+      }) as { ok: boolean; data: { error?: string; candidates?: SmartInputCandidate[]; source?: PreviewState['source']; logId?: string | null } | null }
+      if (!ok || !data) {
         setError(data?.error || 'Gagal membaca gambar.')
         return
       }
-      setPreview({ candidates: data.candidates, source: data.source, logId: data.logId, inputType: 'image' })
-    } catch {
-      setError('Koneksi bermasalah. Coba lagi.')
+      setPreview({ candidates: data.candidates ?? [], source: data.source ?? 'ai', logId: data.logId ?? null, inputType: 'image' })
+    } catch (err) {
+      setError(err instanceof DOMException && err.name === 'AbortError'
+        ? 'AI butuh waktu terlalu lama membaca gambar. Coba foto yang lebih kecil, atau pakai input Manual.'
+        : 'Koneksi bermasalah. Coba lagi.')
     } finally {
       setLoading(false)
     }
   }
 
   async function runFile(file: File) {
+    if (file.size > MAX_FILE_MB * 1024 * 1024) {
+      setError(`Ukuran file maksimal ${MAX_FILE_MB}MB. File kamu ${(file.size / 1024 / 1024).toFixed(1)}MB — coba file lebih kecil atau salin teksnya ke tab Bahasa Natural.`)
+      return
+    }
     setLoading(true)
     setError('')
     setPreview(null)
     try {
       const base64 = await fileToBase64(file)
-      const res = await fetch('/api/ai/parse-file', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ file: base64, mimeType: file.type || 'application/octet-stream', filename: file.name }),
-      })
-      const data = await res.json().catch(() => null)
-      if (!res.ok || !data) {
+      const { ok, data } = await fetchJsonWithTimeout('/api/ai/parse-file', {
+        file: base64,
+        mimeType: file.type || 'application/octet-stream',
+        filename: file.name,
+      }) as { ok: boolean; data: { error?: string; candidates?: SmartInputCandidate[]; source?: PreviewState['source']; logId?: string | null } | null }
+      if (!ok || !data) {
         setError(data?.error || 'Gagal membaca file.')
         return
       }
-      setPreview({ candidates: data.candidates, source: data.source, logId: data.logId, inputType: 'file' })
-    } catch {
-      setError('Koneksi bermasalah. Coba lagi.')
+      setPreview({ candidates: data.candidates ?? [], source: data.source ?? 'ai', logId: data.logId ?? null, inputType: 'file' })
+    } catch (err) {
+      setError(err instanceof DOMException && err.name === 'AbortError'
+        ? 'Proses file terlalu lama. Coba file yang lebih kecil, atau pakai input Manual.'
+        : 'Koneksi bermasalah. Coba lagi.')
     } finally {
       setLoading(false)
     }
@@ -215,7 +251,7 @@ export default function SmartInputBox({ plan, defaultCampus }: { plan: Plan; def
                 <span className="text-sm font-bold text-slate-700">
                   {loading ? 'Membaca gambar...' : 'Tap untuk pilih screenshot tugas'}
                 </span>
-                <span className="text-xs text-slate-400">JPG/PNG/WebP, maks 5MB</span>
+                <span className="text-xs text-slate-400">JPG/PNG/WebP, maks 3MB</span>
                 <input
                   type="file"
                   accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
@@ -238,7 +274,7 @@ export default function SmartInputBox({ plan, defaultCampus }: { plan: Plan; def
                 <span className="text-sm font-bold text-slate-700">
                   {loading ? 'Membaca file...' : 'Tap untuk pilih PDF / DOCX'}
                 </span>
-                <span className="text-xs text-slate-400">PDF atau Word (.docx), maks 8MB</span>
+                <span className="text-xs text-slate-400">PDF atau Word (.docx), maks 3MB</span>
                 <input
                   ref={fileInputRef}
                   type="file"

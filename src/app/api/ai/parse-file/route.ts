@@ -5,7 +5,15 @@ import { extractFromText, extractFromImage } from '@/lib/smart-input/extract'
 import { extractTextFromFile } from '@/lib/smart-input/file-extract'
 import { normalizeCandidates } from '@/lib/smart-input/normalize'
 
-const MAX_FILE_BYTES = 8 * 1024 * 1024 // 8MB
+// pdf-parse & mammoth butuh Node APIs (Buffer/fs) — paksa Node runtime,
+// jangan Edge. maxDuration disesuaikan kalau plan Vercel mendukung (Hobby
+// dibatasi 10s; Pro/Enterprise bisa lebih — sesuaikan kalau perlu).
+export const runtime = 'nodejs'
+export const maxDuration = 30
+
+// Sama seperti parse-image: dibatasi oleh hard cap 4.5MB Vercel Serverless
+// Functions untuk request body. Base64 menambah ~33% ukuran.
+const MAX_FILE_BYTES = 3 * 1024 * 1024 // 3MB raw (~4MB setelah base64, aman di bawah cap 4.5MB Vercel)
 const ALLOWED_IMAGE_MIME = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'])
 
 export async function POST(request: NextRequest) {
@@ -42,7 +50,7 @@ export async function POST(request: NextRequest) {
 
   if (!base64) return NextResponse.json({ error: 'File tidak ditemukan.' }, { status: 400 })
   if (Buffer.byteLength(base64, 'base64') > MAX_FILE_BYTES) {
-    return NextResponse.json({ error: 'Ukuran file maksimal 8MB.' }, { status: 400 })
+    return NextResponse.json({ error: 'Ukuran file maksimal 3MB. Kalau PDF-nya besar, coba kompres dulu atau salin teksnya ke tab Bahasa Natural.' }, { status: 400 })
   }
 
   const defaultCampus = (profile?.campus_name as string) || 'Kampus'

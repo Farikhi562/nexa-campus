@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { parseDeadlinePayload } from '@/lib/deadline-validation'
 
+export const runtime = 'nodejs'
+export const maxDuration = 20
+
 type ConfirmBody = {
   candidates?: unknown
   logId?: unknown
@@ -79,10 +82,9 @@ export async function POST(request: NextRequest) {
       reminder_enabled: c.reminder_enabled !== false, // default true kecuali user matikan
     })
 
-    if ('error' in parsed) {
-      const errorMessage = parsed.error ?? 'Data deadline tidak valid.'
-      errors.push({ index: i, error: errorMessage })
-      finalCandidates.push({ ...c, _error: errorMessage })
+    if (parsed.error) {
+      errors.push({ index: i, error: parsed.error })
+      finalCandidates.push({ ...c, _error: parsed.error })
       continue
     }
 

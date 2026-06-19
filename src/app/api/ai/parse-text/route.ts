@@ -4,6 +4,9 @@ import { getEffectivePlan } from '@/lib/plans'
 import { extractFromText } from '@/lib/smart-input/extract'
 import { normalizeCandidates } from '@/lib/smart-input/normalize'
 
+export const runtime = 'nodejs'
+export const maxDuration = 20
+
 const MAX_TEXT_LENGTH = 4000
 
 export async function POST(request: NextRequest) {

@@ -14,6 +14,24 @@ function isoDate(d: Date) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 }
 
+// Batas waktu panggilan AI. Kalau provider hang/lambat, kita TIDAK biarkan
+// user stuck di spinner — fallback ke parser lokal (untuk teks) atau pesan
+// error yang jelas (untuk gambar, yang tidak punya fallback non-AI).
+const TEXT_AI_TIMEOUT_MS = 15_000
+const IMAGE_AI_TIMEOUT_MS = 25_000
+
+class TimeoutError extends Error {}
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new TimeoutError(`AI timeout after ${ms}ms`)), ms)
+    promise.then(
+      (v) => { clearTimeout(timer); resolve(v) },
+      (e) => { clearTimeout(timer); reject(e) }
+    )
+  })
+}
+
 const SYSTEM_PROMPT = `Kamu adalah Smart Input Engine untuk NEXA Campus — parser tugas/deadline mahasiswa Indonesia.
 Dari teks yang diberikan (bisa berisi 1 atau banyak info tugas/jadwal/ujian/pembayaran), keluarkan JSON ARRAY.
 Tiap item punya field:
@@ -78,13 +96,16 @@ export async function extractFromText(text: string): Promise<ExtractResult> {
 
   try {
     const today = isoDate(new Date())
-    const { text: raw, provider, model } = await generateText({
-      system: SYSTEM_PROMPT,
-      user: `Tanggal hari ini: ${today}.\n\nTeks:\n${text}`,
-      temperature: 0.1,
-      maxTokens: 1200,
-      json: true,
-    })
+    const { text: raw, provider, model } = await withTimeout(
+      generateText({
+        system: SYSTEM_PROMPT,
+        user: `Tanggal hari ini: ${today}.\n\nTeks:\n${text}`,
+        temperature: 0.1,
+        maxTokens: 1200,
+        json: true,
+      }),
+      TEXT_AI_TIMEOUT_MS
+    )
 
     const arr = safeParseArray(raw)
     if (!arr || arr.length === 0) {
@@ -92,7 +113,12 @@ export async function extractFromText(text: string): Promise<ExtractResult> {
       return { candidates: fallback, source: fallback.length > 0 ? 'fallback' : 'ai', provider, model }
     }
     return { candidates: arr, source: 'ai', provider, model }
-  } catch {
+  } catch (err) {
+    // Termasuk TimeoutError — tetap fallback ke parser lokal, jangan biarkan
+    // user menunggu tanpa hasil.
+    if (err instanceof TimeoutError) {
+      console.warn('[smart-input] AI parse-text timeout, fallback ke parser lokal.')
+    }
     return { candidates: localParseText(text), source: 'fallback' }
   }
 }
@@ -118,15 +144,18 @@ export async function extractFromImage(base64: string, mimeType: string): Promis
   }
 
   try {
-    const { text: raw, provider, model } = await generateFromImage({
-      system: SYSTEM_PROMPT_IMAGE,
-      prompt: 'Extract semua tugas/deadline dari gambar ini.',
-      base64,
-      mimeType,
-      temperature: 0.1,
-      maxTokens: 1200,
-      json: true,
-    })
+    const { text: raw, provider, model } = await withTimeout(
+      generateFromImage({
+        system: SYSTEM_PROMPT_IMAGE,
+        prompt: 'Extract semua tugas/deadline dari gambar ini.',
+        base64,
+        mimeType,
+        temperature: 0.1,
+        maxTokens: 1200,
+        json: true,
+      }),
+      IMAGE_AI_TIMEOUT_MS
+    )
 
     const arr = safeParseArray(raw)
     if (!arr) {
@@ -134,6 +163,9 @@ export async function extractFromImage(base64: string, mimeType: string): Promis
     }
     return { candidates: arr, source: 'ai', provider, model }
   } catch (err) {
+    if (err instanceof TimeoutError) {
+      return { candidates: [], source: 'error', error: 'AI butuh waktu terlalu lama membaca gambar ini. Coba foto yang lebih kecil/jelas, atau pakai input Manual/Bahasa Natural.' }
+    }
     if (err instanceof LlmFailure) {
       return { candidates: [], source: 'error', error: `AI gagal membaca gambar (${err.info.code}). Coba lagi atau pakai input manual.` }
     }

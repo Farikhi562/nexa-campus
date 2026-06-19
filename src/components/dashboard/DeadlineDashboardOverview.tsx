@@ -6,6 +6,7 @@ import { AlertTriangle, BellOff, CalendarDays, Check, CheckCircle2, Clock, Flame
 import Badge from '@/components/ui/Badge'
 import { Card, CardContent } from '@/components/ui/Card'
 import AskNexaWidget from '@/components/dashboard/AskNexaWidget'
+import SmartInputBox from '@/components/smart-input/SmartInputBox'
 import DashboardSidePanel from '@/components/dashboard/DashboardSidePanel'
 import CommandFocusPlan from '@/components/dashboard/CommandFocusPlan'
 import ReferralCard from '@/components/dashboard/ReferralCard'
@@ -47,6 +48,7 @@ type DeadlineDashboardOverviewProps = {
   referralCount?: number
   profileCompleted?: boolean
   hasTelegramChatId?: boolean
+  defaultCampus?: string | null
 }
 
 const summaryMeta = [
@@ -120,6 +122,7 @@ export default function DeadlineDashboardOverview({
   referralCount = 0,
   profileCompleted = false,
   hasTelegramChatId = false,
+  defaultCampus,
 }: DeadlineDashboardOverviewProps) {
   const [deadlines, setDeadlines] = useState(() => [...(initialDeadlines ?? [])].sort(sortNearest))
   const [busyId, setBusyId] = useState<string | null>(null)
@@ -259,6 +262,8 @@ export default function DeadlineDashboardOverview({
           </div>
         </div>
       </section>
+
+      <SmartInputBox plan={userTier} defaultCampus={defaultCampus || 'Kampus'} />
 
       <DailyPulseCard />
 

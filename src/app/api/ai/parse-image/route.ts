@@ -4,7 +4,17 @@ import { getEffectivePlan } from '@/lib/plans'
 import { extractFromImage } from '@/lib/smart-input/extract'
 import { normalizeCandidates } from '@/lib/smart-input/normalize'
 
-const MAX_IMAGE_BYTES = 5 * 1024 * 1024 // 5MB
+export const runtime = 'nodejs'
+export const maxDuration = 30
+
+// PENTING: ini bukan limit "pilihan kami" — ini batas dari platform Vercel.
+// Vercel Serverless Functions punya hard limit 4.5MB untuk request body
+// (tidak bisa dikonfigurasi naik). Base64 menambah ~33% ukuran, jadi raw image
+// harus dijaga di bawah ~3MB agar base64 + overhead JSON tetap < 4.5MB.
+// Kalau nanti perlu upload lebih besar, solusinya adalah upload langsung ke
+// Supabase Storage dari client lalu kirim path-nya saja ke API — bukan kirim
+// base64 lewat body JSON. Lihat README untuk detail.
+const MAX_IMAGE_BYTES = 3 * 1024 * 1024 // 3MB raw (~4MB setelah base64, aman di bawah cap 4.5MB Vercel)
 const ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'])
 
 export async function POST(request: NextRequest) {
@@ -43,7 +53,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Format gambar tidak didukung (pakai JPG/PNG/WebP).' }, { status: 400 })
   }
   if (Buffer.byteLength(base64, 'base64') > MAX_IMAGE_BYTES) {
-    return NextResponse.json({ error: 'Ukuran gambar maksimal 5MB.' }, { status: 400 })
+    return NextResponse.json({ error: 'Ukuran gambar maksimal 3MB. Kompres atau crop dulu kalau lebih besar.' }, { status: 400 })
   }
 
   const defaultCampus = (profile?.campus_name as string) || 'Kampus'
