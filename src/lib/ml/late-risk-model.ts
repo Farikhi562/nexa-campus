@@ -67,9 +67,9 @@ function buildTypeLatenessRates(rows: DeadlineForTraining[]): Map<string, number
   }
 
   const rates = new Map<string, number>()
-  for (const [type, { late, total }] of byType) {
+  byType.forEach(({ late, total }, type) => {
     rates.set(type, (late + SMOOTHING * globalLateRate) / (total + SMOOTHING))
-  }
+  })
   return rates
 }
 
