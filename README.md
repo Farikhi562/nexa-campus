@@ -1,32 +1,41 @@
-# NEXA Campus — Focus Mode: Visual Polish
+# NEXA Campus — Hotfix: Build Error di `admin/verifications/page.tsx`
 
-Validasi: `tsc --noEmit` 0 error, `next build` produksi sukses (`/dashboard/focus` naik dari
-3.06 kB → 4.73 kB, mengonfirmasi kode baru ter-bundle). Logic timer inti (preset, pause/resume,
-reset, POST ke `/api/focus/complete`) **tidak diubah** — murni tambahan visual + nicety.
+## Apa yang terjadi
+Build production lo gagal dengan error:
+```
+./src/app/dashboard/admin/verifications/page.tsx
+42:50  Error: `"` can be escaped with `&quot;`...  react/no-unescaped-entities
+```
+Penyebab: ada tanda kutip ganda literal (`"Verified by NEXA"`) langsung di teks JSX. Next.js
+ESLint (`react/no-unescaped-entities`) menolak ini sebagai **error**, bukan cuma warning — jadi
+`next build` gagal total.
 
-## File
+## Kenapa ini lolos dari semua validasi gue sebelumnya
+Gue jujur: di sandbox testing gue, `next.config.js` ada `eslint: { ignoreDuringBuilds: true }` —
+jadi ESLint **gak pernah beneran jalan** di semua `next build` yang gue lakuin sepanjang sesi
+ini. Validasi gue selama ini cuma nutupin `tsc` (cek tipe) + bundling, bukan lint rules kayak
+`react/no-unescaped-entities`. Itu gap nyata di metodologi testing gue.
+
+**Sudah diperbaiki:** sandbox gue sekarang pakai ESLint asli (`eslint-config-next@14.2.35`,
+config `next/core-web-vitals`, sama persis kayak project lo) tanpa `ignoreDuringBuilds`. Build
+ulang dengan setup ini menghasilkan **warning yang identik** dengan log Vercel lo (warning
+`<img>` di file-file lama, dll) dan **nol error** — confirmed sandbox sekarang benar-benar
+mencerminkan build production lo.
+
+## Fix
 | File | Perubahan |
 |---|---|
-| `src/components/dashboard/FocusMode.tsx` | Lihat di bawah |
-| `src/app/dashboard/focus/page.tsx` | Fetch 7 hari terakhir riwayat fokus (dari `points_events`, data asli — bukan dummy) untuk strip streak |
+| `src/app/dashboard/admin/verifications/page.tsx` | Tanda kutip diganti `&quot;` — **ini fix untuk error yang lo laporkan** |
+| `src/components/admin/VerificationReviewPanel.tsx` | Bonus: `load()` dibungkus `useCallback` — ESLint juga nge-flag warning `react-hooks/exhaustive-deps` di file ini (terlihat di log lo juga), sudah dibereskan |
+| `src/components/verification/VerificationProgressCard.tsx` | Konsistensi: pola `useCallback` yang sama (tidak ke-flag ESLint, tapi dibenerin sekalian biar aman dari perbedaan versi linter) |
+| `src/components/verification/SkillEvidenceForm.tsx` | Sama seperti di atas |
 
-## Yang ditambah
-1. **Strip 7 hari di hero** — kotak kecil per hari (Sen-Min), menyala teal kalau hari itu ada
-   sesi fokus selesai. Diambil dari `points_events` (`kind='focus_session'`) milik user sendiri,
-   dibaca server-side via RLS yang sudah ada — tidak butuh tabel/migration baru.
-2. **Badge "X/7 hari aktif"** di hero kalau streak > 0, plus badge "Poin hari ini sudah didapat"
-   kalau hari ini sudah submit sesi.
-3. **Judul tab browser ikut hitung mundur** (`MM:SS · Fokus — NEXA`) saat timer jalan — kebaca
-   tanpa harus buka tab.
-4. **Bunyi chime singkat** (2 nada, Web Audio API — tanpa file audio eksternal) saat sesi
-   fokus/istirahat selesai. Bisa dimatikan (ikon speaker).
-5. **Notifikasi browser** (opsional, minta izin saat diaktifkan) saat sesi selesai DAN tab
-   sedang tidak aktif — supaya tau progress meski lagi buka tab lain.
-6. **Visual lebih hidup saat berjalan**: ring progress dapat glow sesuai mode (teal=fokus,
-   amber=istirahat), efek pulse halus di background hero, angka timer sedikit membesar.
-   Warna ring & background ikut transisi mulus saat ganti mode fokus↔istirahat.
-7. Tombol Mulai/Jeda ganti warna (teal saat siap mulai, amber saat sedang jeda) + efek
-   `active:scale-95` di semua tombol biar terasa lebih responsif disentuh.
+## Validasi
+- `tsc --noEmit`: 0 error.
+- `next build` dengan ESLint **aktif** (bukan di-skip): 0 error, 0 warning di ke-4 file ini.
+- Warning yang tersisa di build (`<img>` di 8 file lama, dll) **sama persis** dengan log Vercel
+  kamu — itu semua dari kode lama kamu sendiri, bukan dari batch manapun yang gue kirim, dan
+  tidak menggagalkan build (cuma warning, bukan error).
 
 ## Cara pasang
-Timpa 2 file di atas. Tidak ada migration, tidak ada dependency baru, tidak ada ENV baru.
+Timpa 4 file di atas. Tidak ada perubahan lain.

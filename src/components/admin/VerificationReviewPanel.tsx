@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Check, ExternalLink, Loader2, ShieldCheck, X } from 'lucide-react'
 
@@ -39,15 +39,15 @@ export default function VerificationReviewPanel() {
   const [actionId, setActionId] = useState<string | null>(null)
   const [notes, setNotes] = useState<Record<string, string>>({})
 
-  async function load() {
+  const load = useCallback(async () => {
     setLoading(true)
     const res = await fetch(`/api/admin/verifications?status=${tab}`, { cache: 'no-store' })
     const json = await res.json().catch(() => ({}))
     setRows(res.ok ? (json.data ?? []) : [])
     setLoading(false)
-  }
+  }, [tab])
 
-  useEffect(() => { void load() }, [tab])
+  useEffect(() => { void load() }, [load])
 
   async function act(row: VerificationRow, action: 'verify' | 'reject') {
     if (action === 'verify') {

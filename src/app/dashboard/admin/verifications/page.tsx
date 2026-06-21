@@ -39,7 +39,7 @@ export default async function AdminVerificationsPage() {
           <ShieldCheck className="h-6 w-6 text-blue-600" /> Review Verifikasi Akun
         </h1>
         <p className="mt-1 text-sm leading-6 text-slate-500">
-          Approve/reject permintaan centang biru "Verified by NEXA". Verified bukan auto-approve —
+          Approve/reject permintaan centang biru &quot;Verified by NEXA&quot;. Verified bukan auto-approve —
           tetap cek profil, evidence, dan riwayat lamaran Arena sebelum menyetujui.
         </p>
       </div>

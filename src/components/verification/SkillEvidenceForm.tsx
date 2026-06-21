@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { ExternalLink, Loader2, Plus, Trash2 } from 'lucide-react'
 import { EVIDENCE_TYPES } from '@/lib/verification/role-config'
 
@@ -28,15 +28,15 @@ export default function SkillEvidenceForm() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
 
-  async function load() {
+  const load = useCallback(async () => {
     setLoading(true)
     const res = await fetch('/api/skill-evidence', { cache: 'no-store' })
     const json = await res.json().catch(() => ({}))
     setItems(res.ok ? (json.data ?? []) : [])
     setLoading(false)
-  }
+  }, [])
 
-  useEffect(() => { void load() }, [])
+  useEffect(() => { void load() }, [load])
 
   async function submit() {
     setError('')

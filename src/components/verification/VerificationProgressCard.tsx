@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { CheckCircle2, Circle, Loader2, ShieldCheck } from 'lucide-react'
 
 type Requirement = { key: string; label: string; met: boolean }
@@ -29,7 +29,7 @@ export default function VerificationProgressCard() {
   const [submitting, setSubmitting] = useState(false)
   const [message, setMessage] = useState<{ type: 'ok' | 'err'; text: string } | null>(null)
 
-  async function load() {
+  const load = useCallback(async () => {
     setLoading(true)
     try {
       const res = await fetch('/api/verification/request', { cache: 'no-store' })
@@ -38,9 +38,9 @@ export default function VerificationProgressCard() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
-  useEffect(() => { void load() }, [])
+  useEffect(() => { void load() }, [load])
 
   async function requestVerification() {
     setSubmitting(true)
