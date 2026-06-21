@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getEffectivePlan } from '@/lib/plans'
-import { BADGES } from '@/lib/badges'
+import { BADGES, evaluateBadges } from '@/lib/badges'
+import { getAchievementStatsFor } from '@/lib/achievement-stats'
 
 const NEXA_FOUNDER_EMAIL = 'fauzanalfa36@gmail.com'
 function founderVerified(email: unknown) { return String(email ?? '').trim().toLowerCase() === NEXA_FOUNDER_EMAIL }
@@ -118,21 +119,32 @@ export async function GET(_request: NextRequest, { params }: Params) {
     }
   }
 
-  const [{ count: friendCount }] = await Promise.all([
+  const founder = founderVerified((data as { email?: string | null }).email) || Boolean((data as { founder_verified?: boolean | null }).founder_verified)
+
+  // FIX BUG "badge tidak konsisten": sebelumnya baris ini baca kolom
+  // `profiles.badges` yang TERNYATA tidak pernah ditulis UI manapun (selalu
+  // kosong) — beda total dari badge yang dihitung LIVE di halaman
+  // Pencapaian. Sekarang badge profil publik dihitung LIVE juga, pakai
+  // logic yang SAMA PERSIS (lib/achievement-stats.ts + evaluateBadges()).
+  const [{ count: friendCount }, liveStats] = await Promise.all([
     db
       .from('friend_requests')
       .select('id', { count: 'exact', head: true })
       .eq('status', 'accepted')
       .or(`requester_id.eq.${id},receiver_id.eq.${id}`),
+    founder ? Promise.resolve(null) : getAchievementStatsFor(id, (data as { email?: string | null }).email ?? null),
   ])
 
-  const founder = founderVerified((data as { email?: string | null }).email) || Boolean((data as { founder_verified?: boolean | null }).founder_verified)
+  const earnedBadgeIds = liveStats
+    ? evaluateBadges(liveStats).filter((b) => b.earned).map((b) => b.def.id)
+    : []
+
   const safeProfile = {
     ...(data as Record<string, unknown>),
     email: null,
     founder_verified: founder,
     plan: getEffectivePlan(data as never),
-    badges: founder ? BADGES.map((badge) => badge.id) : ((data as { badges?: unknown }).badges ?? []),
+    badges: founder ? BADGES.map((badge) => badge.id) : earnedBadgeIds,
     friend_count: friendCount ?? 0,
   }
 

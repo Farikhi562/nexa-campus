@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getEffectivePlan, isFounderEmail } from '@/lib/plans'
-import { BADGES } from '@/lib/badges'
-import { getArenaProfileVerification } from '@/lib/profile-verification'
+import { BADGES, evaluateBadges } from '@/lib/badges'
+import { getAchievementStatsFor } from '@/lib/achievement-stats'
 
 type MissingItem = { key: string; label: string; href: string }
 
@@ -84,15 +84,18 @@ export async function GET() {
 
   const profile = (data ?? null) as ProfileMeRow | null
   const founder = isFounderEmail(user.email) || Boolean(profile?.founder_verified)
-  const arenaVerification = getArenaProfileVerification(profile)
+
+  // Sama dengan fix di /api/profile/[id] — profile?.badges adalah kolom
+  // yang tidak pernah ditulis UI manapun, diganti badge live.
+  const earnedBadgeIds = founder ? [] : evaluateBadges(await getAchievementStatsFor(user.id, user.email))
+    .filter((b) => b.earned)
+    .map((b) => b.def.id)
 
   return NextResponse.json({
     ...(profile ?? {}),
     plan: getEffectivePlan({ ...(profile ?? {}), email: user.email }),
     founder_verified: founder,
-    badges: founder ? BADGES.map((badge) => badge.id) : (profile?.badges ?? []),
+    badges: founder ? BADGES.map((badge) => badge.id) : earnedBadgeIds,
     profile_completion: getProfileCompletion(profile),
-    arena_verified: arenaVerification.verified,
-    arena_profile_verification: arenaVerification,
   })
 }
