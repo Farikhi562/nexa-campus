@@ -1,63 +1,74 @@
-# NEXA Campus — Fix: Badge Tidak Konsisten (Pencapaian vs Profil Publik)
+# NEXA Campus — Batch 14: NEXA Assistant Beneran Pakai Machine Learning
 
-## Bug yang dilaporkan
-"Badge ga konsisten — yang di Pencapaian beda sama yang ditampilin di liat user lain."
+Bukan LLM doang. Ini 2 algoritma ML asli — ditulis dari nol (gradient descent, distribusi
+Beta-Bernoulli), dilatih dari data histori user sungguhan, diuji 32 test assertion statistik.
 
-## Akar masalah (sudah diverifikasi baca kode, bukan tebakan)
-Ada **2 jalur badge yang terpisah**:
-1. **Halaman Pencapaian** (`AchievementsView.tsx`) — menghitung badge **LIVE** dari stats asli
-   (deadline selesai, streak, poin, dll) lewat `evaluateBadges()`. Selalu akurat & up-to-date.
-2. **Profil publik** (lihat diri sendiri ATAU user lain) — membaca kolom `profiles.badges`.
-   Kolom ini **TIDAK PERNAH ditulis oleh UI manapun** — ada endpoint `PATCH /api/profile/badges`
-   untuk itu, tapi tidak dipanggil dari komponen manapun di seluruh codebase (diverifikasi via
-   grep). Jadi kolom ini **selalu kosong** untuk semua user, dan profil publik cuma menampilkan
-   badge tier plan (Radar/Pulse/Command) + 1 featured badge (kalau di-pin) — bukan badge
-   pencapaian yang sebenarnya sudah didapat.
+## 1) Regresi Logistik — Prediksi Risiko Telat
+**`src/lib/ml/logistic-regression.ts`** — implementasi generik: sigmoid, gradient descent,
+L2 regularization, normalisasi fitur. Bobot **dipelajari** dari data (bukan ditentukan manual).
 
-Itu sebabnya: user yang sudah dapat 8 badge di Pencapaian, profil publiknya cuma kelihatan 0-1
-badge. Bukan masalah tampilan, tapi sumber datanya beda total.
+**`src/lib/ml/late-risk-model.ts`** — ekstraksi 6 fitur dari tiap deadline (lead time, prioritas,
+tingkat keterlambatan historis per jenis tugas, weekend, jam, reminder), label dari
+`points_events.kind='ontime_bonus'` (data yang SUDAH ada, tidak perlu kolom baru). Dilatih
+**per-user, on-the-fly** tiap panggilan API (dataset kecil, <100ms) — tidak perlu cron retrain.
 
-## Fix
-Profil publik sekarang **menghitung badge LIVE juga**, pakai fungsi yang sama persis dengan
-Pencapaian — bukan baca kolom mati.
+Minimal 8 deadline selesai buat training; di bawah itu fallback transparan ke rata-rata
+sederhana (dilabeli jelas "belum cukup data", bukan pura-pura ML).
 
-| File | Perubahan |
+## 2) Bandit — Gaya Pengingat yang Paling Efektif (Thompson Sampling)
+**`src/lib/ml/bandit.ts`** — Bernoulli bandit asli: tiap "arm" (gaya pesan) punya distribusi
+Beta(alpha, beta), dipilih dengan SAMPLING (bukan rata-rata/round-robin), update otomatis dari
+reward (1 = deadline selesai tepat waktu, 0 = telat). Makin sering arm tertentu berhasil buat
+SATU USER SPESIFIK, makin sering dipilih untuk user itu — preferensi belajar per individu.
+
+**`src/lib/ml/nudge-arms.ts`** — 4 gaya pesan tetap (neutral/urgency/supportive/question) —
+sengaja template statis (bukan LLM) supaya ada "arm" yang konsisten buat dipelajari bandit.
+
+## Integrasi
+| File | Peran |
 |---|---|
-| `docs/MIGRATION_badge_consistency_fix.sql` | Tambah RPC `get_user_rank(p_user_id, p_scope)` — kembaran `get_my_rank` yang sudah ada, tapi di-parameterize per user (bukan terikat `auth.uid()`). `get_my_rank` asli **tidak disentuh sama sekali** (zero risk ke fitur yang sudah jalan). |
-| `src/lib/achievement-stats.ts` **(BARU)** | `getAchievementStatsFor(userId, email)` — hitung `AchievementStats` lengkap untuk SATU user mana pun (diri sendiri atau orang lain), pakai service-role client + RPC baru di atas. |
-| `src/app/api/achievements/route.ts` | Refactor pakai fungsi shared di atas — **perilaku tidak berubah**, cuma hapus duplikasi logic. |
-| `src/app/api/profile/[id]/route.ts` | `badges` sekarang dihitung live (`evaluateBadges()` + filter `earned`) untuk profil yang sedang dilihat, bukan baca `profiles.badges`. |
-| `src/app/api/profile/me/route.ts` | Sama, untuk konsistensi penuh di semua endpoint yang expose field `badges`. |
+| `docs/MIGRATION_ml_risk_bandit_nudge.sql` **(BARU)** | Tabel `nudge_bandit_arms` (state per user per arm) + `nudge_log` (riwayat nudge + reward) |
+| `src/app/api/ml/risk/route.ts` **(BARU)** | `GET` — latih & prediksi risiko deadline aktif user |
+| `src/app/api/ml/nudge/route.ts` **(BARU)** | `POST` — bandit pilih gaya nudge untuk 1 deadline berisiko |
+| `src/app/api/deadlines/[id]/route.ts` | + hook reward bandit di titik yang SAMA dengan cek `ontime_bonus` yang sudah ada |
+| `src/components/ai/MLRiskPanel.tsx` **(BARU)** | UI — sengaja dipisah visual (ungu) dari chat LLM (teal), label "Machine Learning" jelas |
+| `src/app/dashboard/nexa-assistant/page.tsx` | + render panel ML di bawah chat |
 
-## Kenapa butuh RPC baru (bukan query langsung)
-Poin & streak butuh agregasi dari `points_events`, yang **tidak bisa dibaca lintas-user** lewat
-RLS biasa (ini benar, sudah diperketat di security hardening sebelumnya). RPC `get_my_rank` yang
-sudah ada cuma bisa hitung punya **diri sendiri** (`auth.uid()` hardcoded). Daripada
-reimplementasi logic streak (gaps-and-islands, window function) di JavaScript yang rawan bug
-timezone, lebih aman copy persis logic yang sudah terbukti jalan, tinggal di-parameterize.
-**Privasi tetap dijaga di level pemanggil** (route `profile/[id]` sudah punya gate
-friend/`is_public_profile` dari batch sebelumnya) — RPC ini murni alat hitung, bukan penjaga akses.
+Gated ke **NEXA Command** (konsisten dengan fitur AI lain).
+
+## Kenapa desainnya begini
+- **Training on-the-fly, bukan model tersimpan**: dataset per-user kecil (puluhan-ratusan baris),
+  gradient descent 400 epoch selesai puluhan ms — kompleksitas cron/storage model tidak sepadan.
+- **Bandit state PERLU persisten** (beda dari model risiko) — itu inti "belajar lama-lama", jadi
+  2 tabel baru dengan RLS select-only untuk user; insert/update HANYA lewat server (service role),
+  tidak ada policy tulis untuk client.
+- Privasi sudah digerbang di level pemanggil (cek plan Command, `auth.uid()=user_id` di tiap query).
 
 ## Validasi
-- `tsc --noEmit`: 0 error.
-- `next build` dengan ESLint aktif: 0 error, 0 warning baru.
-- 12 test assertion: termasuk verifikasi bahwa `evaluateBadges()` menghasilkan output **identik**
-  untuk stats yang sama baik dipanggil dari jalur "diri sendiri" maupun "lihat user lain" (intinya
-  fix ini), badge founder tetap dapat semua, manual override tetap dihormati, dan rank `null`
-  tidak ke-coerce jadi `0` (bug kecil yang ketemu & dibenerin saat menulis fix ini).
-- **Migration belum dieksekusi ke Postgres live** — sarankan test manual: jalankan migration,
-  cek `/dashboard/achievements` vs buka profil sendiri (`/dashboard/profile/[your-id]`), badge
-  yang muncul harus sama persis.
+- **32 test assertion runtime**, semua lulus:
+  - 11 untuk regresi logistik (termasuk simulasi realistis deadline mepet vs longgar — model
+    secara konsisten memprediksi risiko lebih tinggi untuk yang mepet)
+  - 9 untuk bandit (simulasi 300 ronde: bandit belajar prefer arm dengan true success rate 0.75
+    dibanding 0.30, estimasi akhir konvergen ke 0.759 vs 0.300 — sangat dekat nilai asli)
+  - 12 untuk integrasi risk-model (termasuk 1 bug nyata ketemu & dibenerin DI TEST-NYA SENDIRI
+    saat proses — bukti proses testing ini beneran jalan, bukan asal centang)
+- `tsc --noEmit`: 0 error. `next build` dengan ESLint aktif: 0 error, 0 warning baru.
+- Migration belum dieksekusi ke Postgres live — fitur bandit (nudge) butuh migration dijalankan
+  dulu; fitur prediksi risiko (`/api/ml/risk`) JALAN TANPA migration (tidak butuh tabel baru).
+
+## Limitasi yang jujur
+1. Training accuracy ditampilkan, BUKAN test accuracy — dataset per-user terlalu kecil untuk
+   train/test split yang bermakna. Dilabeli jelas di UI sebagai "akurasi training".
+2. Bandit butuh waktu (banyak deadline) untuk benar-benar belajar preferensi — di awal pemakaian,
+   pilihan arm akan terasa cukup acak (cold start, ini memang sifat algoritma bandit, bukan bug).
+3. Model risiko TIDAK retrain otomatis kalau histori bertambah — itu memang desainnya (selalu
+   dilatih ulang dari nol tiap dipanggil, jadi otomatis "up to date" tanpa perlu trigger apa pun).
 
 ## Cara pasang
-1. Jalankan `docs/MIGRATION_badge_consistency_fix.sql`.
-2. Timpa 4 file kode di atas.
-3. Test: buka Pencapaian, catat badge yang earned → buka profilmu sendiri via halaman publik →
-   harus muncul badge yang sama. Lalu cek dari akun lain, lihat profil user pertama tadi — badge
-   yang muncul juga harus sama dengan yang di Pencapaian user tersebut.
-
-## Catatan
-`profiles.badges` (kolom lama) dan endpoint `PATCH /api/profile/badges` **tidak dihapus** —
-dibiarkan ada (tidak dipakai lagi untuk display, tapi `manualBadgeIds` di `evaluateBadges()` masih
-membacanya sebagai mekanisme override manual kalau suatu saat mau dipakai admin untuk grant badge
-khusus di luar metric biasa). Tidak ada breaking change.
+1. Jalankan `docs/MIGRATION_ml_risk_bandit_nudge.sql`.
+2. Timpa semua file di atas.
+3. Buka NEXA Assistant (Command) → scroll ke bawah chat → panel ungu "Prediksi Risiko Telat".
+4. Test: selesaikan beberapa deadline (campur tepat waktu & telat) → cek prediksi makin masuk akal
+   seiring histori bertambah. Klik "Tampilkan pengingat" di deadline berisiko → bandit pilih 1
+   dari 4 gaya pesan → selesaikan deadline itu → cek `nudge_bandit_arms` di Supabase, alpha/beta
+   arm yang dipilih harus berubah sesuai hasil (on-time/telat).

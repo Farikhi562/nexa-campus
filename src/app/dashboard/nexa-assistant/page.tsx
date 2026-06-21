@@ -4,6 +4,7 @@ import { Bot, Lock, Sparkles } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { getEffectivePlan } from '@/lib/plans'
 import NexaAssistantCommand from '@/components/ai/NexaAssistantCommand'
+import MLRiskPanel from '@/components/ai/MLRiskPanel'
 import type { AcademicDeadline } from '@/types'
 
 export const metadata = {
@@ -91,6 +92,8 @@ export default async function NexaAssistantPage() {
         userName={profile?.full_name ?? null}
         campus={profile?.campus_name ?? null}
       />
+
+      <MLRiskPanel />
     </div>
   )
 }
