@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { Bot, Lock, Sparkles } from 'lucide-react'
+import { Bot, BookOpen, Lock, Sparkles } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { getEffectivePlan } from '@/lib/plans'
 import NexaAssistantCommand from '@/components/ai/NexaAssistantCommand'
@@ -86,6 +86,22 @@ export default async function NexaAssistantPage() {
           <p className="text-sm text-slate-500">Asisten AI personal yang paham deadline-mu.</p>
         </div>
       </div>
+
+      <Link
+        href="/dashboard/study"
+        className="flex items-center justify-between gap-3 rounded-3xl border border-violet-100 bg-gradient-to-r from-violet-50 to-white p-4 transition hover:border-violet-200"
+      >
+        <div className="flex items-center gap-3">
+          <div className="inline-flex h-10 w-10 flex-none items-center justify-center rounded-2xl bg-violet-600 text-white">
+            <BookOpen className="h-5 w-5" />
+          </div>
+          <div>
+            <p className="text-sm font-black text-slate-950">Belajar dari Materi</p>
+            <p className="text-xs text-slate-500">Upload catatan/transkrip dosen → roadmap, rangkuman, quiz interaktif</p>
+          </div>
+        </div>
+        <span className="flex-none text-xs font-black text-violet-700">Buka →</span>
+      </Link>
 
       <NexaAssistantCommand
         deadlines={(deadlines ?? []) as AcademicDeadline[]}

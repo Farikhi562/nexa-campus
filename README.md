@@ -1,74 +1,68 @@
-# NEXA Campus — Batch 14: NEXA Assistant Beneran Pakai Machine Learning
+# NEXA Campus — Batch 15: NEXA Assistant Bantu Belajar dari Materi
 
-Bukan LLM doang. Ini 2 algoritma ML asli — ditulis dari nol (gradient descent, distribusi
-Beta-Bernoulli), dilatih dari data histori user sungguhan, diuji 32 test assertion statistik.
+## 🔴 HOTFIX duluan (dari build error sebelumnya)
+`src/lib/ml/late-risk-model.ts` di sini sudah **diperbaiki** — error
+`Map<...> can only be iterated through when using the '--downlevelIteration' flag`
+itu karena `tsconfig.json` project kamu pakai `target` di bawah ES2015 tanpa
+`downlevelIteration`. Diganti dari `for (const [k,v] of map)` jadi
+`map.forEach((v, k) => {...})` — kerja sama persis, tapi tidak butuh syarat
+target ES2015+. **Sudah divalidasi ekstra ketat:** kali ini saya jalankan
+`tsc` dengan `target: ES5` + TANPA `downlevelIteration` (skenario paling
+ketat yang mungkin) ke **seluruh kode**, bukan cuma file yang error — 0 error.
+Juga di-grep manual semua pola `for...of` di kode yang saya tulis sepanjang
+sesi ini untuk pastikan tidak ada pola sama yang kelewat (semua sisanya
+ternyata iterasi di atas Array biasa, yang aman di target manapun).
 
-## 1) Regresi Logistik — Prediksi Risiko Telat
-**`src/lib/ml/logistic-regression.ts`** — implementasi generik: sigmoid, gradient descent,
-L2 regularization, normalisasi fitur. Bobot **dipelajari** dari data (bukan ditentukan manual).
+## Fitur baru: Belajar dari Materi
+User upload file (PDF/DOCX) atau tempel teks (transkrip ucapan dosen,
+catatan, dll) → NEXA Assistant susun **roadmap belajar**, **rangkuman**, dan
+**quiz interaktif** — murni LLM (beda dari batch ML sebelumnya yang murni
+statistik), reuse ekstraksi file dari Smart Input (Batch 7), reuse layer AI
+multi-provider dari Batch 1.
 
-**`src/lib/ml/late-risk-model.ts`** — ekstraksi 6 fitur dari tiap deadline (lead time, prioritas,
-tingkat keterlambatan historis per jenis tugas, weekend, jam, reminder), label dari
-`points_events.kind='ontime_bonus'` (data yang SUDAH ada, tidak perlu kolom baru). Dilatih
-**per-user, on-the-fly** tiap panggilan API (dataset kecil, <100ms) — tidak perlu cron retrain.
-
-Minimal 8 deadline selesai buat training; di bawah itu fallback transparan ke rata-rata
-sederhana (dilabeli jelas "belum cukup data", bukan pura-pura ML).
-
-## 2) Bandit — Gaya Pengingat yang Paling Efektif (Thompson Sampling)
-**`src/lib/ml/bandit.ts`** — Bernoulli bandit asli: tiap "arm" (gaya pesan) punya distribusi
-Beta(alpha, beta), dipilih dengan SAMPLING (bukan rata-rata/round-robin), update otomatis dari
-reward (1 = deadline selesai tepat waktu, 0 = telat). Makin sering arm tertentu berhasil buat
-SATU USER SPESIFIK, makin sering dipilih untuk user itu — preferensi belajar per individu.
-
-**`src/lib/ml/nudge-arms.ts`** — 4 gaya pesan tetap (neutral/urgency/supportive/question) —
-sengaja template statis (bukan LLM) supaya ada "arm" yang konsisten buat dipelajari bandit.
-
-## Integrasi
-| File | Peran |
+## File baru
+| File | Fungsi |
 |---|---|
-| `docs/MIGRATION_ml_risk_bandit_nudge.sql` **(BARU)** | Tabel `nudge_bandit_arms` (state per user per arm) + `nudge_log` (riwayat nudge + reward) |
-| `src/app/api/ml/risk/route.ts` **(BARU)** | `GET` — latih & prediksi risiko deadline aktif user |
-| `src/app/api/ml/nudge/route.ts` **(BARU)** | `POST` — bandit pilih gaya nudge untuk 1 deadline berisiko |
-| `src/app/api/deadlines/[id]/route.ts` | + hook reward bandit di titik yang SAMA dengan cek `ontime_bonus` yang sudah ada |
-| `src/components/ai/MLRiskPanel.tsx` **(BARU)** | UI — sengaja dipisah visual (ungu) dari chat LLM (teal), label "Machine Learning" jelas |
-| `src/app/dashboard/nexa-assistant/page.tsx` | + render panel ML di bawah chat |
+| `docs/MIGRATION_study_packs.sql` | Tabel `study_packs` (roadmap/summary/quiz tersimpan per user) |
+| `src/lib/study/types.ts` | Tipe `StudyRoadmapStep`, `StudyQuizQuestion`, `StudyPack` |
+| `src/lib/study/generate-study-pack.ts` | Prompt LLM + parsing JSON robust + validasi (soal dengan format rusak dibuang, bukan bikin crash) |
+| `src/app/api/study/generate/route.ts` | `POST` — terima file/teks → ekstrak (reuse Smart Input) → generate → simpan |
+| `src/app/api/study/packs/route.ts` | `GET` — daftar materi tersimpan |
+| `src/app/api/study/packs/[id]/route.ts` | `GET`/`DELETE` — detail & hapus |
+| `src/app/api/study/packs/[id]/score/route.ts` | `POST` — catat skor quiz (divalidasi terhadap jumlah soal asli, tidak bisa dipalsukan dari client) |
+| `src/components/study/StudyUploadForm.tsx` | Form upload/tempel teks |
+| `src/components/study/StudyRoadmapView.tsx` | Checklist roadmap (progress visual lokal) |
+| `src/components/study/SimpleMarkdown.tsx` | Renderer ringan `**bold**` + paragraf (tanpa dependency baru) |
+| `src/components/study/StudyQuizView.tsx` | Quiz interaktif — pilih jawaban, submit, lihat penjelasan, skor tersimpan |
+| `src/app/dashboard/study/page.tsx` | Daftar materi (Command-gated) |
+| `src/app/dashboard/study/new/page.tsx` | Halaman buat materi baru |
+| `src/app/dashboard/study/[id]/page.tsx` | Halaman detail (roadmap + rangkuman + quiz) |
+| `src/app/dashboard/nexa-assistant/page.tsx` | + link ke fitur ini |
 
-Gated ke **NEXA Command** (konsisten dengan fitur AI lain).
-
-## Kenapa desainnya begini
-- **Training on-the-fly, bukan model tersimpan**: dataset per-user kecil (puluhan-ratusan baris),
-  gradient descent 400 epoch selesai puluhan ms — kompleksitas cron/storage model tidak sepadan.
-- **Bandit state PERLU persisten** (beda dari model risiko) — itu inti "belajar lama-lama", jadi
-  2 tabel baru dengan RLS select-only untuk user; insert/update HANYA lewat server (service role),
-  tidak ada policy tulis untuk client.
-- Privasi sudah digerbang di level pemanggil (cek plan Command, `auth.uid()=user_id` di tiap query).
+## Desain penting
+- **Tidak ada fallback non-AI** (beda dari Smart Input NL parser) — menyusun roadmap & quiz
+  butuh pemahaman bahasa asli, bukan sesuatu yang bisa didekati regex. Kalau AI tidak aktif,
+  pesan errornya jujur bilang begitu.
+- Soal quiz yang formatnya rusak dari AI (opsi bukan 4, `correctIndex` di luar 0-3) **dibuang
+  satu-satu**, bukan bikin seluruh hasil gagal — minimal 3 soal valid baru dianggap berhasil.
+- Skor quiz divalidasi server-side terhadap panjang quiz asli (anti-curang skor ngarang dari client).
+- Rate limit 10/jam (pola sama dengan Batch 9) — generate materi itu panggilan AI yang berat.
+- Gated NEXA Command, konsisten dengan fitur AI lain.
 
 ## Validasi
-- **32 test assertion runtime**, semua lulus:
-  - 11 untuk regresi logistik (termasuk simulasi realistis deadline mepet vs longgar — model
-    secara konsisten memprediksi risiko lebih tinggi untuk yang mepet)
-  - 9 untuk bandit (simulasi 300 ronde: bandit belajar prefer arm dengan true success rate 0.75
-    dibanding 0.30, estimasi akhir konvergen ke 0.759 vs 0.300 — sangat dekat nilai asli)
-  - 12 untuk integrasi risk-model (termasuk 1 bug nyata ketemu & dibenerin DI TEST-NYA SENDIRI
-    saat proses — bukti proses testing ini beneran jalan, bukan asal centang)
-- `tsc --noEmit`: 0 error. `next build` dengan ESLint aktif: 0 error, 0 warning baru.
-- Migration belum dieksekusi ke Postgres live — fitur bandit (nudge) butuh migration dijalankan
-  dulu; fitur prediksi risiko (`/api/ml/risk`) JALAN TANPA migration (tidak butuh tabel baru).
-
-## Limitasi yang jujur
-1. Training accuracy ditampilkan, BUKAN test accuracy — dataset per-user terlalu kecil untuk
-   train/test split yang bermakna. Dilabeli jelas di UI sebagai "akurasi training".
-2. Bandit butuh waktu (banyak deadline) untuk benar-benar belajar preferensi — di awal pemakaian,
-   pilihan arm akan terasa cukup acak (cold start, ini memang sifat algoritma bandit, bukan bug).
-3. Model risiko TIDAK retrain otomatis kalau histori bertambah — itu memang desainnya (selalu
-   dilatih ulang dari nol tiap dipanggil, jadi otomatis "up to date" tanpa perlu trigger apa pun).
+- **14 test assertion** untuk `generate-study-pack.ts` (mock AI, termasuk: respons dibungkus
+  markdown code fence, soal dengan format rusak dibuang otomatis, materi kependekan ditolak,
+  network gagal tidak crash).
+- `tsc --noEmit` standar: 0 error.
+- `tsc --noEmit` dengan **target ES5 tanpa downlevelIteration** (skenario paling ketat): 0 error.
+- `next build` dengan ESLint aktif: 0 error, 0 warning baru dari file manapun di batch ini.
+- Semua 82 test assertion dari batch-batch sebelumnya (trust score, file signature, regresi
+  logistik, bandit, risk model) di-re-run ulang, semua tetap lulus — tidak ada regresi.
 
 ## Cara pasang
-1. Jalankan `docs/MIGRATION_ml_risk_bandit_nudge.sql`.
-2. Timpa semua file di atas.
-3. Buka NEXA Assistant (Command) → scroll ke bawah chat → panel ungu "Prediksi Risiko Telat".
-4. Test: selesaikan beberapa deadline (campur tepat waktu & telat) → cek prediksi makin masuk akal
-   seiring histori bertambah. Klik "Tampilkan pengingat" di deadline berisiko → bandit pilih 1
-   dari 4 gaya pesan → selesaikan deadline itu → cek `nudge_bandit_arms` di Supabase, alpha/beta
-   arm yang dipilih harus berubah sesuai hasil (on-time/telat).
+1. Jalankan `docs/MIGRATION_study_packs.sql`.
+2. Timpa semua file di atas (termasuk `late-risk-model.ts` yang sudah di-hotfix).
+3. `npm run build` — sudah divalidasi hijau dengan kondisi paling ketat.
+4. Test: buka NEXA Assistant → klik "Belajar dari Materi" → tempel beberapa paragraf catatan
+   kuliah → tunggu 10-30 detik → cek roadmap/rangkuman/quiz tersusun masuk akal dari materi yang
+   ditempel → coba kerjain quiz → submit → cek skor tersimpan saat dibuka lagi nanti.
