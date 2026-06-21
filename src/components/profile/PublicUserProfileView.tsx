@@ -2,7 +2,6 @@ import Link from 'next/link'
 import { ArrowLeft, ExternalLink, Lock, MessageCircle, Radio, ShieldCheck, Sparkles, UserRound, Users } from 'lucide-react'
 import { BadgeChip, BadgeTierLabel, FeaturedBadgePin } from '@/components/BadgeChip'
 import FounderVerifiedBadge from '@/components/FounderVerifiedBadge'
-import ProfileVerifiedBadge from '@/components/ProfileVerifiedBadge'
 import { Card, CardContent } from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import { BADGES, type BadgeDef } from '@/lib/badges'
@@ -24,6 +23,7 @@ type ViewProfile = {
   nexa_id: string | null
   is_public_profile: boolean | null
   featured_badge: string | null
+  is_nexa_verified?: boolean | null
   badges: string[] | null
   friend_count?: number | null
   public_profile_headline: string | null
@@ -39,7 +39,6 @@ type ViewProfile = {
   online_status_visibility?: 'public' | 'friends' | 'private' | null
   study_room_presence_visibility?: 'members' | 'private' | null
   dm_privacy?: 'friends' | 'none' | null
-  arena_verified?: boolean | null
   created_at: string
 }
 
@@ -80,7 +79,25 @@ function ExternalProfileLink({ href, label }: { href: string | null; label: stri
   )
 }
 
-export default function PublicUserProfileView({ profile, isOwnProfile, canMessage = false }: { profile: ViewProfile; isOwnProfile: boolean; canMessage?: boolean }) {
+type SkillEvidenceSummary = {
+  id: string
+  skill_name: string
+  evidence_type: string
+  evidence_url: string | null
+  file_url: string | null
+}
+
+export default function PublicUserProfileView({
+  profile,
+  isOwnProfile,
+  canMessage = false,
+  evidence = [],
+}: {
+  profile: ViewProfile
+  isOwnProfile: boolean
+  canMessage?: boolean
+  evidence?: SkillEvidenceSummary[]
+}) {
   const isPublic = profile.is_public_profile ?? true
   const badges = collectBadges(profile)
   const showBio = canShow(isOwnProfile, profile.profile_bio_visibility)
@@ -131,11 +148,7 @@ export default function PublicUserProfileView({ profile, isOwnProfile, canMessag
                 <span className="inline-flex items-center gap-1 rounded-full bg-emerald-400/15 px-2.5 py-1 text-[11px] font-black text-emerald-100"><Radio className="h-3 w-3" /> Bisa tampil online</span>
               )}
             </div>
-            <h1 className="flex flex-wrap items-center gap-2 text-2xl font-black tracking-tight sm:text-3xl">
-              <span>{profile.full_name ?? 'Mahasiswa NEXA'}</span>
-              <FounderVerifiedBadge founderVerified={profile.founder_verified} email={profile.email} />
-              <ProfileVerifiedBadge verified={profile.arena_verified} />
-            </h1>
+            <h1 className="flex flex-wrap items-center gap-2 text-2xl font-black tracking-tight sm:text-3xl"><span>{profile.full_name ?? 'Mahasiswa NEXA'}</span><FounderVerifiedBadge founderVerified={profile.founder_verified} verified={profile.is_nexa_verified} email={profile.email} /></h1>
             {profile.public_profile_headline && <p className="mt-2 max-w-2xl text-sm font-bold leading-6 text-teal-100">{profile.public_profile_headline}</p>}
             <p className="mt-2 text-sm leading-6 text-slate-300">
               {[profile.campus_name, profile.major, profile.semester ? `Semester ${profile.semester}` : null].filter(Boolean).join(' · ') || 'Profil akademik belum lengkap'}
@@ -179,6 +192,34 @@ export default function PublicUserProfileView({ profile, isOwnProfile, canMessag
                 )}
               </CardContent>
             </Card>
+
+            {evidence.length > 0 && (
+              <Card>
+                <CardContent className="p-5">
+                  <h2 className="mb-3 flex items-center gap-2 text-sm font-black uppercase tracking-wide text-slate-500">
+                    <ShieldCheck className="h-4 w-4" /> Bukti Skill
+                  </h2>
+                  <div className="space-y-2">
+                    {evidence.slice(0, 6).map((item) => {
+                      const link = item.evidence_url || item.file_url
+                      return (
+                        <div key={item.id} className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-3">
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-black text-slate-950">{item.skill_name}</p>
+                            <p className="text-[11px] font-bold uppercase tracking-wide text-slate-400">{item.evidence_type}</p>
+                          </div>
+                          {link && (
+                            <a href={link} target="_blank" rel="noreferrer" className="inline-flex flex-none items-center gap-1 text-xs font-black text-brand-700 hover:underline">
+                              <ExternalLink className="h-3.5 w-3.5" /> Lihat
+                            </a>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             <Card>
               <CardContent className="p-5">

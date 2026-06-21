@@ -2,19 +2,19 @@
 
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
-import { AlertTriangle, BellOff, CalendarDays, Check, CheckCircle2, Clock, Flame, Pencil, Plus, RotateCcw, Share2, Sparkles, Trash2, TimerReset } from 'lucide-react'
+import { AlertTriangle, BrainCircuit, CalendarDays, Check, CheckCircle2, ChevronDown, ChevronUp, Clock, Flame, Pencil, Plus, RotateCcw, Share2, Trash2, TimerReset } from 'lucide-react'
 import Badge from '@/components/ui/Badge'
 import { Card, CardContent } from '@/components/ui/Card'
 import AskNexaWidget from '@/components/dashboard/AskNexaWidget'
 import SmartInputBox from '@/components/smart-input/SmartInputBox'
 import DashboardSidePanel from '@/components/dashboard/DashboardSidePanel'
+import DeadlineCalendarCard from '@/components/dashboard/DeadlineCalendarCard'
 import CommandFocusPlan from '@/components/dashboard/CommandFocusPlan'
 import ReferralCard from '@/components/dashboard/ReferralCard'
 import LeaderboardTeaser from '@/components/dashboard/LeaderboardTeaser'
 import DailyPulseCard from '@/components/dashboard/DailyPulseCard'
 import RetentionFomoStrip from '@/components/dashboard/RetentionFomoStrip'
 import ActivityFeedCard from '@/components/dashboard/ActivityFeedCard'
-import ProfileCompletionCard from '@/components/dashboard/ProfileCompletionCard'
 import WeeklyChallengeCard from '@/components/dashboard/WeeklyChallengeCard'
 import BadgeShowcaseCard from '@/components/dashboard/BadgeShowcaseCard'
 import FriendSuggestionsCard from '@/components/dashboard/FriendSuggestionsCard'
@@ -73,13 +73,6 @@ const summaryMeta = [
     copy: 'Saatnya damage control yang elegan.',
     tone: 'text-amber-700',
   },
-  {
-    key: 'noReminder',
-    label: 'Belum Ada Reminder',
-    icon: BellOff,
-    copy: 'Rawan kelupaan kalau cuma mengandalkan niat.',
-    tone: 'text-slate-600',
-  },
 ] as const
 
 const urgencyGroups = [
@@ -110,6 +103,71 @@ function getLocalDateValue(date = new Date()) {
   ].join('-')
 }
 
+function getSmartBriefing({
+  activeCount,
+  overdueCount,
+  todayCount,
+  highPriorityCount,
+  hasTelegramChatId,
+  profileCompleted,
+  userTier,
+}: {
+  activeCount: number
+  overdueCount: number
+  todayCount: number
+  highPriorityCount: number
+  hasTelegramChatId: boolean
+  profileCompleted: boolean
+  userTier: Plan
+}) {
+  if (overdueCount > 0) {
+    return {
+      tone: 'danger' as const,
+      label: 'Mode rescue',
+      title: `${overdueCount} deadline sudah lewat. Fokus beresin yang paling kecil dulu.`,
+      copy: 'NEXA akan lebih berguna kalau kamu pakai untuk pecah tugas jadi langkah 20-30 menit, bukan langsung ngejar semuanya sekaligus.',
+    }
+  }
+
+  if (todayCount > 0 || highPriorityCount > 0) {
+    return {
+      tone: 'warning' as const,
+      label: 'Mode fokus',
+      title: todayCount > 0 ? `${todayCount} deadline aktif hari ini.` : `${highPriorityCount} prioritas tinggi perlu dilihat.`,
+      copy: hasTelegramChatId
+        ? 'Reminder sudah siap. Sekarang tinggal pilih satu target, eksekusi, lalu tandai selesai.'
+        : 'Aktifkan reminder saat sempat supaya NEXA bisa bantu jagain momen rawan lupa.',
+    }
+  }
+
+  if (activeCount === 0) {
+    return {
+      tone: 'info' as const,
+      label: 'Mode kosong',
+      title: 'Belum ada deadline aktif. Tambahkan satu dari chat, foto, atau manual.',
+      copy: 'Mulai dari deadline terdekat dulu. Setelah ada data, asisten bisa baca kondisi kamu dengan lebih akurat.',
+    }
+  }
+
+  if (!profileCompleted || userTier === 'radar') {
+    return {
+      tone: 'info' as const,
+      label: 'Mode rapiin',
+      title: 'Deadline sudah tercatat. Tinggal rapikan sistem kecil di sekitar kamu.',
+      copy: userTier === 'radar'
+        ? 'Pakai dashboard inti dulu. Kalau beban deadline makin banyak, fitur reminder dan AI bisa dinaikkan sesuai kebutuhan.'
+        : 'Profil dan reminder yang rapi bikin NEXA lebih paham konteks sebelum memberi saran.',
+    }
+  }
+
+  return {
+    tone: 'success' as const,
+    label: 'Mode stabil',
+    title: 'Kondisi terlihat stabil. Pertahankan ritme, jangan tunggu mendadak.',
+    copy: 'Kalender dan Ask NEXA sekarang bisa jadi pusat harian: cek tanggal, tambah notes, lalu minta prioritas kalau mulai penuh.',
+  }
+}
+
 export default function DeadlineDashboardOverview({
   initialDeadlines,
   userName,
@@ -129,6 +187,7 @@ export default function DeadlineDashboardOverview({
   const [actionError, setActionError] = useState('')
   const [actionMessage, setActionMessage] = useState('')
   const [showExportModal, setShowExportModal] = useState(false)
+  const [showSecondary, setShowSecondary] = useState(false)
 
   const stats = useMemo(() => countDashboardStats(deadlines), [deadlines])
   const groupedDeadlines = useMemo(() => {
@@ -146,6 +205,24 @@ export default function DeadlineDashboardOverview({
   const highPriorityCount = activeDeadlines.filter((deadline) =>
     deadline.priority === 'high' || deadline.priority === 'urgent'
   ).length
+  const shouldShowSetup = !profileCompleted || deadlines.length === 0 || !hasTelegramChatId
+  const shouldShowUpgrade = userTier === 'radar'
+  const shouldShowOnboarding = deadlines.length === 0 || !profileCompleted
+  const secondaryCount = [
+    true,
+    shouldShowOnboarding,
+    shouldShowUpgrade,
+    Boolean(referralCode),
+  ].filter(Boolean).length
+  const smartBriefing = getSmartBriefing({
+    activeCount: activeDeadlines.length,
+    overdueCount: stats.overdue,
+    todayCount: todayActiveDeadlines.length,
+    highPriorityCount,
+    hasTelegramChatId,
+    profileCompleted,
+    userTier,
+  })
 
   async function updateStatus(deadline: AcademicDeadline, status: 'completed' | 'pending') {
     setBusyId(deadline.id)
@@ -265,48 +342,30 @@ export default function DeadlineDashboardOverview({
 
       <SmartInputBox plan={userTier} defaultCampus={defaultCampus || 'Kampus'} />
 
-      <DailyPulseCard />
-
-      <RetentionFomoStrip
-        referralCount={referralCount}
-        userTier={userTier}
-        todayActiveCount={todayActiveDeadlines.length}
-        highPriorityCount={highPriorityCount}
-      />
-
-      <LeaderboardTeaser />
-
-      <section className="grid gap-4 lg:grid-cols-2">
-        <WeeklyChallengeCard />
-        <BadgeShowcaseCard compact />
-      </section>
-
-      <OnboardingCoachCard />
-
-      <FriendSuggestionsCard compact />
-
-      <section className="grid gap-4 lg:grid-cols-[minmax(0,0.9fr)_minmax(300px,0.55fr)]">
-        <ActivityFeedCard />
-        <ProfileCompletionCard />
-      </section>
-
-      <SetupChecklist
-        profileCompleted={profileCompleted}
-        hasDeadline={deadlines.length > 0}
-        hasTelegramChatId={hasTelegramChatId}
-        referralCode={referralCode}
-        userTier={userTier}
-      />
-
-      <UpgradeCountdownCard userTier={userTier} />
-
-      <CommandFocusPlan deadlines={deadlines} userTier={userTier} />
-
-      <section className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-        <div className="hidden lg:block">
-          <DashboardSidePanel userTier={userTier} />
+      <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.35fr)]">
+        <div className="rounded-3xl border border-cyan-100 bg-white p-4 shadow-sm sm:p-5">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0">
+              <div className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-3 py-1 text-[11px] font-black uppercase tracking-wide text-white">
+                <BrainCircuit className="h-3.5 w-3.5 text-cyan-300" />
+                NEXA membaca kondisi
+              </div>
+              <h2 className="mt-3 text-lg font-black text-slate-950 sm:text-xl">{smartBriefing.title}</h2>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">{smartBriefing.copy}</p>
+            </div>
+            <Badge tone={smartBriefing.tone} className="w-fit flex-shrink-0">{smartBriefing.label}</Badge>
+          </div>
+          <div className="mt-4 grid gap-2 text-xs font-bold text-slate-600 sm:grid-cols-3">
+            <div className="rounded-2xl bg-slate-50 px-3 py-2">Aktif: <span className="font-black text-slate-950">{activeDeadlines.length}</span></div>
+            <div className="rounded-2xl bg-slate-50 px-3 py-2">Prioritas tinggi: <span className="font-black text-slate-950">{highPriorityCount}</span></div>
+            <div className="rounded-2xl bg-slate-50 px-3 py-2">Reminder: <span className="font-black text-slate-950">{hasTelegramChatId ? 'siap' : 'belum'}</span></div>
+          </div>
         </div>
-        {summaryMeta.slice(0, 3).map(({ key, label, icon: Icon, copy, tone }) => (
+        <DashboardSidePanel userTier={userTier} />
+      </section>
+
+      <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        {summaryMeta.map(({ key, label, icon: Icon, copy, tone }) => (
           <Card key={key} className="overflow-hidden">
             <CardContent className="p-4">
               <div className="flex items-center justify-between gap-2">
@@ -324,10 +383,21 @@ export default function DeadlineDashboardOverview({
         ))}
       </section>
 
-      {/* Mobile shortcut panel */}
-      <div className="lg:hidden">
-        <DashboardSidePanel userTier={userTier} />
-      </div>
+      <DeadlineCalendarCard deadlines={deadlines} />
+
+      {shouldShowSetup && (
+        <SetupChecklist
+          profileCompleted={profileCompleted}
+          hasDeadline={deadlines.length > 0}
+          hasTelegramChatId={hasTelegramChatId}
+          referralCode={referralCode}
+          userTier={userTier}
+        />
+      )}
+
+      {userTier === 'command' && activeDeadlines.length > 0 && (
+        <CommandFocusPlan deadlines={deadlines} userTier={userTier} />
+      )}
 
       {deadlines.length > 0 && (
         <section id="deadline-week" className="grid gap-3 lg:grid-cols-2">
@@ -339,6 +409,57 @@ export default function DeadlineDashboardOverview({
           {stats.overdue === 0 && <EmptyOverdue userTier={userTier} />}
         </section>
       )}
+
+      <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">Opsional</p>
+            <h2 className="mt-1 text-lg font-black text-slate-950">Progres, komunitas, dan bonus</h2>
+            <p className="mt-1 text-sm leading-6 text-slate-500">
+              Disimpan di sini supaya dashboard utama tetap fokus ke deadline.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowSecondary((value) => !value)}
+            className="focus-ring inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-black text-slate-700 transition hover:bg-slate-100"
+          >
+            {showSecondary ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            {showSecondary ? 'Tutup panel' : `Buka ${secondaryCount} panel`}
+          </button>
+        </div>
+
+        {showSecondary && (
+          <div id="ajak-teman" className="mt-5 space-y-4">
+            <DailyPulseCard />
+
+            <RetentionFomoStrip
+              referralCount={referralCount}
+              userTier={userTier}
+              todayActiveCount={todayActiveDeadlines.length}
+              highPriorityCount={highPriorityCount}
+            />
+
+            <section className="grid gap-4 lg:grid-cols-2">
+              <WeeklyChallengeCard />
+              <BadgeShowcaseCard compact />
+            </section>
+
+            {shouldShowOnboarding && <OnboardingCoachCard />}
+
+            <FriendSuggestionsCard compact />
+
+            <section className="grid gap-4 lg:grid-cols-[minmax(0,0.9fr)_minmax(300px,0.55fr)]">
+              <ActivityFeedCard />
+              {shouldShowUpgrade ? <UpgradeCountdownCard userTier={userTier} /> : <LeaderboardTeaser />}
+            </section>
+
+            {shouldShowUpgrade && <LeaderboardTeaser />}
+
+            <ReferralCard referralCode={referralCode} referralCount={referralCount} userTier={userTier} nexaId={nexaId} />
+          </div>
+        )}
+      </section>
 
       {actionError && (
         <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700">
@@ -477,14 +598,11 @@ export default function DeadlineDashboardOverview({
         )}
       </section>
 
-      <section className="grid gap-4 lg:grid-cols-[minmax(0,0.78fr)_minmax(280px,0.42fr)]">
-        <div className="rounded-3xl border border-white/80 bg-white/90 p-5 text-sm leading-6 text-slate-600 shadow-xl shadow-slate-200/70">
-          <p className="font-black text-slate-950">Catatan kecil</p>
-          <p className="mt-2">
-            NEXA Campus bukan sistem resmi kampus. Selalu cek informasi final dari kanal resmi kampus.
-          </p>
-        </div>
+      <section className="space-y-3">
         <AskNexaWidget deadlines={deadlines} />
+        <p className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-xs leading-5 text-slate-500">
+          NEXA Campus bukan sistem resmi kampus. Selalu cek informasi final dari kanal resmi kampus.
+        </p>
       </section>
 
       {showExportModal && (
@@ -495,9 +613,6 @@ export default function DeadlineDashboardOverview({
           onClose={() => setShowExportModal(false)}
         />
       )}
-      <div id="referral">
-        <ReferralCard referralCode={referralCode} referralCount={referralCount} userTier={userTier} nexaId={nexaId} />
-      </div>
     </div>
   )
 }

@@ -259,6 +259,16 @@ export interface AcademicDeadline {
   updated_at: string
 }
 
+export interface CalendarNote {
+  id: string
+  user_id: string
+  note_date: string
+  title: string
+  content: string
+  created_at: string
+  updated_at: string
+}
+
 export interface ReminderPreferences {
   id: string
   user_id: string

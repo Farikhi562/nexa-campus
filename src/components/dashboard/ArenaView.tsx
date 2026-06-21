@@ -18,14 +18,19 @@ import {
   Trash2,
   Users,
   UserCheck,
+  Bookmark,
+  Link2,
   X,
 } from 'lucide-react'
 import { FeaturedBadgePin } from '@/components/BadgeChip'
-import ProfileVerifiedBadge from '@/components/ProfileVerifiedBadge'
+import FounderVerifiedBadge from '@/components/FounderVerifiedBadge'
 import { Card, CardContent } from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import SmartEmptyState from '@/components/dashboard/SmartEmptyState'
+import { ARENA_ROLES, ROLE_CONFIG, EVIDENCE_TYPES, isArenaRole, type ArenaRole } from '@/lib/verification/role-config'
+import { TRUST_LABEL_TEXT, TRUST_LABEL_COLOR, type TrustLabel } from '@/lib/verification/trust-score'
+import { isValidEvidenceUrl } from '@/lib/verification/url-validation'
 
 type ArenaPost = {
   id: string
@@ -54,9 +59,11 @@ type ArenaPost = {
     user_id: string
     role: string
     joined_at: string
-    profile?: { id: string; full_name: string | null; avatar_url: string | null; nexa_id: string | null; featured_badge: string | null } | null
+    profile?: { id: string; full_name: string | null; avatar_url: string | null; nexa_id: string | null; featured_badge: string | null; is_nexa_verified?: boolean | null } | null
   }>
 }
+
+type EvidenceLink = { type: string; url: string; label: string }
 
 type ArenaApplication = {
   id: string
@@ -66,9 +73,15 @@ type ArenaApplication = {
   applicant_background: string | null
   portfolio_url: string | null
   skills_offered: string[]
-  status: 'pending' | 'accepted' | 'rejected'
+  status: 'pending' | 'shortlisted' | 'accepted' | 'rejected'
   review_note: string | null
   competency_confirmed: boolean | null
+  role_applied: string | null
+  competency_answers: Record<string, string> | null
+  evidence_links: EvidenceLink[] | null
+  mini_challenge_answer: string | null
+  trust_score: number | null
+  trust_label: string | null
   created_at: string
   updated_at: string
   applicant?: {
@@ -81,24 +94,8 @@ type ArenaApplication = {
     plan: string | null
     nexa_id: string | null
     featured_badge: string | null
-    arena_verified?: boolean | null
-    arena_profile_verification?: ArenaProfileVerification | null
+    is_nexa_verified?: boolean | null
   } | null
-}
-
-type ArenaProfileVerification = {
-  verified: boolean
-  score: number
-  missing: string[]
-  checks: Array<{ key: string; label: string; done: boolean }>
-}
-
-type ProfileMeForArena = {
-  portfolio_url?: string | null
-  github_url?: string | null
-  linkedin_url?: string | null
-  arena_verified?: boolean | null
-  arena_profile_verification?: ArenaProfileVerification | null
 }
 
 type ArenaForm = {
@@ -135,21 +132,6 @@ function arenaTypeEmoji(type: string) {
 function normalizeSkills(value: unknown): string[] {
   if (!Array.isArray(value)) return []
   return value.map((item) => String(item).trim()).filter(Boolean).slice(0, 12)
-}
-
-function normalizeSkill(value: string) {
-  return value.trim().toLowerCase()
-}
-
-function findMatchingSkills(needed: string[], offered: string[]) {
-  const offeredSet = new Set(offered.map(normalizeSkill).filter(Boolean))
-  return needed.filter((skill) => offeredSet.has(normalizeSkill(skill)))
-}
-
-function firstProfileProof(profile?: ProfileMeForArena | null) {
-  return [profile?.portfolio_url, profile?.github_url, profile?.linkedin_url]
-    .map((value) => (typeof value === 'string' ? value.trim() : ''))
-    .find(Boolean) || ''
 }
 
 function formatDate(date: string | null | undefined) {
@@ -433,6 +415,7 @@ export default function ArenaView({ userId }: { userId: string }) {
                             </span>
                             {member.profile?.full_name ?? 'Member'}
                             <FeaturedBadgePin badgeId={member.profile?.featured_badge} />
+                            <FounderVerifiedBadge verified={member.profile?.is_nexa_verified} compact />
                           </Link>
                         ))}
                         {post.team_members.length > 5 && <span className="rounded-full bg-white px-2 py-1 text-[11px] font-black text-slate-400 ring-1 ring-emerald-100">+{post.team_members.length - 5}</span>}
@@ -641,27 +624,16 @@ function ApplyArenaModal({ post, onClose, onApplied }: { post: ArenaPost; onClos
   const [background, setBackground] = useState('')
   const [message, setMessage] = useState('')
   const [portfolioUrl, setPortfolioUrl] = useState('')
-  const [profile, setProfile] = useState<ProfileMeForArena | null>(null)
-  const [profileLoading, setProfileLoading] = useState(true)
+  const [role, setRole] = useState<ArenaRole | ''>('')
+  const [evidenceType, setEvidenceType] = useState('github')
+  const [evidenceUrl, setEvidenceUrl] = useState('')
+  const [evidenceLabel, setEvidenceLabel] = useState('')
+  const [evidenceLinks, setEvidenceLinks] = useState<Array<{ type: string; url: string; label: string }>>([])
+  const [competencyAnswers, setCompetencyAnswers] = useState<Record<string, string>>({})
+  const [miniChallengeAnswer, setMiniChallengeAnswer] = useState('')
+  const [error, setError] = useState('')
 
-  useEffect(() => {
-    let alive = true
-    fetch('/api/profile/me', { cache: 'no-store' })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((json: ProfileMeForArena | null) => {
-        if (!alive) return
-        setProfile(json)
-        const proof = firstProfileProof(json)
-        if (proof) setPortfolioUrl((current) => current || proof)
-      })
-      .catch(() => {
-        if (alive) setProfile(null)
-      })
-      .finally(() => {
-        if (alive) setProfileLoading(false)
-      })
-    return () => { alive = false }
-  }, [])
+  const roleConfig = role ? ROLE_CONFIG[role] : null
 
   function addSkill() {
     const skill = skillInput.trim()
@@ -671,43 +643,31 @@ function ApplyArenaModal({ post, onClose, onApplied }: { post: ArenaPost; onClos
     }
   }
 
-  function addSkillValue(value: string) {
-    const skill = value.trim()
-    if (skill && !skills.some((item) => normalizeSkill(item) === normalizeSkill(skill))) {
-      setSkills((prev) => [...prev, skill])
+  function addEvidence() {
+    const url = evidenceUrl.trim()
+    if (!url) return
+    if (!isValidEvidenceUrl(url)) {
+      setError('Link evidence harus diawali http:// atau https://')
+      return
     }
+    setEvidenceLinks((prev) => [...prev, { type: evidenceType, url, label: evidenceLabel.trim() }])
+    setEvidenceUrl('')
+    setEvidenceLabel('')
+    setError('')
   }
 
-  const neededSkills = normalizeSkills(post.skills_needed)
-  const matchedSkills = findMatchingSkills(neededSkills, skills)
-  const proofUrl = portfolioUrl.trim() || firstProfileProof(profile)
-  const backgroundReady = background.trim().length >= 80
-  const skillsReady = skills.length >= 2
-  const proofReady = Boolean(proofUrl)
-  const skillMatchReady = neededSkills.length === 0 || matchedSkills.length > 0
-  const profileVerification = profile?.arena_profile_verification ?? null
-  const profileCoreReady = !profileVerification || !profileVerification.checks.some((item) => ['name', 'campus', 'major', 'semester'].includes(item.key) && !item.done)
-  const submitReady = profileCoreReady && backgroundReady && skillsReady && proofReady && skillMatchReady
-
   async function submit() {
-    if (!profileCoreReady) {
-      alert('Lengkapi profil inti dulu: nama, kampus, jurusan, dan semester.')
+    setError('')
+    if (!role) {
+      setError('Pilih role yang kamu lamar dulu.')
       return
     }
-    if (!backgroundReady) {
-      alert('Latar belakang minimal 80 karakter supaya owner bisa menilai pengalamanmu.')
+    if (!background.trim()) {
+      setError('Isi latar belakang dulu. Owner perlu tahu kamu siapa, bukan cuma avatar dan harapan.')
       return
     }
-    if (!skillsReady) {
-      alert('Minimal isi 2 skill yang kamu tawarkan.')
-      return
-    }
-    if (!proofReady) {
-      alert('Portfolio, GitHub, atau LinkedIn wajib diisi.')
-      return
-    }
-    if (!skillMatchReady) {
-      alert('Minimal 1 skill harus cocok dengan kebutuhan tim.')
+    if (skills.length === 0) {
+      setError('Minimal isi 1 skill yang kamu tawarkan.')
       return
     }
     setLoading(true)
@@ -718,13 +678,17 @@ function ApplyArenaModal({ post, onClose, onApplied }: { post: ArenaPost; onClos
         message,
         applicant_background: background,
         skills_offered: skills,
-        portfolio_url: proofUrl,
+        portfolio_url: portfolioUrl,
+        role_applied: role,
+        evidence_links: evidenceLinks,
+        competency_answers: competencyAnswers,
+        mini_challenge_answer: miniChallengeAnswer,
       }),
     })
     const json = await res.json().catch(() => ({}))
     setLoading(false)
     if (!res.ok) {
-      alert(json.error ?? 'Gagal melamar.')
+      setError(json.error ?? 'Gagal melamar.')
       return
     }
     onApplied()
@@ -742,46 +706,20 @@ function ApplyArenaModal({ post, onClose, onApplied }: { post: ArenaPost; onClos
         <p className="mt-1 text-sm leading-6 text-slate-500">Isi data yang bisa dinilai owner. Bukan CV sepanjang skripsi, tapi cukup buat kelihatan kamu beneran bisa.</p>
 
         <div className="mt-4 space-y-4">
-          <div className="rounded-2xl border border-blue-100 bg-blue-50 p-3">
-            <div className="flex flex-wrap items-center gap-2">
-              <ProfileVerifiedBadge verified={profile?.arena_verified} />
-              <p className="text-xs font-black text-blue-800">
-                {profileLoading
-                  ? 'Mengecek profil Arena...'
-                  : profile?.arena_verified
-                    ? 'Centang biru aktif. Profilmu lengkap untuk dinilai owner.'
-                    : `Lengkapi profil untuk centang biru${profileVerification?.score ? ` (${profileVerification.score}%)` : ''}.`}
-              </p>
-            </div>
-            {!profileLoading && !profile?.arena_verified && profileVerification?.missing?.length ? (
-              <p className="mt-2 text-[11px] leading-4 text-blue-700">
-                Kurang: {profileVerification.missing.slice(0, 3).join(', ')}{profileVerification.missing.length > 3 ? ', ...' : ''}.
-              </p>
-            ) : null}
-          </div>
           <div>
-            <label className={label}>Latar belakang singkat * <span className="normal-case tracking-normal text-slate-400">min. 80 karakter</span></label>
+            <label className={label}>Role yang kamu lamar *</label>
+            <select value={role} onChange={(e) => setRole(e.target.value as ArenaRole)} className={input}>
+              <option value="">Pilih role...</option>
+              {ARENA_ROLES.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
+            </select>
+          </div>
+
+          <div>
+            <label className={label}>Latar belakang singkat *</label>
             <textarea value={background} onChange={(e) => setBackground(e.target.value)} rows={4} className={input} placeholder="Cth: Mahasiswa Informatika, pernah bikin dashboard React + Supabase, biasa handle frontend dan pitch deck..." />
-            <p className={`mt-1 text-[11px] font-bold ${backgroundReady ? 'text-emerald-600' : 'text-slate-400'}`}>{background.trim().length}/80 karakter</p>
           </div>
           <div>
-            <label className={label}>Skill yang kamu tawarkan * <span className="normal-case tracking-normal text-slate-400">min. 2 skill</span></label>
-            {neededSkills.length > 0 && (
-              <div className="mb-2 flex flex-wrap gap-1.5">
-                {neededSkills.map((skill) => (
-                  <button
-                    key={skill}
-                    type="button"
-                    onClick={() => addSkillValue(skill)}
-                    className={`rounded-full px-2.5 py-1 text-[11px] font-black ring-1 ${
-                      matchedSkills.includes(skill) ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' : 'bg-slate-50 text-slate-600 ring-slate-200'
-                    }`}
-                  >
-                    {skill}
-                  </button>
-                ))}
-              </div>
-            )}
+            <label className={label}>Skill yang kamu tawarkan *</label>
             <div className="flex gap-2">
               <input value={skillInput} onChange={(e) => setSkillInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addSkill() } }} placeholder="Cth: React, UI/UX, Python..." className={`${input} flex-1`} />
               <button type="button" onClick={addSkill} className="rounded-2xl bg-teal-500 px-3 py-2 text-sm font-black text-white hover:bg-teal-400">+</button>
@@ -798,32 +736,83 @@ function ApplyArenaModal({ post, onClose, onApplied }: { post: ArenaPost; onClos
             )}
           </div>
           <div>
-            <label className={label}>Portfolio / GitHub / LinkedIn *</label>
+            <label className={label}>Portfolio / GitHub / LinkedIn</label>
             <input type="url" value={portfolioUrl} onChange={(e) => setPortfolioUrl(e.target.value)} placeholder="https://..." className={input} />
           </div>
+
+          {/* Skill Evidence (spec A.1) */}
+          <div>
+            <label className={label}>Bukti skill (evidence)</label>
+            <p className="mb-2 text-xs leading-5 text-slate-500">
+              Link GitHub, project, sertifikat, atau screenshot hasil kerja. Makin lengkap, makin gampang dipercaya owner.
+            </p>
+            <div className="grid grid-cols-[auto_1fr] gap-2 sm:grid-cols-[140px_1fr]">
+              <select value={evidenceType} onChange={(e) => setEvidenceType(e.target.value)} className={input}>
+                {(roleConfig?.suggestedEvidence ?? []).map((t) => {
+                  const def = EVIDENCE_TYPES.find((e) => e.value === t)
+                  return def ? <option key={def.value} value={def.value}>{def.label}</option> : null
+                })}
+                {EVIDENCE_TYPES.filter((t) => !(roleConfig?.suggestedEvidence ?? []).includes(t.value)).map((t) => (
+                  <option key={t.value} value={t.value}>{t.label}</option>
+                ))}
+              </select>
+              <input value={evidenceUrl} onChange={(e) => setEvidenceUrl(e.target.value)} type="url" placeholder="https://..." className={input} />
+            </div>
+            <div className="mt-2 flex gap-2">
+              <input value={evidenceLabel} onChange={(e) => setEvidenceLabel(e.target.value)} placeholder="Label singkat (opsional)" className={`${input} flex-1`} />
+              <button type="button" onClick={addEvidence} className="inline-flex items-center gap-1 rounded-2xl bg-slate-900 px-3 py-2 text-xs font-black text-white hover:bg-slate-800">
+                <Link2 className="h-3.5 w-3.5" /> Tambah
+              </button>
+            </div>
+            {evidenceLinks.length > 0 && (
+              <div className="mt-2 space-y-1.5">
+                {evidenceLinks.map((ev, i) => (
+                  <div key={i} className="flex items-center justify-between gap-2 rounded-xl bg-slate-50 px-3 py-2 text-xs">
+                    <span className="truncate font-bold text-slate-700">{ev.label || ev.url}</span>
+                    <button type="button" onClick={() => setEvidenceLinks((prev) => prev.filter((_, idx) => idx !== i))} className="flex-none text-slate-400 hover:text-red-500">×</button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Competency Questions (spec A.3) */}
+          {roleConfig && (
+            <div className="space-y-3 rounded-2xl border border-teal-100 bg-teal-50/40 p-3">
+              <p className={label}>Pertanyaan kompetensi singkat</p>
+              {roleConfig.competencyQuestions.map((q) => (
+                <div key={q.key}>
+                  <label className="mb-1 block text-xs font-bold text-slate-600">{q.question}</label>
+                  <textarea
+                    value={competencyAnswers[q.key] ?? ''}
+                    onChange={(e) => setCompetencyAnswers((prev) => ({ ...prev, [q.key]: e.target.value }))}
+                    rows={2}
+                    className="focus-ring w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Mini Challenge (spec A.4, opsional) */}
+          {roleConfig && (
+            <div>
+              <label className={label}>Mini challenge (opsional, tapi nambah kepercayaan)</label>
+              <p className="mb-1.5 text-xs leading-5 text-slate-500">{roleConfig.miniChallenge}</p>
+              <textarea value={miniChallengeAnswer} onChange={(e) => setMiniChallengeAnswer(e.target.value)} rows={3} className={input} placeholder="Jawaban singkat kamu..." />
+            </div>
+          )}
+
           <div>
             <label className={label}>Pesan tambahan</label>
             <textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={3} className={input} placeholder="Kenapa kamu cocok masuk tim ini?" />
           </div>
-
-          <div className="grid gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-3 text-[11px] font-black text-slate-600 sm:grid-cols-2">
-            {[
-              ['Profil inti lengkap', profileCoreReady],
-              ['Background jelas', backgroundReady],
-              ['Minimal 2 skill', skillsReady],
-              ['Skill cocok kebutuhan', skillMatchReady],
-              ['Link bukti valid', proofReady],
-            ].map(([item, done]) => (
-              <div key={String(item)} className={`flex items-center gap-2 ${done ? 'text-emerald-700' : 'text-slate-400'}`}>
-                <Check className="h-3.5 w-3.5" />
-                <span>{item}</span>
-              </div>
-            ))}
-          </div>
         </div>
 
+        {error && <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-xs text-red-700">{error}</p>}
+
         <div className="mt-5 flex gap-2">
-          <Button onClick={submit} disabled={loading || !submitReady} className="flex-1 rounded-2xl">
+          <Button onClick={submit} disabled={loading} className="flex-1 rounded-2xl">
             {loading ? 'Mengirim...' : 'Kirim Lamaran'}
           </Button>
           <Button onClick={onClose} variant="outline" className="rounded-2xl">Batal</Button>
@@ -833,11 +822,14 @@ function ApplyArenaModal({ post, onClose, onApplied }: { post: ArenaPost; onClos
   )
 }
 
+
 function ManageApplicantsModal({ post, onClose, onChanged }: { post: ArenaPost; onClose: () => void; onChanged: () => void }) {
   const [applications, setApplications] = useState<ArenaApplication[]>([])
   const [loading, setLoading] = useState(true)
   const [actionId, setActionId] = useState<string | null>(null)
   const [reviewNote, setReviewNote] = useState<Record<string, string>>({})
+  const [roleFilter, setRoleFilter] = useState('')
+  const [verifiedOnly, setVerifiedOnly] = useState(false)
 
   const loadApplications = useCallback(async () => {
     setLoading(true)
@@ -849,20 +841,29 @@ function ManageApplicantsModal({ post, onClose, onChanged }: { post: ArenaPost; 
 
   useEffect(() => { void loadApplications() }, [loadApplications])
 
-  const grouped = useMemo(() => ({
-    pending: applications.filter((item) => item.status === 'pending'),
-    accepted: applications.filter((item) => item.status === 'accepted'),
-    rejected: applications.filter((item) => item.status === 'rejected'),
-  }), [applications])
+  const filtered = useMemo(() => {
+    return applications.filter((item) => {
+      if (roleFilter && item.role_applied !== roleFilter) return false
+      if (verifiedOnly && !item.applicant?.is_nexa_verified) return false
+      return true
+    })
+  }, [applications, roleFilter, verifiedOnly])
 
-  async function respond(application: ArenaApplication, action: 'accept' | 'reject') {
+  const grouped = useMemo(() => ({
+    pending: filtered.filter((item) => item.status === 'pending'),
+    shortlisted: filtered.filter((item) => item.status === 'shortlisted'),
+    accepted: filtered.filter((item) => item.status === 'accepted'),
+    rejected: filtered.filter((item) => item.status === 'rejected'),
+  }), [filtered])
+
+  const appliedRoles = useMemo(
+    () => Array.from(new Set(applications.map((a) => a.role_applied).filter(Boolean))) as string[],
+    [applications]
+  )
+
+  async function respond(application: ArenaApplication, action: 'accept' | 'reject' | 'shortlist') {
     if (action === 'accept') {
-      const note = (reviewNote[application.id] ?? '').trim()
-      if (note.length < 20) {
-        alert('Catatan review minimal 20 karakter saat menerima pelamar.')
-        return
-      }
-      const ok = window.confirm('Terima pelamar ini hanya kalau kamu sudah cek profil, portfolio, skill, dan catatan review sudah jelas. Konfirmasi?')
+      const ok = window.confirm('Terima pelamar ini hanya kalau kamu sudah cek latar belakang, skill, dan merasa dia beneran kompeten. Konfirmasi?')
       if (!ok) return
     }
     setActionId(application.id)
@@ -872,7 +873,7 @@ function ManageApplicantsModal({ post, onClose, onChanged }: { post: ArenaPost; 
       body: JSON.stringify({
         action,
         competency_confirmed: action === 'accept',
-        review_note: reviewNote[application.id]?.trim() ?? '',
+        review_note: reviewNote[application.id] ?? '',
       }),
     })
     const json = await res.json().catch(() => ({}))
@@ -893,18 +894,40 @@ function ManageApplicantsModal({ post, onClose, onChanged }: { post: ArenaPost; 
           <div>
             <h2 className="text-lg font-black text-slate-950">Review pelamar</h2>
             <p className="mt-1 text-sm font-bold text-teal-700">{post.title}</p>
-            <p className="mt-1 text-sm leading-6 text-slate-500">Cek latar belakang dan skill dulu. Tombol terima memang sengaja dibuat serius, karena tim lomba bukan grup random jam kosong.</p>
+            <p className="mt-1 text-sm leading-6 text-slate-500">Cek latar belakang, skill, dan evidence dulu. Tombol terima memang sengaja dibuat serius, karena tim lomba bukan grup random jam kosong.</p>
           </div>
           <button onClick={onClose} className="rounded-2xl bg-slate-100 p-2 text-slate-500 hover:bg-slate-200"><X className="h-4 w-4" /></button>
         </div>
 
+        {appliedRoles.length > 0 && (
+          <div className="mb-4 flex flex-wrap items-center gap-2">
+            <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)} className="focus-ring rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold">
+              <option value="">Semua role</option>
+              {appliedRoles.map((r) => {
+                const def = ARENA_ROLES.find((x) => x.value === r)
+                return <option key={r} value={r}>{def?.label ?? r}</option>
+              })}
+            </select>
+            <button
+              type="button"
+              onClick={() => setVerifiedOnly((v) => !v)}
+              className={`rounded-xl px-3 py-2 text-xs font-black ${verifiedOnly ? 'bg-blue-600 text-white' : 'border border-slate-200 bg-white text-slate-600'}`}
+            >
+              Hanya yang Verified
+            </button>
+          </div>
+        )}
+
         {loading ? (
           <div className="flex justify-center p-10 text-slate-400"><Loader2 className="h-6 w-6 animate-spin" /></div>
-        ) : applications.length === 0 ? (
-          <div className="rounded-3xl border border-slate-200 bg-slate-50 p-8 text-center text-sm text-slate-500">Belum ada pelamar. Coba lengkapi detail postingan supaya lebih mudah ditemukan.</div>
+        ) : filtered.length === 0 ? (
+          <div className="rounded-3xl border border-slate-200 bg-slate-50 p-8 text-center text-sm text-slate-500">
+            {applications.length === 0 ? 'Belum ada pelamar. Coba lengkapi detail postingan supaya lebih mudah ditemukan.' : 'Tidak ada pelamar yang cocok dengan filter ini.'}
+          </div>
         ) : (
           <div className="space-y-5">
             <ApplicantSection title="Menunggu Review" items={grouped.pending} actionId={actionId} reviewNote={reviewNote} setReviewNote={setReviewNote} onRespond={respond} />
+            <ApplicantSection title="Shortlist" items={grouped.shortlisted} actionId={actionId} reviewNote={reviewNote} setReviewNote={setReviewNote} onRespond={respond} />
             <ApplicantSection title="Diterima" items={grouped.accepted} actionId={actionId} reviewNote={reviewNote} setReviewNote={setReviewNote} onRespond={respond} />
             <ApplicantSection title="Ditolak" items={grouped.rejected} actionId={actionId} reviewNote={reviewNote} setReviewNote={setReviewNote} onRespond={respond} />
           </div>
@@ -927,7 +950,7 @@ function ApplicantSection({
   actionId: string | null
   reviewNote: Record<string, string>
   setReviewNote: Dispatch<SetStateAction<Record<string, string>>>
-  onRespond: (application: ArenaApplication, action: 'accept' | 'reject') => void
+  onRespond: (application: ArenaApplication, action: 'accept' | 'reject' | 'shortlist') => void
 }) {
   if (items.length === 0) return null
 
@@ -937,7 +960,9 @@ function ApplicantSection({
       <div className="space-y-3">
         {items.map((application) => {
           const applicant = application.applicant
-          const isPending = application.status === 'pending'
+          const isActionable = application.status === 'pending' || application.status === 'shortlisted'
+          const roleDef = ARENA_ROLES.find((r) => r.value === application.role_applied)
+          const trustLabel = application.trust_label as TrustLabel | null
           return (
             <div key={application.id} className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
               <div className="flex items-start gap-3">
@@ -949,20 +974,26 @@ function ApplicantSection({
                     ) : (
                       <p className="font-black text-slate-950">Mahasiswa NEXA</p>
                     )}
-                    <ProfileVerifiedBadge verified={applicant?.arena_verified} compact />
                     <FeaturedBadgePin badgeId={applicant?.featured_badge} />
+                    <FounderVerifiedBadge verified={applicant?.is_nexa_verified} compact />
                     <Badge tone={application.status === 'accepted' ? 'success' : application.status === 'rejected' ? 'danger' : 'warning'}>{application.status}</Badge>
                   </div>
                   <p className="mt-0.5 text-xs text-slate-500">
                     {[applicant?.campus_name, applicant?.major, applicant?.semester ? `Semester ${applicant.semester}` : null].filter(Boolean).join(' · ') || 'Profil belum lengkap'}
                   </p>
                   {applicant?.nexa_id && <p className="mt-0.5 text-[10px] font-bold text-slate-400">#{applicant.nexa_id}</p>}
-                  {applicant?.arena_profile_verification && !applicant.arena_verified && (
-                    <p className="mt-1 text-[10px] font-bold text-blue-600">
-                      Profil Arena {applicant.arena_profile_verification.score}% lengkap
-                    </p>
-                  )}
                 </div>
+              </div>
+
+              <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                {roleDef && (
+                  <span className="rounded-full bg-slate-900 px-2.5 py-1 text-[11px] font-black text-white">{roleDef.label}</span>
+                )}
+                {trustLabel && (
+                  <span className={`rounded-full px-2.5 py-1 text-[11px] font-black ${TRUST_LABEL_COLOR[trustLabel]}`}>
+                    {TRUST_LABEL_TEXT[trustLabel]} · {application.trust_score}/100
+                  </span>
+                )}
               </div>
 
               {application.applicant_background && (
@@ -980,6 +1011,33 @@ function ApplicantSection({
                 </div>
               )}
 
+              {application.evidence_links && application.evidence_links.length > 0 && (
+                <div className="mt-3 space-y-1">
+                  <p className="text-[11px] font-black uppercase tracking-wide text-slate-400">Evidence ({application.evidence_links.length})</p>
+                  {application.evidence_links.map((ev, i) => (
+                    <a key={i} href={ev.url} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-xs font-bold text-brand-700 hover:underline">
+                      <ExternalLink className="h-3.5 w-3.5 flex-none" /> {ev.label || ev.url}
+                    </a>
+                  ))}
+                </div>
+              )}
+
+              {application.competency_answers && Object.keys(application.competency_answers).length > 0 && (
+                <div className="mt-3 space-y-2 rounded-2xl bg-slate-50 p-3">
+                  <p className="text-[11px] font-black uppercase tracking-wide text-slate-400">Jawaban kompetensi</p>
+                  {Object.entries(application.competency_answers).map(([key, val]) => (
+                    val ? <p key={key} className="text-xs leading-5 text-slate-600">{val}</p> : null
+                  ))}
+                </div>
+              )}
+
+              {application.mini_challenge_answer && (
+                <div className="mt-3 rounded-2xl border border-teal-100 bg-teal-50/40 p-3">
+                  <p className="text-[11px] font-black uppercase tracking-wide text-teal-700">Mini challenge</p>
+                  <p className="mt-1 text-xs leading-5 text-slate-700">{application.mini_challenge_answer}</p>
+                </div>
+              )}
+
               {application.message && (
                 <p className="mt-3 text-sm leading-6 text-slate-600"><span className="font-black text-slate-950">Pesan:</span> {application.message}</p>
               )}
@@ -990,28 +1048,38 @@ function ApplicantSection({
                 </a>
               )}
 
-              {application.review_note && application.status !== 'pending' && (
+              {application.review_note && application.status !== 'pending' && application.status !== 'shortlisted' && (
                 <p className="mt-3 rounded-2xl bg-slate-50 p-3 text-xs leading-5 text-slate-500"><span className="font-black text-slate-700">Catatan review:</span> {application.review_note}</p>
               )}
 
-              {isPending && (
+              {isActionable && (
                 <div className="mt-4 space-y-3">
                   <textarea
                     value={reviewNote[application.id] ?? ''}
                     onChange={(e) => setReviewNote((prev) => ({ ...prev, [application.id]: e.target.value }))}
                     rows={2}
-                    placeholder="Wajib jika menerima. Cth: portfolio sudah dicek, cocok frontend, komunikasi jelas."
+                    placeholder="Catatan review opsional. Cth: cocok frontend, portfolio sudah dicek."
                     className="focus-ring w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm"
                   />
-                  <div className="grid gap-2 sm:grid-cols-2">
+                  <div className="grid gap-2 sm:grid-cols-3">
                     <button
                       onClick={() => onRespond(application, 'accept')}
                       disabled={actionId === application.id}
                       className="focus-ring inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 py-2.5 text-sm font-black text-white hover:bg-emerald-700 disabled:opacity-60"
                     >
                       {actionId === application.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
-                      Terima, sudah cek kompeten
+                      Terima
                     </button>
+                    {application.status === 'pending' && (
+                      <button
+                        onClick={() => onRespond(application, 'shortlist')}
+                        disabled={actionId === application.id}
+                        className="focus-ring inline-flex items-center justify-center gap-2 rounded-2xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-sm font-black text-blue-700 hover:bg-blue-100 disabled:opacity-60"
+                      >
+                        <Bookmark className="h-4 w-4" />
+                        Shortlist
+                      </button>
+                    )}
                     <button
                       onClick={() => onRespond(application, 'reject')}
                       disabled={actionId === application.id}

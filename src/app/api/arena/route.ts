@@ -141,13 +141,13 @@ export async function GET(req: NextRequest) {
   }
 
   const memberUserIds = Array.from(new Set(Object.values(memberRowsByPost).flat().map((member) => member.user_id)))
-  const memberProfileMap: Record<string, { id: string; full_name: string | null; avatar_url: string | null; nexa_id: string | null; featured_badge: string | null }> = {}
+  const memberProfileMap: Record<string, { id: string; full_name: string | null; avatar_url: string | null; nexa_id: string | null; featured_badge: string | null; is_nexa_verified: boolean | null }> = {}
   if (memberUserIds.length > 0) {
     const { data: memberProfiles } = await supabase
       .from('profiles')
-      .select('id, full_name, avatar_url, nexa_id, featured_badge')
+      .select('id, full_name, avatar_url, nexa_id, featured_badge, is_nexa_verified')
       .in('id', memberUserIds)
-    for (const profile of (memberProfiles ?? []) as Array<{ id: string; full_name: string | null; avatar_url: string | null; nexa_id: string | null; featured_badge: string | null }>) {
+    for (const profile of (memberProfiles ?? []) as Array<{ id: string; full_name: string | null; avatar_url: string | null; nexa_id: string | null; featured_badge: string | null; is_nexa_verified: boolean | null }>) {
       memberProfileMap[profile.id] = profile
     }
   }

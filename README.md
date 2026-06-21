@@ -1,120 +1,71 @@
-# NEXA Campus — Batch 9: Security Hardening
+# NEXA Campus — Batch 7.1: NEXA Arena Trust & Verification System
 
-Fix untuk **semua 9 temuan** dari audit keamanan sebelumnya. 23 file (1 migration SQL +
-2 lib baru + 20 route yang dipatch). Semua diverifikasi `tsc --noEmit` (0 error, full source
-asli) dan `next build` produksi (sukses, semua route ter-bundle).
+Status: dibangun di atas skema Arena yang **sudah ada** (tidak duplikat), diuji 41 assertion
+runtime + `tsc --noEmit` 0 error + `next build` produksi sukses penuh (semua route baru
+ter-generate). 1 bug build (route conflict) dan 1 bug fungsional lama ditemukan & diperbaiki.
 
-## 🔴 Kritis
+## Yang sudah ada sebelumnya (TIDAK diduplikasi)
+`nexa_arena_applications` (apply→review dasar), `nexa_arena_posts`, `nexa_arena_team_members`,
+`profiles.featured_badge` sudah ada. Migration ini **memperluas**, bukan membuat ulang.
 
-### 1. `payment_orders` — RLS tidak pernah enable
-**Fix:** `docs/MIGRATION_security_hardening.sql` §1 — enable RLS + policy SELECT-own-only.
-Sengaja TIDAK ada policy insert/update/delete untuk `authenticated` (order hanya dibuat/diupdate
-lewat service-role client di server, client tidak pernah butuh tulis langsung).
-
-### 2. `award_points` RPC bisa dipanggil bebas dari client
-**Fix:** `docs/MIGRATION_security_hardening.sql` §2 — function di-redefinisi: parameter
-`p_points` **dihapus total** (poin sekarang hardcode di server via whitelist 5 kind), dan
-`p_ref` **wajib diisi** (dedup selalu aktif, tidak bisa di-spam).
-**5 call site di kode diupdate** (hapus `p_points` dari pemanggilan, sesuai signature baru):
-`focus/complete`, `smart-input/confirm`, `daily-pulse`, `deadlines` (create), `deadlines/[id]`
-(complete + ontime_bonus).
-**Diverifikasi:** 10 test assertion mensimulasikan logic SQL di JS — termasuk skenario exploit
-asli (kirim `p_points: 999999999` → diabaikan; loop 1000x tanpa ref → 0 yang berhasil insert).
-
-### 3. Cron reminder — header `x-vercel-cron` bisa dipalsukan (bug saya sendiri dari Batch 6)
-**Fix:** `src/app/api/cron/send-reminders/route.ts` — baris pengecekan header itu dihapus.
-Sekarang murni `CRON_SECRET` via `Authorization: Bearer`, sesuai dokumentasi resmi Vercel.
-
-## 🟠 Tinggi
-
-### 4. Telegram webhook fail-open kalau env kosong
-**Fix:** `src/app/api/telegram/webhook/route.ts` — sekarang fail-**closed**. Kalau
-`TELEGRAM_WEBHOOK_SECRET` belum diset, endpoint menolak (503) alih-alih melewati validasi.
-
-### 5. Nol rate limiting di seluruh aplikasi
-**Fix:** Infrastruktur baru — `docs/MIGRATION_security_hardening.sql` §4 (tabel `rate_limits` +
-function `check_rate_limit`, atomic via `insert ... on conflict ... do update ... returning`,
-tidak butuh Redis/layanan eksternal) + `src/lib/rate-limit.ts` (wrapper TS).
-**Dipasang di 8 endpoint:**
-
-| Endpoint | Limit |
+## 1) Baru
+| File | Fungsi |
 |---|---|
-| `ai-extract` | 20/jam |
-| `ai-extract-image` | 15/jam |
-| `ask-nexa` (chatbot) | 30/jam |
-| `quick-nl` | 30/jam |
-| `smart-input/parse-text` | 20/jam |
-| `smart-input/parse-image` | 15/jam |
-| `smart-input/parse-file` | 15/jam |
-| `study-rooms/join-by-code` | 10/5 menit (anti brute-force) |
+| `docs/MIGRATION_arena_trust_verification.sql` | Extend `nexa_arena_applications` (role/evidence/competency/trust_score/status shortlisted) + tabel baru `user_verifications` + `user_skill_evidence` + `profiles.is_nexa_verified` |
+| `src/lib/verification/role-config.ts` | 10 role + pertanyaan kompetensi + mini challenge per role |
+| `src/lib/verification/trust-score.ts` | Hitung skor 0-100 → low/medium/high_trust/verified_candidate |
+| `src/lib/verification/eligibility.ts` | Cek syarat verifikasi akun (7 syarat dari spec) |
+| `src/lib/verification/url-validation.ts` | Validasi URL evidence (tolak `javascript:`/`data:`) |
+| `src/app/api/skill-evidence/route.ts` | CRUD bukti skill |
+| `src/app/api/verification/request/route.ts` | User ajukan verifikasi (cek eligibility server-side) |
+| `src/app/api/admin/verifications/route.ts` + `[id]/route.ts` | Admin list + approve/reject, sync `is_nexa_verified` |
+| `src/components/verification/VerificationProgressCard.tsx` | Checklist syarat + tombol ajukan (settings) |
+| `src/components/verification/SkillEvidenceForm.tsx` | Kelola evidence (settings) |
+| `src/components/admin/VerificationReviewPanel.tsx` + `app/dashboard/admin/verifications/page.tsx` | Dashboard admin review |
 
-**PENTING:** `checkRateLimit()` **fail-open** kalau RPC belum ada (migration belum dijalankan)
-— supaya kode tidak mematikan fitur AI sebelum migration jalan. Begitu migration dieksekusi,
-proteksi otomatis aktif tanpa redeploy kode. **Jalankan migration SEGERA setelah deploy kode ini.**
+## 2) Diperluas (bukan ditulis ulang dari nol)
+- **`FounderVerifiedBadge.tsx`** — tambah prop `verified`, render centang biru (CSS baru
+  `.nexa-verified-check` di `globals.css`, lihat snippet di bawah). Founder tetap prioritas.
+- **`ArenaView.tsx`** — Apply Modal: + role select, evidence links (multi), pertanyaan
+  kompetensi per role, mini challenge opsional. Review Panel: + filter role/verified, badge
+  trust score, tombol Shortlist, tampilan evidence/jawaban kompetensi.
+- **`apply/route.ts`** — validasi role+evidence (URL check)+competency, hitung trust score
+  server-side (profil+evidence+skill cocok+aktivitas sebelumnya), insert lengkap.
+- **`applications/[applicationId]/route.ts`** — + action `shortlist`. **Fix bug:** poin
+  `arena_approved` sebelumnya selalu gagal diam-diam (insert via client biasa untuk user LAIN,
+  selalu kena RLS + field `metadata` yang sebenarnya tidak ada di skema) — sekarang pakai
+  service-role client + field yang benar + idempotent via `ref`.
+- **`applications/route.ts`, `arena/route.ts`** — tambah `is_nexa_verified` ke select profil.
+- **Public profile** (`page.tsx` + `PublicUserProfileView.tsx`) — badge verified di nama, card
+  "Bukti Skill" ringkas (skill+evidence, sesuai spec F — tidak menampilkan data sensitif).
 
-## 🟡 Sedang
+### Snippet CSS (tambah manual ke `globals.css`, dekat style founder yang sudah ada)
+```css
+.nexa-verified-check {
+  filter: drop-shadow(0 0 2px rgba(37, 99, 235, 0.35));
+}
+```
 
-### 6. Kode join Study Room cuma 16,7 juta kombinasi (hex 6 karakter)
-**Fix:** `docs/MIGRATION_security_hardening.sql` §3 — alfabet diperlebar jadi 34 karakter
-(alfanumerik tanpa I/O) → ~1,5 miliar kombinasi. Panjang tetap 6 karakter (UI sudah ada
-`maxLength={6}`, sengaja tidak diubah). Digabung dengan rate limit #5 di atas.
+## 3) Bug ditemukan & diperbaiki selama proses ini
+1. **[BUILD-BREAKING]** Folder duplikat nyangkut `arena/[id]/[id]/...` dari sisa `cp -r` di sesi
+   sebelumnya — bikin `next build` gagal total ("same slug name id repeat"). Dihapus.
+2. **[FUNGSIONAL, pre-existing]** Poin `arena_approved` (20 poin) gagal diberikan ke pelamar yang
+   diterima — insert lewat client biasa untuk user lain selalu kena RLS, plus field `metadata`
+   yang tidak ada di skema. Diperbaiki pakai service-role client.
+3. **[RLS, ditemukan saat desain]** Endpoint re-request verifikasi (`rejected` → `pending_review`)
+   pakai `upsert()`, butuh policy UPDATE terbatas yang awalnya lupa ditambahkan — sudah di-fix di
+   migration (transisi HANYA dari `rejected`, tidak bisa dari status lain).
 
-### 7. `is_public_profile` tidak ditegakkan
-**Fix:** `src/app/api/profile/[id]/route.ts` — sekarang dicek. Kalau bukan pemilik profil DAN
-bukan teman DAN `is_public_profile === false`, response dipangkas jadi minimal (`id`,
-`full_name`, `avatar_url`, `private: true`).
-**Asumsi yang saya buat** (tolong dikoreksi kalau beda dari maksud aslinya): teman tetap bisa
-lihat profil lengkap meski `is_public_profile=false` — mirip pola `dm_privacy` di tempat lain.
-`is_public_profile` null/undefined (data lama) dianggap public, supaya tidak mematahkan profil
-yang belum pernah set nilai eksplisit.
+### Dicatat, TIDAK diperbaiki (di luar scope batch ini)
+Trigger `update_arena_team_size()` (pre-existing) dan kode `applications/[applicationId]/route.ts`
+(pre-existing) **sama-sama** meng-update `current_team_size` saat accept — redundan, berisiko
+race condition kalau owner accept 2 pelamar nyaris bersamaan (lost update). Bukan bug yang
+diperkenalkan batch ini; perlu sesi terpisah untuk fix yang hati-hati (perlu live DB test).
 
-### 8. MIME upload cuma dicek dari `file.type` (header client, gampang dipalsukan)
-**Fix:** `src/lib/file-signature.ts` (baru) — verifikasi magic byte (isi file sebenarnya).
-Dipasang di 3 route upload: `chats/[friendId]/upload`, `study-rooms/[id]/upload`,
-`profile/photo`. Cakupan: JPEG/PNG/GIF/WEBP/PDF/ZIP (docx/xlsx terdeteksi sebagai ZIP, ini
-wajar). Video & text/plain tidak ada signature sederhana yang reliable, jadi tetap lolos di
-lapis ini (mengandalkan validasi MIME header yang sudah ada sebagai lapis pertama).
-**Diverifikasi:** 16 test assertion dengan byte signature asli, termasuk kasus utama — file
-PDF yang diklaim `image/png` berhasil terdeteksi & ditolak.
-
-## ⚪ Rendah
-
-### 9a. Admin route `subscription-intents` punya logic sendiri yang gak sinkron
-**Fix:** `src/app/api/admin/subscription-intents/[id]/route.ts` — sekarang pakai
-`isAdminEmail()` dari `lib/admin.ts` (satu sumber kebenaran), bukan implementasi duplikat.
-
-### 9b. Signature Midtrans pakai `===` bukan `timingSafeEqual`
-**Fix:** `src/lib/payments/midtrans.ts` — pakai `crypto.timingSafeEqual` (defense in depth).
-
----
-
-## ✅ Yang sudah diverifikasi
-- `tsc --noEmit` strict, full source asli + semua patch Batch 9: **0 error**.
-- `next build` produksi (Next.js 14.2.35): **sukses**, semua route (termasuk yang dipatch)
-  ter-bundle normal.
-- 16 test assertion runtime untuk `file-signature.ts` (byte signature asli).
-- 10 test assertion untuk logic `award_points` baru (simulasi JS dari logic SQL).
-
-## ⚠️ Yang TIDAK bisa saya verifikasi dari sandbox ini
-- **Migration SQL belum pernah dieksekusi ke Postgres sungguhan** (tidak ada koneksi database
-  live di sini). Logic-nya sudah saya tulis hati-hati & disimulasikan di JS, tapi **wajib
-  ditest di Supabase SQL Editor kamu** sebelum production — terutama:
-  - Pastikan `drop function if exists public.award_points(text, integer, text);` berhasil
-    (kalau ada dependency lain yang masih merujuk overload lama, mungkin perlu penyesuaian).
-  - Test manual: buat 1 deadline baru, complete-kan, cek `points_events` bertambah dengan
-    angka yang benar (2, lalu 10+5 kalau on-time).
-  - Test `generate_room_code()`: buat beberapa room baru, pastikan kode 6 karakter ter-generate
-    tanpa error.
-- Rate limiting: logic-nya benar secara desain (atomic SQL), tapi belum pernah benar-benar
-  dipanggil 20+ kali berturut-turut terhadap Postgres sungguhan untuk lihat perilaku window
-  reset-nya persis seperti yang diharapkan — sarankan test manual setelah deploy.
-
-## 📋 Cara pasang (urutan penting)
-1. **Backup database dulu** (perubahan ini menyentuh fungsi inti poin & pembayaran).
-2. Jalankan `docs/MIGRATION_security_hardening.sql` di Supabase SQL Editor.
-3. Timpa 21 file kode + 2 lib baru.
-4. Pastikan env `CRON_SECRET` dan `TELEGRAM_WEBHOOK_SECRET` sudah diset di Vercel (kalau belum,
-   cron reminder & Telegram webhook akan berhenti berfungsi sampai diisi — ini **disengaja**,
-   bagian dari fix #3 dan #4 di atas).
-5. `npm run build` (sudah divalidasi hijau di sandbox).
-6. Test manual sesuai daftar di atas (poin, room code, rate limit, upload file disguised).
+## 4) Cara pasang
+1. Jalankan `docs/MIGRATION_arena_trust_verification.sql`.
+2. Timpa semua file di atas + tambah snippet CSS.
+3. `npm run build` (sudah hijau di sandbox).
+4. Test: lamar Arena dengan role+evidence → cek trust score muncul di review panel → shortlist
+   → accept → cek poin masuk → lengkapi profil+evidence → ajukan verifikasi di settings →
+   approve di `/dashboard/admin/verifications` → cek centang biru muncul di profil publik.
