@@ -106,6 +106,12 @@ function localParse(textRaw: string) {
   const online = /\bonline|daring|vclass|ilab|zoom|gmeet\b/.test(text)
   const location = extractLocation(textRaw)
 
+  // Detect recurring pattern
+  const recurringMatch = text.match(/\b(setiap|tiap|rutin)\s+(?:minggu\s+)?(senin|selasa|rabu|kamis|jumat|jum'?at|sabtu|minggu|ahad)\b/i)
+  const isRecurring = Boolean(recurringMatch) || /\bjadwal\s+(mingguan|rutin|tetap)\b/i.test(text)
+  const DOW: Record<string, number> = { minggu:0, ahad:0, senin:1, selasa:2, rabu:3, kamis:4, jumat:5, sabtu:6 }
+  const recurringDay = recurringMatch ? (DOW[recurringMatch[2].toLowerCase().replace("jum'at",'jumat')] ?? null) : null
+
   // course_name: ambil teks setelah keyword tipe, atau seluruh kalimat dibersihkan.
   const course = textRaw
     .replace(/\b\d{4}-\d{2}-\d{2}\b/g, '')
@@ -130,6 +136,8 @@ function localParse(textRaw: string) {
     priority,
     online,
     location,
+    is_recurring: isRecurring,
+    recurrence_day_of_week: recurringDay,
   }
 }
 
@@ -204,6 +212,8 @@ export async function POST(request: NextRequest) {
           priority: PRIORITIES.includes(String(obj.priority)) ? String(obj.priority) : parsed.priority,
           online: typeof obj.online === 'boolean' ? obj.online : parsed.online,
           location: typeof obj.location === 'string' && obj.location.trim() ? obj.location.trim().slice(0, 150) : parsed.location,
+          is_recurring: typeof obj.is_recurring === 'boolean' ? obj.is_recurring : parsed.is_recurring,
+          recurrence_day_of_week: typeof obj.recurrence_day_of_week === 'number' ? obj.recurrence_day_of_week : parsed.recurrence_day_of_week,
         }
       }
     } catch {
@@ -231,6 +241,8 @@ export async function POST(request: NextRequest) {
     priority: parsed.priority,
     status: 'pending',
     reminder_enabled: true,
+    is_recurring: parsed.is_recurring,
+    recurrence_day_of_week: parsed.recurrence_day_of_week ?? undefined,
   }
 
   const result = parseDeadlinePayload(payload)
@@ -248,9 +260,27 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
+  // Generate instance untuk jadwal berulang (8 minggu ke depan)
+  if (data?.id && result.data.is_recurring && result.data.deadline_date) {
+    try {
+      const anchor = new Date(`${result.data.deadline_date}T00:00:00`)
+      const instances = Array.from({ length: 8 }, (_, i) => {
+        const d = new Date(anchor)
+        d.setDate(d.getDate() + (i + 1) * 7)
+        return { ...result.data, user_id: user.id, deadline_date: d.toISOString().slice(0, 10), recurrence_parent_id: data.id, status: 'pending' }
+      })
+      await supabase.from('academic_deadlines').insert(instances).then(undefined, () => null)
+    } catch { /* non-fatal */ }
+  }
+
+  const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
+  const recurringNotice = result.data.is_recurring
+    ? `📅 Jadwal berulang${result.data.recurrence_day_of_week != null ? ' setiap ' + dayNames[result.data.recurrence_day_of_week] : ' mingguan'} — 8 minggu ke depan sudah dibuat.`
+    : null
+
   return NextResponse.json({
     data,
     parsed,
-    notice: parsed.location || parsed.online ? null : 'Ruangan diisi "Menyusul" — edit kalau perlu.',
+    notice: recurringNotice || (parsed.location || parsed.online ? null : 'Ruangan diisi "Menyusul" — edit kalau perlu.'),
   }, { status: 201 })
 }

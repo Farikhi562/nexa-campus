@@ -12,6 +12,14 @@ export type StudyQuizQuestion = {
   explanation: string
 }
 
+export type Flashcard = {
+  front: string // pertanyaan / istilah
+  back: string  // jawaban / definisi singkat
+}
+
+/** Leitner box: 1=belum tahu, 2=agak tahu, 3=sudah tahu */
+export type FlashcardBoxes = Record<string, 1 | 2 | 3>
+
 export type StudyPack = {
   id: string
   topic: string
@@ -22,9 +30,11 @@ export type StudyPack = {
   quiz: StudyQuizQuestion[]
   quizBestScore: number | null
   quizAttempts: number
+  flashcards: Flashcard[]
+  flashcardBoxes: FlashcardBoxes
   createdAt: string
 }
 
 export type GenerateStudyPackResult =
-  | { ok: true; pack: Omit<StudyPack, 'id' | 'createdAt' | 'quizBestScore' | 'quizAttempts'> }
+  | { ok: true; pack: Omit<StudyPack, 'id' | 'createdAt' | 'quizBestScore' | 'quizAttempts' | 'flashcards' | 'flashcardBoxes'> }
   | { ok: false; error: string }

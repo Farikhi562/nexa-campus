@@ -5,7 +5,10 @@ import { createClient } from '@/lib/supabase/server'
 import { getEffectivePlan } from '@/lib/plans'
 import StudyRoadmapView from '@/components/study/StudyRoadmapView'
 import StudyQuizView from '@/components/study/StudyQuizView'
+import FlashcardView from '@/components/study/FlashcardView'
+import PracticeView from '@/components/study/PracticeView'
 import SimpleMarkdown from '@/components/study/SimpleMarkdown'
+import StudyTabsClient from '@/components/study/StudyTabsClient'
 import type { StudyRoadmapStep, StudyQuizQuestion } from '@/lib/study/types'
 
 export const dynamic = 'force-dynamic'
@@ -21,19 +24,13 @@ export default async function StudyDetailPage({ params }: Params) {
   const { data: profile } = await supabase
     .from('profiles')
     .select('plan, email, pulse_trial_until, plan_expires_at, subscription_expires_at, command_expires_at, lifetime_command')
-    .eq('id', user.id)
-    .maybeSingle()
+    .eq('id', user.id).maybeSingle()
 
-  if (getEffectivePlan({ ...(profile ?? {}), email: user.email }) !== 'command') {
-    redirect('/dashboard/study')
-  }
+  if (getEffectivePlan({ ...(profile ?? {}), email: user.email }) !== 'command') redirect('/dashboard/study')
 
   const { data: pack } = await supabase
-    .from('study_packs')
-    .select('*')
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .maybeSingle()
+    .from('study_packs').select('*')
+    .eq('id', id).eq('user_id', user.id).maybeSingle()
 
   if (!pack) notFound()
 
@@ -60,20 +57,13 @@ export default async function StudyDetailPage({ params }: Params) {
         </div>
       </div>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-5">
-        <h2 className="mb-3 text-sm font-black uppercase tracking-wide text-violet-700">Roadmap Belajar</h2>
-        <StudyRoadmapView roadmap={roadmap} />
-      </section>
-
-      <section className="rounded-3xl border border-slate-200 bg-white p-5">
-        <h2 className="mb-3 text-sm font-black uppercase tracking-wide text-violet-700">Rangkuman</h2>
-        <SimpleMarkdown text={pack.summary || ''} />
-      </section>
-
-      <section className="rounded-3xl border border-slate-200 bg-white p-5">
-        <h2 className="mb-3 text-sm font-black uppercase tracking-wide text-violet-700">Quiz</h2>
-        <StudyQuizView packId={pack.id} quiz={quiz} initialBestScore={pack.quiz_best_score} />
-      </section>
+      <StudyTabsClient
+        packId={pack.id}
+        roadmap={roadmap}
+        summary={pack.summary || ''}
+        quiz={quiz}
+        quizBestScore={pack.quiz_best_score}
+      />
     </div>
   )
 }

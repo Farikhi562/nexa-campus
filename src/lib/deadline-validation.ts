@@ -20,6 +20,8 @@ export type DeadlinePayload = {
   priority?: unknown
   reminder_enabled?: unknown
   status?: unknown
+  is_recurring?: unknown
+  recurrence_day_of_week?: unknown
 }
 
 export function text(value: unknown) {
@@ -68,6 +70,13 @@ export function parseDeadlinePayload(body: DeadlinePayload) {
   if (!allowedPriorities.has(priority as DeadlinePriority)) return { error: 'Prioritas tidak valid.' }
   if (!allowedStatuses.has(status as DeadlineStatus)) return { error: 'Status tidak valid.' }
 
+  const isRecurring = body.is_recurring === true
+  const recurrenceDow = typeof body.recurrence_day_of_week === 'number'
+    && Number.isInteger(body.recurrence_day_of_week)
+    && body.recurrence_day_of_week >= 0
+    && body.recurrence_day_of_week <= 6
+    ? body.recurrence_day_of_week : null
+
   return {
     data: {
       title: optionalText(body.title),
@@ -83,6 +92,8 @@ export function parseDeadlinePayload(body: DeadlinePayload) {
       priority,
       reminder_enabled: body.reminder_enabled === true,
       status,
+      is_recurring: isRecurring,
+      recurrence_day_of_week: isRecurring ? recurrenceDow : null,
     },
   }
 }

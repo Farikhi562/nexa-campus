@@ -85,6 +85,8 @@ export function normalizeCandidate(raw: RawCandidate, opts: { defaultCampus: str
     notes,
     priority,
     reminder_enabled: true,
+    is_recurring: raw.is_recurring === true,
+    recurrence_day_of_week: typeof raw.recurrence_day_of_week === 'number' ? raw.recurrence_day_of_week : null,
     confidence,
     missing_fields: missing,
   }

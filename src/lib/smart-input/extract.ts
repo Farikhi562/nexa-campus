@@ -43,9 +43,11 @@ Tiap item punya field:
   "deadline_date": "YYYY-MM-DD"|null,  // null kalau tanggal TIDAK disebut/tidak jelas, JANGAN MENEBAK
   "deadline_time": "HH:MM",         // default "23:59" kalau jam tidak disebut
   "priority": one of ${PRIORITIES.join('|')},
-  "notes": string|null,             // instruksi/catatan tambahan kalau ada
+  "notes": string|null,             // instruksi/catatan tambahan kalau ada, termasuk nama dosen kalau disebut
   "online": boolean,                // true kalau jelas online/daring/vclass/zoom
-  "location": string|null           // ruangan/gedung/lab/platform yang DISEBUTKAN EKSPLISIT, mis. "Ruang B204", "Lab Komputer 2", "Zoom", "Google Meet". Null kalau tidak disebutkan sama sekali -- JANGAN MENEBAK.
+  "location": string|null,          // ruangan/gedung/lab/platform yang DISEBUTKAN EKSPLISIT, null kalau tidak ada
+  "is_recurring": boolean,          // true kalau ada pola berulang ("setiap senin", "tiap minggu", "jadwal mingguan")
+  "recurrence_day_of_week": number|null  // 0=Min,1=Sen,2=Sel,3=Rab,4=Kam,5=Jum,6=Sab. null kalau is_recurring=false atau hari tidak disebutkan
 }
 Aturan: hari ini = tanggal yang diberikan di prompt. Kalau teks tidak berisi info tugas sama sekali, kembalikan array kosong [].
 Respond ONLY with the JSON array, no markdown, no commentary.`

@@ -255,16 +255,9 @@ export interface AcademicDeadline {
   status: DeadlineStatus
   priority: DeadlinePriority
   reminder_enabled: boolean
-  created_at: string
-  updated_at: string
-}
-
-export interface CalendarNote {
-  id: string
-  user_id: string
-  note_date: string
-  title: string
-  content: string
+  is_recurring: boolean
+  recurrence_day_of_week: number | null
+  recurrence_parent_id: string | null
   created_at: string
   updated_at: string
 }

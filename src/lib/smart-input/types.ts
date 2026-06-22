@@ -14,8 +14,12 @@ export type RawCandidate = {
   priority?: unknown
   notes?: unknown
   online?: unknown
-  /** Penyebutan ruangan/lokasi/platform eksplisit dari teks, mis. "Ruang B204", "Zoom". */
+  /** Lokasi/ruangan/platform yang disebutkan eksplisit. */
   location?: unknown
+  /** true jika terdeteksi pola jadwal berulang ("setiap senin", "tiap minggu"). */
+  is_recurring?: unknown
+  /** 0=Min..6=Sab, diisi kalau is_recurring=true dan hari spesifik disebutkan. */
+  recurrence_day_of_week?: unknown
 }
 
 /**
@@ -35,6 +39,8 @@ export type SmartInputCandidate = {
   notes: string | null
   priority: DeadlinePriority
   reminder_enabled: boolean
+  is_recurring: boolean
+  recurrence_day_of_week: number | null
   /** seberapa yakin sistem terhadap hasil ekstraksi ini */
   confidence: 'high' | 'medium' | 'low'
   /** field yang WAJIB dicek/diisi user sebelum disimpan */

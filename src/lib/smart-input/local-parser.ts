@@ -1,20 +1,49 @@
 import type { RawCandidate } from './types'
 import { extractLocation } from './location-extract'
 
-/**
- * Tangkap judul tugas eksplisit kalau ada pola yang jelas (mis. "judul: ...",
- * "tugas: ...", atau teks dalam tanda kutip). Sengaja KONSERVATIF — kalau
- * tidak ada pola eksplisit, return null (title tetap null, course_name yang
- * dipakai seperti sebelumnya) supaya tidak salah memotong course_name.
- */
+// ── Recurring detection ───────────────────────────────────────────────────────
+const DOW_NAMES: Record<string, number> = {
+  minggu: 0, ahad: 0,
+  senin: 1,
+  selasa: 2,
+  rabu: 3,
+  kamis: 4,
+  jumat: 5, "jum'at": 5, jumaat: 5,
+  sabtu: 6,
+}
+
+function detectRecurring(text: string): { isRecurring: boolean; dayOfWeek: number | null } {
+  const m = text.match(/\b(setiap|tiap|rutin|every)\s+(?:minggu\s+)?(senin|selasa|rabu|kamis|jumat|jum'?at|jumaat|sabtu|minggu|ahad)\b/i)
+  if (m) {
+    const dayName = m[2].toLowerCase().replace("jum'at", 'jumat')
+    const dow: Record<string,number> = { minggu:0, ahad:0, senin:1, selasa:2, rabu:3, kamis:4, jumat:5, jumaat:5, sabtu:6 }
+    return { isRecurring: true, dayOfWeek: dow[dayName] ?? null }
+  }
+  if (/\bjadwal\s+(mingguan|rutin|tetap)\b/i.test(text)) {
+    return { isRecurring: true, dayOfWeek: null }
+  }
+  return { isRecurring: false, dayOfWeek: null }
+}
+
+function extractLecturerNote(text: string): string | null {
+  const m = text.match(/\b(?:dari\s+|from\s+)?(bapak|pak|ibu|bu|dr\.?|prof\.?)\s+([a-z][\w.\s]{1,40}?)(?:\s*[:–,]|\s+bilang|\s+nyuruh|\s+minta|\s+kasih)/i)
+  if (m) {
+    const name = m[2].trim().replace(/\s{2,}/g, ' ')
+    if (name.length >= 2) return `Dari ${m[1]} ${name}`
+  }
+  return null
+}
+
 function extractTitleHint(text: string): string | null {
   const labeledMatch = text.match(/\b(?:judul|title)\s*[:\-]\s*(.{3,150})/i)
   if (labeledMatch) {
     const value = labeledMatch[1].split(/[.\n]/)[0].trim()
     if (value.length >= 3) return value
   }
-  const quoteMatch = text.match(/["“]([^"”]{3,150})["”]/)
+  const quoteMatch = text.match(/["""]([^"""]{3,150})["""]/)
   if (quoteMatch) return quoteMatch[1].trim()
+  const subtitleMatch = text.match(/\btugas\s+(?:\d+|ke-\d+|[ivx]+)\s*[:\-–]\s*([A-Z][^.\n]{3,100})/i)
+  if (subtitleMatch) return subtitleMatch[1].trim()
   return null
 }
 
@@ -173,6 +202,8 @@ function parseLine(lineRaw: string, today: Date): RawCandidate {
   const online = /\bonline|daring|vclass|ilab|zoom|gmeet\b/.test(line)
   const location = extractLocation(lineRaw)
   const titleHint = extractTitleHint(lineRaw)
+  const lecturerNote = extractLecturerNote(lineRaw)
+  const { isRecurring, dayOfWeek } = detectRecurring(line)
   const courseName = cleanCourseName(lineRaw.trim()) || lineRaw.trim()
 
   return {
@@ -183,9 +214,11 @@ function parseLine(lineRaw: string, today: Date): RawCandidate {
     deadline_date: date,
     deadline_time: time,
     priority,
-    notes: null,
+    notes: lecturerNote,
     online,
     location,
+    is_recurring: isRecurring || undefined,
+    recurrence_day_of_week: dayOfWeek ?? undefined,
   }
 }
 
