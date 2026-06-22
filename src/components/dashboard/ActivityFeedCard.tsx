@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { ArrowRight, CheckCircle2, Flame, Loader2, Sparkles, Trophy, Users } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/Card'
 import SmartEmptyState from '@/components/dashboard/SmartEmptyState'
+import Image from 'next/image'
 
 type FeedItem = {
   id: string
@@ -121,7 +122,7 @@ export default function ActivityFeedCard() {
                 <div key={item.id} className="flex gap-3 p-4 transition hover:bg-slate-50/80 sm:p-5">
                   <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-950 text-white shadow-lg shadow-slate-900/10">
                     {item.actor?.avatar_url ? (
-                      <img src={item.actor.avatar_url} alt="" className="h-full w-full object-cover" />
+                      <Image src={item.actor.avatar_url} alt="" width={40} height={40} className="h-full w-full object-cover" />
                     ) : (
                       <Icon className="h-4 w-4" />
                     )}

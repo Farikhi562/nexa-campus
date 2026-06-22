@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import { BADGES, type BadgeDef } from '@/lib/badges'
 import type { Plan } from '@/types'
+import Image from 'next/image'
 
 type Visibility = 'public' | 'private' | null
 
@@ -131,8 +132,7 @@ export default function PublicUserProfileView({
         <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center">
           <div className="flex h-24 w-24 flex-shrink-0 items-center justify-center overflow-hidden rounded-[2rem] border border-white/10 bg-white/10 text-3xl font-black text-white shadow-2xl sm:h-28 sm:w-28">
             {profile.avatar_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={profile.avatar_url} alt="Foto profil" className="h-full w-full object-cover" />
+              <Image src={profile.avatar_url} alt="Foto profil" width={96} height={96} className="h-full w-full object-cover" />
             ) : (
               initials(profile.full_name)
             )}

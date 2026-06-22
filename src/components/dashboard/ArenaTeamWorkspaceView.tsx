@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import FounderVerifiedBadge from '@/components/FounderVerifiedBadge'
+import Image from 'next/image'
 
 type Member = { user_id: string; role: string; joined_at: string; profile?: { full_name: string | null; avatar_url: string | null; nexa_id: string | null; founder_verified?: boolean | null } | null }
 type Workspace = { owner_task: string | null; team_status: string | null; checklist: Array<{ id: string; text: string; done: boolean }> }
@@ -174,7 +175,7 @@ export default function ArenaTeamWorkspaceView({ postId, userId }: { postId: str
               {(post.team_members ?? []).map((member) => (
                 <div key={member.user_id} className="flex items-center gap-3 rounded-2xl bg-slate-50 p-3">
                   <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-2xl bg-white text-sm font-black text-slate-600">
-                    {member.profile?.avatar_url ? <img src={member.profile.avatar_url} alt="" className="h-full w-full object-cover" /> : initials(member.profile?.full_name)}
+                    {member.profile?.avatar_url ? <Image src={member.profile.avatar_url} alt="" width={40} height={40} className="h-full w-full object-cover" /> : initials(member.profile?.full_name)}
                   </span>
                   <div className="min-w-0"><p className="flex items-center gap-1 truncate text-sm font-black text-slate-950"><span className="truncate">{member.profile?.full_name || 'Member'}</span><FounderVerifiedBadge founderVerified={member.profile?.founder_verified} compact /></p><p className="text-xs font-bold text-slate-500">{member.role}{member.profile?.nexa_id ? ` · #${member.profile.nexa_id}` : ''}</p></div>
                 </div>

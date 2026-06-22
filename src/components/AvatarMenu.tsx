@@ -6,6 +6,7 @@ import { Award, Globe, LogOut, Settings, Trophy, UserRound } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useT } from '@/components/LanguageProvider'
 import { LANG_LABELS, type Lang } from '@/components/LanguageProvider'
+import Image from 'next/image'
 
 function initials(name?: string | null) {
   if (!name) return 'N'
@@ -73,8 +74,7 @@ export default function AvatarMenu({
         className="focus-ring flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-100 text-xs font-black text-slate-700 ring-1 ring-slate-200 transition hover:ring-teal-300 sm:h-10 sm:w-10"
       >
         {avatarUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={avatarUrl} alt="Foto profil" className="h-full w-full object-cover" />
+          <Image src={avatarUrl} alt="Foto profil" width={40} height={40} className="h-full w-full object-cover" />
         ) : initials(fullName)}
       </button>
 
@@ -88,8 +88,7 @@ export default function AvatarMenu({
           <div className="flex items-center gap-3 bg-slate-50 px-3 py-3">
             <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-200 text-sm font-black text-slate-700">
               {avatarUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
+                <Image src={avatarUrl} alt="" width={40} height={40} className="h-full w-full object-cover" />
               ) : initials(fullName)}
             </span>
             <div className="min-w-0">

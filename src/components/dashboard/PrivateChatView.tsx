@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/Card'
 import { FeaturedBadgePin } from '@/components/BadgeChip'
 import FounderVerifiedBadge from '@/components/FounderVerifiedBadge'
 import type { PrivateMessage, PublicProfile } from '@/types'
+import Image from 'next/image'
 
 const QUICK_REPLIES = ['Sip', 'Gas', 'Oke', 'Done', 'Haha', 'Mantap']
 
@@ -193,7 +194,7 @@ export default function PrivateChatView({ friendId, userId }: { friendId: string
           <Link href="/dashboard/friends" className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100"><ArrowLeft className="h-5 w-5" /></Link>
           <Link href={`/dashboard/profile/${friendId}`} className="flex min-w-0 items-center gap-2">
             <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-100 text-sm font-black text-slate-600">
-              {friend?.avatar_url ? <img src={friend.avatar_url} alt="" className="h-full w-full object-cover" /> : avatarText(friend?.full_name)}
+              {friend?.avatar_url ? <Image src={friend.avatar_url} alt="" width={40} height={40} className="h-full w-full object-cover" /> : avatarText(friend?.full_name)}
             </span>
             <span className="min-w-0">
               <span className="flex items-center gap-1.5">
@@ -222,7 +223,7 @@ export default function PrivateChatView({ friendId, userId }: { friendId: string
           return (
             <div key={msg.id} className={`flex gap-2.5 ${isMe ? 'flex-row-reverse' : ''}`}>
               <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-100 text-[10px] font-black text-slate-600">
-                {isMe ? 'K' : friend?.avatar_url ? <img src={friend.avatar_url} alt="" className="h-full w-full object-cover" /> : avatarText(friend?.full_name)}
+                {isMe ? 'K' : friend?.avatar_url ? <Image src={friend.avatar_url} alt="" width={28} height={28} className="h-full w-full object-cover" /> : avatarText(friend?.full_name)}
               </span>
               <div className={`flex max-w-[76%] flex-col space-y-1 ${isMe ? 'items-end' : 'items-start'}`}>
                 <p className={`text-[11px] font-bold text-slate-500 ${isMe ? 'text-right' : ''}`}>
@@ -246,7 +247,7 @@ export default function PrivateChatView({ friendId, userId }: { friendId: string
                       </div>
                     </div>
                   ) : msg.message_type === 'image' && msg.attachment_path ? (
-                    <div className="space-y-1"><img src={mediaUrl(msg.attachment_path)} alt={msg.attachment_name ?? 'Gambar'} className="max-h-64 max-w-full rounded-xl object-cover" /><p className="text-[11px] opacity-70">{msg.attachment_name}</p></div>
+                    <div className="space-y-1"><Image src={mediaUrl(msg.attachment_path)} alt={msg.attachment_name ?? 'Gambar'} width={800} height={600} className="max-h-64 max-w-full rounded-xl object-cover" /><p className="text-[11px] opacity-70">{msg.attachment_name}</p></div>
                   ) : msg.message_type === 'video' && msg.attachment_path ? (
                     <div className="space-y-1"><video controls className="max-h-64 max-w-full rounded-xl" preload="metadata"><source src={mediaUrl(msg.attachment_path)} type={msg.attachment_mime ?? 'video/mp4'} /></video><p className="text-[11px] opacity-70">{msg.attachment_name} {formatBytes(msg.attachment_size)}</p></div>
                   ) : msg.message_type === 'file' && msg.attachment_path ? (

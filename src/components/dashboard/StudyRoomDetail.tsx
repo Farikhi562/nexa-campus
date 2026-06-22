@@ -14,7 +14,7 @@ import type { StudyRoom, StudyRoomMember, StudyRoomMessage, StudyRoomJoinRequest
 import Link from 'next/link'
 import FounderVerifiedBadge from '@/components/FounderVerifiedBadge'
 import StudyRoomWorkspaceCard from '@/components/dashboard/StudyRoomWorkspaceCard'
-import StudyRoomCommandActions from '@/components/study-room/StudyRoomCommandActions'
+import Image from 'next/image'
 
 function initials(name?: string | null) {
   if (!name) return 'N'
@@ -26,7 +26,7 @@ function Avatar({ url, name, size = 'md' }: { url?: string | null; name?: string
   const s = size === 'sm' ? 'h-7 w-7 text-[10px]' : size === 'lg' ? 'h-12 w-12 text-base' : 'h-9 w-9 text-xs'
   return (
     <span className={`flex ${s} flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-100 font-black text-slate-600`}>
-      {url ? <img src={url} alt="" className="h-full w-full object-cover" /> : initials(name)}
+      {url ? <Image src={url} alt="" width={size === 'sm' ? 28 : size === 'lg' ? 48 : 36} height={size === 'sm' ? 28 : size === 'lg' ? 48 : 36} className="h-full w-full object-cover" /> : initials(name)}
     </span>
   )
 }
@@ -125,6 +125,12 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
 
   // Satu channel untuk: postgres_changes (pesan baru/edit/hapus) + broadcast (typing) + presence (online member)
   useEffect(() => {
+    // Capture ref.current di awal effect — ini pattern yang benar untuk menghindari
+    // "ref value will have changed" warning. Karena typingTimeoutRef.current adalah
+    // OBJEK yang sama (bukan primitive), mutasi di dalam effect (tambah/hapus timeout)
+    // tetap terlihat dari currentTimeouts di cleanup karena keduanya menunjuk ke objek
+    // yang sama. Beda dengan DOM ref yang bisa null saat cleanup berjalan.
+    const currentTimeouts = typingTimeoutRef.current
     const channel = supabase
       .channel(`study-room-${roomId}`, { config: { presence: { key: userId } } })
       .on('postgres_changes',
@@ -173,7 +179,8 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
     return () => {
       void supabase.removeChannel(channel)
       channelRef.current = null
-      Object.values(typingTimeoutRef.current).forEach(clearTimeout)
+      const timeouts = currentTimeouts
+      Object.values(timeouts).forEach(clearTimeout)
     }
   }, [myRoomPresenceVisibility, roomId, supabase, userId])
 
@@ -436,9 +443,7 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
   }
 
   return (
-    <div className="space-y-4">
-      <StudyRoomCommandActions />
-      <div className="flex h-[calc(100vh-12rem)] flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl">
+    <div className="flex h-[calc(100vh-8rem)] flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl">
       {/* Header */}
       <div className="flex flex-shrink-0 items-center justify-between gap-3 border-b border-slate-100 bg-white px-4 py-3">
         <div className="flex min-w-0 items-center gap-3">
@@ -744,7 +749,6 @@ Nama anggota selalu terlihat untuk satu grup room. Yang mengikuti privasi hanya 
           onSaved={() => { setShowSettings(false); void loadAll() }}
         />
       )}
-      </div>
     </div>
   )
 }

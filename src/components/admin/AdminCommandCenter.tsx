@@ -10,6 +10,7 @@ import Badge from '@/components/ui/Badge'
 import SubscriptionIntentActions from '@/components/admin/SubscriptionIntentActions'
 import type { Profile, Referral, SubscriptionIntent } from '@/types'
 import { PLAN_LABELS } from '@/lib/nexa-data'
+import Image from 'next/image'
 
 type StudyRoomRow = {
   id: string; title: string; status: string; current_members_count: number
@@ -50,7 +51,7 @@ function UserAvatar({ profile }: { profile: Profile }) {
   return (
     <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-100 text-sm font-black text-slate-700">
       {profile.avatar_url
-        ? <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
+        ? <Image src={profile.avatar_url} alt="" width={40} height={40} className="h-full w-full object-cover" />
         : init}
     </span>
   )

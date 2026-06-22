@@ -11,6 +11,7 @@ import CreateRoomModal from '@/components/dashboard/CreateRoomModal'
 import OnlineFriendsStrip from '@/components/dashboard/OnlineFriendsStrip'
 import SmartEmptyState from '@/components/dashboard/SmartEmptyState'
 import type { StudyRoom, StudyRoomCategory } from '@/types'
+import Image from 'next/image'
 
 const CATEGORIES: Array<{ value: StudyRoomCategory | ''; label: string }> = [
   { value: '', label: 'Semua' },
@@ -44,7 +45,7 @@ function Avatar({ url, name, size = 'sm' }: { url?: string | null; name?: string
   const init = (name ?? 'N').slice(0, 1).toUpperCase()
   return (
     <span className={`flex ${s} flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-100 font-black text-slate-600`}>
-      {url ? <img src={url} alt="" className="h-full w-full object-cover" /> : init}
+      {url ? <Image src={url} alt="" width={size === 'md' ? 40 : 28} height={size === 'md' ? 40 : 28} className="h-full w-full object-cover" /> : init}
     </span>
   )
 }

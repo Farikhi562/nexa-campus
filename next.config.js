@@ -1,60 +1,38 @@
-let withPWA = (config) => config
-
-try {
-  withPWA = require('next-pwa')({
-    dest: 'public',
-    disable: process.env.NODE_ENV === 'development',
-    register: true,
-    skipWaiting: true,
-    fallbacks: {
-      document: '/offline.html',
-    },
-    runtimeCaching: [
-      {
-        urlPattern: /^https?.*\/api\/(schedules|exam-schedules).*$/i,
-        handler: 'NetworkFirst',
-        options: {
-          cacheName: 'nexa-deadlines',
-          expiration: {
-            maxEntries: 24,
-            maxAgeSeconds: 7 * 24 * 60 * 60,
-          },
-          networkTimeoutSeconds: 5,
-        },
-      },
-      {
-        urlPattern: /^https?.*\.(?:png|jpg|jpeg|svg|gif|webp|ico)$/i,
-        handler: 'CacheFirst',
-        options: {
-          cacheName: 'nexa-images',
-          expiration: {
-            maxEntries: 64,
-            maxAgeSeconds: 30 * 24 * 60 * 60,
-          },
-        },
-      },
-      {
-        urlPattern: /^https?.*$/i,
-        handler: 'NetworkFirst',
-        options: {
-          cacheName: 'nexa-pages',
-          expiration: {
-            maxEntries: 64,
-            maxAgeSeconds: 24 * 60 * 60,
-          },
-          networkTimeoutSeconds: 5,
-        },
-      },
-    ],
-  })
-} catch (error) {
-  console.warn('[next.config] next-pwa disabled:', error.message)
-}
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
-  skipTrailingSlashRedirect: true,
+  images: {
+    // Izinkan semua subdomain Supabase (storage avatar, attachment file).
+    // Kalau project kamu pakai custom domain, tambahkan di sini juga.
+    remotePatterns: [
+      { protocol: 'https', hostname: '*.supabase.co' },
+      { protocol: 'https', hostname: '*.supabase.in' },
+    ],
+  },
+
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          // Percepat DNS prefetch untuk sub-resource
+          { key: 'X-DNS-Prefetch-Control', value: 'on' },
+          // Cegah situs ini di-embed di iframe orang lain (clickjacking)
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          // Cegah browser menebak MIME type (MIME sniffing attacks)
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          // Kirim referrer hanya untuk same-origin atau ke HTTPS — jangan
+          // bocorkan URL penuh ke pihak ketiga lewat HTTP
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          // Batasi akses ke sensor perangkat yang tidak dipakai app
+          // (camera/mic/geolocation butuh izin user terpisah, bukan header ini)
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=()',
+          },
+        ],
+      },
+    ]
+  },
 }
 
-module.exports = withPWA(nextConfig)
+module.exports = nextConfig

@@ -31,6 +31,7 @@ import SmartEmptyState from '@/components/dashboard/SmartEmptyState'
 import { ARENA_ROLES, ROLE_CONFIG, EVIDENCE_TYPES, isArenaRole, type ArenaRole } from '@/lib/verification/role-config'
 import { TRUST_LABEL_TEXT, TRUST_LABEL_COLOR, type TrustLabel } from '@/lib/verification/trust-score'
 import { isValidEvidenceUrl } from '@/lib/verification/url-validation'
+import Image from 'next/image'
 
 type ArenaPost = {
   id: string
@@ -171,8 +172,7 @@ function ProfileAvatar({ url, name }: { url?: string | null; name?: string | nul
   return (
     <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-100 text-sm font-black text-slate-700 ring-1 ring-slate-200">
       {url ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={url} alt="" className="h-full w-full object-cover" />
+        <Image src={url} alt="" width={44} height={44} className="h-full w-full object-cover" />
       ) : (
         initials(name)
       )}
@@ -409,8 +409,7 @@ export default function ArenaView({ userId }: { userId: string }) {
                           <Link key={member.user_id} href={`/dashboard/profile/${member.user_id}`} className="inline-flex items-center gap-1.5 rounded-full bg-white px-2 py-1 text-[11px] font-black text-slate-700 ring-1 ring-emerald-100 hover:text-emerald-700">
                             <span className="flex h-5 w-5 items-center justify-center overflow-hidden rounded-full bg-slate-100 text-[9px]">
                               {member.profile?.avatar_url ? (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img src={member.profile.avatar_url} alt="" className="h-full w-full object-cover" />
+                                <Image src={member.profile.avatar_url} alt="" width={44} height={44} className="h-full w-full object-cover" />
                               ) : initials(member.profile?.full_name)}
                             </span>
                             {member.profile?.full_name ?? 'Member'}

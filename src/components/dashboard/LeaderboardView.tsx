@@ -8,6 +8,7 @@ import { FeaturedBadgePin } from '@/components/BadgeChip'
 import FounderVerifiedBadge from '@/components/FounderVerifiedBadge'
 import { Card, CardContent } from '@/components/ui/Card'
 import type { LeaderboardEntry, LeaderboardMe, LeaderboardScope } from '@/types'
+import Image from 'next/image'
 
 type ApiResponse = {
   scope: LeaderboardScope
@@ -33,12 +34,7 @@ function Avatar({ url, name, size = 'md' }: { url?: string | null; name?: string
   const dim = size === 'lg' ? 'h-16 w-16 text-lg' : 'h-11 w-11 text-sm'
   return (
     <span className={`flex ${dim} flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-100 font-black text-slate-700 ring-1 ring-slate-200`}>
-      {url ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={url} alt="" className="h-full w-full object-cover" />
-      ) : (
-        initials(name)
-      )}
+      {url ? <Image src={url} alt="" width={size === 'lg' ? 64 : 44} height={size === 'lg' ? 64 : 44} className="h-full w-full object-cover" /> : initials(name)}
     </span>
   )
 }
