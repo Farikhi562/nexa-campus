@@ -5,71 +5,51 @@ export type FileExtractResult = { text: string } | { error: string }
 const MAX_EXTRACTED_CHARS = 8000
 
 /**
- * Ekstrak teks dari file PDF/DOCX. Sengaja simpel (sesuai brief): tidak ada OCR
- * untuk PDF hasil scan (gambar) — kalau hasil ekstraksi kosong, kembalikan
- * error yang ramah supaya UI bisa arahkan user ke tab Upload Gambar (vision AI)
- * atau Manual.
+ * Ekstrak teks dari file PDF/DOCX.
  *
- * Dependency: `pdfjs-dist` (PDF, build legacy Node) dan `mammoth` (DOCX).
+ * CATATAN PENTING — riwayat pilihan library PDF:
  *
- * CATATAN PENTING soal pilihan library PDF:
- * Brief awal menyebut `pdf-parse`, tapi paket itu TERNYATA tidak dipakai di sini
- * — diuji langsung dengan PDF asli (tulisan tangan reportlab) dan ditemukan
- * tidak reliable: bundling pdf.js versi sangat lama (v1.10.100, ~2017) dengan
- * module-level state (`var PDFJS = null` di-cache lintas pemanggilan). Pada
- * pengujian terjadi kasus konkret: parsing PDF kosong segera setelah PDF berisi
- * teks mengembalikan teks dari PDF SEBELUMNYA (kemungkinan race condition di
- * pipeline async pdf.js lama itu saat worker dimatikan). Risiko ini terlalu
- * serius untuk app yang menyimpan data tugas mahasiswa — di Vercel serverless
- * dengan "warm" reuse, ini secara teori bisa membocorkan isi PDF user A ke hasil
- * ekstraksi user B kalau function instance dipakai ulang berurutan.
- * Sebagai gantinya dipakai `pdfjs-dist` (pdf.js resmi, aktif di-maintain
- * Mozilla) lewat build `legacy/build/pdf.mjs` yang didesain untuk Node tanpa
- * DOM/canvas. Sudah diuji ulang dengan pemanggilan berurutan & interleaved
- * (PDF berisi teks vs PDF kosong, bergantian beberapa kali) — hasilnya selalu
- * benar & konsisten, tidak ada kebocoran data antar pemanggilan.
+ * 1) pdf-parse (awal Batch 7): di-reject karena bundling pdf.js v1.10.100 (2017)
+ *    dengan module-level state yang menyebabkan teks PDF sebelumnya "bocor" ke
+ *    hasil parse PDF sesudahnya (verified di testing dengan file asli).
+ *
+ * 2) pdfjs-dist v6 (Batch 7 setelah reject pdf-parse): berjalan di sandbox (Node
+ *    ES2017+), tapi GAGAL di production Vercel dengan error "Gagal membaca file
+ *    PDF" karena pdfjs-dist bergantung pada modul `canvas` untuk Node.js yang
+ *    tidak berfungsi di dalam worker threads Vercel serverless — bahkan build
+ *    legacy/build/pdf.mjs tetap punya dependency ini.
+ *
+ * 3) unpdf (sekarang): didesain khusus untuk serverless/edge runtimes (Cloudflare
+ *    Workers, Vercel Edge & Serverless Functions). Bundling serverless build PDF.js
+ *    yang MOCK modul canvas — tidak perlu konfigurasi tambahan, tidak ada
+ *    dependency native, API bersih (getDocumentProxy + extractText).
+ *    Diverifikasi bekerja di Node.js lokal DAN didesain eksplisit untuk Vercel.
+ *    Zero dependency tambahan.
  */
-export async function extractTextFromFile(base64: string, mimeType: string, filename?: string): Promise<FileExtractResult> {
+export async function extractTextFromFile(
+  base64: string,
+  mimeType: string,
+  filename?: string
+): Promise<FileExtractResult> {
   const buffer = Buffer.from(base64, 'base64')
 
   if (mimeType === 'application/pdf' || filename?.toLowerCase().endsWith('.pdf')) {
-    let loadingTask: { promise: Promise<unknown>; destroy: () => Promise<void> } | null = null
     try {
-      const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs')
-      loadingTask = pdfjsLib.getDocument({
-        data: new Uint8Array(buffer),
-        useWorkerFetch: false,
-        useSystemFonts: true,
-      }) as unknown as { promise: Promise<unknown>; destroy: () => Promise<void> }
+      const { getDocumentProxy, extractText } = await import('unpdf')
+      const pdf = await getDocumentProxy(new Uint8Array(buffer))
+      const { text } = await extractText(pdf, { mergePages: true })
 
-      type PdfPage = { getTextContent: () => Promise<{ items: Array<{ str?: string }> }>; cleanup: () => void }
-      type PdfDoc = { numPages: number; getPage: (n: number) => Promise<PdfPage> }
-      const doc = (await loadingTask.promise) as PdfDoc
-
-      let text = ''
-      for (let i = 1; i <= doc.numPages; i++) {
-        const page = await doc.getPage(i)
-        const content = await page.getTextContent()
-        const pageText = content.items.map((item) => item.str ?? '').join(' ')
-        text += (text ? '\n' : '') + pageText
-        page.cleanup()
-      }
-
-      const trimmed = text.trim()
+      const trimmed = (text as string).trim()
       if (!trimmed) {
-        return { error: 'PDF ini sepertinya hasil scan/gambar (tidak ada teks terbaca). Coba upload sebagai foto di tab "Upload Gambar".' }
+        return {
+          error:
+            'PDF ini sepertinya hasil scan/gambar (tidak ada teks terbaca). Coba upload sebagai foto di tab "Upload Gambar".',
+        }
       }
       return { text: trimmed.slice(0, MAX_EXTRACTED_CHARS) }
     } catch (err) {
       console.error('[smart-input] gagal parse PDF:', err)
       return { error: 'Gagal membaca file PDF ini. Pastikan file tidak corrupt/terkunci.' }
-    } finally {
-      // WAJIB: selalu destroy loading task, baik sukses maupun gagal — kalau
-      // tidak, resource pdf.js (dan kemungkinan state internal) bisa menumpuk
-      // antar request di server yang sama (warm serverless reuse).
-      if (loadingTask) {
-        await loadingTask.destroy().catch(() => null)
-      }
     }
   }
 
@@ -91,8 +71,14 @@ export async function extractTextFromFile(base64: string, mimeType: string, file
   }
 
   if (mimeType === 'application/msword' || filename?.toLowerCase().endsWith('.doc')) {
-    return { error: 'Format .doc lama belum didukung. Convert dulu ke .docx atau PDF, atau pakai tab "Upload Gambar"/"Bahasa Natural".' }
+    return {
+      error:
+        'Format .doc lama belum didukung. Convert dulu ke .docx atau PDF, atau pakai tab "Upload Gambar"/"Bahasa Natural".',
+    }
   }
 
-  return { error: 'Format file tidak didukung. Gunakan PDF atau DOCX (untuk gambar, pakai tab "Upload Gambar").' }
+  return {
+    error:
+      'Format file tidak didukung. Gunakan PDF atau DOCX (untuk gambar, pakai tab "Upload Gambar").',
+  }
 }

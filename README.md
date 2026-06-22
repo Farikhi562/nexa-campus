@@ -1,55 +1,46 @@
-# NEXA Campus — Batch 16: Quick Add & Smart Input Lebih Pintar
+# NEXA Campus — PDF Fix: pdfjs-dist → unpdf
 
-NLP, upload file, dan upload gambar sekarang menangkap **ruangan/lokasi** dan **judul tugas**
-dengan lebih baik — sebelumnya field ini ada di skema tapi nyaris tidak pernah benar-benar
-terisi dari teks/gambar. Plus 2 bug nyata ketemu & dibenerin di proses.
+## Error yang dilaporkan
+"Gagal membaca file PDF ini. Pastikan file tidak corrupt/terkunci."
 
-## Masalah yang diperbaiki
-1. **Ruangan TIDAK PERNAH diekstrak dari teks/gambar** — field `room` cuma diisi binary
-   "Online"/"Menyusul" dari deteksi kata "online/zoom/dll", walau user sebut ruangan eksplisit
-   ("ruang B204", "lab komputer 2"). Berlaku di **3 jalur sekaligus**: prompt AI (NLP+File+Image),
-   parser lokal fallback, DAN route Quick Add 1-baris (`quick-nl`) yang punya logic terpisah sendiri.
-2. **Judul tugas (`title`) nyaris selalu null** dari parser lokal — sekarang ada pola deteksi
-   konservatif ("judul: ...", teks dalam kutip) + prompt AI diperjelas instruksinya.
+## Root cause (terverifikasi dari riset + dokumentasi resmi unpdf)
+`pdfjs-dist` (library PDF yang dipakai sejak Batch 7) bergantung pada modul
+`canvas` untuk environment Node.js. Modul `canvas` **tidak bekerja di dalam
+worker threads** — dan inilah persis bagaimana Vercel serverless functions
+dijalankan. Bahkan build `legacy/build/pdf.mjs` yang didesain untuk Node tetap
+punya dependency ini. Di sandbox testing gue (Node.js biasa, bukan worker
+thread), pdfjs-dist bekerja normal — itu sebabnya bug ini tidak ketangkap di
+sandbox, tapi langsung error di production.
 
-## Bug ditemukan & diperbaiki (di luar scope awal, tapi ketemu pas testing)
-3. **[Pre-existing] "jam 2 siang" salah ke-parse jadi 02:00**, bukan 14:00 — kata "siang" tidak
-   pernah masuk kondisi tambah-12-jam (cuma "sore"/"malam"). Ada di **2 tempat terpisah**
-   (`local-parser.ts` dan `quick-nl/route.ts`, masing-masing salah dengan caranya sendiri — yang
-   di quick-nl bahkan eksplisit `h += 0`, no-op). Sekalian ditambah kasus "jam 12 malam" → 00:00
-   (tengah malam, sebelumnya tetap di 12).
+## Fix
+Ganti `pdfjs-dist` → `unpdf`. `unpdf` ships with a **serverless build** of
+PDF.js yang mock modul `canvas` — didesain eksplisit untuk Cloudflare Workers,
+Vercel Edge, dan Vercel Serverless Functions. Zero konfigurasi tambahan untuk
+deployment Vercel standar.
 
 ## File yang diubah
 | File | Perubahan |
 |---|---|
-| `src/lib/smart-input/location-extract.ts` **(BARU)** | Regex ekstraksi ruangan/platform, konservatif (return null kalau tidak yakin) |
-| `src/lib/smart-input/types.ts` | + field `location` di `RawCandidate` |
-| `src/lib/smart-input/normalize.ts` | Lokasi eksplisit dari teks **diutamakan** dari fallback online/offline binary |
-| `src/lib/smart-input/local-parser.ts` | + ekstraksi lokasi & judul, + pembersihan ruangan dari `course_name` (tidak dobel), **fix bug waktu siang** |
-| `src/lib/smart-input/extract.ts` | Prompt AI (teks & gambar) diperluas minta field `location` eksplisit + instruksi title vs course_name diperjelas |
-| `src/app/api/deadlines/quick-nl/route.ts` | Sama seperti local-parser (parser terpisah, fix terpisah) + prompt AI-nya juga diperluas, **fix bug waktu siang** |
+| `src/lib/smart-input/file-extract.ts` | Ganti `pdfjs-dist` → `unpdf`. API jauh lebih simpel: `getDocumentProxy(buffer)` + `extractText(pdf, { mergePages: true })`. Semua behavior lain (DOCX via mammoth, error messages, MAX_EXTRACTED_CHARS) tidak berubah. |
 
-## Kenapa desainnya konservatif
-`extractLocation()` & ekstraksi judul SENGAJA return `null` kalau pola tidak jelas — lebih baik
-tidak mengisi daripada salah mengisi dengan teks yang dipotong asal. Prompt AI juga eksplisit
-bilang "JANGAN MENEBAK" untuk location, sama seperti aturan yang sudah ada untuk tanggal.
+## Dependency
+Tambah ke `package.json`: `npm install unpdf`
 
 ## Validasi
-- **49 test assertion baru** di batch ini (17 untuk `extractLocation` standalone, 16 untuk
-  pipeline `local-parser` end-to-end termasuk regresi dari Batch 7, 8 untuk semua kombinasi
-  jam Indonesia, 4 untuk jalur AI dengan mock fetch) — semua lulus.
-- **Total 127 test assertion** dari seluruh sesi (termasuk batch-batch sebelumnya) di-re-run
-  ulang sebagai pengecekan regresi penuh — semua tetap lulus.
-- `tsc --noEmit` standar: 0 error.
-- `tsc --noEmit` dengan **target ES5 tanpa downlevelIteration** (skenario paling ketat, sesuai
-  pelajaran dari 2 build error sebelumnya): 0 error.
-- `next build` dengan ESLint aktif: 0 error, 0 warning baru.
+- **11 test assertion** pakai file PDF asli (bukan mock):
+  - PDF berteks → ekstrak berhasil dengan teks yang benar
+  - PDF kosong/scan → error ramah (bukan crash)
+  - Interleaved: PDF A → PDF kosong → PDF A lagi → hasilnya identik, zero cross-contamination
+  - DOCX → tetap bekerja (tidak ada perubahan ke jalur DOCX)
+  - Format tidak didukung → error yang jelas
+- `tsc --noEmit` standar: 0 error
+- `tsc --noEmit` dengan `target: ES5` (strict probe): 0 error
+- `next build` dengan ESLint aktif: 0 error, 0 warning baru
+- 138 test assertion total (11 baru + 127 dari sesi sebelumnya) re-run: semua lulus
 
 ## Cara pasang
-Timpa 6 file di atas. Tidak ada migration, tidak ada dependency baru, tidak ada ENV baru.
+1. `npm install unpdf` di repo
+2. Timpa `src/lib/smart-input/file-extract.ts`
+3. Deploy — PDF seharusnya langsung bekerja di production
 
-Test cepat setelah pasang:
-- Smart Input (NLP) atau Quick Add: ketik "tugas kalkulus dikumpulkan di ruang B204 jumat jam 2
-  siang" → cek ruangan jadi "Ruang B204" (bukan "Menyusul") dan jam jadi 14:00 (bukan 02:00).
-- Upload screenshot jadwal kelas yang ada nomor ruangan tertulis jelas → cek ruangan ikut terbaca
-  di hasil ekstraksi (butuh AI vision aktif).
+pdfjs-dist bisa dihapus dari package.json kalau sudah tidak dipakai di tempat lain.
