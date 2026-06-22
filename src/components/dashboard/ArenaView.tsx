@@ -13,6 +13,7 @@ import {
   Plus,
   Search,
   ShieldCheck,
+  Sparkles,
   Sword,
   Target,
   Trash2,
@@ -509,6 +510,33 @@ function ArenaPostFormModal({
   const isEdit = Boolean(post)
   const set = (key: keyof ArenaForm, value: ArenaForm[keyof ArenaForm]) => setForm((prev) => ({ ...prev, [key]: value }))
 
+  const [briefLoading, setBriefLoading] = useState(false)
+  const [briefError, setBriefError] = useState('')
+
+  /** Generate brief hanya dari form (tanpa post ID, pakai data form saat ini) */
+  async function generateBriefFromForm() {
+    setBriefLoading(true)
+    setBriefError('')
+    try {
+      const res = await fetch('/api/arena/brief-preview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: form.title,
+          competition_name: form.competition_name,
+          competition_type: form.competition_type,
+          skills_needed: form.skills_needed,
+          team_size_max: form.team_size_max,
+          deadline_registration: form.deadline_registration,
+        }),
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) { setBriefError(json.error || 'Gagal generate brief.'); return }
+      if (json.result) set('description', json.result)
+    } catch { setBriefError('Koneksi bermasalah.') }
+    finally { setBriefLoading(false) }
+  }
+
   function addSkill() {
     const skill = skillInput.trim()
     if (skill && !form.skills_needed.includes(skill)) {
@@ -564,8 +592,22 @@ function ArenaPostFormModal({
             </div>
           </div>
           <div>
-            <label className={label}>Deskripsi</label>
+            <div className="mb-1.5 flex items-center justify-between gap-2">
+              <label className={label}>Deskripsi</label>
+              <button
+                type="button"
+                onClick={() => void generateBriefFromForm()}
+                disabled={briefLoading || !form.title.trim()}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-violet-100 px-2.5 py-1 text-[11px] font-black text-violet-700 hover:bg-violet-200 disabled:opacity-50"
+              >
+                {briefLoading
+                  ? <><Loader2 className="h-3 w-3 animate-spin" /> Generating...</>
+                  : <><Sparkles className="h-3 w-3" /> AI Bantu Tulis</>
+                }
+              </button>
+            </div>
             <textarea value={form.description} onChange={(e) => set('description', e.target.value)} rows={3} className={input} placeholder="Ceritain lomba, target, role, dan gaya kerja tim..." />
+            {briefError && <p className="mt-1 text-xs text-red-600">{briefError}</p>}
           </div>
           <div>
             <label className={label}>Skill yang dibutuhkan</label>

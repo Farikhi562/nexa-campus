@@ -14,6 +14,7 @@ import type { StudyRoom, StudyRoomMember, StudyRoomMessage, StudyRoomJoinRequest
 import Link from 'next/link'
 import FounderVerifiedBadge from '@/components/FounderVerifiedBadge'
 import StudyRoomWorkspaceCard from '@/components/dashboard/StudyRoomWorkspaceCard'
+import StudyRoomAIPanel from '@/components/study-room/StudyRoomAIPanel'
 import Image from 'next/image'
 
 function initials(name?: string | null) {
@@ -589,6 +590,11 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
               </p>
             </div>
           )}
+
+          {/* AI Tutor Panel — collapsible, di atas input bar */}
+          <div className="flex-shrink-0 border-t border-violet-100 bg-violet-50/30 px-3 pt-2 pb-1">
+            <StudyRoomAIPanel roomId={roomId} />
+          </div>
 
           {/* Chat input */}
           <div className="flex-shrink-0 border-t border-slate-100 p-3">

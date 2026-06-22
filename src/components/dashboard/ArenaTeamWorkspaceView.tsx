@@ -2,12 +2,13 @@
 
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
-import { CheckCircle2, ChevronLeft, Loader2, Save, ShieldCheck, Users } from 'lucide-react'
+import { Brain, CheckCircle2, ChevronLeft, Loader2, Save, ShieldCheck, Sparkles, Users, X } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import FounderVerifiedBadge from '@/components/FounderVerifiedBadge'
 import Image from 'next/image'
+import SimpleMarkdown from '@/components/study/SimpleMarkdown'
 
 type Member = { user_id: string; role: string; joined_at: string; profile?: { full_name: string | null; avatar_url: string | null; nexa_id: string | null; founder_verified?: boolean | null } | null }
 type Workspace = { owner_task: string | null; team_status: string | null; checklist: Array<{ id: string; text: string; done: boolean }> }
@@ -51,6 +52,45 @@ export default function ArenaTeamWorkspaceView({ postId, userId }: { postId: str
 
   const isCreator = post?.creator_id === userId
   const isMember = Boolean(post?.team_members?.some((member) => member.user_id === userId))
+
+  // AI state
+  const [aiLoading, setAiLoading] = useState<'tasks' | 'analyze' | 'brief' | null>(null)
+  const [aiResult, setAiResult] = useState<{ type: 'tasks' | 'analyze' | 'brief'; content: string; tasks?: string[] } | null>(null)
+  const [aiError, setAiError] = useState('')
+
+  async function callAI(action: 'tasks' | 'analyze' | 'brief') {
+    setAiLoading(action)
+    setAiError('')
+    setAiResult(null)
+    try {
+      const res = await fetch(`/api/arena/${postId}/workspace/ai`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action }),
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) { setAiError(json.error || 'AI sedang tidak tersedia.'); return }
+      if (action === 'tasks') {
+        setAiResult({ type: 'tasks', content: '', tasks: json.tasks ?? [] })
+      } else {
+        setAiResult({ type: action, content: json.result ?? '' })
+      }
+    } catch { setAiError('Koneksi bermasalah. Coba lagi.') }
+    finally { setAiLoading(null) }
+  }
+
+  function applyAITasks() {
+    if (!aiResult?.tasks?.length) return
+    const existing = new Set((workspace.checklist ?? []).map((task) => task.text.toLowerCase()))
+    const newTasks = aiResult.tasks
+      .filter((t) => t.trim() && !existing.has(t.trim().toLowerCase()))
+      .map((t) => ({ id: crypto.randomUUID(), text: t.trim(), done: false }))
+    if (!newTasks.length) return
+    const next = { ...workspace, checklist: [...(workspace.checklist ?? []), ...newTasks] }
+    setWorkspace(next)
+    if (isCreator) void save(next)
+    setAiResult(null)
+  }
 
   async function save(next = workspace) {
     setSaving(true)
@@ -150,11 +190,50 @@ export default function ArenaTeamWorkspaceView({ postId, userId }: { postId: str
                   <h3 className="font-black text-slate-950">Checklist project</h3>
                   <p className="text-xs leading-5 text-slate-500">Biar progress tim nggak cuma hidup di chat.</p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <Badge tone={done === total && total > 0 ? 'success' : 'neutral'}>{done}/{total}</Badge>
                   {isCreator && <button onClick={applyTemplate} className="rounded-2xl bg-white px-3 py-1.5 text-xs font-black text-teal-700 ring-1 ring-teal-100 hover:bg-teal-50">Pakai template</button>}
+                  {/* AI Generate Task */}
+                  {(isCreator || isMember) && (
+                    <button
+                      onClick={() => void callAI('tasks')}
+                      disabled={aiLoading === 'tasks'}
+                      className="inline-flex items-center gap-1.5 rounded-2xl bg-violet-600 px-3 py-1.5 text-xs font-black text-white hover:bg-violet-700 disabled:opacity-50"
+                    >
+                      {aiLoading === 'tasks' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+                      Generate Task AI
+                    </button>
+                  )}
                 </div>
               </div>
+
+              {/* AI error */}
+              {aiError && (
+                <p className="mb-3 rounded-2xl bg-red-50 px-3 py-2 text-xs text-red-700">{aiError}</p>
+              )}
+
+              {/* AI task suggestions */}
+              {aiResult?.type === 'tasks' && aiResult.tasks && aiResult.tasks.length > 0 && (
+                <div className="mb-3 rounded-2xl border border-violet-200 bg-violet-50 p-3">
+                  <div className="mb-2 flex items-center justify-between gap-2">
+                    <p className="text-xs font-black text-violet-700">✨ {aiResult.tasks.length} task dari AI — tambahkan ke checklist?</p>
+                    <button onClick={() => setAiResult(null)} className="text-slate-400 hover:text-slate-600"><X className="h-4 w-4" /></button>
+                  </div>
+                  <div className="space-y-1 mb-3">
+                    {aiResult.tasks.map((task, i) => (
+                      <p key={i} className="flex items-start gap-2 text-xs text-slate-700">
+                        <span className="mt-0.5 h-4 w-4 flex-none rounded-md bg-violet-200 text-center text-[10px] font-black leading-4 text-violet-700">{i + 1}</span>
+                        {task}
+                      </p>
+                    ))}
+                  </div>
+                  {isCreator && (
+                    <button onClick={applyAITasks} className="inline-flex items-center gap-1.5 rounded-xl bg-violet-600 px-3 py-1.5 text-xs font-black text-white hover:bg-violet-700">
+                      <CheckCircle2 className="h-3.5 w-3.5" /> Tambah ke checklist
+                    </button>
+                  )}
+                </div>
+              )}
               <div className="space-y-2">
                 {(workspace.checklist ?? []).map((task) => (
                   <button key={task.id} disabled={!isCreator} onClick={() => toggle(task.id)} className="flex w-full items-center gap-3 rounded-2xl bg-white p-3 text-left text-sm hover:bg-teal-50 disabled:cursor-default">
@@ -167,6 +246,85 @@ export default function ArenaTeamWorkspaceView({ postId, userId }: { postId: str
             </div>
           </CardContent>
         </Card>
+
+        {/* AI Cards — Analisis Tim + Improve Brief */}
+        {(isCreator || isMember) && (
+          <div className="grid gap-4 sm:grid-cols-2">
+            {/* Analisis Tim */}
+            <Card>
+              <CardContent className="p-4">
+                <div className="mb-3 flex items-start gap-3">
+                  <div className="flex h-9 w-9 flex-none items-center justify-center rounded-2xl bg-violet-100">
+                    <Brain className="h-4 w-4 text-violet-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-slate-950">Analisis Kekuatan Tim</h3>
+                    <p className="text-xs leading-5 text-slate-500">AI baca skill tiap anggota dan kasih rekomendasi pembagian peran + gap yang perlu diisi.</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => void callAI('analyze')}
+                  disabled={aiLoading === 'analyze'}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-violet-600 py-2.5 text-sm font-black text-white hover:bg-violet-700 disabled:opacity-50"
+                >
+                  {aiLoading === 'analyze' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                  {aiLoading === 'analyze' ? 'Menganalisis...' : 'Analisis Tim'}
+                </button>
+                {aiResult?.type === 'analyze' && (
+                  <div className="mt-3 rounded-2xl border border-violet-100 bg-violet-50/50 p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-xs font-black text-violet-700">Hasil Analisis</p>
+                      <button onClick={() => setAiResult(null)} className="text-slate-400 hover:text-slate-600"><X className="h-4 w-4" /></button>
+                    </div>
+                    <SimpleMarkdown text={aiResult.content} />
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Improve Brief */}
+            <Card>
+              <CardContent className="p-4">
+                <div className="mb-3 flex items-start gap-3">
+                  <div className="flex h-9 w-9 flex-none items-center justify-center rounded-2xl bg-amber-100">
+                    <Sparkles className="h-4 w-4 text-amber-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-slate-950">Improve Brief Posting</h3>
+                    <p className="text-xs leading-5 text-slate-500">AI tulis ulang deskripsi posting kamu biar lebih menarik anggota berkualitas.</p>
+                  </div>
+                </div>
+                {isCreator ? (
+                  <button
+                    onClick={() => void callAI('brief')}
+                    disabled={aiLoading === 'brief'}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-amber-500 py-2.5 text-sm font-black text-amber-950 hover:bg-amber-400 disabled:opacity-50"
+                  >
+                    {aiLoading === 'brief' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                    {aiLoading === 'brief' ? 'Generating...' : 'Generate Brief'}
+                  </button>
+                ) : (
+                  <p className="rounded-2xl bg-slate-50 px-3 py-2 text-xs text-slate-500">Hanya creator yang bisa generate brief.</p>
+                )}
+                {aiResult?.type === 'brief' && (
+                  <div className="mt-3 rounded-2xl border border-amber-100 bg-amber-50/50 p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-xs font-black text-amber-700">Brief dari AI — copy dan paste ke deskripsi posting</p>
+                      <button onClick={() => setAiResult(null)} className="text-slate-400 hover:text-slate-600"><X className="h-4 w-4" /></button>
+                    </div>
+                    <p className="text-sm leading-6 text-slate-700 whitespace-pre-wrap">{aiResult.content}</p>
+                    <button
+                      onClick={() => { void navigator.clipboard.writeText(aiResult.content).catch(() => null) }}
+                      className="mt-2 inline-flex items-center gap-1.5 rounded-xl border border-amber-200 bg-white px-3 py-1.5 text-xs font-black text-amber-700 hover:bg-amber-50"
+                    >
+                      Copy Brief
+                    </button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         <Card>
           <CardContent className="p-4 sm:p-5">
