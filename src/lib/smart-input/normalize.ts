@@ -60,7 +60,12 @@ export function normalizeCandidate(raw: RawCandidate, opts: { defaultCampus: str
     : 'normal'
 
   const isOnline = raw.online === true
-  const room = isOnline ? 'Online' : 'Menyusul'
+  // Prioritaskan lokasi eksplisit yang terbaca dari teks (mis. "Ruang B204",
+  // "Zoom") — sebelumnya field ini SELALU cuma "Online"/"Menyusul" walau
+  // user sebutkan ruangan jelas di teksnya. Fallback ke logic lama kalau
+  // tidak ada lokasi eksplisit yang terbaca.
+  const explicitLocation = str(raw.location)
+  const room = explicitLocation || (isOnline ? 'Online' : 'Menyusul')
 
   const title = str(raw.title) || null
   const notes = str(raw.notes) || null

@@ -14,6 +14,8 @@ export type RawCandidate = {
   priority?: unknown
   notes?: unknown
   online?: unknown
+  /** Penyebutan ruangan/lokasi/platform eksplisit dari teks, mis. "Ruang B204", "Zoom". */
+  location?: unknown
 }
 
 /**

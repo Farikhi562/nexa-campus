@@ -1,68 +1,55 @@
-# NEXA Campus — Batch 15: NEXA Assistant Bantu Belajar dari Materi
+# NEXA Campus — Batch 16: Quick Add & Smart Input Lebih Pintar
 
-## 🔴 HOTFIX duluan (dari build error sebelumnya)
-`src/lib/ml/late-risk-model.ts` di sini sudah **diperbaiki** — error
-`Map<...> can only be iterated through when using the '--downlevelIteration' flag`
-itu karena `tsconfig.json` project kamu pakai `target` di bawah ES2015 tanpa
-`downlevelIteration`. Diganti dari `for (const [k,v] of map)` jadi
-`map.forEach((v, k) => {...})` — kerja sama persis, tapi tidak butuh syarat
-target ES2015+. **Sudah divalidasi ekstra ketat:** kali ini saya jalankan
-`tsc` dengan `target: ES5` + TANPA `downlevelIteration` (skenario paling
-ketat yang mungkin) ke **seluruh kode**, bukan cuma file yang error — 0 error.
-Juga di-grep manual semua pola `for...of` di kode yang saya tulis sepanjang
-sesi ini untuk pastikan tidak ada pola sama yang kelewat (semua sisanya
-ternyata iterasi di atas Array biasa, yang aman di target manapun).
+NLP, upload file, dan upload gambar sekarang menangkap **ruangan/lokasi** dan **judul tugas**
+dengan lebih baik — sebelumnya field ini ada di skema tapi nyaris tidak pernah benar-benar
+terisi dari teks/gambar. Plus 2 bug nyata ketemu & dibenerin di proses.
 
-## Fitur baru: Belajar dari Materi
-User upload file (PDF/DOCX) atau tempel teks (transkrip ucapan dosen,
-catatan, dll) → NEXA Assistant susun **roadmap belajar**, **rangkuman**, dan
-**quiz interaktif** — murni LLM (beda dari batch ML sebelumnya yang murni
-statistik), reuse ekstraksi file dari Smart Input (Batch 7), reuse layer AI
-multi-provider dari Batch 1.
+## Masalah yang diperbaiki
+1. **Ruangan TIDAK PERNAH diekstrak dari teks/gambar** — field `room` cuma diisi binary
+   "Online"/"Menyusul" dari deteksi kata "online/zoom/dll", walau user sebut ruangan eksplisit
+   ("ruang B204", "lab komputer 2"). Berlaku di **3 jalur sekaligus**: prompt AI (NLP+File+Image),
+   parser lokal fallback, DAN route Quick Add 1-baris (`quick-nl`) yang punya logic terpisah sendiri.
+2. **Judul tugas (`title`) nyaris selalu null** dari parser lokal — sekarang ada pola deteksi
+   konservatif ("judul: ...", teks dalam kutip) + prompt AI diperjelas instruksinya.
 
-## File baru
-| File | Fungsi |
+## Bug ditemukan & diperbaiki (di luar scope awal, tapi ketemu pas testing)
+3. **[Pre-existing] "jam 2 siang" salah ke-parse jadi 02:00**, bukan 14:00 — kata "siang" tidak
+   pernah masuk kondisi tambah-12-jam (cuma "sore"/"malam"). Ada di **2 tempat terpisah**
+   (`local-parser.ts` dan `quick-nl/route.ts`, masing-masing salah dengan caranya sendiri — yang
+   di quick-nl bahkan eksplisit `h += 0`, no-op). Sekalian ditambah kasus "jam 12 malam" → 00:00
+   (tengah malam, sebelumnya tetap di 12).
+
+## File yang diubah
+| File | Perubahan |
 |---|---|
-| `docs/MIGRATION_study_packs.sql` | Tabel `study_packs` (roadmap/summary/quiz tersimpan per user) |
-| `src/lib/study/types.ts` | Tipe `StudyRoadmapStep`, `StudyQuizQuestion`, `StudyPack` |
-| `src/lib/study/generate-study-pack.ts` | Prompt LLM + parsing JSON robust + validasi (soal dengan format rusak dibuang, bukan bikin crash) |
-| `src/app/api/study/generate/route.ts` | `POST` — terima file/teks → ekstrak (reuse Smart Input) → generate → simpan |
-| `src/app/api/study/packs/route.ts` | `GET` — daftar materi tersimpan |
-| `src/app/api/study/packs/[id]/route.ts` | `GET`/`DELETE` — detail & hapus |
-| `src/app/api/study/packs/[id]/score/route.ts` | `POST` — catat skor quiz (divalidasi terhadap jumlah soal asli, tidak bisa dipalsukan dari client) |
-| `src/components/study/StudyUploadForm.tsx` | Form upload/tempel teks |
-| `src/components/study/StudyRoadmapView.tsx` | Checklist roadmap (progress visual lokal) |
-| `src/components/study/SimpleMarkdown.tsx` | Renderer ringan `**bold**` + paragraf (tanpa dependency baru) |
-| `src/components/study/StudyQuizView.tsx` | Quiz interaktif — pilih jawaban, submit, lihat penjelasan, skor tersimpan |
-| `src/app/dashboard/study/page.tsx` | Daftar materi (Command-gated) |
-| `src/app/dashboard/study/new/page.tsx` | Halaman buat materi baru |
-| `src/app/dashboard/study/[id]/page.tsx` | Halaman detail (roadmap + rangkuman + quiz) |
-| `src/app/dashboard/nexa-assistant/page.tsx` | + link ke fitur ini |
+| `src/lib/smart-input/location-extract.ts` **(BARU)** | Regex ekstraksi ruangan/platform, konservatif (return null kalau tidak yakin) |
+| `src/lib/smart-input/types.ts` | + field `location` di `RawCandidate` |
+| `src/lib/smart-input/normalize.ts` | Lokasi eksplisit dari teks **diutamakan** dari fallback online/offline binary |
+| `src/lib/smart-input/local-parser.ts` | + ekstraksi lokasi & judul, + pembersihan ruangan dari `course_name` (tidak dobel), **fix bug waktu siang** |
+| `src/lib/smart-input/extract.ts` | Prompt AI (teks & gambar) diperluas minta field `location` eksplisit + instruksi title vs course_name diperjelas |
+| `src/app/api/deadlines/quick-nl/route.ts` | Sama seperti local-parser (parser terpisah, fix terpisah) + prompt AI-nya juga diperluas, **fix bug waktu siang** |
 
-## Desain penting
-- **Tidak ada fallback non-AI** (beda dari Smart Input NL parser) — menyusun roadmap & quiz
-  butuh pemahaman bahasa asli, bukan sesuatu yang bisa didekati regex. Kalau AI tidak aktif,
-  pesan errornya jujur bilang begitu.
-- Soal quiz yang formatnya rusak dari AI (opsi bukan 4, `correctIndex` di luar 0-3) **dibuang
-  satu-satu**, bukan bikin seluruh hasil gagal — minimal 3 soal valid baru dianggap berhasil.
-- Skor quiz divalidasi server-side terhadap panjang quiz asli (anti-curang skor ngarang dari client).
-- Rate limit 10/jam (pola sama dengan Batch 9) — generate materi itu panggilan AI yang berat.
-- Gated NEXA Command, konsisten dengan fitur AI lain.
+## Kenapa desainnya konservatif
+`extractLocation()` & ekstraksi judul SENGAJA return `null` kalau pola tidak jelas — lebih baik
+tidak mengisi daripada salah mengisi dengan teks yang dipotong asal. Prompt AI juga eksplisit
+bilang "JANGAN MENEBAK" untuk location, sama seperti aturan yang sudah ada untuk tanggal.
 
 ## Validasi
-- **14 test assertion** untuk `generate-study-pack.ts` (mock AI, termasuk: respons dibungkus
-  markdown code fence, soal dengan format rusak dibuang otomatis, materi kependekan ditolak,
-  network gagal tidak crash).
+- **49 test assertion baru** di batch ini (17 untuk `extractLocation` standalone, 16 untuk
+  pipeline `local-parser` end-to-end termasuk regresi dari Batch 7, 8 untuk semua kombinasi
+  jam Indonesia, 4 untuk jalur AI dengan mock fetch) — semua lulus.
+- **Total 127 test assertion** dari seluruh sesi (termasuk batch-batch sebelumnya) di-re-run
+  ulang sebagai pengecekan regresi penuh — semua tetap lulus.
 - `tsc --noEmit` standar: 0 error.
-- `tsc --noEmit` dengan **target ES5 tanpa downlevelIteration** (skenario paling ketat): 0 error.
-- `next build` dengan ESLint aktif: 0 error, 0 warning baru dari file manapun di batch ini.
-- Semua 82 test assertion dari batch-batch sebelumnya (trust score, file signature, regresi
-  logistik, bandit, risk model) di-re-run ulang, semua tetap lulus — tidak ada regresi.
+- `tsc --noEmit` dengan **target ES5 tanpa downlevelIteration** (skenario paling ketat, sesuai
+  pelajaran dari 2 build error sebelumnya): 0 error.
+- `next build` dengan ESLint aktif: 0 error, 0 warning baru.
 
 ## Cara pasang
-1. Jalankan `docs/MIGRATION_study_packs.sql`.
-2. Timpa semua file di atas (termasuk `late-risk-model.ts` yang sudah di-hotfix).
-3. `npm run build` — sudah divalidasi hijau dengan kondisi paling ketat.
-4. Test: buka NEXA Assistant → klik "Belajar dari Materi" → tempel beberapa paragraf catatan
-   kuliah → tunggu 10-30 detik → cek roadmap/rangkuman/quiz tersusun masuk akal dari materi yang
-   ditempel → coba kerjain quiz → submit → cek skor tersimpan saat dibuka lagi nanti.
+Timpa 6 file di atas. Tidak ada migration, tidak ada dependency baru, tidak ada ENV baru.
+
+Test cepat setelah pasang:
+- Smart Input (NLP) atau Quick Add: ketik "tugas kalkulus dikumpulkan di ruang B204 jumat jam 2
+  siang" → cek ruangan jadi "Ruang B204" (bukan "Menyusul") dan jam jadi 14:00 (bukan 02:00).
+- Upload screenshot jadwal kelas yang ada nomor ruangan tertulis jelas → cek ruangan ikut terbaca
+  di hasil ekstraksi (butuh AI vision aktif).

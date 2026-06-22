@@ -1,4 +1,22 @@
 import type { RawCandidate } from './types'
+import { extractLocation } from './location-extract'
+
+/**
+ * Tangkap judul tugas eksplisit kalau ada pola yang jelas (mis. "judul: ...",
+ * "tugas: ...", atau teks dalam tanda kutip). Sengaja KONSERVATIF — kalau
+ * tidak ada pola eksplisit, return null (title tetap null, course_name yang
+ * dipakai seperti sebelumnya) supaya tidak salah memotong course_name.
+ */
+function extractTitleHint(text: string): string | null {
+  const labeledMatch = text.match(/\b(?:judul|title)\s*[:\-]\s*(.{3,150})/i)
+  if (labeledMatch) {
+    const value = labeledMatch[1].split(/[.\n]/)[0].trim()
+    if (value.length >= 3) return value
+  }
+  const quoteMatch = text.match(/["“]([^"”]{3,150})["”]/)
+  if (quoteMatch) return quoteMatch[1].trim()
+  return null
+}
 
 /**
  * Parser lokal tanpa AI. Dipakai sebagai fallback kalau AI belum dikonfigurasi
@@ -69,7 +87,13 @@ function parseTime(text: string): string {
     let h = +jam[1]
     const min = jam[2] ? +jam[2] : 0
     const part = jam[3]
-    if ((part === 'sore' || part === 'malam') && h < 12) h += 12
+    // PENTING: "siang" sebelumnya TIDAK termasuk di kondisi ini -- "jam 2
+    // siang" salah ke-parse jadi 02:00 (dini hari) padahal maksudnya 14:00
+    // (siang hari). Indonesia: siang ~11:00-15:00, sore ~15:00-18:00,
+    // malam ~18:00-24:00 -- ketiganya butuh +12 untuk jam 1-11.
+    if ((part === 'siang' || part === 'sore' || part === 'malam') && h >= 1 && h < 12) h += 12
+    // "jam 12 malam" = tengah malam = 00:00, bukan tetap 12 (siang/noon).
+    if (part === 'malam' && h === 12) h = 0
     if (h > 23) h = 23
     return `${pad(h)}:${pad(min)}`
   }
@@ -117,6 +141,11 @@ function cleanCourseName(original: string): string {
     .replace(/\b([01]?\d|2[0-3]):([0-5]\d)\b/g, '')
     .replace(/\b(hari ini|besok|lusa|minggu depan|senin|selasa|rabu|kamis|jumat|jum'at|sabtu|minggu)\b/gi, '')
     .replace(/\bhari\b/gi, '')
+    // Ruangan/lokasi sudah ditangkap terpisah lewat extractLocation() — buang
+    // dari course_name supaya tidak nongol dobel ("Kalkulus ruang B204" jadi
+    // cuma "Kalkulus", ruangnya pindah ke field room).
+    .replace(/\b(ruang(?:an)?|gedung|lab(?:oratorium)?|lt\.?|lantai)\s+(?:(?!\b(?:jam|pukul|pada|untuk|dengan|dan|yang|di|ke|hari|besok|lusa|senin|selasa|rabu|kamis|jumat|jum'at|sabtu|minggu|deadline)\b)[a-z0-9.\-]+\s*){1,3}/gi, '')
+    .replace(/\b(google\s*meet|gmeet|zoom|microsoft\s*teams|teams)\b/gi, '')
     .replace(/\s{2,}/g, ' ')
     .replace(/[,\-–—:]\s*$/, '')
     .trim()
@@ -142,10 +171,12 @@ function parseLine(lineRaw: string, today: Date): RawCandidate {
   const source = parseSource(line)
   const priority = parsePriority(line)
   const online = /\bonline|daring|vclass|ilab|zoom|gmeet\b/.test(line)
+  const location = extractLocation(lineRaw)
+  const titleHint = extractTitleHint(lineRaw)
   const courseName = cleanCourseName(lineRaw.trim()) || lineRaw.trim()
 
   return {
-    title: null,
+    title: titleHint,
     course_name: courseName,
     type,
     source,
@@ -154,6 +185,7 @@ function parseLine(lineRaw: string, today: Date): RawCandidate {
     priority,
     notes: null,
     online,
+    location,
   }
 }
 

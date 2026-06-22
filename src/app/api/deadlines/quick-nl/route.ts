@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { generateText, aiConfigured } from '@/lib/ai/llm'
 import { parseDeadlinePayload } from '@/lib/deadline-validation'
 import { checkRateLimit, rateLimitMessage } from '@/lib/rate-limit'
+import { extractLocation } from '@/lib/smart-input/location-extract'
 
 /**
  * Quick Add 1 baris (natural language).
@@ -70,8 +71,11 @@ function localParse(textRaw: string) {
     let h = +jam[1]
     const min = jam[2] ? +jam[2] : 0
     const part = jam[3]
-    if (part === 'sore' || part === 'malam') { if (h < 12) h += 12 }
-    if (part === 'siang' && h < 12 && h !== 12) h += 0
+    // FIX: sebelumnya "siang" pakai "h += 0" (no-op) -- "jam 2 siang" salah
+    // ke-parse jadi 02:00. Sekarang konsisten dengan sore/malam (+12 untuk
+    // jam 1-11), dan "jam 12 malam" ditangani sebagai tengah malam (00:00).
+    if ((part === 'siang' || part === 'sore' || part === 'malam') && h >= 1 && h < 12) h += 12
+    if (part === 'malam' && h === 12) h = 0
     if (h > 23) h = 23
     time = `${pad(h)}:${pad(min)}`
   }
@@ -100,6 +104,7 @@ function localParse(textRaw: string) {
       : 'normal'
 
   const online = /\bonline|daring|vclass|ilab|zoom|gmeet\b/.test(text)
+  const location = extractLocation(textRaw)
 
   // course_name: ambil teks setelah keyword tipe, atau seluruh kalimat dibersihkan.
   const course = textRaw
@@ -108,6 +113,10 @@ function localParse(textRaw: string) {
     .replace(/jam\s+\d{1,2}([.:]\d{2})?\s*(pagi|siang|sore|malam)?/gi, '')
     .replace(/\b([01]?\d|2[0-3]):([0-5]\d)\b/g, '')
     .replace(/\b(hari ini|besok|lusa|senin|selasa|rabu|kamis|jumat|jum'at|sabtu|minggu)\b/gi, '')
+    // Ruangan sudah ditangkap terpisah lewat extractLocation() -- buang dari
+    // course_name supaya tidak nongol dobel.
+    .replace(/\b(ruang(?:an)?|gedung|lab(?:oratorium)?|lt\.?|lantai)\s+(?:(?!\b(?:jam|pukul|pada|untuk|dengan|dan|yang|di|ke|hari|besok|lusa|senin|selasa|rabu|kamis|jumat|jum'at|sabtu|minggu|deadline)\b)[a-z0-9.\-]+\s*){1,3}/gi, '')
+    .replace(/\b(google\s*meet|gmeet|zoom|microsoft\s*teams|teams)\b/gi, '')
     .replace(/\s{2,}/g, ' ')
     .trim()
 
@@ -120,13 +129,17 @@ function localParse(textRaw: string) {
     deadline_time: time,
     priority,
     online,
+    location,
   }
 }
 
 const AI_SYSTEM =
   `Kamu parser deadline mahasiswa Indonesia. Dari satu kalimat, keluarkan JSON object:
-{"title":string|null,"course_name":string,"type":one of ${TYPES.join('|')},"source":one of ${SOURCES.join('|')},"deadline_date":"YYYY-MM-DD"|null,"deadline_time":"HH:MM","priority":one of ${PRIORITIES.join('|')},"online":boolean}
-Aturan: kalau jam tidak disebut, pakai "23:59". Kalau tipe/sumber tidak jelas pakai "tugas"/"lainnya". Hari ini = tanggal sekarang. Respond ONLY JSON object.`
+{"title":string|null,"course_name":string,"type":one of ${TYPES.join('|')},"source":one of ${SOURCES.join('|')},"deadline_date":"YYYY-MM-DD"|null,"deadline_time":"HH:MM","priority":one of ${PRIORITIES.join('|')},"online":boolean,"location":string|null}
+Aturan: kalau jam tidak disebut, pakai "23:59". Kalau tipe/sumber tidak jelas pakai "tugas"/"lainnya". Hari ini = tanggal sekarang.
+"title" = judul tugas spesifik kalau disebutkan terpisah dari nama matkul (mis. "Laporan Praktikum Modul 3"), null kalau tidak ada judul spesifik (course_name saja sudah cukup).
+"location" = ruangan/gedung/lab/platform yang DISEBUTKAN EKSPLISIT di kalimat (mis. "Ruang B204", "Lab Komputer 2", "Zoom", "Google Meet"), null kalau tidak disebutkan sama sekali. JANGAN menebak.
+Respond ONLY JSON object.`
 
 function safeParseObject(raw: string): Record<string, unknown> | null {
   const cleaned = raw.trim().replace(/^```(?:json)?/i, '').replace(/```$/i, '').trim()
@@ -190,6 +203,7 @@ export async function POST(request: NextRequest) {
           deadline_time: /^([01]\d|2[0-3]):[0-5]\d$/.test(String(obj.deadline_time)) ? String(obj.deadline_time) : parsed.deadline_time,
           priority: PRIORITIES.includes(String(obj.priority)) ? String(obj.priority) : parsed.priority,
           online: typeof obj.online === 'boolean' ? obj.online : parsed.online,
+          location: typeof obj.location === 'string' && obj.location.trim() ? obj.location.trim().slice(0, 150) : parsed.location,
         }
       }
     } catch {
@@ -213,7 +227,7 @@ export async function POST(request: NextRequest) {
     deadline_date: parsed.deadline_date,
     deadline_time: parsed.deadline_time,
     campus: defaultCampus,
-    room: parsed.online ? 'Online' : 'Menyusul',
+    room: parsed.location || (parsed.online ? 'Online' : 'Menyusul'),
     priority: parsed.priority,
     status: 'pending',
     reminder_enabled: true,
@@ -237,6 +251,6 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({
     data,
     parsed,
-    notice: parsed.online ? null : 'Ruangan diisi "Menyusul" — edit kalau perlu.',
+    notice: parsed.location || parsed.online ? null : 'Ruangan diisi "Menyusul" — edit kalau perlu.',
   }, { status: 201 })
 }
