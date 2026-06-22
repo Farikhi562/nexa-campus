@@ -289,7 +289,8 @@ export interface SubscriptionIntent {
 export interface CalendarNote {
   id: string
   user_id: string
-  note_date: string     // ISO date string, e.g. "2026-06-22"
+  note_date: string
+  title: string
   content: string
   created_at: string
   updated_at: string
