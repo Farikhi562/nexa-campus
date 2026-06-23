@@ -286,3 +286,14 @@ export interface SubscriptionIntent {
   created_at: string
   updated_at: string
 }
+
+// ---------- Calendar Notes ---------------------------------------------------
+export interface CalendarNote {
+  id: string
+  user_id: string
+  /** Target date for this note in YYYY-MM-DD format. */
+  date: string
+  content: string
+  created_at: string
+  updated_at: string
+}
