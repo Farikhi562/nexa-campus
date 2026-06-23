@@ -20,7 +20,10 @@ export async function GET(request: NextRequest) {
     .order('created_at', { ascending: false })
     .limit(limit)
 
-  if (error) return NextResponse.json({ error: error.message, code: error.code, details: error.details, hint: error.hint }, { status: 500 })
+  if (error) {
+    console.error('[notifications]', error.message)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
 
   const rows = data ?? []
   const unreadCount = rows.filter((n: { is_read: boolean }) => !n.is_read).length
@@ -41,7 +44,10 @@ export async function PATCH(request: NextRequest) {
       .update({ is_read: true, read_at: new Date().toISOString() })
       .eq('user_id', user.id)
       .eq('is_read', false)
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    if (error) {
+    console.error('[api]', error.message)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
   } else if (Array.isArray(body.ids) && body.ids.length > 0) {
     const ids = body.ids.map((id) => String(id)).filter(Boolean).slice(0, 100)
     const { error } = await supabase
@@ -49,7 +55,10 @@ export async function PATCH(request: NextRequest) {
       .update({ is_read: true, read_at: new Date().toISOString() })
       .in('id', ids)
       .eq('user_id', user.id)
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    if (error) {
+    console.error('[api]', error.message)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
   }
 
   return NextResponse.json({ ok: true })

@@ -38,7 +38,10 @@ export async function POST(request: NextRequest) {
     if (error && error.code === '23505') {
       return NextResponse.json({ data: { room_id: r.id, pending: true, message: 'Kamu sudah pernah request join room ini.' } })
     }
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    if (error) {
+    console.error('[api]', error.message)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
     return NextResponse.json({ data: { room_id: r.id, pending: true, message: `Request join "${r.title}" terkirim.`, reqData } }, { status: 201 })
   }
 
@@ -48,7 +51,10 @@ export async function POST(request: NextRequest) {
 
   const { error } = await supabase
     .from('study_room_members').insert({ room_id: r.id, user_id: user.id, role: 'member' })
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[api]', error.message)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
 
   return NextResponse.json({ data: { room_id: r.id, joined: true, title: r.title } }, { status: 201 })
 }

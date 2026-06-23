@@ -20,7 +20,10 @@ export async function GET(request: NextRequest) {
     .order('created_at', { ascending: false })
     .limit(50)
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[api]', error.message)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
   return NextResponse.json({ data: data ?? [] })
 }
 
@@ -73,7 +76,10 @@ export async function POST(request: NextRequest) {
     .select('*')
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[api]', error.message)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
   return NextResponse.json({ data }, { status: 201 })
 }
 
@@ -93,6 +99,9 @@ export async function DELETE(request: NextRequest) {
     .eq('id', id)
     .eq('user_id', user.id)
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[api]', error.message)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
   return NextResponse.json({ ok: true })
 }

@@ -27,7 +27,10 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
     .eq('user_id', user.id)
     .maybeSingle()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[api]', error.message)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
   if (!data) return NextResponse.json({ error: 'Deadline tidak ditemukan.' }, { status: 404 })
 
   return NextResponse.json({ data })
@@ -59,7 +62,10 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     .select('*')
     .maybeSingle()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[api]', error.message)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
   if (!data) return NextResponse.json({ error: 'Deadline tidak ditemukan.' }, { status: 404 })
 
   // Poin leaderboard saat deadline ditandai selesai (idempotent per deadline).
@@ -125,7 +131,10 @@ export async function DELETE(_request: NextRequest, { params }: { params: { id: 
     .eq('id', params.id)
     .eq('user_id', user.id)
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[api]', error.message)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
   if (!count) return NextResponse.json({ error: 'Deadline tidak ditemukan.' }, { status: 404 })
 
   return NextResponse.json({ data: { id: params.id } })

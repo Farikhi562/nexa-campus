@@ -20,7 +20,14 @@ export type RawCandidate = {
   is_recurring?: unknown
   /** 0=Min..6=Sab, diisi kalau is_recurring=true dan hari spesifik disebutkan. */
   recurrence_day_of_week?: unknown
+  /** Potongan teks asli yang menjadi dasar parsing kandidat ini (transparansi). */
+  evidence?: unknown
+  /** Menit sebelum deadline untuk reminder, dari "ingatkan 2 jam sebelum" → 120. */
+  reminder_offset_minutes?: unknown
 }
+
+/** Klasifikasi maksud utama dari input Smart Input. */
+export type SmartInputIntent = 'deadline' | 'schedule' | 'reminder' | 'study' | 'mixed' | 'unknown'
 
 /**
  * Kandidat yang sudah dinormalisasi & siap ditampilkan di Smart Preview.
@@ -41,6 +48,12 @@ export type SmartInputCandidate = {
   reminder_enabled: boolean
   is_recurring: boolean
   recurrence_day_of_week: number | null
+  /** Menit sebelum deadline untuk reminder (mis. 120 = 2 jam sebelum). null = pakai default. */
+  reminder_offset_minutes: number | null
+  /** Potongan teks asli yang jadi dasar parsing — ditampilkan ke user biar transparan. */
+  evidence: string | null
+  /** Asumsi yang AI/parser ambil (mis. "Jam default 23:59", "Ruangan belum disebut"). */
+  assumptions: string[]
   /** seberapa yakin sistem terhadap hasil ekstraksi ini */
   confidence: 'high' | 'medium' | 'low'
   /** field yang WAJIB dicek/diisi user sebelum disimpan */
@@ -52,6 +65,8 @@ export type ExtractSource = 'ai' | 'fallback' | 'error'
 export type ExtractResult = {
   candidates: RawCandidate[]
   source: ExtractSource
+  /** Maksud utama input — diisi kalau bisa diklasifikasi (default 'unknown'). */
+  intent?: SmartInputIntent
   provider?: string
   model?: string
   error?: string

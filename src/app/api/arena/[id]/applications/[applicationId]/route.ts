@@ -116,7 +116,10 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     .select('*')
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[api]', error.message)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
 
   if (action === 'accept') {
     const joinedAt = new Date().toISOString()

@@ -38,7 +38,10 @@ export async function GET() {
     .neq('id', user.id)
     .limit(80)
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[api]', error.message)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
 
   const mySkills = new Set(Array.isArray((me as { profile_skills?: string[] | null } | null)?.profile_skills) ? (me as { profile_skills?: string[] }).profile_skills?.map((s) => s.toLowerCase()) : [])
   const result = ((profiles ?? []) as ProfileRow[]).map((p) => {

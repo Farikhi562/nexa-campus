@@ -18,6 +18,9 @@ export async function PATCH(req: NextRequest) {
   }
 
   const { error } = await supabase.from('profiles').update({ featured_badge: badgeId ?? null }).eq('id', user.id)
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[api]', error.message)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
   return NextResponse.json({ ok: true })
 }

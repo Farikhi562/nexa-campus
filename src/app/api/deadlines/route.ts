@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     .single()
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
   }
 
   if (data?.id) {

@@ -1,4 +1,5 @@
 import DeadlineDashboardOverview from '@/components/dashboard/DeadlineDashboardOverview'
+import DashboardStatsStrip from '@/components/dashboard/DashboardStatsStrip'
 import { createClient } from '@/lib/supabase/server'
 import { sortNearest } from '@/lib/deadline-utils'
 import { redirect } from 'next/navigation'
@@ -58,9 +59,13 @@ export default async function DashboardPage({
 
   const dashboardProfile = profile as DashboardProfile | null
 
+  const sortedDeadlines = ((deadlines ?? []) as AcademicDeadline[]).sort(sortNearest)
+
   return (
-    <DeadlineDashboardOverview
-      initialDeadlines={((deadlines ?? []) as AcademicDeadline[]).sort(sortNearest)}
+    <div className="space-y-4">
+      <DashboardStatsStrip deadlines={sortedDeadlines} />
+      <DeadlineDashboardOverview
+        initialDeadlines={sortedDeadlines}
       userName={dashboardProfile?.full_name}
       userTier={getEffectivePlan({ ...(dashboardProfile ?? {}), email: user.email })}
       referralCode={dashboardProfile?.referral_code}
@@ -73,5 +78,6 @@ export default async function DashboardPage({
       showUpdatedMessage={searchParams?.updated === 'deadline'}
       showDeletedMessage={searchParams?.deleted === 'deadline'}
     />
+    </div>
   )
 }

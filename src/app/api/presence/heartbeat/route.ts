@@ -21,15 +21,8 @@ export async function POST(request: NextRequest) {
       current_room_id: currentRoomId,
     }, { onConflict: 'user_id' })
 
-  // BUG-002 fix: jangan balas 500. Heartbeat itu fitur "nice to have" (presence/online status).
-  // Kalau tabel/RLS bermasalah, balas 200 dengan ok:false supaya:
-  //   1) Console tidak dibanjiri error 500 berulang tiap beberapa detik.
-  //   2) Client tidak retry agresif / nge-spam.
-  // Error tetap dicatat di server log untuk diinvestigasi (kemungkinan tabel user_presence
-  // belum dibuat atau RLS belum mengizinkan upsert — lihat migration di docs).
   if (error) {
-    console.error('[presence/heartbeat] upsert failed (soft):', error.message)
-    return NextResponse.json({ ok: false, soft_error: 'presence_unavailable' }, { status: 200 })
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
   }
 
   return NextResponse.json({ ok: true })

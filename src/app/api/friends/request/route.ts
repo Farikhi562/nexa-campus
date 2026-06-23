@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
 
   if (error) {
     if (error.code === '23505') return NextResponse.json({ error: 'Permintaan sudah pernah dikirim.' }, { status: 409 })
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
   }
 
   // Notifikasi tidak boleh menggagalkan proses tambah teman. Jika tabel belum dimigrasi, request tetap berjalan.

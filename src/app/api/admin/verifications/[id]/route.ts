@@ -50,7 +50,10 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     .select('*')
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[api]', error.message)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
 
   // Sinkron flag denormalisasi di profiles (dipakai FounderVerifiedBadge dkk
   // supaya tidak perlu join ke user_verifications di setiap render badge).

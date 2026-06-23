@@ -33,7 +33,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       .from('study_room_members')
       .insert({ room_id: id, user_id: reqRow.user_id, role: 'member' })
     if (error && error.code !== '23505') {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
     }
   }
 

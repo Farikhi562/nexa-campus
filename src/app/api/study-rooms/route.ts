@@ -26,7 +26,10 @@ export async function GET(request: NextRequest) {
   if (status) query = query.eq('status', status)
 
   const { data: rooms, error } = await query
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[api]', error.message)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
 
   const roomList = (rooms ?? []) as Array<Record<string, unknown>>
   const roomIds = roomList.map((r) => r.id as string)

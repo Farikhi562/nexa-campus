@@ -38,7 +38,10 @@ export async function GET(_: NextRequest, { params }: Params) {
     .eq('room_id', id)
     .maybeSingle()
 
-  if (error && error.code !== 'PGRST116') return NextResponse.json({ error: error.message, code: error.code }, { status: 500 })
+  if (error && error.code !== 'PGRST116') {
+    console.error('[study-rooms/workspace]', error.message)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
 
   return NextResponse.json({
     data: data ?? { room_id: id, pinned_note: '', group_goal: '', material_link: '', next_session_at: null, checklist: [] },
@@ -77,6 +80,9 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     .select('*')
     .single()
 
-  if (error) return NextResponse.json({ error: error.message, code: error.code }, { status: 500 })
+  if (error) {
+    console.error('[study-rooms/workspace]', error.message)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
   return NextResponse.json({ data })
 }

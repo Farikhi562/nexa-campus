@@ -78,7 +78,10 @@ export async function GET(req: NextRequest) {
   if (type) query = query.eq('competition_type', type)
 
   const { data: posts, error } = await query
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[api]', error.message)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
 
   const rows = (posts ?? []) as ArenaPostRow[]
   const postIds = rows.map((row) => row.id)
@@ -187,7 +190,10 @@ export async function POST(req: NextRequest) {
     .select('*')
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[api]', error.message)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
 
   await supabase.from('nexa_arena_team_members').upsert({
     post_id: data.id,

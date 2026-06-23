@@ -2,8 +2,9 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { AlertTriangle, CheckCircle2, Loader2, Trash2, X } from 'lucide-react'
+import { AlertTriangle, Bell, CheckCircle2, Info, Loader2, Trash2, X } from 'lucide-react'
 import { DEADLINE_TYPES, PRIORITIES } from '@/lib/nexa-data'
+import { formatReminderOffset } from '@/lib/smart-input/reminder-offset'
 import type { SmartInputCandidate } from '@/lib/smart-input/types'
 
 type EditableCandidate = SmartInputCandidate & { _include: boolean }
@@ -80,6 +81,7 @@ export default function SmartInputPreview({ candidates, source, logId, inputType
             notes: it.notes,
             priority: it.priority,
             reminder_enabled: it.reminder_enabled,
+            reminder_offset_minutes: it.reminder_offset_minutes,
           })),
         }),
       })
@@ -260,6 +262,34 @@ export default function SmartInputPreview({ candidates, source, logId, inputType
                   <AlertTriangle className="mt-0.5 h-3.5 w-3.5 flex-none" />
                   Sistem tidak yakin dengan field bertanda kuning — tolong cek/lengkapi sebelum simpan.
                 </p>
+              )}
+
+              {/* Asumsi yang diambil parser — transparansi buat user */}
+              {item.assumptions && item.assumptions.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {item.assumptions.map((a, ai) => (
+                    <span key={ai} className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500">
+                      <Info className="h-2.5 w-2.5" /> {a}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Reminder offset kalau user minta diingatkan */}
+              {item.reminder_offset_minutes != null && (
+                <p className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-violet-50 px-2 py-0.5 text-[10px] font-black text-violet-700">
+                  <Bell className="h-2.5 w-2.5" /> Reminder {formatReminderOffset(item.reminder_offset_minutes)}
+                </p>
+              )}
+
+              {/* Evidence — potongan teks asli yang jadi dasar parsing */}
+              {item.evidence && (
+                <details className="mt-2">
+                  <summary className="cursor-pointer text-[10px] font-bold text-slate-400 hover:text-slate-600">
+                    Dari teks: &ldquo;{item.evidence.length > 60 ? item.evidence.slice(0, 60) + '…' : item.evidence}&rdquo;
+                  </summary>
+                  <p className="mt-1 rounded-lg bg-slate-50 px-2 py-1.5 text-[11px] leading-4 text-slate-500">{item.evidence}</p>
+                </details>
               )}
             </div>
           )

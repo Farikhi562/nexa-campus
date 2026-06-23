@@ -73,6 +73,7 @@ export default function SmartInputBox({ plan, defaultCampus }: { plan: Plan; def
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [preview, setPreview] = useState<PreviewState | null>(null)
+  const [studyHint, setStudyHint] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const isLocked = (tabId: TabId) => plan === 'radar' && TABS.find((t) => t.id === tabId)?.ai
@@ -84,11 +85,14 @@ export default function SmartInputBox({ plan, defaultCampus }: { plan: Plan; def
     setError('')
     setPreview(null)
     try {
-      const { ok, data } = await fetchJsonWithTimeout('/api/ai/parse-text', { text: value }) as { ok: boolean; data: { error?: string; candidates?: SmartInputCandidate[]; source?: PreviewState['source']; logId?: string | null } | null }
+      const { ok, data } = await fetchJsonWithTimeout('/api/ai/parse-text', { text: value }) as { ok: boolean; data: { error?: string; candidates?: SmartInputCandidate[]; source?: PreviewState['source']; logId?: string | null; intent?: string } | null }
       if (!ok || !data) {
         setError(data?.error || 'Gagal memproses teks.')
         return
       }
+      // Kalau AI mendeteksi maksud BELAJAR, arahkan user ke fitur Belajar
+      // alih-alih cuma bikin deadline.
+      setStudyHint(data.intent === 'study')
       if (!data.candidates?.length) {
         setError('Belum kebaca ada tugas/jadwal dari teks ini. Coba lebih spesifik atau pakai input Manual.')
         return
@@ -274,11 +278,11 @@ export default function SmartInputBox({ plan, defaultCampus }: { plan: Plan; def
                 <span className="text-sm font-bold text-slate-700">
                   {loading ? 'Membaca file...' : 'Tap untuk pilih PDF / DOCX'}
                 </span>
-                <span className="text-xs text-slate-400">PDF atau Word (.docx), maks 3MB</span>
+                <span className="text-xs text-slate-400">PDF, Word (.docx), TXT, atau CSV — maks 3MB</span>
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="application/pdf,.pdf,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  accept="application/pdf,.pdf,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.txt,text/plain,.csv,text/csv"
                   className="hidden"
                   disabled={loading}
                   onChange={(e) => {
@@ -295,6 +299,23 @@ export default function SmartInputBox({ plan, defaultCampus }: { plan: Plan; def
             <p className="mt-2 rounded-xl bg-red-50 px-3 py-2 text-xs leading-5 text-red-700">{error}</p>
           )}
         </>
+      )}
+
+      {studyHint && (
+        <div className="mt-3 flex items-start gap-2.5 rounded-2xl border border-violet-200 bg-violet-50 p-3">
+          <Brain className="mt-0.5 h-4 w-4 flex-none text-violet-600" />
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-black text-violet-900">Kayaknya kamu mau belajar, bukan cuma catat deadline?</p>
+            <p className="mt-0.5 text-[11px] leading-4 text-violet-700">NEXA bisa bikin rangkuman, quiz, dan flashcard dari materimu.</p>
+            <Link href="/dashboard/study/new" className="mt-1.5 inline-flex items-center gap-1 text-[11px] font-black text-violet-700 underline hover:text-violet-900">
+              Buka fitur Belajar →
+            </Link>
+          </div>
+          <button type="button" onClick={() => setStudyHint(false)} className="flex-none rounded-lg p-0.5 text-violet-400 hover:text-violet-700" aria-label="Tutup">
+            <Lock className="hidden" />
+            <span className="text-sm">×</span>
+          </button>
+        </div>
       )}
 
       {preview && (

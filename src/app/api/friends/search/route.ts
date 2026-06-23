@@ -46,7 +46,10 @@ export async function GET(request: NextRequest) {
   if (major) query = query.ilike('major', `%${major}%`)
 
   const { data, error } = await query
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[api]', error.message)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
 
   const sanitized = (data ?? []).map((row) => ({
     ...row,

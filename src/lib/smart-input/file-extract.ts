@@ -70,6 +70,40 @@ export async function extractTextFromFile(
     }
   }
 
+  // TXT — teks polos, langsung decode UTF-8.
+  if (mimeType === 'text/plain' || filename?.toLowerCase().endsWith('.txt')) {
+    try {
+      const text = buffer.toString('utf-8').trim()
+      if (!text) return { error: 'File teks ini kosong.' }
+      return { text: text.slice(0, MAX_EXTRACTED_CHARS) }
+    } catch {
+      return { error: 'Gagal membaca file teks ini.' }
+    }
+  }
+
+  // CSV — decode lalu rapikan jadi baris-baris (sel dipisah " | " biar parser NLP
+  // tetap bisa baca tiap baris sebagai satu kandidat). Header (baris pertama)
+  // dipertahankan karena sering berisi nama kolom yang membantu konteks AI.
+  if (mimeType === 'text/csv' || filename?.toLowerCase().endsWith('.csv')) {
+    try {
+      const raw = buffer.toString('utf-8').trim()
+      if (!raw) return { error: 'File CSV ini kosong.' }
+      const lines = raw
+        .split(/\r?\n/)
+        .filter((line) => line.trim())
+        .map((line) => {
+          // Pisah CSV sederhana (koma atau titik koma), buang quote pembungkus.
+          const cells = line.split(/[,;]/).map((c) => c.trim().replace(/^"|"$/g, ''))
+          return cells.filter(Boolean).join(' | ')
+        })
+      const text = lines.join('\n')
+      if (!text) return { error: 'Tidak ada data terbaca dari CSV ini.' }
+      return { text: text.slice(0, MAX_EXTRACTED_CHARS) }
+    } catch {
+      return { error: 'Gagal membaca file CSV ini.' }
+    }
+  }
+
   if (mimeType === 'application/msword' || filename?.toLowerCase().endsWith('.doc')) {
     return {
       error:
@@ -79,6 +113,6 @@ export async function extractTextFromFile(
 
   return {
     error:
-      'Format file tidak didukung. Gunakan PDF atau DOCX (untuk gambar, pakai tab "Upload Gambar").',
+      'Format file tidak didukung. Gunakan PDF, DOCX, TXT, atau CSV (untuk gambar, pakai tab "Upload Gambar").',
   }
 }

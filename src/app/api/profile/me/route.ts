@@ -80,7 +80,10 @@ export async function GET() {
     .eq('id', user.id)
     .maybeSingle()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[api]', error.message)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
 
   const profile = (data ?? null) as ProfileMeRow | null
   const founder = isFounderEmail(user.email) || Boolean(profile?.founder_verified)

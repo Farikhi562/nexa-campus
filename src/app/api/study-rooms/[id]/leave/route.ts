@@ -84,7 +84,10 @@ export async function POST(_request: NextRequest, { params }: Params) {
       .eq('room_id', id)
       .eq('user_id', user.id)
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    if (error) {
+    console.error('[api]', error.message)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
 
     return NextResponse.json({ ok: true, owner_transferred_to: transfer.transferredTo })
   } catch (err) {

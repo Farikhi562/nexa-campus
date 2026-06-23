@@ -51,7 +51,10 @@ export async function GET(_req: NextRequest, { params }: Params) {
     .eq('post_id', id)
     .order('created_at', { ascending: false })
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[api]', error.message)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
 
   const rows = (applications ?? []) as ApplicationRow[]
   const applicantIds = Array.from(new Set(rows.map((row) => row.applicant_id)))

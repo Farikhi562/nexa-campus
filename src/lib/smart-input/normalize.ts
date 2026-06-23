@@ -52,7 +52,8 @@ export function normalizeCandidate(raw: RawCandidate, opts: { defaultCampus: str
   if (!date) missing.push('deadline_date')
 
   const timeRaw = str(raw.deadline_time)
-  const time = TIME_RE.test(timeRaw) ? timeRaw : '23:59'
+  const timeWasGiven = TIME_RE.test(timeRaw)
+  const time = timeWasGiven ? timeRaw : '23:59'
 
   const priorityRaw = str(raw.priority)
   const priority: DeadlinePriority = ALLOWED_PRIORITIES.has(priorityRaw as DeadlinePriority)
@@ -69,6 +70,20 @@ export function normalizeCandidate(raw: RawCandidate, opts: { defaultCampus: str
 
   const title = str(raw.title) || null
   const notes = str(raw.notes) || null
+
+  const reminderOffset = typeof raw.reminder_offset_minutes === 'number' && raw.reminder_offset_minutes > 0
+    ? Math.round(raw.reminder_offset_minutes)
+    : null
+
+  const evidence = str(raw.evidence) || null
+
+  // Kumpulkan asumsi yang diambil saat parsing supaya user tahu apa yang
+  // perlu dicek ulang. Tampil di Smart Preview.
+  const assumptions: string[] = []
+  if (!timeWasGiven) assumptions.push('Jam diasumsikan 23:59 (tidak disebutkan)')
+  if (!date) assumptions.push('Tanggal belum terbaca — cek/isi manual')
+  if (!explicitLocation && !isOnline) assumptions.push('Ruangan belum disebut, diisi "Menyusul"')
+  if (missing.includes('course_name')) assumptions.push('Nama matkul belum jelas')
 
   const confidence: SmartInputCandidate['confidence'] =
     missing.length === 0 ? 'high' : missing.includes('deadline_date') ? 'low' : 'medium'
@@ -87,6 +102,9 @@ export function normalizeCandidate(raw: RawCandidate, opts: { defaultCampus: str
     reminder_enabled: true,
     is_recurring: raw.is_recurring === true,
     recurrence_day_of_week: typeof raw.recurrence_day_of_week === 'number' ? raw.recurrence_day_of_week : null,
+    reminder_offset_minutes: reminderOffset,
+    evidence,
+    assumptions,
     confidence,
     missing_fields: missing,
   }

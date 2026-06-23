@@ -95,7 +95,10 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   const { error } = await supabase
     .from('study_room_members').update({ role: newRole })
     .eq('room_id', id).eq('user_id', userId)
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[api]', error.message)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
   return NextResponse.json({ ok: true })
 }
 
@@ -127,7 +130,10 @@ export async function DELETE(_request: NextRequest, { params }: Params) {
     const transfer = await transferOwnerIfNeeded(supabase, id, userId, targetRole)
     const { error } = await supabase
       .from('study_room_members').delete().eq('room_id', id).eq('user_id', userId)
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    if (error) {
+    console.error('[api]', error.message)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
     return NextResponse.json({ ok: true, owner_transferred_to: transfer.transferredTo })
   } catch (err) {
     return NextResponse.json({ error: err instanceof Error ? err.message : 'Gagal mengeluarkan member.' }, { status: 500 })

@@ -26,7 +26,10 @@ export async function GET(request: NextRequest) {
     .or(`requester_id.eq.${user.id},receiver_id.eq.${user.id}`)
     .order('created_at', { ascending: false })
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[api]', error.message)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
 
   const rows = (requests ?? []) as Array<{
     id: string; requester_id: string; receiver_id: string

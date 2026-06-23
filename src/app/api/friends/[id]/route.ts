@@ -49,7 +49,10 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     .select('id, requester_id, receiver_id, status')
     .maybeSingle()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[api]', error.message)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
 
   if (action === 'accept' && data?.requester_id) {
     try { await notifyFriendAccepted(supabase, data.requester_id as string, user.id) } catch (error) { console.error('[Friend Accepted Notification]', error) }
@@ -70,6 +73,9 @@ export async function DELETE(_request: NextRequest, { params }: Params) {
     .eq('id', id)
     .eq('requester_id', user.id)
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[api]', error.message)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
   return NextResponse.json({ ok: true })
 }

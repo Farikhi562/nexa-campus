@@ -89,6 +89,9 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     .select('*')
     .single()
 
-  if (error) return NextResponse.json({ error: error.message, code: error.code }, { status: 500 })
+  if (error) {
+    console.error('[arena/workspace]', error.message, error.code)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
   return NextResponse.json({ workspace: data })
 }

@@ -23,7 +23,7 @@ export async function POST(_request: NextRequest, { params }: Params) {
 
   if (error) {
     if (error.code === '23505') return NextResponse.json({ error: 'Kamu sudah ada di room ini.' }, { status: 409 })
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
   }
 
   return NextResponse.json({ ok: true })

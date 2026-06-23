@@ -195,7 +195,7 @@ export async function POST(req: NextRequest, { params }: Params) {
 
   if (error) {
     if (error.code === '23505') return NextResponse.json({ error: 'Kamu sudah melamar ke post ini.' }, { status: 409 })
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
   }
 
   try { await notifyOwner(supabase, arenaPost.creator_id, user.id, arenaPost.title) } catch (error) { console.error('[Arena Application Notification]', error) }

@@ -19,6 +19,7 @@ export type DeadlinePayload = {
   notes?: unknown
   priority?: unknown
   reminder_enabled?: unknown
+  reminder_offset_minutes?: unknown
   status?: unknown
   is_recurring?: unknown
   recurrence_day_of_week?: unknown
@@ -91,6 +92,13 @@ export function parseDeadlinePayload(body: DeadlinePayload) {
       notes: optionalText(body.notes),
       priority,
       reminder_enabled: body.reminder_enabled === true,
+      reminder_offset_minutes:
+        typeof body.reminder_offset_minutes === 'number'
+        && Number.isInteger(body.reminder_offset_minutes)
+        && body.reminder_offset_minutes >= 1
+        && body.reminder_offset_minutes <= 40320
+          ? body.reminder_offset_minutes
+          : null,
       status,
       is_recurring: isRecurring,
       recurrence_day_of_week: isRecurring ? recurrenceDow : null,

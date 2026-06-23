@@ -1,5 +1,6 @@
 import type { RawCandidate } from './types'
 import { extractLocation } from './location-extract'
+import { parseReminderOffset } from './reminder-offset'
 
 // ── Recurring detection ───────────────────────────────────────────────────────
 const DOW_NAMES: Record<string, number> = {
@@ -204,6 +205,7 @@ function parseLine(lineRaw: string, today: Date): RawCandidate {
   const titleHint = extractTitleHint(lineRaw)
   const lecturerNote = extractLecturerNote(lineRaw)
   const { isRecurring, dayOfWeek } = detectRecurring(line)
+  const reminderOffset = parseReminderOffset(lineRaw)
   const courseName = cleanCourseName(lineRaw.trim()) || lineRaw.trim()
 
   return {
@@ -219,6 +221,9 @@ function parseLine(lineRaw: string, today: Date): RawCandidate {
     location,
     is_recurring: isRecurring || undefined,
     recurrence_day_of_week: dayOfWeek ?? undefined,
+    reminder_offset_minutes: reminderOffset ?? undefined,
+    // Evidence = baris asli yang jadi dasar parsing kandidat ini.
+    evidence: lineRaw.trim().slice(0, 200),
   }
 }
 

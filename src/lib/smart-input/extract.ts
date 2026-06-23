@@ -1,6 +1,7 @@
 import 'server-only'
 import { generateText, generateFromImage, aiConfigured, activeProviderInfo, LlmFailure } from '@/lib/ai/llm'
 import { localParseText } from './local-parser'
+import { classifyIntent } from './classify-intent'
 import type { ExtractResult, RawCandidate } from './types'
 
 const TYPES = ['tugas', 'praktikum', 'kuis', 'ujian', 'presentasi', 'administrasi', 'pembayaran', 'organisasi', 'lainnya']
@@ -47,7 +48,9 @@ Tiap item punya field:
   "online": boolean,                // true kalau jelas online/daring/vclass/zoom
   "location": string|null,          // ruangan/gedung/lab/platform yang DISEBUTKAN EKSPLISIT, null kalau tidak ada
   "is_recurring": boolean,          // true kalau ada pola berulang ("setiap senin", "tiap minggu", "jadwal mingguan")
-  "recurrence_day_of_week": number|null  // 0=Min,1=Sen,2=Sel,3=Rab,4=Kam,5=Jum,6=Sab. null kalau is_recurring=false atau hari tidak disebutkan
+  "recurrence_day_of_week": number|null,  // 0=Min,1=Sen,2=Sel,3=Rab,4=Kam,5=Jum,6=Sab. null kalau is_recurring=false atau hari tidak disebutkan
+  "reminder_offset_minutes": number|null, // kalau user minta diingatkan ("ingatkan 2 jam sebelum" -> 120, "30 menit sebelum" -> 30). null kalau tidak diminta
+  "evidence": string|null           // POTONGAN TEKS ASLI (verbatim, maks 1 kalimat) yang jadi dasar item ini. Berguna agar user paham dari mana hasil ini.
 }
 Aturan: hari ini = tanggal yang diberikan di prompt. Kalau teks tidak berisi info tugas sama sekali, kembalikan array kosong [].
 Respond ONLY with the JSON array, no markdown, no commentary.`
@@ -95,8 +98,9 @@ function safeParseArray(raw: string): RawCandidate[] | null {
  * mengembalikan error keras ke user untuk input teks.
  */
 export async function extractFromText(text: string): Promise<ExtractResult> {
+  const intent = classifyIntent(text)
   if (!aiConfigured()) {
-    return { candidates: localParseText(text), source: 'fallback' }
+    return { candidates: localParseText(text), source: 'fallback', intent }
   }
 
   try {
@@ -115,16 +119,16 @@ export async function extractFromText(text: string): Promise<ExtractResult> {
     const arr = safeParseArray(raw)
     if (!arr || arr.length === 0) {
       const fallback = localParseText(text)
-      return { candidates: fallback, source: fallback.length > 0 ? 'fallback' : 'ai', provider, model }
+      return { candidates: fallback, source: fallback.length > 0 ? 'fallback' : 'ai', provider, model, intent }
     }
-    return { candidates: arr, source: 'ai', provider, model }
+    return { candidates: arr, source: 'ai', provider, model, intent }
   } catch (err) {
     // Termasuk TimeoutError — tetap fallback ke parser lokal, jangan biarkan
     // user menunggu tanpa hasil.
     if (err instanceof TimeoutError) {
       console.warn('[smart-input] AI parse-text timeout, fallback ke parser lokal.')
     }
-    return { candidates: localParseText(text), source: 'fallback' }
+    return { candidates: localParseText(text), source: 'fallback', intent }
   }
 }
 

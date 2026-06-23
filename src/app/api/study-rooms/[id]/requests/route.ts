@@ -19,7 +19,10 @@ export async function GET(_request: NextRequest, { params }: Params) {
   const { data: requests, error } = await supabase
     .from('study_room_join_requests').select('*').eq('room_id', id).eq('status', 'pending')
     .order('created_at', { ascending: true })
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[api]', error.message)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
 
   const rows = (requests ?? []) as Array<{ user_id: string } & Record<string, unknown>>
   const userIds = rows.map((r) => r.user_id)
@@ -60,7 +63,7 @@ export async function POST(request: NextRequest, { params }: Params) {
 
   if (error) {
     if (error.code === '23505') return NextResponse.json({ error: 'Kamu sudah pernah request join room ini.' }, { status: 409 })
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
   }
   return NextResponse.json({ data }, { status: 201 })
 }

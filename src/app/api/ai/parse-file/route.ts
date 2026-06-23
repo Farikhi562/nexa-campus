@@ -121,6 +121,7 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({
     candidates,
     source: result.source,
+    intent: result.intent ?? 'unknown',
     provider: result.provider,
     model: result.model,
     logId: log?.id ?? null,

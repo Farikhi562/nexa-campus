@@ -45,7 +45,10 @@ export async function GET(request: NextRequest, { params }: Params) {
   if (before) query = query.lt('created_at', before)
 
   const { data: messages, error } = await query
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[api]', error.message)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
 
   const msgs = (messages ?? []).reverse()
 
@@ -106,6 +109,9 @@ export async function POST(request: NextRequest, { params }: Params) {
     .select('*')
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[api]', error.message)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
   return NextResponse.json({ data }, { status: 201 })
 }

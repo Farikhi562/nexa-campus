@@ -21,7 +21,10 @@ export async function GET(request: NextRequest) {
   if (status !== 'all') query = query.eq('status', status)
 
   const { data: rows, error } = await query
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[api]', error.message)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
 
   const userIds = Array.from(new Set((rows ?? []).map((r) => (r as { user_id: string }).user_id)))
   const profileMap: Record<string, unknown> = {}

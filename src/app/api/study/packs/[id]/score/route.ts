@@ -44,6 +44,9 @@ export async function POST(request: NextRequest, { params }: Params) {
     .select('quiz_best_score, quiz_attempts')
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[api]', error.message)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
   return NextResponse.json({ data: { ...data, score, total: quizLength } })
 }

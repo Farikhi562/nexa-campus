@@ -24,7 +24,10 @@ export async function GET(_request: NextRequest, { params }: Params) {
   const { data: members, error } = await supabase
     .from('study_room_members').select('*').eq('room_id', id)
     .order('joined_at', { ascending: true })
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[api]', error.message)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
 
   const rows = (members ?? []) as Array<{ user_id: string; role: string; joined_at: string; id: string }>
   const profileIds = rows.map((m) => m.user_id)

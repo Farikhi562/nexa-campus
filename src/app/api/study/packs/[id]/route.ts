@@ -16,7 +16,10 @@ export async function GET(_request: NextRequest, { params }: Params) {
     .eq('user_id', user.id)
     .maybeSingle()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[api]', error.message)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
   if (!data) return NextResponse.json({ error: 'Materi tidak ditemukan.' }, { status: 404 })
 
   return NextResponse.json({ data })
@@ -34,6 +37,9 @@ export async function DELETE(_request: NextRequest, { params }: Params) {
     .eq('id', id)
     .eq('user_id', user.id)
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[api]', error.message)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
   return NextResponse.json({ ok: true })
 }

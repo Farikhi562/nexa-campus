@@ -23,6 +23,7 @@ type CandidateInput = {
   notes?: unknown
   priority?: unknown
   reminder_enabled?: unknown
+  reminder_offset_minutes?: unknown
 }
 
 const INPUT_TYPES = new Set(['manual', 'nlp', 'image', 'file'])
@@ -80,6 +81,7 @@ export async function POST(request: NextRequest) {
       priority: c.priority ?? 'normal',
       status: 'pending',
       reminder_enabled: c.reminder_enabled !== false, // default true kecuali user matikan
+      reminder_offset_minutes: c.reminder_offset_minutes,
     })
 
     if (parsed.error) {

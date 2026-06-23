@@ -90,7 +90,10 @@ export async function GET(_request: NextRequest, { params }: Params) {
     .eq('id', id)
     .maybeSingle()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[api]', error.message)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
   if (!data) return NextResponse.json({ error: 'Profil tidak ditemukan.' }, { status: 404 })
 
   const isOwnProfile = data.id === user.id

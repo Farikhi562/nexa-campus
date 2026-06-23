@@ -258,6 +258,7 @@ export interface AcademicDeadline {
   is_recurring: boolean
   recurrence_day_of_week: number | null
   recurrence_parent_id: string | null
+  reminder_offset_minutes: number | null
   created_at: string
   updated_at: string
 }
@@ -282,16 +283,6 @@ export interface SubscriptionIntent {
   status: SubscriptionIntentStatus
   payment_method: 'manual_transfer' | 'qris'
   contact_note: string | null
-  created_at: string
-  updated_at: string
-}
-
-export interface CalendarNote {
-  id: string
-  user_id: string
-  note_date: string
-  title: string
-  content: string
   created_at: string
   updated_at: string
 }

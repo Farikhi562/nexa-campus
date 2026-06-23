@@ -70,7 +70,10 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     .select('*')
     .maybeSingle()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[api]', error.message)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
   if (!data) return NextResponse.json({ error: 'Postingan tidak ditemukan atau bukan milik kamu.' }, { status: 404 })
 
   return NextResponse.json({ data })
@@ -88,7 +91,10 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
     .eq('id', id)
     .eq('creator_id', user.id)
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[api]', error.message)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
   if (!count) return NextResponse.json({ error: 'Postingan tidak ditemukan atau bukan milik kamu.' }, { status: 404 })
 
   return NextResponse.json({ ok: true })
