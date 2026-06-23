@@ -46,7 +46,7 @@ export async function POST(_req: NextRequest, { params }: Params) {
   }
 
   const roadmap = (Array.isArray(pack.roadmap) ? pack.roadmap : []) as RoadmapStep[]
-  const roadmapText = roadmap.map((s) => `${s.step}. ${s.title}: ${s.description}`).join('\n')
+   const roadmapText = roadmap.map((s, i) => `${i + 1}. ${s.title}: ${s.description}`).join('\n')
 
   const result = await generateFlashcards(pack.topic, pack.summary, roadmapText)
   if (!result.ok) return NextResponse.json({ error: result.error }, { status: 422 })
