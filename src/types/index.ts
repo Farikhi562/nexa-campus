@@ -293,6 +293,7 @@ export interface CalendarNote {
   user_id: string
   /** Target date for this note in YYYY-MM-DD format. */
   note_date: string
+  title: string | null
   content: string
   created_at: string
   updated_at: string
