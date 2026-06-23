@@ -106,3 +106,39 @@ export type QuizQuestion = {
   correct_index: number
   explanation?: string
 }
+
+// ─── Study Pack — generated content shapes ────────────────────────────────────
+// These were previously exported from this file; re-added to fix imports across
+// StudyRoadmapView, StudyTabsClient, StudyQuizView, PracticeView, page.tsx,
+// generate-study-pack.ts.
+
+/** Satu langkah roadmap yang dihasilkan AI dan disimpan di kolom study_packs.roadmap */
+export type StudyRoadmapStep = {
+  step: number
+  title: string
+  description: string
+  estimatedMinutes: number
+}
+
+/** Satu soal kuis yang dihasilkan AI dan disimpan di kolom study_packs.quiz */
+export type StudyQuizQuestion = {
+  question: string
+  options: string[]
+  correctIndex: number
+  explanation: string
+}
+
+/** Return type dari generateStudyPack() */
+export type GenerateStudyPackResult =
+  | { ok: false; error: string }
+  | {
+      ok: true
+      pack: {
+        topic: string
+        sourceFilename: string | null
+        sourceType: string
+        roadmap: StudyRoadmapStep[]
+        summary: string
+        quiz: StudyQuizQuestion[]
+      }
+    }
