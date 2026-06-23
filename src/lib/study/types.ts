@@ -142,3 +142,17 @@ export type GenerateStudyPackResult =
         quiz: StudyQuizQuestion[]
       }
     }
+
+// ─── Flashcard (Leitner system) ───────────────────────────────────────────────
+
+/** Satu kartu flashcard yang dihasilkan AI */
+export type Flashcard = {
+  front: string
+  back: string
+}
+
+/**
+ * Progress Leitner per kartu, key = index kartu (string).
+ * 1 = belum tahu, 2 = agak tahu, 3 = sudah tahu.
+ */
+export type FlashcardBoxes = Record<string, 1 | 2 | 3>
