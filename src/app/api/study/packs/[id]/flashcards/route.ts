@@ -45,7 +45,7 @@ export async function POST(_req: NextRequest, { params }: Params) {
     return NextResponse.json({ flashcards: pack.flashcards, generated: false })
   }
 
-  const roadmap = (Array.isArray(pack.roadmap) ? pack.roadmap : []) as StudyRoadmapStep[]
+  const roadmap = (Array.isArray(pack.roadmap) ? pack.roadmap : []) as RoadmapStep[]
   const roadmapText = roadmap.map((s) => `${s.step}. ${s.title}: ${s.description}`).join('\n')
 
   const result = await generateFlashcards(pack.topic, pack.summary, roadmapText)
