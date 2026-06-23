@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getEffectivePlan } from '@/lib/plans'
 import { generateFlashcards } from '@/lib/study/generate-flashcards'
-import type { StudyRoadmapStep } from '@/lib/study/types'
+import type { RoadmapStep } from '@/lib/study/types'
 
 type Params = { params: Promise<{ id: string }> }
 
