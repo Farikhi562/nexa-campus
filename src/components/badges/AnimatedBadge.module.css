@@ -1,0 +1,161 @@
+/* ============================================================================
+   Animasi badge — transform & opacity saja (GPU, 60fps).
+   Semua animasi otomatis NONAKTIF saat user mengaktifkan "reduce motion".
+   ============================================================================ */
+
+.icon {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+
+/* ── Idle float (buku, piala, mahkota, perisai) ──────────────────────────── */
+.float { animation: badgeFloat 3.2s ease-in-out infinite; }
+@keyframes badgeFloat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-2.5px); }
+}
+
+/* ── Deadline: buku atas mengintip, buku tengah geser halus ──────────────── */
+.bookTop { animation: bookTopTilt 4s ease-in-out infinite; }
+@keyframes bookTopTilt {
+  0%, 100% { transform: rotate(0deg) translateY(0); }
+  50%      { transform: rotate(-4deg) translateY(-1px); }
+}
+.bookMid { animation: bookMidShift 4s ease-in-out infinite; }
+@keyframes bookMidShift {
+  0%, 100% { transform: translateX(0); }
+  50%      { transform: translateX(1.5px); }
+}
+
+/* ── Referral: cincin Saturnus berputar (3D-ish via scaleY) ──────────────── */
+.ringSpin { animation: ringSpin 6s linear infinite; }
+@keyframes ringSpin {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ── Leaderboard / generic: bintang berdenyut ────────────────────────────── */
+.starPulse { animation: starPulse 2s ease-in-out infinite; }
+@keyframes starPulse {
+  0%, 100% { transform: scale(1);   opacity: 1; }
+  50%      { transform: scale(1.18); opacity: 0.85; }
+}
+
+/* ── Study: tassel berayun ───────────────────────────────────────────────── */
+.tassel { animation: tasselSwing 2.6s ease-in-out infinite; }
+@keyframes tasselSwing {
+  0%, 100% { transform: rotate(-8deg); }
+  50%      { transform: rotate(8deg); }
+}
+
+/* ── Arena: kilau pedang menyapu ─────────────────────────────────────────── */
+.gleam { animation: gleamPulse 3s ease-in-out infinite; }
+@keyframes gleamPulse {
+  0%, 100% { filter: brightness(1); }
+  50%      { filter: brightness(1.35); }
+}
+
+/* ── Streak: api berkedip ────────────────────────────────────────────────── */
+.flicker { animation: flameFlicker 0.9s ease-in-out infinite; }
+@keyframes flameFlicker {
+  0%, 100% { transform: scaleY(1)    scaleX(1);    }
+  30%      { transform: scaleY(1.08) scaleX(0.96); }
+  60%      { transform: scaleY(0.95) scaleX(1.03); }
+}
+
+/* ── Social: dua cincin berdenyut bergantian ─────────────────────────────── */
+.pulseA { animation: ringPulse 2.4s ease-in-out infinite; }
+.pulseB { animation: ringPulse 2.4s ease-in-out infinite 1.2s; }
+@keyframes ringPulse {
+  0%, 100% { transform: scale(1);    opacity: 0.9; }
+  50%      { transform: scale(1.08); opacity: 1; }
+}
+
+/* ── Founder: permata berkilau ───────────────────────────────────────────── */
+.gemA { animation: gemSparkle 2.2s ease-in-out infinite; }
+.gemB { animation: gemSparkle 2.2s ease-in-out infinite 1.1s; }
+@keyframes gemSparkle {
+  0%, 100% { opacity: 0.7; }
+  50%      { opacity: 1; }
+}
+
+/* ── Aura/glow di belakang medali (semua badge) ──────────────────────────── */
+.aura {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  z-index: 0;
+  animation: auraBreath 3.4s ease-in-out infinite;
+}
+@keyframes auraBreath {
+  0%, 100% { transform: scale(0.92); opacity: 0.55; }
+  50%      { transform: scale(1.05); opacity: 0.9; }
+}
+
+/* ── Shine sweep — gloss diagonal yang menyatukan semua badge jadi satu keluarga ── */
+.shine {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  overflow: hidden;
+  z-index: 2;
+  pointer-events: none;
+}
+.shine::after {
+  content: '';
+  position: absolute;
+  top: -120%;
+  left: -120%;
+  width: 80%;
+  height: 340%;
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0) 38%,
+    rgba(255, 255, 255, 0.55) 50%,
+    rgba(255, 255, 255, 0) 62%,
+    transparent 100%
+  );
+  transform: rotate(8deg);
+  animation: shineSweep 4.5s ease-in-out infinite;
+}
+@keyframes shineSweep {
+  0%, 70%, 100% { transform: translate(0, 0) rotate(8deg); }
+  80%           { transform: translate(260%, 60%) rotate(8deg); }
+}
+
+/* ── Mythos: partikel orbit ──────────────────────────────────────────────── */
+.orbit {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  animation: orbitSpin 8s linear infinite;
+}
+.orbitDot {
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  margin-left: -2px;
+  border-radius: 9999px;
+  background: #e9d5ff;
+  box-shadow: 0 0 6px 2px rgba(196, 181, 253, 0.8);
+}
+@keyframes orbitSpin {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ── Hormati preferensi reduce-motion: diam, tapi tetap tampil ────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .float, .bookTop, .bookMid, .ringSpin, .starPulse, .tassel,
+  .gleam, .flicker, .pulseA, .pulseB, .gemA, .gemB,
+  .aura, .orbit {
+    animation: none !important;
+  }
+  .shine::after { animation: none !important; opacity: 0; }
+  .aura { opacity: 0.6; transform: scale(1); }
+}
