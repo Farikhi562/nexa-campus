@@ -175,7 +175,7 @@ export default function SmartManualForm({ defaultCampus }: { defaultCampus: stri
         </div>
 
         <label className="flex items-center gap-2 text-sm font-bold text-slate-600 sm:col-span-2">
-          <input type="checkbox" checked={online} onChange={(e) => setOnline(e.target.checked)} className="h-4 w-4 rounded accent-teal-600" />
+          <input type="checkbox" checked={online} onChange={(e) => setOnline(e.target.checked)} className="h-4 w-4 rounded accent-blue-600" />
           Online / daring (kalau tidak, ruangan diisi &quot;Menyusul&quot;)
         </label>
       </div>
@@ -183,7 +183,7 @@ export default function SmartManualForm({ defaultCampus }: { defaultCampus: stri
       <button
         type="submit"
         disabled={loading}
-        className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-teal-600 px-4 py-3 text-sm font-black text-white transition hover:bg-teal-700 disabled:opacity-50 sm:w-auto"
+        className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-sm font-black text-white transition hover:bg-blue-700 disabled:opacity-50 sm:w-auto"
       >
         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
         Simpan Deadline

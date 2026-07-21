@@ -300,7 +300,7 @@ export default function ProfileSettingsForm({ profile }: { profile: Profile }) {
   return (
     <form onSubmit={submit} className="space-y-5">
       <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-        <div className="mb-5 flex gap-3 rounded-2xl border border-cyan-200 bg-cyan-50 p-4 text-sm leading-6 text-cyan-900">
+        <div className="mb-5 flex gap-3 rounded-2xl border border-orange-200 bg-orange-50 p-4 text-sm leading-6 text-orange-900">
           <Info className="mt-0.5 h-5 w-5 flex-shrink-0" />
           <div>
             <p className="font-black">Panduan isi profil</p>
@@ -318,7 +318,7 @@ export default function ProfileSettingsForm({ profile }: { profile: Profile }) {
               Kampus pakai input bebas dulu, jadi semua universitas di Indonesia tetap bisa masuk tanpa nunggu daftar resmi.
             </p>
           </div>
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-50 text-teal-700">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-700">
             <UserRound className="h-6 w-6" />
           </div>
         </div>
@@ -414,7 +414,7 @@ export default function ProfileSettingsForm({ profile }: { profile: Profile }) {
             <button
               type="button"
               onClick={() => setIsPublicProfile((value) => !value)}
-              className="focus-ring flex w-full items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:border-teal-200"
+              className="focus-ring flex w-full items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:border-blue-200"
             >
               <span>
                 <span className="block text-sm font-black text-slate-950">Tampil di leaderboard</span>
@@ -424,7 +424,7 @@ export default function ProfileSettingsForm({ profile }: { profile: Profile }) {
               </span>
               <span
                 className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition ${
-                  isPublicProfile ? 'bg-teal-500' : 'bg-slate-300'
+                  isPublicProfile ? 'bg-blue-500' : 'bg-slate-300'
                 }`}
               >
                 <span

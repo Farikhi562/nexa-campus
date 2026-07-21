@@ -66,7 +66,7 @@ export default function UpgradeCountdownCard({ userTier }: { userTier: Plan }) {
 
   return (
     <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-slate-950 p-5 text-white shadow-xl sm:p-6">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(45,212,191,0.22),transparent_18rem),radial-gradient(circle_at_90%_80%,rgba(56,189,248,0.16),transparent_16rem)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(96,165,250,0.22),transparent_18rem),radial-gradient(circle_at_90%_80%,rgba(56,189,248,0.16),transparent_16rem)]" />
       <div className="relative">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
@@ -106,7 +106,7 @@ export default function UpgradeCountdownCard({ userTier }: { userTier: Plan }) {
         <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:items-center">
           <Link
             href="/dashboard/billing"
-            className="focus-ring inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-teal-400 px-5 py-3 text-sm font-black text-slate-950 shadow-lg shadow-teal-900/30 transition hover:-translate-y-0.5 hover:bg-teal-300"
+            className="focus-ring inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-blue-400 px-5 py-3 text-sm font-black text-slate-950 shadow-lg shadow-blue-900/30 transition hover:-translate-y-0.5 hover:bg-blue-300"
           >
             Lihat upgrade {targetPlan}
             <ArrowRight className="h-4 w-4" />

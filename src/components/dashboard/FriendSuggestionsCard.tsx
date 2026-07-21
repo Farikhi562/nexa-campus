@@ -62,17 +62,17 @@ export default function FriendSuggestionsCard({ compact = false }: { compact?: b
   if (items.length === 0) return null
 
   return (
-    <Card className="border-teal-100 bg-gradient-to-br from-white to-teal-50/60">
+    <Card className="border-blue-100 bg-gradient-to-br from-white to-blue-50/60">
       <CardContent className="p-4 sm:p-5">
         <div className="mb-4 flex items-center justify-between gap-3">
           <div>
-            <div className="mb-1 inline-flex items-center gap-2 rounded-full bg-teal-100 px-3 py-1 text-xs font-black text-teal-700">
+            <div className="mb-1 inline-flex items-center gap-2 rounded-full bg-blue-100 px-3 py-1 text-xs font-black text-blue-700">
               <Sparkles className="h-3.5 w-3.5" /> Rekomendasi teman
             </div>
             <h2 className="font-black text-slate-950">Cocok buat diajak belajar</h2>
             <p className="text-xs leading-5 text-slate-500">Diprioritaskan dari kampus, jurusan, aktivitas, dan skill supaya rekomendasinya lebih relevan.</p>
           </div>
-          {!compact && <Link href="/dashboard/friends" className="text-xs font-black text-teal-700 hover:underline">Cari lagi</Link>}
+          {!compact && <Link href="/dashboard/friends" className="text-xs font-black text-blue-700 hover:underline">Cari lagi</Link>}
         </div>
         <div className="grid gap-2 sm:grid-cols-2">
           {items.slice(0, compact ? 4 : 8).map((user) => (
@@ -88,11 +88,11 @@ export default function FriendSuggestionsCard({ compact = false }: { compact?: b
                     <FeaturedBadgePin badgeId={user.featured_badge} />
                   </p>
                   <p className="truncate text-[11px] text-slate-500">{[user.campus_name, user.major].filter(Boolean).join(' · ')}</p>
-                  <p className="mt-1 text-[10px] font-black text-teal-700">{user.reason}</p>
+                  <p className="mt-1 text-[10px] font-black text-blue-700">{user.reason}</p>
                 </div>
               </Link>
               {user.status === 'friend' ? (
-                <Link href={`/dashboard/messages/${user.id}`} className="flex h-9 w-9 items-center justify-center rounded-2xl bg-teal-100 text-teal-700 hover:bg-teal-200"><MessageCircle className="h-4 w-4" /></Link>
+                <Link href={`/dashboard/messages/${user.id}`} className="flex h-9 w-9 items-center justify-center rounded-2xl bg-blue-100 text-blue-700 hover:bg-blue-200"><MessageCircle className="h-4 w-4" /></Link>
               ) : user.status === 'pending' ? (
                 <Badge tone="neutral">Pending</Badge>
               ) : (

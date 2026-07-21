@@ -22,9 +22,9 @@ export default async function EditDeadlinePage({ params }: { params: { id: strin
     <div className="mx-auto max-w-3xl space-y-5">
       <div className="overflow-hidden rounded-3xl border border-slate-200 bg-slate-950 text-white shadow-xl shadow-slate-200">
         <div className="relative p-5 sm:p-6">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_86%_18%,rgba(20,184,166,0.28),transparent_18rem)]" />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_86%_18%,rgba(59,130,246,0.28),transparent_18rem)]" />
           <div className="relative">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-teal-200">Edit Deadline</p>
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-200">Edit Deadline</p>
             <h1 className="mt-2 text-2xl font-black tracking-tight sm:text-3xl">Benerin detail sebelum deadline benerin kamu</h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
               Update data deadline, ubah status, atau hapus kalau emang udah engga relevan

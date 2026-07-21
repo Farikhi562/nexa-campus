@@ -134,11 +134,11 @@ export default function LeaderboardView({ currentUserId }: { currentUserId: stri
     <div className="space-y-5">
       {/* Hero */}
       <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-slate-950 p-5 text-white shadow-xl sm:p-7">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_85%_10%,rgba(45,212,191,0.28),transparent_20rem)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_85%_10%,rgba(96,165,250,0.28),transparent_20rem)]" />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_10%_90%,rgba(251,191,36,0.18),transparent_18rem)]" />
         <div className="relative flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-teal-300/20 bg-teal-300/10 px-3 py-1.5 text-xs font-black text-teal-100">
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-blue-300/20 bg-blue-300/10 px-3 py-1.5 text-xs font-black text-blue-100">
               <Trophy className="h-3.5 w-3.5" />
               NEXA Leaderboard
             </div>
@@ -149,7 +149,7 @@ export default function LeaderboardView({ currentUserId }: { currentUserId: stri
           </div>
           <div className="flex flex-col gap-2 sm:items-end">
             <div className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3">
-              <p className="flex items-center gap-2 text-xs font-black uppercase tracking-wide text-teal-100"><Clock3 className="h-3.5 w-3.5" /> Sisa waktu</p>
+              <p className="flex items-center gap-2 text-xs font-black uppercase tracking-wide text-blue-100"><Clock3 className="h-3.5 w-3.5" /> Sisa waktu</p>
               <p className="mt-1 text-lg font-black tabular-nums">{countdownText}</p>
               <p className="mt-1 text-[11px] leading-4 text-slate-400">{periodCopy}</p>
             </div>
@@ -166,11 +166,11 @@ export default function LeaderboardView({ currentUserId }: { currentUserId: stri
 
       {/* Your rank — FOMO */}
       {me && me.points > 0 ? (
-        <Card className="border-teal-100 bg-gradient-to-br from-teal-50/70 to-white">
+        <Card className="border-blue-100 bg-gradient-to-br from-blue-50/70 to-white">
           <CardContent className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
             <div className="flex items-center gap-4">
               <div className="flex h-14 w-14 flex-col items-center justify-center rounded-2xl bg-slate-950 text-white">
-                <span className="text-[10px] font-bold uppercase tracking-wide text-teal-300">Rank</span>
+                <span className="text-[10px] font-bold uppercase tracking-wide text-blue-300">Rank</span>
                 <span className="text-xl font-black leading-none">{me.rank ? `#${me.rank}` : '—'}</span>
               </div>
               <div>
@@ -265,7 +265,7 @@ export default function LeaderboardView({ currentUserId }: { currentUserId: stri
                         </span>
                       </div>
                       <div className="mt-2 flex max-w-full items-center justify-center gap-1.5">
-                        <Link href={`/dashboard/profile/${entry.user_id}`} className="line-clamp-1 text-sm font-black text-slate-950 hover:text-teal-700">
+                        <Link href={`/dashboard/profile/${entry.user_id}`} className="line-clamp-1 text-sm font-black text-slate-950 hover:text-blue-700">
                           {entry.display_name}{isMe ? ' (kamu)' : ''}
                         </Link>
                         <FounderVerifiedBadge founderVerified={entry.founder_verified} email={entry.email} compact />
@@ -291,7 +291,7 @@ export default function LeaderboardView({ currentUserId }: { currentUserId: stri
                     return (
                       <div
                         key={entry.user_id}
-                        className={`flex items-center gap-2 p-3 sm:gap-3 sm:p-4 ${isMe ? 'bg-teal-50/60' : 'hover:bg-slate-50'}`}
+                        className={`flex items-center gap-2 p-3 sm:gap-3 sm:p-4 ${isMe ? 'bg-blue-50/60' : 'hover:bg-slate-50'}`}
                       >
                         {/* Rank number */}
                         <span className="w-6 flex-shrink-0 text-center text-xs font-black text-slate-400 sm:w-7 sm:text-sm">
@@ -302,7 +302,7 @@ export default function LeaderboardView({ currentUserId }: { currentUserId: stri
                         {/* Name + campus — min-w-0 agar bisa truncate */}
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-1.5">
-                            <Link href={`/dashboard/profile/${entry.user_id}`} className="truncate text-sm font-black text-slate-950 hover:text-teal-700">
+                            <Link href={`/dashboard/profile/${entry.user_id}`} className="truncate text-sm font-black text-slate-950 hover:text-blue-700">
                               {entry.display_name}{isMe ? ' (kamu)' : ''}
                             </Link>
                             <FounderVerifiedBadge founderVerified={entry.founder_verified} email={entry.email} compact />
@@ -312,7 +312,7 @@ export default function LeaderboardView({ currentUserId }: { currentUserId: stri
                         </div>
                         {/* Points — flex-shrink-0 agar tidak terpotong */}
                         <div className="flex flex-shrink-0 items-center gap-1.5">
-                          {entry.plan !== 'radar' && <Medal className="h-3.5 w-3.5 text-teal-500" />}
+                          {entry.plan !== 'radar' && <Medal className="h-3.5 w-3.5 text-blue-500" />}
                           <span className="text-sm font-black tabular-nums text-slate-950">{entry.points}</span>
                         </div>
                       </div>

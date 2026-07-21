@@ -77,18 +77,18 @@ const faqs = [
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-slate-950/85 backdrop-blur-xl">
+    <div className="min-h-screen bg-[#111827] text-white">
+      <header className="sticky top-0 z-50 border-b border-white/10 bg-[#111827]/95">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
           <Link href="/" className="flex items-center gap-3">
             <NexaCampusLogo tone="dark" imageClassName="h-10 w-10" />
           </Link>
           <nav className="hidden items-center gap-6 text-sm font-bold text-slate-300 md:flex">
-            <a href="#cara-kerja" className="hover:text-teal-200">Cara Kerja</a>
-            <a href="#fitur" className="hover:text-teal-200">Fitur</a>
-            <Link href="/pricing" className="hover:text-teal-200">Pricing</Link>
-            <Link href="/privacy" className="hover:text-teal-200">Privacy</Link>
-            <Link href="/support" className="hover:text-teal-200">Support</Link>
+            <a href="#cara-kerja" className="hover:text-blue-200">Cara Kerja</a>
+            <a href="#fitur" className="hover:text-blue-200">Fitur</a>
+            <Link href="/pricing" className="hover:text-blue-200">Pricing</Link>
+            <Link href="/privacy" className="hover:text-blue-200">Privacy</Link>
+            <Link href="/support" className="hover:text-blue-200">Support</Link>
           </nav>
           <AuthStatusActions variant="dark" />
         </div>
@@ -96,11 +96,10 @@ export default function LandingPage() {
 
       <main>
         <section className="relative overflow-hidden border-b border-white/10">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_16%_16%,rgba(45,212,191,0.24),transparent_28rem),radial-gradient(circle_at_82%_12%,rgba(14,165,233,0.14),transparent_22rem)]" />
-          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[size:44px_44px] opacity-40" />
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,rgba(37,99,235,0.14),transparent_46%,rgba(249,115,22,0.07))]" />
           <div className="relative mx-auto grid max-w-7xl gap-8 px-4 py-12 lg:grid-cols-[1.02fr_0.98fr] lg:py-16">
             <div className="flex flex-col justify-center">
-              <Badge tone="brand" className="mb-5 w-fit border-teal-300/20 bg-teal-300/10 text-teal-100">
+              <Badge tone="brand" className="mb-5 w-fit border-blue-300/20 bg-blue-300/10 text-blue-100">
                 Siap Dipakai - NEXA Tech Labs
               </Badge>
               <h1 className="max-w-3xl text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
@@ -112,32 +111,32 @@ export default function LandingPage() {
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link
                   href="/login?mode=signup"
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-teal-400 px-5 py-3 text-sm font-black text-slate-950 shadow-lg shadow-teal-950/30 transition hover:bg-teal-300"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-black text-white shadow-lg shadow-black/20 transition hover:bg-blue-500"
                 >
                   Mulai Pakai Gratis
                   <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link
                   href="/pricing"
-                  className="inline-flex items-center justify-center rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
+                  className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
                 >
                   Lihat Paket
                 </Link>
               </div>
-              <div className="mt-6 flex max-w-xl gap-3 rounded-2xl border border-teal-200/15 bg-teal-200/[0.06] p-4 text-sm leading-6 text-teal-50">
-                <ShieldCheck className="mt-0.5 h-5 w-5 flex-shrink-0 text-teal-200" />
+              <div className="mt-6 flex max-w-xl gap-3 rounded-2xl border border-blue-200/15 bg-blue-200/[0.06] p-4 text-sm leading-6 text-blue-50">
+                <ShieldCheck className="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-200" />
                 <p>NEXA tidak meminta password kampus. Semua deadline dicatat sendiri oleh pengguna</p>
               </div>
             </div>
 
-            <div className="rounded-[2rem] border border-white/10 bg-white/[0.06] p-3 shadow-2xl shadow-black/30 backdrop-blur">
-              <div className="rounded-[1.5rem] border border-white/10 bg-slate-950/80 p-4">
+            <div className="rounded-2xl border border-white/10 bg-[#182033] p-3 shadow-xl shadow-black/20">
+              <div className="rounded-xl border border-white/10 bg-[#111827] p-4">
                 <div className="mb-5 flex items-center justify-between">
                   <div>
                     <p className="text-sm font-black">Deadline Radar</p>
                     <p className="text-xs text-slate-400">Contoh tampilan dashboard</p>
                   </div>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-teal-300/10 text-teal-200">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-300/10 text-blue-200">
                     <Radar className="h-5 w-5" />
                   </div>
                 </div>
@@ -152,7 +151,7 @@ export default function LandingPage() {
                 <div className="mt-4 space-y-3">
                   {sampleDeadlines.map((deadline) => (
                     <div key={deadline.title} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.045] p-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-teal-300/10 text-teal-200">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-300/10 text-blue-200">
                         <TimerReset className="h-4 w-4" />
                       </div>
                       <div className="min-w-0 flex-1">
@@ -173,10 +172,10 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="bg-slate-50 text-slate-950">
+        <section className="bg-[#f7f5ef] text-slate-950">
           <div className="mx-auto max-w-7xl px-4 py-14">
             <div className="mb-8 max-w-2xl">
-              <p className="text-sm font-bold uppercase tracking-wide text-brand-700">Lihat sekilas</p>
+              <p className="text-sm font-bold uppercase tracking-wide text-blue-700">Lihat sekilas</p>
               <h2 className="mt-2 text-3xl font-black">Tampilan inti NEXA Campus.</h2>
               <p className="mt-3 text-sm leading-6 text-slate-600">
                 Alur utama sudah bisa dipakai untuk mencatat, mengingatkan, dan mengatur deadline harian
@@ -190,17 +189,17 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section id="cara-kerja" className="border-b border-white/10 bg-white text-slate-950">
+        <section id="cara-kerja" className="border-b border-slate-200 bg-[#fffdf8] text-slate-950">
           <div className="mx-auto max-w-7xl px-4 py-14">
             <div className="mb-8 max-w-2xl">
-              <p className="text-sm font-bold uppercase tracking-wide text-brand-700">Cara Kerja</p>
+              <p className="text-sm font-bold uppercase tracking-wide text-blue-700">Cara Kerja</p>
               <h2 className="mt-2 text-3xl font-black">Dari info yang tercecer jadi daftar yang jelas</h2>
             </div>
             <div className="grid gap-4 md:grid-cols-3">
               {steps.map((step, index) => (
                 <Card key={step}>
                   <CardContent>
-                    <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-50 text-lg font-black text-brand-700">
+                    <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-lg font-black text-blue-700">
                       {index + 1}
                     </div>
                     <p className="text-sm font-bold leading-6 text-slate-700">{step}</p>
@@ -211,17 +210,17 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section id="fitur" className="bg-slate-50 text-slate-950">
+        <section id="fitur" className="bg-[#f7f5ef] text-slate-950">
           <div className="mx-auto max-w-7xl px-4 py-14">
             <div className="mb-8 max-w-2xl">
-              <p className="text-sm font-bold uppercase tracking-wide text-brand-700">Fitur utama</p>
+              <p className="text-sm font-bold uppercase tracking-wide text-blue-700">Fitur utama</p>
               <h2 className="mt-2 text-3xl font-black">Fokus ke hal yang paling sering bikin mahasiswa kelupaan</h2>
             </div>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {features.map(([title, desc]) => (
                 <Card key={title}>
                   <CardContent>
-                    <CheckCircle2 className="mb-4 h-5 w-5 text-brand-700" />
+                    <CheckCircle2 className="mb-4 h-5 w-5 text-blue-700" />
                     <h3 className="font-black text-slate-950">{title}</h3>
                     <p className="mt-2 text-sm leading-6 text-slate-600">{desc}</p>
                   </CardContent>
@@ -234,7 +233,7 @@ export default function LandingPage() {
         <section className="border-y border-white/10 bg-slate-950">
           <div className="mx-auto grid max-w-7xl gap-6 px-4 py-14 lg:grid-cols-[0.9fr_1.1fr]">
             <div>
-              <Badge tone="brand" className="mb-4 w-fit border-teal-300/20 bg-teal-300/10 text-teal-100">Privasi & keamanan</Badge>
+              <Badge tone="brand" className="mb-4 w-fit border-blue-300/20 bg-blue-300/10 text-blue-100">Privasi & keamanan</Badge>
               <h2 className="text-3xl font-black">NEXA membantu mengingatkan, bukan mengakses akun kampusmu.</h2>
               <p className="mt-4 text-sm leading-6 text-slate-300">{BRAND.disclaimer}</p>
             </div>
@@ -245,7 +244,7 @@ export default function LandingPage() {
                 'Data yang disimpan hanya profil, deadline yang kamu masukkan sendiri, kontak reminder opsional, dan status paket',
               ].map((item) => (
                 <div key={item} className="flex gap-3 rounded-2xl border border-white/10 bg-white/[0.055] p-4 text-sm leading-6 text-slate-300">
-                  <LockKeyhole className="mt-0.5 h-5 w-5 flex-shrink-0 text-teal-200" />
+                  <LockKeyhole className="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-200" />
                   <p>{item}</p>
                 </div>
               ))}
@@ -256,14 +255,14 @@ export default function LandingPage() {
         <section className="bg-white text-slate-950">
           <div className="mx-auto max-w-7xl px-4 py-14">
             <div className="mb-8 max-w-2xl">
-              <p className="text-sm font-bold uppercase tracking-wide text-brand-700">FAQ</p>
+              <p className="text-sm font-bold uppercase tracking-wide text-blue-700">FAQ</p>
               <h2 className="mt-2 text-3xl font-black">Jawaban singkat untuk hal yang sering ditanyakan</h2>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               {faqs.map(([question, answer]) => (
                 <Card key={question}>
                   <CardContent>
-                    <HelpCircle className="mb-4 h-5 w-5 text-brand-700" />
+                    <HelpCircle className="mb-4 h-5 w-5 text-blue-700" />
                     <h3 className="font-black text-slate-950">{question}</h3>
                     <p className="mt-2 text-sm leading-6 text-slate-600">{answer}</p>
                   </CardContent>
@@ -275,15 +274,15 @@ export default function LandingPage() {
 
         <section className="bg-slate-950">
           <div className="mx-auto max-w-7xl px-4 py-12">
-            <div className="rounded-[2rem] border border-white/10 bg-white/[0.055] p-6 text-center backdrop-blur sm:p-10">
-              <Layers3 className="mx-auto mb-4 h-7 w-7 text-teal-200" />
+            <div className="rounded-2xl border border-white/10 bg-[#182033] p-6 text-center sm:p-10">
+              <Layers3 className="mx-auto mb-4 h-7 w-7 text-blue-200" />
               <h2 className="text-3xl font-black">Mulai dari NEXA Radar, gratis</h2>
               <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-300">
                 Catet deadline pertama, lihat mana yang paling dekat, lalu biasakan cek dashboard sebelum tugas menumpuk
               </p>
               <Link
                 href="/login?mode=signup"
-                className="mt-6 inline-flex items-center justify-center gap-2 rounded-2xl bg-teal-400 px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-teal-300"
+                className="mt-6 inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-400 px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-blue-300"
               >
                 Mulai Pakai Gratis
                 <Sparkles className="h-4 w-4" />

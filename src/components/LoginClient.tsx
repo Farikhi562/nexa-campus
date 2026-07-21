@@ -108,8 +108,8 @@ export default function LoginClient({ initialMode = 'login' }: { initialMode?: M
       <div className="pointer-events-none absolute inset-0">
         <div className="auth-ambient absolute inset-0" />
         <div className="auth-grid-pattern absolute inset-0 opacity-[0.08]" />
-        <div className="absolute left-[-8rem] top-[-8rem] h-80 w-80 rounded-full border border-teal-300/10" />
-        <div className="absolute left-[-3rem] top-[-3rem] h-56 w-56 rounded-full border border-cyan-200/10" />
+        <div className="absolute left-[-8rem] top-[-8rem] h-80 w-80 rounded-full border border-blue-300/10" />
+        <div className="absolute left-[-3rem] top-[-3rem] h-56 w-56 rounded-full border border-orange-200/10" />
       </div>
 
       <div className="relative mx-auto grid min-h-screen w-full max-w-7xl gap-6 px-4 py-5 sm:px-6 lg:grid-cols-[1.02fr_0.98fr] lg:gap-10 lg:px-8 lg:py-8">
@@ -118,13 +118,13 @@ export default function LoginClient({ initialMode = 'login' }: { initialMode?: M
             <Link href="/" className="flex items-center gap-3">
               <NexaCampusLogo tone="dark" imageClassName="h-12 w-12" />
             </Link>
-            <div className="hidden rounded-full border border-teal-200/15 bg-teal-200/10 px-3 py-1.5 text-xs font-bold text-teal-100 sm:inline-flex">
+            <div className="hidden rounded-full border border-blue-200/15 bg-blue-200/10 px-3 py-1.5 text-xs font-bold text-blue-100 sm:inline-flex">
               Early access
             </div>
           </div>
 
           <div className="py-10 lg:py-16">
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-teal-200/20 bg-teal-100/10 px-3 py-1.5 text-xs font-bold text-teal-100 shadow-sm">
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-blue-200/20 bg-blue-100/10 px-3 py-1.5 text-xs font-bold text-blue-100 shadow-sm">
               <ShieldCheck className="h-3.5 w-3.5" />
               Privacy-first. No campus password.
             </div>
@@ -142,7 +142,7 @@ export default function LoginClient({ initialMode = 'login' }: { initialMode?: M
                 { icon: LockKeyhole, title: 'Data minimum', desc: 'Profil dan deadline input sendiri.' },
               ].map(({ icon: Icon, title, desc }) => (
                 <div key={title} className="rounded-2xl border border-white/10 bg-white/[0.055] p-4 backdrop-blur">
-                  <Icon className="mb-4 h-5 w-5 text-teal-200" />
+                  <Icon className="mb-4 h-5 w-5 text-blue-200" />
                   <p className="text-sm font-black text-white">{title}</p>
                   <p className="mt-1 text-xs leading-5 text-slate-400">{desc}</p>
                 </div>
@@ -155,8 +155,8 @@ export default function LoginClient({ initialMode = 'login' }: { initialMode?: M
               NEXA tidak meminta password VClass, iLab, Studentsite, atau platform kampus mana pun. Data yang disimpan hanya profil dan deadline yang kamu input sendiri.
             </div>
             <div className="auth-radar-tile">
-              <Radar className="absolute left-1/2 top-1/2 h-20 w-20 -translate-x-1/2 -translate-y-1/2 text-teal-200/70" />
-              <span className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-teal-200 shadow-[0_0_22px_rgba(94,234,212,0.9)]" />
+              <Radar className="absolute left-1/2 top-1/2 h-20 w-20 -translate-x-1/2 -translate-y-1/2 text-blue-200/70" />
+              <span className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-200 shadow-[0_0_22px_rgba(147,197,253,0.9)]" />
             </div>
           </div>
         </section>
@@ -174,10 +174,10 @@ export default function LoginClient({ initialMode = 'login' }: { initialMode?: M
                 <div className="mb-6">
                   <div className="mb-4 flex items-center justify-between gap-3">
                     <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-slate-300">
-                      <Sparkles className="h-3.5 w-3.5 text-teal-200" />
+                      <Sparkles className="h-3.5 w-3.5 text-blue-200" />
                       Akun NEXA
                     </div>
-                    <span className="rounded-full bg-teal-300/10 px-3 py-1.5 text-xs font-bold text-teal-100">
+                    <span className="rounded-full bg-blue-300/10 px-3 py-1.5 text-xs font-bold text-blue-100">
                       Google OAuth
                     </span>
                   </div>
@@ -207,7 +207,7 @@ export default function LoginClient({ initialMode = 'login' }: { initialMode?: M
                         />
                       </span>
                     </label>
-                    <Button className="h-12 w-full rounded-2xl bg-teal-500 text-slate-950 hover:bg-teal-300" disabled={loading}>
+                    <Button className="h-12 w-full rounded-2xl bg-blue-500 text-slate-950 hover:bg-blue-300" disabled={loading}>
                       {loading ? 'Mengirim...' : 'Kirim Link Reset'}
                     </Button>
                     <button
@@ -240,8 +240,8 @@ export default function LoginClient({ initialMode = 'login' }: { initialMode?: M
                       {!loading && <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />}
                     </button>
 
-                    <div className="flex items-start gap-2 rounded-2xl border border-teal-200/10 bg-teal-200/[0.06] p-3 text-xs leading-5 text-teal-50/80">
-                      <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-teal-200" />
+                    <div className="flex items-start gap-2 rounded-2xl border border-blue-200/10 bg-blue-200/[0.06] p-3 text-xs leading-5 text-blue-50/80">
+                      <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-blue-200" />
                       <p>Login ini tidak meminta password kampus. NEXA hanya memakai Google OAuth untuk membuat akun.</p>
                     </div>
 
@@ -255,7 +255,7 @@ export default function LoginClient({ initialMode = 'login' }: { initialMode?: M
                             setError('')
                             setMessage('')
                           }}
-                          className="mt-1 text-sm font-bold text-teal-200 transition hover:text-teal-100"
+                          className="mt-1 text-sm font-bold text-blue-200 transition hover:text-blue-100"
                         >
                           Kirim link reset via email
                         </button>
@@ -276,7 +276,7 @@ export default function LoginClient({ initialMode = 'login' }: { initialMode?: M
                 )}
 
                 <div className="mt-5 flex gap-3 rounded-2xl border border-white/10 bg-white/[0.045] p-3 text-xs leading-5 text-slate-400">
-                  <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-teal-200" />
+                  <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-blue-200" />
                   <p>NEXA Campus bukan sistem resmi kampus. Selalu cek informasi final dari kanal resmi kampus.</p>
                 </div>
               </div>

@@ -20,7 +20,7 @@ const TIER_CONFIG: Record<BadgeTier, {
     labelText: 'Epic',
   },
   rarest: {
-    bg: 'bg-[conic-gradient(from_180deg_at_50%_50%,#0f172a,#7c3aed,#f59e0b,#14b8a6,#0f172a)]',
+    bg: 'bg-[conic-gradient(from_180deg_at_50%_50%,#0f172a,#7c3aed,#f59e0b,#3b82f6,#0f172a)]',
     ring: 'ring-2 ring-amber-300',
     text: 'text-white',
     label: 'bg-slate-950 text-amber-200 ring-1 ring-amber-300/50',
@@ -38,21 +38,21 @@ const BADGE_OVERRIDES: Record<string, { bg: string; ring: string; text: string; 
     emoji: '👑',
   },
   badge_pulse: {
-    bg: 'bg-gradient-to-br from-blue-500 via-cyan-400 to-teal-400',
-    ring: 'ring-2 ring-cyan-300',
+    bg: 'bg-gradient-to-br from-blue-500 via-orange-400 to-blue-400',
+    ring: 'ring-2 ring-orange-300',
     text: 'text-white',
-    glow: 'shadow-lg shadow-cyan-200',
+    glow: 'shadow-lg shadow-orange-200',
     emoji: '⚡',
   },
   badge_radar: {
-    bg: 'bg-gradient-to-br from-teal-400 to-teal-600',
-    ring: 'ring-1 ring-teal-400',
+    bg: 'bg-gradient-to-br from-blue-400 to-blue-600',
+    ring: 'ring-1 ring-blue-400',
     text: 'text-white',
     glow: '',
     emoji: '🎯',
   },
   nexa_origin: {
-    bg: 'bg-[conic-gradient(from_180deg_at_50%_50%,#020617,#7c3aed,#f59e0b,#2dd4bf,#020617)]',
+    bg: 'bg-[conic-gradient(from_180deg_at_50%_50%,#020617,#7c3aed,#f59e0b,#60a5fa,#020617)]',
     ring: 'ring-2 ring-amber-200',
     text: 'text-white',
     glow: 'shadow-2xl shadow-amber-300/60',
@@ -73,10 +73,10 @@ const BADGE_OVERRIDES: Record<string, { bg: string; ring: string; text: string; 
     emoji: '🧲',
   },
   pulse_6_months: {
-    bg: 'bg-gradient-to-br from-cyan-400 via-teal-400 to-emerald-400',
-    ring: 'ring-2 ring-teal-200',
+    bg: 'bg-gradient-to-br from-orange-400 via-blue-400 to-emerald-400',
+    ring: 'ring-2 ring-blue-200',
     text: 'text-slate-950',
-    glow: 'shadow-xl shadow-teal-200/70',
+    glow: 'shadow-xl shadow-blue-200/70',
     emoji: '⚡',
   },
   command_6_months: {
@@ -87,10 +87,10 @@ const BADGE_OVERRIDES: Record<string, { bg: string; ring: string; text: string; 
     emoji: '👑',
   },
   pulse_12_months: {
-    bg: 'bg-[conic-gradient(from_180deg_at_50%_50%,#06b6d4,#14b8a6,#a7f3d0,#06b6d4)]',
-    ring: 'ring-2 ring-cyan-200',
+    bg: 'bg-[conic-gradient(from_180deg_at_50%_50%,#f97316,#3b82f6,#a7f3d0,#f97316)]',
+    ring: 'ring-2 ring-orange-200',
     text: 'text-slate-950',
-    glow: 'shadow-2xl shadow-cyan-200/70',
+    glow: 'shadow-2xl shadow-orange-200/70',
     emoji: '💎',
   },
   command_12_months: {
@@ -178,7 +178,7 @@ export function BadgeChip({
       disabled={!onClick}
       title={`${badge.name}${animated ? ' · Animated badge' : ''}`}
       className={`relative flex flex-shrink-0 items-center justify-center overflow-hidden transition ${s.wrap} ${bg} ${ring} ${glow} ${
-        selected ? 'scale-110 ring-4 ring-offset-1 ring-teal-400' : ''
+        selected ? 'scale-110 ring-4 ring-offset-1 ring-blue-400' : ''
       } ${animated ? 'nexa-animated-badge' : ''} ${isRarest ? 'nexa-rarest-badge' : ''} ${onClick ? 'cursor-pointer hover:scale-105 active:scale-95' : 'cursor-default'}`}
     >
       {animated && <span className="nexa-badge-orbit pointer-events-none absolute -inset-1.5 rounded-[inherit]" />}

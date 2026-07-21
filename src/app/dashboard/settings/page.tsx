@@ -29,14 +29,14 @@ export default async function SettingsPage() {
       <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-50 text-teal-700">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-700">
               <UserRound className="h-6 w-6" />
             </div>
             <div>
-              <p className="text-sm font-bold uppercase tracking-wide text-brand-700">Pengaturan</p>
+              <p className="text-sm font-bold uppercase tracking-wide text-blue-700">Pengaturan</p>
               <h1 className="mt-1 text-xl font-black text-slate-950">{typedProfile.full_name || 'Akun NEXA'}</h1>
               <p className="mt-0.5 text-sm text-slate-500">{typedProfile.email}</p>
-              {typedProfile.nexa_id && <p className="mt-0.5 text-xs font-bold text-teal-600">Nexa ID: #{typedProfile.nexa_id}</p>}
+              {typedProfile.nexa_id && <p className="mt-0.5 text-xs font-bold text-blue-600">Nexa ID: #{typedProfile.nexa_id}</p>}
             </div>
           </div>
           <div className="flex flex-col items-start gap-1 sm:items-end"><Badge tone="brand">Plan aktif: {PLAN_LABELS[effectivePlan]}</Badge>{expiresLabel && <span className="text-xs font-bold text-slate-500">Berlaku: {expiresLabel}</span>}</div>
@@ -60,10 +60,10 @@ export default async function SettingsPage() {
         {settingItems.map(({ title, desc, href, icon: Icon }) => (
           <Card key={title}>
             <CardContent>
-              <Icon className="mb-4 h-5 w-5 text-brand-700" />
+              <Icon className="mb-4 h-5 w-5 text-blue-700" />
               <h2 className="font-black text-slate-950">{title}</h2>
               <p className="mt-2 min-h-10 text-sm leading-6 text-slate-600">{desc}</p>
-              <Link href={href} className="mt-4 inline-flex w-full items-center justify-center rounded-2xl bg-brand-600 px-4 py-3 text-sm font-black text-white hover:bg-brand-700">
+              <Link href={href} className="mt-4 inline-flex w-full items-center justify-center rounded-2xl bg-blue-600 px-4 py-3 text-sm font-black text-white hover:bg-blue-700">
                 Buka
               </Link>
             </CardContent>

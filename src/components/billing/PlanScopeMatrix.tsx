@@ -43,7 +43,7 @@ export default function PlanScopeMatrix() {
     <section className="rounded-[2rem] border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
       <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <div className="inline-flex items-center gap-2 rounded-full bg-teal-50 px-3 py-1 text-xs font-black uppercase tracking-[0.2em] text-teal-700">
+          <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-xs font-black uppercase tracking-[0.2em] text-blue-700">
             <Sparkles className="h-3.5 w-3.5" /> Scope Plan
           </div>
           <h2 className="mt-3 text-2xl font-black text-slate-950">Batasan Radar, Pulse, Command</h2>

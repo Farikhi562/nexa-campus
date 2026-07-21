@@ -192,7 +192,7 @@ export function AchievementsView({ badges, earnedIds, featuredBadgeId }: Achieve
       {/* Header ringkas */}
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-2">
-          <Sparkles size={20} className="text-teal-500" />
+          <Sparkles size={20} className="text-blue-500" />
           <h2 className="text-lg font-extrabold text-zinc-900">Pencapaian</h2>
         </div>
         <span className="ml-auto text-sm font-semibold text-zinc-500">

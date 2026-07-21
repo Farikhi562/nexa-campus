@@ -48,7 +48,7 @@ export default function PrivacyPage() {
         {sections.map(({ title, body, icon: Icon }) => (
           <Card key={title} className="border-slate-200 bg-white">
             <CardContent>
-              <Icon className="mb-4 h-5 w-5 text-brand-700" />
+              <Icon className="mb-4 h-5 w-5 text-blue-700" />
               <h2 className="font-black text-slate-950">{title}</h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">{body}</p>
             </CardContent>

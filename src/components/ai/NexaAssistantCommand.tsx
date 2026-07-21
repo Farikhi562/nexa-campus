@@ -162,7 +162,7 @@ export default function NexaAssistantCommand({
             <div key={m.id} className={`flex gap-2.5 ${m.role === 'user' ? 'flex-row-reverse' : ''}`}>
               <div
                 className={`mt-0.5 flex h-8 w-8 flex-none items-center justify-center rounded-full ${
-                  m.role === 'user' ? 'bg-slate-200 text-slate-700' : 'bg-teal-600 text-white'
+                  m.role === 'user' ? 'bg-slate-200 text-slate-700' : 'bg-blue-600 text-white'
                 }`}
               >
                 {m.role === 'user' ? <User2 className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
@@ -170,7 +170,7 @@ export default function NexaAssistantCommand({
               <div
                 className={`max-w-[82%] whitespace-pre-wrap rounded-2xl px-4 py-2.5 text-sm leading-6 ${
                   m.role === 'user'
-                    ? 'bg-teal-600 text-white'
+                    ? 'bg-blue-600 text-white'
                     : m.status === 'error'
                       ? 'border border-red-200 bg-red-50 text-red-700'
                       : 'border border-slate-200 bg-slate-50 text-slate-700'
@@ -182,7 +182,7 @@ export default function NexaAssistantCommand({
           ))}
           {loading && (
             <div className="flex gap-2.5">
-              <div className="mt-0.5 flex h-8 w-8 flex-none items-center justify-center rounded-full bg-teal-600 text-white">
+              <div className="mt-0.5 flex h-8 w-8 flex-none items-center justify-center rounded-full bg-blue-600 text-white">
                 <Bot className="h-4 w-4" />
               </div>
               <div className="flex items-center gap-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
@@ -214,7 +214,7 @@ export default function NexaAssistantCommand({
               type="button"
               onClick={() => send(undefined, activeMode ? MODES.find((mm) => mm.id === activeMode)?.framing : undefined)}
               disabled={loading || !input.trim()}
-              className="inline-flex h-11 w-11 flex-none items-center justify-center rounded-2xl bg-teal-600 text-white transition hover:bg-teal-700 disabled:opacity-40"
+              className="inline-flex h-11 w-11 flex-none items-center justify-center rounded-2xl bg-blue-600 text-white transition hover:bg-blue-700 disabled:opacity-40"
               aria-label="Kirim"
             >
               <Send className="h-4 w-4" />
@@ -226,7 +226,7 @@ export default function NexaAssistantCommand({
       {/* Mode panel */}
       <div className="space-y-3">
         <div className="rounded-2xl border border-slate-200 bg-white p-3">
-          <p className="mb-2 flex items-center gap-1.5 px-1 text-xs font-black uppercase tracking-wide text-teal-700">
+          <p className="mb-2 flex items-center gap-1.5 px-1 text-xs font-black uppercase tracking-wide text-blue-700">
             <Sparkles className="h-3.5 w-3.5" /> Mode Canggih
           </p>
           <div className="grid grid-cols-2 gap-2 lg:grid-cols-1">
@@ -241,11 +241,11 @@ export default function NexaAssistantCommand({
                   disabled={loading}
                   className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 text-left text-sm font-bold transition disabled:opacity-50 ${
                     active
-                      ? 'border-teal-300 bg-teal-50 text-teal-800'
-                      : 'border-slate-200 bg-white text-slate-700 hover:border-teal-200'
+                      ? 'border-blue-300 bg-blue-50 text-blue-800'
+                      : 'border-slate-200 bg-white text-slate-700 hover:border-blue-200'
                   }`}
                 >
-                  <Icon className="h-4 w-4 flex-none text-teal-600" />
+                  <Icon className="h-4 w-4 flex-none text-blue-600" />
                   <span className="truncate">{mode.label}</span>
                 </button>
               )

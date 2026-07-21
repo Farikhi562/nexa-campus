@@ -97,7 +97,7 @@ function HistoryItem({ session }: { session: FeynmanSession }) {
         <div className="border-t border-zinc-700/50 px-4 py-3 space-y-2">
           <p className="text-xs text-zinc-400 italic">&ldquo;{session.user_explanation.slice(0, 200)}{session.user_explanation.length > 200 ? '…' : ''}&rdquo;</p>
           {session.feedback.tip && (
-            <p className="text-xs text-teal-300">💡 {session.feedback.tip}</p>
+            <p className="text-xs text-blue-300">💡 {session.feedback.tip}</p>
           )}
         </div>
       )}
@@ -174,7 +174,7 @@ export function FeynmanBox({ packId, topic, roadmapTopics = [] }: Props) {
     <div className="space-y-5">
       {/* Header */}
       <div className="flex items-center gap-2">
-        <BrainCircuit size={20} className="text-teal-400" />
+        <BrainCircuit size={20} className="text-blue-400" />
         <h3 className="text-base font-semibold text-zinc-100">Mode Feynman</h3>
         <span className="ml-auto text-xs text-zinc-500">Jelaskan konsep = buktikan kamu paham</span>
       </div>
@@ -190,8 +190,8 @@ export function FeynmanBox({ packId, topic, roadmapTopics = [] }: Props) {
                 onClick={() => { setConcept(t); setUseCustom(false) }}
                 className={`rounded-lg px-3 py-1.5 text-xs transition-colors border ${
                   !useCustom && concept === t
-                    ? 'bg-teal-600 border-teal-500 text-white'
-                    : 'bg-zinc-800 border-zinc-700 text-zinc-300 hover:border-teal-600'
+                    ? 'bg-blue-600 border-blue-500 text-white'
+                    : 'bg-zinc-800 border-zinc-700 text-zinc-300 hover:border-blue-600'
                 }`}
               >
                 {t}
@@ -206,7 +206,7 @@ export function FeynmanBox({ packId, topic, roadmapTopics = [] }: Props) {
             onFocus={() => setUseCustom(true)}
             onChange={(e) => { setCustom(e.target.value); setUseCustom(true) }}
             placeholder="Atau ketik konsep sendiri…"
-            className="flex-1 rounded-xl bg-zinc-800 border border-zinc-700 focus:border-teal-500 outline-none text-sm text-zinc-200 placeholder:text-zinc-600 px-3 py-2 transition-colors"
+            className="flex-1 rounded-xl bg-zinc-800 border border-zinc-700 focus:border-blue-500 outline-none text-sm text-zinc-200 placeholder:text-zinc-600 px-3 py-2 transition-colors"
           />
         </div>
       </div>
@@ -215,7 +215,7 @@ export function FeynmanBox({ packId, topic, roadmapTopics = [] }: Props) {
       {!feedback && (
         <div className="space-y-2">
           <p className="text-xs text-zinc-400 font-medium">
-            Jelaskan <span className="text-teal-400">{activeConcept || '—'}</span> seolah-olah kamu ngajarin teman:
+            Jelaskan <span className="text-blue-400">{activeConcept || '—'}</span> seolah-olah kamu ngajarin teman:
           </p>
           <textarea
             value={explanation}
@@ -223,7 +223,7 @@ export function FeynmanBox({ packId, topic, roadmapTopics = [] }: Props) {
             placeholder="Contoh: 'OOP itu cara nulis kode di mana kita bikin objek yang punya sifat dan kemampuan sendiri…'"
             rows={5}
             maxLength={4000}
-            className="w-full rounded-xl bg-zinc-800 border border-zinc-700 focus:border-teal-500 outline-none text-sm text-zinc-200 placeholder:text-zinc-600 px-3 py-2.5 resize-none transition-colors"
+            className="w-full rounded-xl bg-zinc-800 border border-zinc-700 focus:border-blue-500 outline-none text-sm text-zinc-200 placeholder:text-zinc-600 px-3 py-2.5 resize-none transition-colors"
           />
           <div className="flex items-center justify-between">
             <span className="text-xs text-zinc-600">{explanation.length}/4000</span>
@@ -232,7 +232,7 @@ export function FeynmanBox({ packId, topic, roadmapTopics = [] }: Props) {
           <button
             onClick={handleSubmit}
             disabled={loading || !activeConcept || explanation.trim().length < 10}
-            className="w-full flex items-center justify-center gap-2 rounded-xl bg-teal-600 hover:bg-teal-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold py-2.5 transition-colors"
+            className="w-full flex items-center justify-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold py-2.5 transition-colors"
           >
             {loading ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />}
             {loading ? 'Mengevaluasi…' : 'Evaluasi Penjelasanku'}
@@ -252,9 +252,9 @@ export function FeynmanBox({ packId, topic, roadmapTopics = [] }: Props) {
             </div>
           </div>
           {feedback.tip && (
-            <div className="rounded-xl bg-teal-900/30 border border-teal-700/40 px-4 py-3">
-              <p className="text-xs font-semibold text-teal-300 mb-1">💡 Saran berikutnya</p>
-              <p className="text-sm text-teal-100">{feedback.tip}</p>
+            <div className="rounded-xl bg-blue-900/30 border border-blue-700/40 px-4 py-3">
+              <p className="text-xs font-semibold text-blue-300 mb-1">💡 Saran berikutnya</p>
+              <p className="text-sm text-blue-100">{feedback.tip}</p>
             </div>
           )}
           <button

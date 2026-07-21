@@ -52,7 +52,7 @@ export default function CollapsibleSidebar({
       <div className="sticky top-24 space-y-3">
         <nav className="overflow-hidden rounded-3xl border border-white/80 bg-white/90 shadow-xl shadow-slate-200/70 ring-1 ring-slate-950/[0.03]">
           {!collapsed && (
-            <p className="px-4 pb-0 pt-3 text-xs font-black uppercase tracking-[0.18em] text-brand-700">
+            <p className="px-4 pb-0 pt-3 text-xs font-black uppercase tracking-[0.18em] text-blue-700">
               {t('section_navigation')}
             </p>
           )}
@@ -76,8 +76,8 @@ export default function CollapsibleSidebar({
                   <span
                     className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-xl transition ${
                       active
-                        ? 'bg-cyan-300 text-slate-950'
-                        : 'bg-slate-100 text-brand-700 group-hover:bg-cyan-300 group-hover:text-slate-950'
+                        ? 'bg-orange-300 text-slate-950'
+                        : 'bg-slate-100 text-blue-700 group-hover:bg-orange-300 group-hover:text-slate-950'
                     }`}
                   >
                     <Icon className="h-4 w-4" />

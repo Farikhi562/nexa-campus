@@ -110,10 +110,10 @@ export default async function AdminPage() {
       {/* Header */}
       <section className="border-b border-slate-900 bg-slate-950 text-white">
         <div className="relative mx-auto max-w-7xl overflow-hidden px-4 py-8 sm:py-10">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(45,212,191,0.26),transparent_24rem)]" />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(96,165,250,0.26),transparent_24rem)]" />
           <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-teal-300/20 bg-teal-300/10 px-3 py-1.5 text-xs font-black text-teal-100">
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-blue-300/20 bg-blue-300/10 px-3 py-1.5 text-xs font-black text-blue-100">
                 <ShieldCheck className="h-3.5 w-3.5" />
                 Admin Command Center
               </div>
@@ -121,14 +121,14 @@ export default async function AdminPage() {
                 NEXA Admin Dashboard.
               </h1>
               <p className="mt-3 text-sm leading-6 text-slate-300">
-                Login sebagai <span className="font-bold text-teal-200">{user.email}</span>
+                Login sebagai <span className="font-bold text-blue-200">{user.email}</span>
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
               <Link href="/dashboard" className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm font-black text-white hover:bg-white/15">
                 Dashboard
               </Link>
-              <Link href="/admin/readiness" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-teal-400 px-4 py-2.5 text-sm font-black text-slate-950 hover:bg-teal-300">
+              <Link href="/admin/readiness" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-blue-400 px-4 py-2.5 text-sm font-black text-slate-950 hover:bg-blue-300">
                 Readiness
                 <ArrowUpRight className="h-4 w-4" />
               </Link>

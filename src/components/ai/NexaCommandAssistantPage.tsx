@@ -92,7 +92,7 @@ const actionCards: Array<{
     desc: 'Ringkas kondisi akademik hari ini, prioritas, dan next move.',
     prompt: 'Buatkan command briefing hari ini dari semua deadline gue. Fokus ke prioritas, risiko, dan langkah 24 jam ke depan.',
     icon: RadioTower,
-    tone: 'from-teal-500/25 to-cyan-500/10 border-teal-300/20',
+    tone: 'from-blue-500/25 to-orange-500/10 border-blue-300/20',
   },
   {
     id: 'risk_scan',
@@ -116,7 +116,7 @@ const actionCards: Array<{
     desc: 'Ketik bebas, AI parse dan simpan deadline kalau datanya lengkap.',
     prompt: 'Tambah deadline: tugas kalkulus besok jam 8 malam prioritas tinggi.',
     icon: WandSparkles,
-    tone: 'from-emerald-500/25 to-teal-500/10 border-emerald-300/20',
+    tone: 'from-emerald-500/25 to-blue-500/10 border-emerald-300/20',
   },
   {
     id: 'reminder_architect',
@@ -182,7 +182,7 @@ function UserAvatar({ profile }: { profile: CommandProfile }) {
         src={profile.avatar_url}
         alt={profile.full_name || 'User'}
         referrerPolicy="no-referrer"
-        className="h-10 w-10 rounded-full object-cover ring-2 ring-teal-300/40"
+        className="h-10 w-10 rounded-full object-cover ring-2 ring-blue-300/40"
       />
     )
   }
@@ -198,7 +198,7 @@ function StatCard({ icon: Icon, label, value, hint }: { icon: typeof Sparkles; l
   return (
     <div className="rounded-3xl border border-white/10 bg-white/[0.05] p-4 shadow-xl shadow-slate-950/10">
       <div className="flex items-center gap-3">
-        <div className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-teal-400/15 text-teal-200">
+        <div className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-400/15 text-blue-200">
           <Icon className="h-5 w-5" />
         </div>
         <div>
@@ -352,10 +352,10 @@ export default function NexaCommandAssistantPage({ profile, deadlines }: Props) 
   return (
     <main className="min-h-screen bg-slate-950 text-white">
       <section className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-5 sm:px-6 lg:px-8">
-        <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.22),transparent_38%),linear-gradient(135deg,rgba(15,23,42,1),rgba(2,6,23,1))] p-5 shadow-2xl shadow-slate-950/50 sm:p-7">
+        <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-[radial-gradient(circle_at_top_left,rgba(96,165,250,0.22),transparent_38%),linear-gradient(135deg,rgba(15,23,42,1),rgba(2,6,23,1))] p-5 shadow-2xl shadow-slate-950/50 sm:p-7">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-teal-300/25 bg-teal-300/10 px-3 py-1 text-xs font-black uppercase tracking-[0.22em] text-teal-200">
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-blue-300/25 bg-blue-300/10 px-3 py-1 text-xs font-black uppercase tracking-[0.22em] text-blue-200">
                 <Crown className="h-3.5 w-3.5" /> Command only assistant
               </div>
               <h1 className="text-3xl font-black tracking-tight sm:text-5xl">
@@ -372,7 +372,7 @@ export default function NexaCommandAssistantPage({ profile, deadlines }: Props) 
                 <div className="text-sm font-black text-white">{profile.full_name || name}</div>
                 <div className="text-xs text-slate-400">{profile.nexa_id || profile.email || 'NEXA Command User'}</div>
               </div>
-              <div className="ml-2 rounded-2xl bg-teal-400 px-3 py-1 text-xs font-black uppercase tracking-wide text-slate-950">
+              <div className="ml-2 rounded-2xl bg-blue-400 px-3 py-1 text-xs font-black uppercase tracking-wide text-slate-950">
                 Command
               </div>
             </div>
@@ -394,7 +394,7 @@ export default function NexaCommandAssistantPage({ profile, deadlines }: Props) 
                   <h2 className="font-black text-white">Command Modules</h2>
                   <p className="text-xs text-slate-400">Klik modul, prompt otomatis jalan.</p>
                 </div>
-                <ShieldCheck className="h-5 w-5 text-teal-300" />
+                <ShieldCheck className="h-5 w-5 text-blue-300" />
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
@@ -406,7 +406,7 @@ export default function NexaCommandAssistantPage({ profile, deadlines }: Props) 
                       type="button"
                       onClick={() => runCommand(card.id, card.prompt)}
                       disabled={loading}
-                      className={`group rounded-3xl border bg-gradient-to-br p-4 text-left transition hover:-translate-y-0.5 hover:border-teal-300/40 disabled:cursor-not-allowed disabled:opacity-60 ${card.tone}`}
+                      className={`group rounded-3xl border bg-gradient-to-br p-4 text-left transition hover:-translate-y-0.5 hover:border-blue-300/40 disabled:cursor-not-allowed disabled:opacity-60 ${card.tone}`}
                     >
                       <div className="flex items-start gap-3">
                         <div className="inline-flex h-10 w-10 flex-none items-center justify-center rounded-2xl bg-white/10 text-white ring-1 ring-white/10">
@@ -423,8 +423,8 @@ export default function NexaCommandAssistantPage({ profile, deadlines }: Props) 
               </div>
             </div>
 
-            <div className="rounded-[2rem] border border-teal-300/15 bg-teal-300/10 p-4">
-              <div className="flex items-center gap-2 text-sm font-black text-teal-100">
+            <div className="rounded-[2rem] border border-blue-300/15 bg-blue-300/10 p-4">
+              <div className="flex items-center gap-2 text-sm font-black text-blue-100">
                 <Sparkles className="h-4 w-4" /> Command abilities
               </div>
               <div className="mt-3 grid gap-2 text-xs leading-5 text-slate-300">
@@ -440,7 +440,7 @@ export default function NexaCommandAssistantPage({ profile, deadlines }: Props) 
           <section className="flex min-h-[42rem] flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.04] shadow-2xl shadow-slate-950/40">
             <div className="flex flex-col gap-3 border-b border-white/10 p-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3">
-                <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-400 text-slate-950 shadow-lg shadow-teal-950/40">
+                <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-400 text-slate-950 shadow-lg shadow-blue-950/40">
                   <Bot className="h-5 w-5" />
                 </div>
                 <div>
@@ -463,17 +463,17 @@ export default function NexaCommandAssistantPage({ profile, deadlines }: Props) 
                 const isUser = message.role === 'user'
                 return (
                   <div key={message.id} className={`flex gap-3 ${isUser ? 'flex-row-reverse' : ''}`}>
-                    <div className={`mt-6 flex h-9 w-9 flex-none items-center justify-center rounded-full ${isUser ? 'bg-slate-700' : 'bg-teal-400 text-slate-950'}`}>
+                    <div className={`mt-6 flex h-9 w-9 flex-none items-center justify-center rounded-full ${isUser ? 'bg-slate-700' : 'bg-blue-400 text-slate-950'}`}>
                       {isUser ? <User2 className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
                     </div>
                     <div className={`max-w-[86%] ${isUser ? 'text-right' : 'text-left'}`}>
-                      <div className={`mb-1 px-1 text-[11px] font-black uppercase tracking-[0.14em] ${isUser ? 'text-slate-500' : 'text-teal-300'}`}>
+                      <div className={`mb-1 px-1 text-[11px] font-black uppercase tracking-[0.14em] ${isUser ? 'text-slate-500' : 'text-blue-300'}`}>
                         {isUser ? name : 'NEXA Command'}
                       </div>
                       <div
                         className={`whitespace-pre-wrap rounded-3xl px-4 py-3 text-sm leading-6 ${
                           isUser
-                            ? 'bg-teal-400 text-slate-950'
+                            ? 'bg-blue-400 text-slate-950'
                             : message.status === 'error'
                               ? 'border border-red-300/25 bg-red-500/10 text-red-100'
                               : message.status === 'locked'
@@ -490,11 +490,11 @@ export default function NexaCommandAssistantPage({ profile, deadlines }: Props) 
 
               {loading && (
                 <div className="flex gap-3">
-                  <div className="mt-6 flex h-9 w-9 items-center justify-center rounded-full bg-teal-400 text-slate-950">
+                  <div className="mt-6 flex h-9 w-9 items-center justify-center rounded-full bg-blue-400 text-slate-950">
                     <Bot className="h-4 w-4" />
                   </div>
                   <div>
-                    <div className="mb-1 px-1 text-[11px] font-black uppercase tracking-[0.14em] text-teal-300">NEXA Command</div>
+                    <div className="mb-1 px-1 text-[11px] font-black uppercase tracking-[0.14em] text-blue-300">NEXA Command</div>
                     <div className="rounded-3xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-slate-300">
                       Lagi mikir sambil nyusun strategi. AI juga capek, tapi minimal nggak ngeluh di standup.
                     </div>
@@ -511,7 +511,7 @@ export default function NexaCommandAssistantPage({ profile, deadlines }: Props) 
                     type="button"
                     onClick={() => setActiveAction(action)}
                     className={`rounded-full px-3 py-1.5 text-xs font-black transition ${
-                      activeAction === action ? 'bg-teal-400 text-slate-950' : 'bg-white/10 text-slate-300 hover:bg-white/15'
+                      activeAction === action ? 'bg-blue-400 text-slate-950' : 'bg-white/10 text-slate-300 hover:bg-white/15'
                     }`}
                   >
                     {action.replace(/_/g, ' ')}
@@ -526,13 +526,13 @@ export default function NexaCommandAssistantPage({ profile, deadlines }: Props) 
                   onKeyDown={onKeyDown}
                   rows={2}
                   placeholder="Contoh: bikin battle plan UAS 7 hari, atau tambahin deadline tugas AI besok jam 21.00"
-                  className="min-h-[3.5rem] flex-1 resize-none rounded-3xl border border-white/10 bg-slate-900/90 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-teal-300/60"
+                  className="min-h-[3.5rem] flex-1 resize-none rounded-3xl border border-white/10 bg-slate-900/90 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-blue-300/60"
                 />
                 <button
                   type="button"
                   disabled={loading || !input.trim()}
                   onClick={() => runCommand(activeAction, input)}
-                  className="inline-flex h-[3.5rem] w-14 flex-none items-center justify-center rounded-3xl bg-teal-400 text-slate-950 transition hover:bg-teal-300 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex h-[3.5rem] w-14 flex-none items-center justify-center rounded-3xl bg-blue-400 text-slate-950 transition hover:bg-blue-300 disabled:cursor-not-allowed disabled:opacity-50"
                   aria-label="Kirim ke NEXA Command"
                 >
                   <Send className="h-5 w-5" />

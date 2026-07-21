@@ -37,7 +37,7 @@ export default function ReleaseNotesPage() {
             <NexaLogo className="h-9 w-9" />
             <div>
               <span className="block font-black leading-4">NEXA Campus</span>
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-700">
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-blue-700">
                 v{BRAND.version}
               </span>
             </div>
@@ -60,7 +60,7 @@ export default function ReleaseNotesPage() {
         <div className="mt-8 grid gap-4 lg:grid-cols-[1fr_0.9fr]">
           <Card>
             <CardContent>
-              <Rocket className="mb-4 h-5 w-5 text-brand-700" />
+              <Rocket className="mb-4 h-5 w-5 text-blue-700" />
               <h2 className="text-lg font-black text-slate-950">Fitur yang sudah masuk</h2>
               <ul className="mt-4 space-y-3">
                 {shipped.map((item) => (
@@ -75,12 +75,12 @@ export default function ReleaseNotesPage() {
 
           <Card>
             <CardContent>
-              <ShieldCheck className="mb-4 h-5 w-5 text-brand-700" />
+              <ShieldCheck className="mb-4 h-5 w-5 text-blue-700" />
               <h2 className="text-lg font-black text-slate-950">Catatan rilis</h2>
               <ul className="mt-4 space-y-3">
                 {releaseNotes.map((item) => (
                   <li key={item} className="flex gap-2 text-sm leading-6 text-slate-700">
-                    <Sparkles className="mt-0.5 h-4 w-4 flex-shrink-0 text-brand-700" />
+                    <Sparkles className="mt-0.5 h-4 w-4 flex-shrink-0 text-blue-700" />
                     {item}
                   </li>
                 ))}

@@ -144,10 +144,10 @@ export default function StudyRoomView({ userId }: { userId: string }) {
       <div className="space-y-5">
         {/* Hero */}
         <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-slate-950 p-5 text-white shadow-xl sm:p-7">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(45,212,191,0.26),transparent_18rem)]" />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(96,165,250,0.26),transparent_18rem)]" />
           <div className="relative flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-teal-300/20 bg-teal-300/10 px-3 py-1.5 text-xs font-black text-teal-100">
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-blue-300/20 bg-blue-300/10 px-3 py-1.5 text-xs font-black text-blue-100">
                 <Users className="h-3.5 w-3.5" />
                 Study Room
               </div>
@@ -156,7 +156,7 @@ export default function StudyRoomView({ userId }: { userId: string }) {
                 Buat atau gabung ruang belajar bersama teman. Fokus, diskusi, selesaikan deadline bareng.
               </p>
             </div>
-            <Button onClick={() => setShowCreate(true)} className="min-h-12 flex-shrink-0 rounded-2xl bg-teal-400 text-slate-950 hover:bg-teal-300">
+            <Button onClick={() => setShowCreate(true)} className="min-h-12 flex-shrink-0 rounded-2xl bg-blue-400 text-slate-950 hover:bg-blue-300">
               <Plus className="h-4 w-4" />
               Buat Study Room
             </Button>
@@ -165,7 +165,7 @@ export default function StudyRoomView({ userId }: { userId: string }) {
 
         <OnlineFriendsStrip />
 
-        <div className="rounded-3xl border border-cyan-100 bg-cyan-50 p-4 text-xs leading-5 text-cyan-900">
+        <div className="rounded-3xl border border-orange-100 bg-orange-50 p-4 text-xs leading-5 text-orange-900">
           <b>Privasi aktif:</b> status online teman hanya tampil kalau mereka mengizinkan. Di dalam room, indikator online juga mengikuti pengaturan privasi masing-masing pengguna.
         </div>
 
@@ -184,7 +184,7 @@ export default function StudyRoomView({ userId }: { userId: string }) {
           <button
             onClick={joinByCode}
             disabled={!codeInput.trim() || joiningCode}
-            className="focus-ring flex min-h-12 items-center justify-center rounded-2xl bg-teal-500 px-4 text-sm font-black text-white transition hover:bg-teal-400 disabled:opacity-40"
+            className="focus-ring flex min-h-12 items-center justify-center rounded-2xl bg-blue-500 px-4 text-sm font-black text-white transition hover:bg-blue-400 disabled:opacity-40"
           >
             {joiningCode ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Gabung'}
           </button>
@@ -276,7 +276,7 @@ export default function StudyRoomView({ userId }: { userId: string }) {
                           {new Date(room.scheduled_at).toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' })}
                         </span>
                       )}
-                      {room.topic && <span className="text-teal-700">#{room.topic}</span>}
+                      {room.topic && <span className="text-blue-700">#{room.topic}</span>}
                     </div>
 
                     {/* Owner info — selalu tampil untuk semua room */}
@@ -295,7 +295,7 @@ export default function StudyRoomView({ userId }: { userId: string }) {
                           )}
                           <Link
                             href={`/dashboard/study-room/${room.id}`}
-                            className="focus-ring inline-flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-2xl bg-teal-500 px-4 text-sm font-black text-white hover:bg-teal-400"
+                            className="focus-ring inline-flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-2xl bg-blue-500 px-4 text-sm font-black text-white hover:bg-blue-400"
                           >
                             Masuk Room
                           </Link>

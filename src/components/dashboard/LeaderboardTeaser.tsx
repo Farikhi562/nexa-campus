@@ -46,7 +46,7 @@ export default function LeaderboardTeaser() {
             <Trophy className="h-6 w-6" />
           </span>
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-teal-300">Leaderboard · Minggu ini</p>
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-blue-300">Leaderboard · Minggu ini</p>
             {loading ? (
               <p className="mt-0.5 text-base font-black text-white">Memuat peringkat…</p>
             ) : data?.rank ? (

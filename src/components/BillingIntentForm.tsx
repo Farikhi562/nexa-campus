@@ -138,7 +138,7 @@ export default function BillingIntentForm({ profile }: { profile: Profile }) {
             type="button"
             onClick={() => setPlan(id)}
             className={`focus-ring rounded-2xl border p-4 text-left transition ${
-              plan === id ? 'border-brand-500 bg-brand-50 ring-2 ring-brand-200' : 'border-slate-200 bg-white hover:border-slate-300'
+              plan === id ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200' : 'border-slate-200 bg-white hover:border-slate-300'
             }`}
           >
             <p className="font-black text-slate-950">{id === 'pulse' ? 'NEXA Pulse' : 'NEXA Command'}</p>
@@ -168,7 +168,7 @@ export default function BillingIntentForm({ profile }: { profile: Profile }) {
       {/* Bayar otomatis (Midtrans) */}
       <div className="rounded-3xl border border-slate-800 bg-slate-950 p-5 text-white">
         <div className="flex items-start gap-3">
-          <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-teal-300/10 text-teal-200">
+          <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-blue-300/10 text-blue-200">
             <Sparkles className="h-5 w-5" />
           </span>
           <div className="min-w-0">
@@ -181,7 +181,7 @@ export default function BillingIntentForm({ profile }: { profile: Profile }) {
         <Button
           onClick={payWithMidtrans}
           disabled={paying || profile.plan === plan}
-          className="mt-4 min-h-12 w-full rounded-2xl bg-teal-400 text-slate-950 hover:bg-teal-300"
+          className="mt-4 min-h-12 w-full rounded-2xl bg-blue-400 text-slate-950 hover:bg-blue-300"
         >
           {paying ? <Loader2 className="h-4 w-4 animate-spin" /> : <CreditCard className="h-4 w-4" />}
           {paying ? 'Menyiapkan pembayaran...' : `Bayar ${PLAN_PRICE[plan]} sekarang`}
@@ -214,7 +214,7 @@ export default function BillingIntentForm({ profile }: { profile: Profile }) {
       </details>
 
       <p className="flex items-start gap-2 text-xs leading-5 text-slate-500">
-        <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-teal-600" />
+        <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-blue-600" />
         Pembayaran diproses aman oleh Midtrans. NEXA tidak menyimpan data kartu/akun pembayaranmu.
       </p>
 

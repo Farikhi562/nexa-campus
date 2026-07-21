@@ -259,7 +259,7 @@ export default function ArenaView({ userId }: { userId: string }) {
   return (
     <div className="space-y-5">
       <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-slate-950 p-5 text-white shadow-xl sm:p-7">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(45,212,191,0.28),transparent_20rem)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(96,165,250,0.28),transparent_20rem)]" />
         <div className="relative flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-amber-300/20 bg-amber-300/10 px-3 py-1.5 text-xs font-black text-amber-100">
@@ -281,9 +281,9 @@ export default function ArenaView({ userId }: { userId: string }) {
           <p className="text-2xl font-black tabular-nums text-slate-950">{summary.open}</p>
           <p className="mt-0.5 text-xs font-bold text-slate-500">tim masih buka</p>
         </div>
-        <div className="rounded-3xl border border-teal-100 bg-teal-50 p-3 shadow-sm">
-          <p className="text-2xl font-black tabular-nums text-teal-800">{summary.recommended}</p>
-          <p className="mt-0.5 text-xs font-bold text-teal-700">match skill kamu</p>
+        <div className="rounded-3xl border border-blue-100 bg-blue-50 p-3 shadow-sm">
+          <p className="text-2xl font-black tabular-nums text-blue-800">{summary.recommended}</p>
+          <p className="mt-0.5 text-xs font-bold text-blue-700">match skill kamu</p>
         </div>
         <div className="rounded-3xl border border-amber-100 bg-amber-50 p-3 shadow-sm">
           <p className="text-2xl font-black tabular-nums text-amber-800">{summary.applied}</p>
@@ -358,12 +358,12 @@ export default function ArenaView({ userId }: { userId: string }) {
                     </Badge>
                     <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-bold capitalize text-slate-600">{post.competition_type}</span>
                     {matchScore > 0 && !isOwner && (
-                      <span className="rounded-full bg-teal-50 px-2 py-0.5 text-[11px] font-black text-teal-700 ring-1 ring-teal-100">{matchScore}% match</span>
+                      <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-black text-blue-700 ring-1 ring-blue-100">{matchScore}% match</span>
                     )}
                   </div>
 
                   <h3 className="mt-2 line-clamp-1 text-base font-black text-slate-950">{post.title}</h3>
-                  {post.competition_name && <p className="text-xs font-bold text-teal-700">{post.competition_name}</p>}
+                  {post.competition_name && <p className="text-xs font-bold text-blue-700">{post.competition_name}</p>}
                   {post.description && <p className="mt-1 line-clamp-2 text-sm leading-5 text-slate-500">{post.description}</p>}
 
                   {post.skills_needed.length > 0 && (
@@ -371,7 +371,7 @@ export default function ArenaView({ userId }: { userId: string }) {
                       {post.skills_needed.slice(0, 4).map((skill) => (
                         <span
                           key={skill}
-                          className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${post.matching_skills?.includes(skill) ? 'bg-teal-100 text-teal-800 ring-1 ring-teal-200' : 'bg-slate-100 text-slate-600'}`}
+                          className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${post.matching_skills?.includes(skill) ? 'bg-blue-100 text-blue-800 ring-1 ring-blue-200' : 'bg-slate-100 text-slate-600'}`}
                         >
                           {skill}
                         </span>
@@ -380,7 +380,7 @@ export default function ArenaView({ userId }: { userId: string }) {
                     </div>
                   )}
                   {post.matching_skills && post.matching_skills.length > 0 && !isOwner && (
-                    <p className="mt-2 flex items-center gap-1.5 text-[11px] font-bold text-teal-700">
+                    <p className="mt-2 flex items-center gap-1.5 text-[11px] font-bold text-blue-700">
                       <Target className="h-3.5 w-3.5" /> Cocok di {post.matching_skills.slice(0, 3).join(', ')}
                     </p>
                   )}
@@ -397,7 +397,7 @@ export default function ArenaView({ userId }: { userId: string }) {
 
                   {post.creator_name && (
                     <p className="mt-2 flex items-center gap-1.5 text-xs text-slate-400">
-                      oleh <Link href={`/dashboard/profile/${post.creator_id}`} className="font-bold text-slate-600 hover:text-teal-700">{post.creator_name}</Link>
+                      oleh <Link href={`/dashboard/profile/${post.creator_id}`} className="font-bold text-slate-600 hover:text-blue-700">{post.creator_name}</Link>
                       <FeaturedBadgePin badgeId={post.creator_featured_badge} />
                     </p>
                   )}
@@ -613,14 +613,14 @@ function ArenaPostFormModal({
             <label className={label}>Skill yang dibutuhkan</label>
             <div className="flex gap-2">
               <input value={skillInput} onChange={(e) => setSkillInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addSkill() } }} placeholder="Cth: React, Python, UI/UX..." className={`${input} flex-1`} />
-              <button type="button" onClick={addSkill} className="rounded-2xl bg-teal-500 px-3 py-2 text-sm font-black text-white hover:bg-teal-400">+</button>
+              <button type="button" onClick={addSkill} className="rounded-2xl bg-blue-500 px-3 py-2 text-sm font-black text-white hover:bg-blue-400">+</button>
             </div>
             {form.skills_needed.length > 0 && (
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {form.skills_needed.map((skill) => (
-                  <span key={skill} className="flex items-center gap-1 rounded-full bg-teal-50 px-2.5 py-1 text-xs font-bold text-teal-700">
+                  <span key={skill} className="flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700">
                     {skill}
-                    <button type="button" onClick={() => set('skills_needed', form.skills_needed.filter((item) => item !== skill))} className="text-teal-400 hover:text-red-500">×</button>
+                    <button type="button" onClick={() => set('skills_needed', form.skills_needed.filter((item) => item !== skill))} className="text-blue-400 hover:text-red-500">×</button>
                   </span>
                 ))}
               </div>
@@ -743,7 +743,7 @@ function ApplyArenaModal({ post, onClose, onApplied }: { post: ArenaPost; onClos
       <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" />
       <div className="relative z-10 max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-t-3xl bg-white p-5 shadow-2xl sm:rounded-3xl sm:p-6" onClick={(e) => e.stopPropagation()}>
         <h2 className="text-lg font-black text-slate-950">Lamar ke tim</h2>
-        <p className="mt-1 text-sm font-bold text-teal-700">{post.title}</p>
+        <p className="mt-1 text-sm font-bold text-blue-700">{post.title}</p>
         <p className="mt-1 text-sm leading-6 text-slate-500">Isi data yang bisa dinilai owner. Bukan CV sepanjang skripsi, tapi cukup buat kelihatan kamu beneran bisa.</p>
 
         <div className="mt-4 space-y-4">
@@ -763,14 +763,14 @@ function ApplyArenaModal({ post, onClose, onApplied }: { post: ArenaPost; onClos
             <label className={label}>Skill yang kamu tawarkan *</label>
             <div className="flex gap-2">
               <input value={skillInput} onChange={(e) => setSkillInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addSkill() } }} placeholder="Cth: React, UI/UX, Python..." className={`${input} flex-1`} />
-              <button type="button" onClick={addSkill} className="rounded-2xl bg-teal-500 px-3 py-2 text-sm font-black text-white hover:bg-teal-400">+</button>
+              <button type="button" onClick={addSkill} className="rounded-2xl bg-blue-500 px-3 py-2 text-sm font-black text-white hover:bg-blue-400">+</button>
             </div>
             {skills.length > 0 && (
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {skills.map((skill) => (
-                  <span key={skill} className="flex items-center gap-1 rounded-full bg-teal-50 px-2.5 py-1 text-xs font-bold text-teal-700">
+                  <span key={skill} className="flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700">
                     {skill}
-                    <button type="button" onClick={() => setSkills((prev) => prev.filter((item) => item !== skill))} className="text-teal-400 hover:text-red-500">×</button>
+                    <button type="button" onClick={() => setSkills((prev) => prev.filter((item) => item !== skill))} className="text-blue-400 hover:text-red-500">×</button>
                   </span>
                 ))}
               </div>
@@ -819,7 +819,7 @@ function ApplyArenaModal({ post, onClose, onApplied }: { post: ArenaPost; onClos
 
           {/* Competency Questions (spec A.3) */}
           {roleConfig && (
-            <div className="space-y-3 rounded-2xl border border-teal-100 bg-teal-50/40 p-3">
+            <div className="space-y-3 rounded-2xl border border-blue-100 bg-blue-50/40 p-3">
               <p className={label}>Pertanyaan kompetensi singkat</p>
               {roleConfig.competencyQuestions.map((q) => (
                 <div key={q.key}>
@@ -934,7 +934,7 @@ function ManageApplicantsModal({ post, onClose, onChanged }: { post: ArenaPost; 
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>
             <h2 className="text-lg font-black text-slate-950">Review pelamar</h2>
-            <p className="mt-1 text-sm font-bold text-teal-700">{post.title}</p>
+            <p className="mt-1 text-sm font-bold text-blue-700">{post.title}</p>
             <p className="mt-1 text-sm leading-6 text-slate-500">Cek latar belakang, skill, dan evidence dulu. Tombol terima memang sengaja dibuat serius, karena tim lomba bukan grup random jam kosong.</p>
           </div>
           <button onClick={onClose} className="rounded-2xl bg-slate-100 p-2 text-slate-500 hover:bg-slate-200"><X className="h-4 w-4" /></button>
@@ -1011,7 +1011,7 @@ function ApplicantSection({
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     {applicant?.id ? (
-                      <Link href={`/dashboard/profile/${applicant.id}`} className="font-black text-slate-950 hover:text-teal-700">{applicant.full_name ?? 'Mahasiswa NEXA'}</Link>
+                      <Link href={`/dashboard/profile/${applicant.id}`} className="font-black text-slate-950 hover:text-blue-700">{applicant.full_name ?? 'Mahasiswa NEXA'}</Link>
                     ) : (
                       <p className="font-black text-slate-950">Mahasiswa NEXA</p>
                     )}
@@ -1047,7 +1047,7 @@ function ApplicantSection({
               {application.skills_offered.length > 0 && (
                 <div className="mt-3 flex flex-wrap gap-1.5">
                   {application.skills_offered.map((skill) => (
-                    <span key={skill} className="rounded-full bg-teal-50 px-2.5 py-1 text-xs font-bold text-teal-700">{skill}</span>
+                    <span key={skill} className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700">{skill}</span>
                   ))}
                 </div>
               )}
@@ -1056,7 +1056,7 @@ function ApplicantSection({
                 <div className="mt-3 space-y-1">
                   <p className="text-[11px] font-black uppercase tracking-wide text-slate-400">Evidence ({application.evidence_links.length})</p>
                   {application.evidence_links.map((ev, i) => (
-                    <a key={i} href={ev.url} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-xs font-bold text-brand-700 hover:underline">
+                    <a key={i} href={ev.url} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-xs font-bold text-blue-700 hover:underline">
                       <ExternalLink className="h-3.5 w-3.5 flex-none" /> {ev.label || ev.url}
                     </a>
                   ))}
@@ -1073,8 +1073,8 @@ function ApplicantSection({
               )}
 
               {application.mini_challenge_answer && (
-                <div className="mt-3 rounded-2xl border border-teal-100 bg-teal-50/40 p-3">
-                  <p className="text-[11px] font-black uppercase tracking-wide text-teal-700">Mini challenge</p>
+                <div className="mt-3 rounded-2xl border border-blue-100 bg-blue-50/40 p-3">
+                  <p className="text-[11px] font-black uppercase tracking-wide text-blue-700">Mini challenge</p>
                   <p className="mt-1 text-xs leading-5 text-slate-700">{application.mini_challenge_answer}</p>
                 </div>
               )}
@@ -1084,7 +1084,7 @@ function ApplicantSection({
               )}
 
               {application.portfolio_url && (
-                <a href={application.portfolio_url} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-1.5 text-xs font-black text-brand-700 hover:underline">
+                <a href={application.portfolio_url} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-1.5 text-xs font-black text-blue-700 hover:underline">
                   <ExternalLink className="h-3.5 w-3.5" /> Cek portfolio
                 </a>
               )}

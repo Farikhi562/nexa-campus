@@ -116,7 +116,7 @@ export default function VoiceNoteRecorder({ roomId, disabled, onUploaded }: Voic
           <h3 className="text-base font-black text-slate-950 dark:text-white">Voice Note</h3>
           <p className="text-sm text-slate-500 dark:text-slate-400">Rekam VN buat Study Room. Maks 10MB, Command-only.</p>
         </div>
-        <div className="text-sm font-black text-teal-600 dark:text-teal-300">{formatSeconds(duration)}</div>
+        <div className="text-sm font-black text-blue-600 dark:text-blue-300">{formatSeconds(duration)}</div>
       </div>
 
       <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -125,7 +125,7 @@ export default function VoiceNoteRecorder({ roomId, disabled, onUploaded }: Voic
             type="button"
             disabled={disabled || uploading}
             onClick={startRecording}
-            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-teal-500 px-4 py-3 text-sm font-black text-slate-950 transition hover:bg-teal-400 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-500 px-4 py-3 text-sm font-black text-slate-950 transition hover:bg-blue-400 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Mic className="h-4 w-4" /> Mulai Rekam
           </button>

@@ -93,12 +93,12 @@ export default function SmartEmptyState({
   return (
     <Card className={cn('overflow-hidden', className)}>
       <CardContent className={cn('relative text-center', compact ? 'p-5' : 'p-8 sm:p-10')}>
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(20,184,166,0.12),transparent_20rem)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(59,130,246,0.12),transparent_20rem)]" />
         <div className="relative mx-auto flex max-w-xl flex-col items-center">
           <div className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-lg shadow-slate-900/15">
             <Icon className="h-5 w-5" />
           </div>
-          <p className="text-[11px] font-black uppercase tracking-[0.2em] text-teal-600">{eyebrow ?? preset.eyebrow}</p>
+          <p className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-600">{eyebrow ?? preset.eyebrow}</p>
           <h3 className="mt-2 text-lg font-black text-slate-950">{title ?? preset.title}</h3>
           <p className="mt-2 text-sm leading-6 text-slate-500">{copy ?? preset.copy}</p>
 

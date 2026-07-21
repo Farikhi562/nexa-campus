@@ -43,9 +43,9 @@ export default function AppShell({
   }) === 'command'
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-[#f7f5ef]">
       <PresenceHeartbeat />
-      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-xl">
+      <header className="sticky top-0 z-50 border-b border-slate-200 bg-[#fffdf8]">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-3 py-2.5 sm:px-4 sm:py-3">
           <div className="flex min-w-0 items-center gap-2">
             <MobileNavMenu isAdmin={isAdmin} isCommand={isCommand} />
@@ -53,7 +53,7 @@ export default function AppShell({
               <NexaLogo className="h-9 w-9 flex-shrink-0 sm:h-10 sm:w-10" />
               <div className="min-w-0">
                 <p className="truncate text-sm font-black leading-5 text-slate-950 sm:text-base">NEXA Campus</p>
-                <p className="truncate text-[9px] font-bold uppercase tracking-[0.18em] text-brand-700 sm:text-[10px]">
+                <p className="truncate text-[9px] font-bold uppercase tracking-[0.18em] text-blue-700 sm:text-[10px]">
                   Deadline Radar · v{BRAND.version}
                 </p>
               </div>

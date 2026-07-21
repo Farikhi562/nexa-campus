@@ -99,7 +99,7 @@ export default function SkillEvidenceForm() {
         type="button"
         onClick={submit}
         disabled={submitting}
-        className="mt-3 inline-flex min-h-10 items-center gap-2 rounded-2xl bg-teal-600 px-4 py-2.5 text-xs font-black text-white hover:bg-teal-700 disabled:opacity-50"
+        className="mt-3 inline-flex min-h-10 items-center gap-2 rounded-2xl bg-blue-600 px-4 py-2.5 text-xs font-black text-white hover:bg-blue-700 disabled:opacity-50"
       >
         {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
         Tambah Evidence
@@ -119,7 +119,7 @@ export default function SkillEvidenceForm() {
               </div>
               <div className="flex flex-none items-center gap-2">
                 {(item.evidence_url || item.file_url) && (
-                  <a href={item.evidence_url || item.file_url || '#'} target="_blank" rel="noreferrer" className="text-slate-400 hover:text-teal-700">
+                  <a href={item.evidence_url || item.file_url || '#'} target="_blank" rel="noreferrer" className="text-slate-400 hover:text-blue-700">
                     <ExternalLink className="h-4 w-4" />
                   </a>
                 )}

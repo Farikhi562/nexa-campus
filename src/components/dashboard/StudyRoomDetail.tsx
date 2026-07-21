@@ -35,7 +35,7 @@ function Avatar({ url, name, size = 'md' }: { url?: string | null; name?: string
 function RoleBadge({ role }: { role: RoomMemberRole }) {
   const styles: Record<RoomMemberRole, string> = {
     owner: 'bg-amber-100 text-amber-700',
-    admin: 'bg-teal-100 text-teal-700',
+    admin: 'bg-blue-100 text-blue-700',
     moderator: 'bg-blue-100 text-blue-700',
     member: 'bg-slate-100 text-slate-600',
   }
@@ -333,7 +333,7 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
   if (error) return (
     <Card><CardContent className="p-8 text-center">
       <p className="text-red-600">{error}</p>
-      <Link href="/dashboard/study-room" className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-teal-700 underline">
+      <Link href="/dashboard/study-room" className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-blue-700 underline">
         <ChevronLeft className="h-4 w-4" /> Kembali ke Study Room
       </Link>
     </CardContent></Card>
@@ -353,7 +353,7 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-black ${
-                    room.visibility === 'private' ? 'bg-amber-100 text-amber-700' : 'bg-teal-100 text-teal-700'
+                    room.visibility === 'private' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'
                   }`}>
                     {room.visibility === 'private' ? '🔒 Private' : '🌐 Publik'}
                   </span>
@@ -367,7 +367,7 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
                   </span>
                 </div>
                 <h2 className="mt-2 text-xl font-black text-slate-950">{room.title}</h2>
-                {room.topic && <p className="mt-1 text-xs font-bold text-teal-600">#{room.topic}</p>}
+                {room.topic && <p className="mt-1 text-xs font-bold text-blue-600">#{room.topic}</p>}
               </div>
             </div>
 
@@ -412,7 +412,7 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
                       if (res.ok) { await loadAll() }
                       else { const j = await res.json(); alert(j.error ?? 'Gagal.') }
                     }}
-                    className="focus-ring w-full rounded-2xl bg-teal-500 py-3 text-sm font-black text-white hover:bg-teal-400"
+                    className="focus-ring w-full rounded-2xl bg-blue-500 py-3 text-sm font-black text-white hover:bg-blue-400"
                   >
                     🔒 Minta Bergabung
                   </button>
@@ -428,7 +428,7 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
                   if (res.ok) { await loadAll() }
                   else { const j = await res.json(); alert(j.error ?? 'Gagal join.') }
                 }}
-                className="focus-ring w-full rounded-2xl bg-teal-500 py-3 text-sm font-black text-white hover:bg-teal-400"
+                className="focus-ring w-full rounded-2xl bg-blue-500 py-3 text-sm font-black text-white hover:bg-blue-400"
               >
                 Gabung Room
               </button>
@@ -472,7 +472,7 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
         </div>
         <div className="flex items-center gap-2">
           {canManage && joinRequests.length > 0 && (
-            <button className="flex items-center gap-1 rounded-full bg-teal-100 px-2.5 py-1 text-xs font-black text-teal-700">
+            <button className="flex items-center gap-1 rounded-full bg-blue-100 px-2.5 py-1 text-xs font-black text-blue-700">
               <UserPlus className="h-3.5 w-3.5" /> {joinRequests.length}
             </button>
           )}
@@ -511,7 +511,7 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
                         <span className="inline-flex items-center gap-1">{isMe ? 'Kamu' : (msg.sender?.full_name ?? 'Anggota')} <FounderVerifiedBadge founderVerified={msg.sender?.founder_verified} email={msg.sender?.email} compact /></span> · {formatTime(msg.created_at)} {msg.edited_at && !msg.deleted_at ? '· diedit' : ''}
                       </p>
                       <div className={`rounded-2xl px-3.5 py-2.5 text-sm leading-6 ${
-                        isMe ? 'rounded-tr-sm bg-teal-500 text-white' : 'rounded-tl-sm bg-slate-100 text-slate-900'
+                        isMe ? 'rounded-tr-sm bg-blue-500 text-white' : 'rounded-tl-sm bg-slate-100 text-slate-900'
                       }`}>
                         {msg.deleted_at ? (
                           <p className="italic opacity-70">Pesan dihapus</p>
@@ -627,7 +627,7 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
                 style={{ minHeight: '2.5rem', maxHeight: '8rem' }}
               />
               <button onClick={sendMessage} disabled={!message.trim() || sending}
-                className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-teal-500 text-white transition hover:bg-teal-400 disabled:opacity-40">
+                className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-blue-500 text-white transition hover:bg-blue-400 disabled:opacity-40">
                 {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
               </button>
             </div>

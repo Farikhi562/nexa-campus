@@ -172,9 +172,9 @@ export default function SmartInputBox({ plan, defaultCampus }: { plan: Plan; def
   }
 
   return (
-    <div className="rounded-2xl border border-teal-100 bg-gradient-to-br from-white to-teal-50/40 p-4">
+    <div className="rounded-2xl border border-blue-100 bg-gradient-to-br from-white to-blue-50/40 p-4">
       <div className="mb-3 flex items-center gap-2">
-        <div className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-teal-600 text-white">
+        <div className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-white">
           <Sparkles className="h-4 w-4" />
         </div>
         <div>
@@ -195,7 +195,7 @@ export default function SmartInputBox({ plan, defaultCampus }: { plan: Plan; def
               type="button"
               onClick={() => switchTab(t.id)}
               className={`inline-flex flex-none items-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold transition ${
-                active ? 'bg-teal-600 text-white' : 'border border-slate-200 bg-white text-slate-600 hover:border-teal-200'
+                active ? 'bg-blue-600 text-white' : 'border border-slate-200 bg-white text-slate-600 hover:border-blue-200'
               }`}
             >
               <Icon className="h-3.5 w-3.5" />
@@ -240,7 +240,7 @@ export default function SmartInputBox({ plan, defaultCampus }: { plan: Plan; def
                 type="button"
                 onClick={runNlp}
                 disabled={loading || !text.trim()}
-                className="inline-flex min-h-11 items-center gap-2 rounded-2xl bg-teal-600 px-4 py-3 text-sm font-black text-white transition hover:bg-teal-700 disabled:opacity-50"
+                className="inline-flex min-h-11 items-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-sm font-black text-white transition hover:bg-blue-700 disabled:opacity-50"
               >
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Brain className="h-4 w-4" />}
                 Proses dengan AI
@@ -250,8 +250,8 @@ export default function SmartInputBox({ plan, defaultCampus }: { plan: Plan; def
 
           {tab === 'image' && (
             <div className="space-y-2">
-              <label className="flex min-h-32 cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-slate-200 bg-white px-4 py-6 text-center transition hover:border-teal-300">
-                <ImageIcon className="h-6 w-6 text-teal-600" />
+              <label className="flex min-h-32 cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-slate-200 bg-white px-4 py-6 text-center transition hover:border-blue-300">
+                <ImageIcon className="h-6 w-6 text-blue-600" />
                 <span className="text-sm font-bold text-slate-700">
                   {loading ? 'Membaca gambar...' : 'Tap untuk pilih screenshot tugas'}
                 </span>
@@ -273,8 +273,8 @@ export default function SmartInputBox({ plan, defaultCampus }: { plan: Plan; def
 
           {tab === 'file' && (
             <div className="space-y-2">
-              <label className="flex min-h-32 cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-slate-200 bg-white px-4 py-6 text-center transition hover:border-teal-300">
-                <Upload className="h-6 w-6 text-teal-600" />
+              <label className="flex min-h-32 cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-slate-200 bg-white px-4 py-6 text-center transition hover:border-blue-300">
+                <Upload className="h-6 w-6 text-blue-600" />
                 <span className="text-sm font-bold text-slate-700">
                   {loading ? 'Membaca file...' : 'Tap untuk pilih PDF / DOCX'}
                 </span>

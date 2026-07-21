@@ -26,7 +26,7 @@ export default function OnlineFriendsStrip() {
   }, [])
 
   return (
-    <section className="rounded-3xl border border-teal-100 bg-white p-4 shadow-sm">
+    <section className="rounded-3xl border border-blue-100 bg-white p-4 shadow-sm">
       <div className="mb-3 flex items-center justify-between gap-3">
         <div>
           <p className="flex items-center gap-2 text-sm font-black text-slate-950"><Radio className="h-4 w-4 text-emerald-500" /> Teman online</p>
@@ -39,14 +39,14 @@ export default function OnlineFriendsStrip() {
       ) : (
         <div className="flex gap-2 overflow-x-auto pb-1">
           {friends.slice(0, 10).map((friend) => (
-            <Link key={friend.id} href={`/dashboard/messages/${friend.id}`} className="group flex min-w-[180px] items-center gap-2 rounded-2xl border border-slate-100 bg-slate-50 p-2.5 transition hover:border-teal-200 hover:bg-teal-50">
+            <Link key={friend.id} href={`/dashboard/messages/${friend.id}`} className="group flex min-w-[180px] items-center gap-2 rounded-2xl border border-slate-100 bg-slate-50 p-2.5 transition hover:border-blue-200 hover:bg-blue-50">
               <span className="relative flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-200 text-xs font-black text-slate-600">
                 {friend.avatar_url ? <Image src={friend.avatar_url} alt="" width={40} height={40} className="h-full w-full object-cover" /> : (friend.full_name ?? 'N').slice(0, 1).toUpperCase()}
                 <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-emerald-500" />
               </span>
               <span className="min-w-0 flex-1">
                 <span className="flex items-center gap-1.5">
-                  <span className="truncate text-xs font-black text-slate-950 group-hover:text-teal-700">{friend.full_name ?? 'Teman NEXA'}</span>
+                  <span className="truncate text-xs font-black text-slate-950 group-hover:text-blue-700">{friend.full_name ?? 'Teman NEXA'}</span>
                   <FounderVerifiedBadge founderVerified={friend.founder_verified} email={friend.email} compact />
                   <FeaturedBadgePin badgeId={friend.featured_badge} />
                 </span>

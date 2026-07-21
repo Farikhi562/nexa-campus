@@ -74,7 +74,7 @@ function cleanList(values?: string[] | null) {
 function ExternalProfileLink({ href, label }: { href: string | null; label: string }) {
   if (!href) return null
   return (
-    <a href={href} target="_blank" rel="noreferrer" className="focus-ring inline-flex items-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 transition hover:border-teal-200 hover:text-teal-700">
+    <a href={href} target="_blank" rel="noreferrer" className="focus-ring inline-flex items-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 transition hover:border-blue-200 hover:text-blue-700">
       <ExternalLink className="h-3.5 w-3.5" /> {label}
     </a>
   )
@@ -115,12 +115,12 @@ export default function PublicUserProfileView({
         </Link>
         <div className="flex items-center gap-2">
           {canMessage && (
-            <Link href={`/dashboard/messages/${profile.id}`} className="focus-ring inline-flex items-center gap-1.5 rounded-2xl bg-teal-400 px-3 py-2 text-xs font-black text-slate-950 hover:bg-teal-300">
+            <Link href={`/dashboard/messages/${profile.id}`} className="focus-ring inline-flex items-center gap-1.5 rounded-2xl bg-blue-400 px-3 py-2 text-xs font-black text-slate-950 hover:bg-blue-300">
               <MessageCircle className="h-3.5 w-3.5" /> Chat
             </Link>
           )}
           {isOwnProfile && (
-            <Link href="/dashboard/settings/profile" className="focus-ring rounded-2xl bg-teal-400 px-3 py-2 text-xs font-black text-slate-950 hover:bg-teal-300">
+            <Link href="/dashboard/settings/profile" className="focus-ring rounded-2xl bg-blue-400 px-3 py-2 text-xs font-black text-slate-950 hover:bg-blue-300">
               Edit Profil
             </Link>
           )}
@@ -128,7 +128,7 @@ export default function PublicUserProfileView({
       </div>
 
       <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-slate-950 p-5 text-white shadow-xl sm:p-7">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(45,212,191,0.28),transparent_18rem),radial-gradient(circle_at_10%_90%,rgba(251,191,36,0.16),transparent_16rem)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(96,165,250,0.28),transparent_18rem),radial-gradient(circle_at_10%_90%,rgba(251,191,36,0.16),transparent_16rem)]" />
         <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center">
           <div className="flex h-24 w-24 flex-shrink-0 items-center justify-center overflow-hidden rounded-[2rem] border border-white/10 bg-white/10 text-3xl font-black text-white shadow-2xl sm:h-28 sm:w-28">
             {profile.avatar_url ? (
@@ -149,7 +149,7 @@ export default function PublicUserProfileView({
               )}
             </div>
             <h1 className="flex flex-wrap items-center gap-2 text-2xl font-black tracking-tight sm:text-3xl"><span>{profile.full_name ?? 'Mahasiswa NEXA'}</span><FounderVerifiedBadge founderVerified={profile.founder_verified} verified={profile.is_nexa_verified} email={profile.email} /></h1>
-            {profile.public_profile_headline && <p className="mt-2 max-w-2xl text-sm font-bold leading-6 text-teal-100">{profile.public_profile_headline}</p>}
+            {profile.public_profile_headline && <p className="mt-2 max-w-2xl text-sm font-bold leading-6 text-blue-100">{profile.public_profile_headline}</p>}
             <p className="mt-2 text-sm leading-6 text-slate-300">
               {[profile.campus_name, profile.major, profile.semester ? `Semester ${profile.semester}` : null].filter(Boolean).join(' · ') || 'Profil akademik belum lengkap'}
             </p>
@@ -185,7 +185,7 @@ export default function PublicUserProfileView({
                 </div>
                 {skills.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
-                    {skills.map((skill) => <span key={skill} className="rounded-full bg-teal-50 px-3 py-1.5 text-xs font-black text-teal-700 ring-1 ring-teal-100">{skill}</span>)}
+                    {skills.map((skill) => <span key={skill} className="rounded-full bg-blue-50 px-3 py-1.5 text-xs font-black text-blue-700 ring-1 ring-blue-100">{skill}</span>)}
                   </div>
                 ) : (
                   <p className="text-sm leading-6 text-slate-500">Skill belum ditampilkan.</p>
@@ -209,7 +209,7 @@ export default function PublicUserProfileView({
                             <p className="text-[11px] font-bold uppercase tracking-wide text-slate-400">{item.evidence_type}</p>
                           </div>
                           {link && (
-                            <a href={link} target="_blank" rel="noreferrer" className="inline-flex flex-none items-center gap-1 text-xs font-black text-brand-700 hover:underline">
+                            <a href={link} target="_blank" rel="noreferrer" className="inline-flex flex-none items-center gap-1 text-xs font-black text-blue-700 hover:underline">
                               <ExternalLink className="h-3.5 w-3.5" /> Lihat
                             </a>
                           )}

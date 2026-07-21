@@ -70,13 +70,13 @@ const tierMeta: Record<
     icon: Zap,
     tagline: 'Untuk yang butuh reminder otomatis.',
     who: 'Mahasiswa yang sering punya banyak deadline dan butuh pengingat.',
-    tone: 'border-cyan-200',
+    tone: 'border-orange-200',
   },
   command: {
     icon: Target,
     tagline: 'Reminder lebih detail dan akses fitur baru.',
     who: 'Pengguna yang ingin mengatur reminder lebih lengkap dan mencoba fitur baru lebih awal.',
-    tone: 'border-teal-300 ring-2 ring-teal-200',
+    tone: 'border-blue-300 ring-2 ring-blue-200',
   },
 }
 
@@ -165,7 +165,7 @@ export default function SupportPage() {
             <Card key={title} className="flex flex-col">
               <CardContent className="flex flex-1 flex-col p-5">
                 <div className="flex items-center justify-between">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-50 text-teal-700">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-700">
                     <Icon className="h-5 w-5" />
                   </span>
                   <span className="text-3xl font-black text-slate-200">{index + 1}</span>
@@ -174,7 +174,7 @@ export default function SupportPage() {
                 <p className="mt-1.5 flex-1 text-sm leading-6 text-slate-600">{desc}</p>
                 <Link
                   href={href}
-                  className="focus-ring mt-4 inline-flex items-center gap-1.5 text-sm font-black text-teal-700 hover:text-teal-800"
+                  className="focus-ring mt-4 inline-flex items-center gap-1.5 text-sm font-black text-blue-700 hover:text-blue-800"
                 >
                   {cta}
                   <ArrowRight className="h-4 w-4" />
@@ -203,7 +203,7 @@ export default function SupportPage() {
                   </div>
                 )}
                 <CardContent className="p-5">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-950 text-teal-300">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-950 text-blue-300">
                     <Icon className="h-5 w-5" />
                   </span>
                   <h3 className="mt-4 text-lg font-black text-slate-950">{plan.name}</h3>
@@ -252,7 +252,7 @@ export default function SupportPage() {
             <Card key={title}>
               <CardContent className="p-5">
                 <div className="flex items-start gap-4">
-                  <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-teal-50 text-teal-700">
+                  <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-700">
                     <Icon className="h-5 w-5" />
                   </span>
                   <div>
@@ -275,14 +275,14 @@ export default function SupportPage() {
         <Card className="overflow-hidden">
           <CardContent className="grid gap-6 p-5 sm:p-7 lg:grid-cols-[0.9fr_1.1fr]">
             <div>
-              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-600 text-white">
+              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-white">
                 <Gift className="h-6 w-6" />
               </span>
               <h2 className="mt-4 text-2xl font-black text-slate-950">Ajak teman, dapat Pulse gratis</h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">
                 Referral NEXA dibuat sederhana: bagikan link, teman join, lalu reward diproses otomatis.
               </p>
-              <div className="mt-4 inline-flex items-center gap-2 rounded-2xl border border-teal-100 bg-teal-50 px-4 py-2.5 text-sm font-black text-teal-900">
+              <div className="mt-4 inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-2.5 text-sm font-black text-blue-900">
                 <Sparkles className="h-4 w-4" />
                 +30 hari NEXA Pulse per teman
               </div>
@@ -321,7 +321,7 @@ export default function SupportPage() {
 
       {/* PRIVACY NOTE */}
       <div className="flex gap-3 rounded-3xl border border-slate-200 bg-slate-950 p-5 text-sm leading-6 text-slate-300">
-        <LockKeyhole className="mt-0.5 h-5 w-5 flex-shrink-0 text-teal-300" />
+        <LockKeyhole className="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-300" />
         <p>
           NEXA Campus tidak meminta password VClass, iLab, Studentsite, atau akun kampus mana pun. Yang disimpan hanya
           profil dan deadline yang kamu input sendiri. NEXA Campus bukan sistem resmi kampus, jadi tetap cek informasi final dari
@@ -333,7 +333,7 @@ export default function SupportPage() {
         <p className="text-sm font-bold text-slate-500">Mau mulai dari yang paling sederhana?</p>
         <Link
           href="/login?mode=signup"
-          className="focus-ring inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-teal-400 px-6 py-3 text-sm font-black text-slate-950 transition hover:bg-teal-300"
+          className="focus-ring inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-blue-400 px-6 py-3 text-sm font-black text-slate-950 transition hover:bg-blue-300"
         >
           Mulai pakai NEXA
           <Send className="h-4 w-4" />

@@ -48,15 +48,15 @@ export default function ReferralCard({
   }
 
   return (
-    <Card className="overflow-hidden border-teal-100 bg-gradient-to-br from-white via-teal-50/70 to-amber-50/70">
+    <Card className="overflow-hidden border-blue-100 bg-gradient-to-br from-white via-blue-50/70 to-amber-50/70">
       <CardContent className="p-0">
         <div className="relative p-4 sm:p-5">
           <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-amber-300/25 blur-3xl" />
-          <div className="pointer-events-none absolute bottom-0 left-1/3 h-24 w-24 rounded-full bg-teal-300/20 blur-3xl" />
+          <div className="pointer-events-none absolute bottom-0 left-1/3 h-24 w-24 rounded-full bg-blue-300/20 blur-3xl" />
 
           <div className="relative flex items-start justify-between gap-3">
             <div>
-              <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-teal-600 text-white shadow-sm">
+              <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-sm">
                 <Gift className="h-5 w-5" />
               </div>
               <h2 className="text-lg font-black text-slate-950">Ajak Teman</h2>
@@ -95,7 +95,7 @@ export default function ReferralCard({
                   <span>{remaining > 0 ? `${remaining} lagi` : 'selesai'}</span>
                 </div>
                 <div className="h-2 overflow-hidden rounded-full bg-amber-100">
-                  <div className="h-full rounded-full bg-gradient-to-r from-teal-400 via-cyan-400 to-amber-400 transition-all" style={{ width: `${progress}%` }} />
+                  <div className="h-full rounded-full bg-gradient-to-r from-blue-400 via-orange-400 to-amber-400 transition-all" style={{ width: `${progress}%` }} />
                 </div>
               </div>
               <p className="mt-2 text-[11px] font-bold leading-4 text-amber-800">Reward: {target.reward}</p>
@@ -103,7 +103,7 @@ export default function ReferralCard({
           </div>
 
           <div className="relative mt-3 grid gap-3 sm:grid-cols-3">
-            <div className="rounded-2xl border border-teal-100 bg-teal-50 p-3 text-sm font-bold text-teal-900">
+            <div className="rounded-2xl border border-blue-100 bg-blue-50 p-3 text-sm font-bold text-blue-900">
               <div className="flex items-center gap-2"><Users className="h-4 w-4" /> {referralCount} teman join</div>
             </div>
             <div className="rounded-2xl border border-fuchsia-100 bg-fuchsia-50 p-3 text-sm font-bold text-fuchsia-900">

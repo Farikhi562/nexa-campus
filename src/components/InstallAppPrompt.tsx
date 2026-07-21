@@ -72,7 +72,7 @@ export default function InstallAppPrompt() {
         <X className="h-4 w-4" />
       </button>
       <div className="flex gap-3 pr-8">
-        <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-brand-50 text-brand-700">
+        <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-700">
           <Download className="h-5 w-5" />
         </div>
         <div>
@@ -87,7 +87,7 @@ export default function InstallAppPrompt() {
         <button
           type="button"
           onClick={installApp}
-          className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-brand-600 px-4 py-3 text-sm font-black text-white hover:bg-brand-700"
+          className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-blue-600 px-4 py-3 text-sm font-black text-white hover:bg-blue-700"
         >
           Install Aplikasi
         </button>

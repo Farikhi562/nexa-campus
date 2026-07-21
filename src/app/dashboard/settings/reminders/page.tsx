@@ -24,7 +24,7 @@ export default async function ReminderSettingsPage() {
       <div className="rounded-3xl border border-white/80 bg-white/90 p-5 shadow-xl shadow-slate-200/70 sm:p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm font-black uppercase tracking-wide text-brand-700">Reminder Settings</p>
+            <p className="text-sm font-black uppercase tracking-wide text-blue-700">Reminder Settings</p>
             <h1 className="mt-1 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">Pengaturan Telegram</h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
               Aktifkan reminder Telegram untuk deadline yang kamu input manual. Jika token udah ada di env, restart server dev/deploy biar tokennya ke baca
@@ -32,7 +32,7 @@ export default async function ReminderSettingsPage() {
           </div>
           <Link
             href="/dashboard/settings"
-            className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:border-brand-200 hover:bg-brand-50 hover:text-brand-800"
+            className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-800"
           >
             Kembali ke Settings
           </Link>

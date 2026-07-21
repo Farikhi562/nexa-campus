@@ -34,20 +34,20 @@ export default async function OnboardingPage({
   return (
     <main className="relative min-h-screen overflow-hidden bg-slate-50">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-gradient-to-b from-slate-950 to-slate-900" />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[radial-gradient(circle_at_80%_10%,rgba(45,212,191,0.25),transparent_22rem)]" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[radial-gradient(circle_at_80%_10%,rgba(96,165,250,0.25),transparent_22rem)]" />
 
       <div className="relative mx-auto max-w-3xl px-4 py-10">
         <div className="mb-6 flex items-center gap-3">
           <NexaCampusLogo size="sm" />
           <div>
-            <p className="text-sm font-black uppercase tracking-[0.18em] text-teal-300">Setup profil</p>
+            <p className="text-sm font-black uppercase tracking-[0.18em] text-blue-300">Setup profil</p>
             <p className="text-sm text-slate-300">Lengkapi data dasar agar dashboard bisa disiapkan.</p>
           </div>
         </div>
 
         <div className="overflow-hidden rounded-3xl border border-white/80 bg-white shadow-xl shadow-slate-950/10 ring-1 ring-slate-950/5">
-          <div className="border-b border-slate-100 bg-gradient-to-br from-white to-teal-50/60 p-6 sm:p-7">
-            <span className="inline-flex items-center rounded-full bg-teal-100 px-3 py-1 text-xs font-black text-teal-800">
+          <div className="border-b border-slate-100 bg-gradient-to-br from-white to-blue-50/60 p-6 sm:p-7">
+            <span className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-xs font-black text-blue-800">
               Langkah terakhir
             </span>
             <h1 className="mt-3 text-2xl font-black text-slate-950 sm:text-3xl">Kenalan sebentar.</h1>

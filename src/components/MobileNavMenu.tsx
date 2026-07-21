@@ -60,7 +60,7 @@ function NavList({
       >
         <span
           className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl ${
-            active ? 'bg-teal-400 text-slate-950' : 'bg-slate-100 text-teal-700'
+            active ? 'bg-blue-400 text-slate-950' : 'bg-slate-100 text-blue-700'
           }`}
         >
           <Icon className="h-4 w-4" />
@@ -88,7 +88,7 @@ function NavList({
     // membiarkan area ini tumbuh melebihi layar tanpa scroll — item di bagian
     // bawah (Pengaturan/Support/Admin dst) jadi tidak terjangkau.
     <nav className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-6 pt-3">
-      <p className="px-2 pb-2 text-[10px] font-black uppercase tracking-[0.18em] text-teal-700">{t('section_main')}</p>
+      <p className="px-2 pb-2 text-[10px] font-black uppercase tracking-[0.18em] text-blue-700">{t('section_main')}</p>
       <div className="grid grid-cols-1 gap-1">{priorityItems.map(renderItem)}</div>
 
       <p className="px-2 pb-2 pt-4 text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
@@ -154,7 +154,7 @@ export default function MobileNavMenu({
                 <NexaLogo className="h-8 w-8 flex-shrink-0" />
                 <div className="min-w-0">
                   <p className="truncate text-sm font-black text-slate-950">NEXA Campus</p>
-                  <p className="truncate text-[10px] font-bold uppercase tracking-wider text-teal-600">{t('section_all')}</p>
+                  <p className="truncate text-[10px] font-bold uppercase tracking-wider text-blue-600">{t('section_all')}</p>
                 </div>
               </div>
               <button

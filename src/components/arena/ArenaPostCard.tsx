@@ -141,7 +141,7 @@ export function ArenaPostCard({ post, isOwner, onWorkspace, onReview, onEdit, on
       <div className="space-y-1">
         <h3 className="text-2xl font-extrabold text-zinc-900 leading-tight">{post.title}</h3>
         {post.competition_name && (
-          <p className="text-base font-semibold text-teal-600">{post.competition_name}</p>
+          <p className="text-base font-semibold text-blue-600">{post.competition_name}</p>
         )}
       </div>
 
@@ -203,7 +203,7 @@ export function ArenaPostCard({ post, isOwner, onWorkspace, onReview, onEdit, on
         <button
           onClick={() => onApply?.(post.id)}
           disabled={post.has_applied || !open || memberCount >= post.team_size_max}
-          className="w-full rounded-2xl bg-teal-600 hover:bg-teal-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3.5 transition-colors"
+          className="w-full rounded-2xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3.5 transition-colors"
         >
           {post.has_applied
             ? `Lamaran: ${post.my_application_status ?? 'terkirim'}`

@@ -118,7 +118,7 @@ export default function AdminCommandCenter({
                       <p className="text-2xl font-black text-slate-950">{value}</p>
                       <p className="mt-0.5 text-xs font-bold text-slate-500">{label}</p>
                     </div>
-                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-950 text-teal-200">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-950 text-blue-200">
                       <Icon className="h-5 w-5" />
                     </div>
                   </div>

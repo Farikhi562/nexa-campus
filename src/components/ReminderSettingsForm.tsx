@@ -113,7 +113,7 @@ export default function ReminderSettingsForm({
               Masukkan Telegram chat ID kamu. NEXA tidak butuh password kampus, cuma butuh chat ID untuk kirim reminder.
             </p>
           </div>
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-50 text-teal-700">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-700">
             <BellRing className="h-6 w-6" />
           </div>
         </div>
@@ -219,7 +219,7 @@ export default function ReminderSettingsForm({
       </div>
 
       <div className="flex gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-xs leading-5 text-slate-600">
-        <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-teal-700" />
+        <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-blue-700" />
         <p>
           NEXA Campus bukan sistem resmi kampus. Reminder membantu, tapi info final tetap harus dicek dari kanal resmi kampus.
         </p>

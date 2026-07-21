@@ -45,7 +45,7 @@ export default function WeeklyChallengeCard() {
   const pct = Math.round((data.done / Math.max(1, data.total)) * 100)
 
   return (
-    <Card className="border-amber-100 bg-gradient-to-br from-white via-amber-50/60 to-teal-50">
+    <Card className="border-amber-100 bg-gradient-to-br from-white via-amber-50/60 to-blue-50">
       <CardContent className="p-4 sm:p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
@@ -58,13 +58,13 @@ export default function WeeklyChallengeCard() {
           <Badge tone={data.done === data.total ? 'success' : 'warning'}>{data.done}/{data.total} selesai</Badge>
         </div>
         <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-200">
-          <div className="h-full rounded-full bg-gradient-to-r from-amber-400 to-teal-400" style={{ width: `${pct}%` }} />
+          <div className="h-full rounded-full bg-gradient-to-r from-amber-400 to-blue-400" style={{ width: `${pct}%` }} />
         </div>
         <div className="mt-4 grid gap-2 sm:grid-cols-2">
           {data.missions.map((mission) => {
             const complete = mission.current >= mission.goal
             return (
-              <Link key={mission.id} href={mission.href} className="rounded-2xl border border-slate-200 bg-white p-3 transition hover:-translate-y-0.5 hover:border-teal-200 hover:shadow-sm">
+              <Link key={mission.id} href={mission.href} className="rounded-2xl border border-slate-200 bg-white p-3 transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-sm">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-sm font-black text-slate-950">{mission.label}</p>

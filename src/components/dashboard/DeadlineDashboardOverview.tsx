@@ -65,7 +65,7 @@ const summaryMeta = [
     label: 'Minggu Ini',
     icon: TimerReset,
     copy: 'Yang dekat dulu. Napas dulu juga boleh.',
-    tone: 'text-cyan-700',
+    tone: 'text-orange-700',
   },
   {
     key: 'overdue',
@@ -222,7 +222,7 @@ export default function DeadlineDashboardOverview({
       )}
 
       <section className="overflow-hidden rounded-3xl border border-white/10 bg-slate-950 text-white shadow-2xl shadow-slate-900/20">
-        <div className="relative bg-gradient-to-br from-slate-950 via-slate-900 to-brand-950 p-5 sm:p-6">
+        <div className="relative bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 p-5 sm:p-6">
           <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <Badge tone="info" className="mb-3">Deadline Radar</Badge>
@@ -254,7 +254,7 @@ export default function DeadlineDashboardOverview({
               </button>
               <Link
                 href="/dashboard/deadlines/new"
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-cyan-300 px-4 py-3 text-sm font-black text-slate-950 shadow-lg shadow-cyan-950/30 transition hover:-translate-y-0.5 hover:bg-cyan-200"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-orange-300 px-4 py-3 text-sm font-black text-slate-950 shadow-lg shadow-orange-950/30 transition hover:-translate-y-0.5 hover:bg-orange-200"
               >
                 <Plus className="h-4 w-4" />
                 Tambah Deadline
@@ -397,7 +397,7 @@ export default function DeadlineDashboardOverview({
                             className={`focus-ring mt-1 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-xl border transition ${
                               isDone
                                 ? 'border-emerald-500 bg-emerald-500 text-white hover:bg-emerald-600'
-                                : 'border-slate-300 bg-white text-transparent hover:border-teal-500 hover:text-teal-600'
+                                : 'border-slate-300 bg-white text-transparent hover:border-blue-500 hover:text-blue-600'
                             }`}
                             aria-label={isDone ? `Balikin ${getDisplayTitle(deadline)} ke pending` : `Tandai ${getDisplayTitle(deadline)} selesai`}
                           >
@@ -445,7 +445,7 @@ export default function DeadlineDashboardOverview({
                             <div className="mt-4 flex flex-wrap gap-2">
                               <Link
                                 href={`/dashboard/deadlines/${deadline.id}/edit`}
-                                className="focus-ring inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 transition hover:-translate-y-0.5 hover:border-brand-200 hover:bg-brand-50 hover:text-brand-800"
+                                className="focus-ring inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 transition hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-800"
                               >
                                 <Pencil className="h-3.5 w-3.5" />
                                 Edit
@@ -454,7 +454,7 @@ export default function DeadlineDashboardOverview({
                                 type="button"
                                 onClick={() => updateStatus(deadline, isDone ? 'pending' : 'completed')}
                                 disabled={busyId === deadline.id}
-                                className="focus-ring inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 transition hover:-translate-y-0.5 hover:border-brand-200 hover:bg-brand-50 hover:text-brand-800 disabled:opacity-60"
+                                className="focus-ring inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 transition hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-800 disabled:opacity-60"
                               >
                                 {isDone ? <RotateCcw className="h-3.5 w-3.5" /> : <Check className="h-3.5 w-3.5" />}
                                 {isDone ? 'Balikin ke pending' : 'Tandai selesai'}

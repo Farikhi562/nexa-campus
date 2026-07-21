@@ -20,7 +20,7 @@ const STEP_COLOR: Record<StudyStepType, string> = {
   read:     'border-blue-700/50 bg-blue-900/20',
   watch:    'border-purple-700/50 bg-purple-900/20',
   practice: 'border-amber-700/50 bg-amber-900/20',
-  quiz:     'border-teal-700/50 bg-teal-900/20',
+  quiz:     'border-blue-700/50 bg-blue-900/20',
   review:   'border-indigo-700/50 bg-indigo-900/20',
   write:    'border-emerald-700/50 bg-emerald-900/20',
   rest:     'border-zinc-700 bg-zinc-800/40',
@@ -79,7 +79,7 @@ function TimerCircle({ display, pct, running }: { display: string; pct: number; 
         <circle
           cx="38" cy="38" r={r} fill="none" strokeWidth="5" strokeLinecap="round"
           strokeDasharray={`${dash} ${circ}`}
-          className={pct >= 100 ? 'stroke-emerald-400' : running ? 'stroke-teal-400' : 'stroke-zinc-500'}
+          className={pct >= 100 ? 'stroke-emerald-400' : running ? 'stroke-blue-400' : 'stroke-zinc-500'}
           style={{ transition: 'stroke-dasharray 1s linear' }}
         />
       </svg>
@@ -127,7 +127,7 @@ function StepRow({ step, index, isActive, isDone, onActivate, onDone }: StepRowP
   }
 
   return (
-    <div className={`rounded-2xl border-2 ${isDone ? 'border-emerald-600/60' : 'border-teal-600/60'} ${STEP_COLOR[step.type]} p-4 space-y-3`}>
+    <div className={`rounded-2xl border-2 ${isDone ? 'border-emerald-600/60' : 'border-blue-600/60'} ${STEP_COLOR[step.type]} p-4 space-y-3`}>
       <div className="flex items-center gap-3">
         <span className="text-2xl">{STEP_ICONS[step.type]}</span>
         <div className="flex-1 min-w-0">
@@ -144,7 +144,7 @@ function StepRow({ step, index, isActive, isDone, onActivate, onDone }: StepRowP
               <button
                 onClick={timer.start}
                 disabled={isDone}
-                className="flex items-center gap-1.5 rounded-xl bg-teal-600 hover:bg-teal-500 disabled:opacity-40 px-4 py-2 text-xs font-semibold text-white transition-colors"
+                className="flex items-center gap-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-40 px-4 py-2 text-xs font-semibold text-white transition-colors"
               >
                 <PlayCircle size={14} /> Mulai
               </button>
@@ -273,7 +273,7 @@ export function StudyPlanWithTimer({ packId, topic }: Props) {
     <div className="space-y-5">
       {/* Header */}
       <div className="flex items-center gap-2">
-        <Clock size={18} className="text-teal-400" />
+        <Clock size={18} className="text-blue-400" />
         <h3 className="text-base font-semibold text-zinc-100">Rencana Belajar</h3>
         {saving && <Loader2 size={12} className="ml-auto animate-spin text-zinc-500" />}
       </div>
@@ -287,7 +287,7 @@ export function StudyPlanWithTimer({ packId, topic }: Props) {
           <button
             onClick={handleGenerate}
             disabled={generating}
-            className="mx-auto flex items-center gap-2 rounded-xl bg-teal-600 hover:bg-teal-500 disabled:opacity-50 px-5 py-2.5 text-sm font-semibold text-white transition-colors"
+            className="mx-auto flex items-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 px-5 py-2.5 text-sm font-semibold text-white transition-colors"
           >
             {generating ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
             {generating ? 'Membuat rencana…' : 'Buat Rencana Belajar'}
@@ -304,7 +304,7 @@ export function StudyPlanWithTimer({ packId, topic }: Props) {
             </div>
             <div className="h-1.5 rounded-full bg-zinc-700 overflow-hidden">
               <div
-                className="h-full rounded-full bg-teal-500 transition-all duration-500"
+                className="h-full rounded-full bg-blue-500 transition-all duration-500"
                 style={{ width: `${totalSteps > 0 ? (doneCount / totalSteps) * 100 : 0}%` }}
               />
             </div>

@@ -82,10 +82,10 @@ export default async function AdminReadinessPage() {
     <main className="min-h-screen bg-[#f6f8fb]">
       <section className="border-b border-slate-900 bg-slate-950 text-white">
         <div className="relative mx-auto max-w-7xl overflow-hidden px-4 py-8 sm:py-10">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_78%_20%,rgba(45,212,191,0.24),transparent_24rem)]" />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_78%_20%,rgba(96,165,250,0.24),transparent_24rem)]" />
           <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-teal-300/20 bg-teal-300/10 px-3 py-1.5 text-xs font-black text-teal-100">
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-blue-300/20 bg-blue-300/10 px-3 py-1.5 text-xs font-black text-blue-100">
                 <ShieldCheck className="h-3.5 w-3.5" />
                 Production Readiness
               </div>
@@ -120,7 +120,7 @@ export default async function AdminReadinessPage() {
                     <p className="text-3xl font-black tracking-tight text-slate-950">{value}</p>
                     <p className="mt-1 text-sm font-black text-slate-800">{label}</p>
                   </div>
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-950 text-teal-200">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-950 text-blue-200">
                     <Icon className="h-5 w-5" />
                   </div>
                 </div>

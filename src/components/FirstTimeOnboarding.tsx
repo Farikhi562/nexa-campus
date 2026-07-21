@@ -124,10 +124,10 @@ export default function FirstTimeOnboarding({ userId, userName }: FirstTimeOnboa
       <div className="w-full max-w-xl rounded-lg bg-white shadow-2xl">
         <div className="border-b border-slate-200 px-6 py-5">
           <div className="flex items-center justify-between gap-4">
-            <p className="text-sm font-black uppercase tracking-wide text-brand-700">Step {step} of 3</p>
+            <p className="text-sm font-black uppercase tracking-wide text-blue-700">Step {step} of 3</p>
             <div className="flex gap-1.5" aria-hidden="true">
               {[1, 2, 3].map((item) => (
-                <span key={item} className={`h-2 w-10 rounded-full ${item <= step ? 'bg-brand-600' : 'bg-slate-200'}`} />
+                <span key={item} className={`h-2 w-10 rounded-full ${item <= step ? 'bg-blue-600' : 'bg-slate-200'}`} />
               ))}
             </div>
           </div>
@@ -139,12 +139,12 @@ export default function FirstTimeOnboarding({ userId, userName }: FirstTimeOnboa
               <h2 className="text-2xl font-black text-slate-950">Halo {displayName}! Deadline kamu dari mana?</h2>
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
                 {deadlineSources.map((source) => (
-                  <label key={source} className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-200 px-4 py-3 text-sm font-bold text-slate-800 hover:border-brand-300 hover:bg-brand-50">
+                  <label key={source} className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-200 px-4 py-3 text-sm font-bold text-slate-800 hover:border-blue-300 hover:bg-blue-50">
                     <input
                       type="checkbox"
                       checked={sources.includes(source)}
                       onChange={() => toggleSource(source)}
-                      className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+                      className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                     />
                     {source}
                   </label>
@@ -164,7 +164,7 @@ export default function FirstTimeOnboarding({ userId, userName }: FirstTimeOnboa
                       name="reminder"
                       checked={reminderPreference === 'telegram'}
                       onChange={() => setReminderPreference('telegram')}
-                      className="h-4 w-4 border-slate-300 text-brand-600 focus:ring-brand-500"
+                      className="h-4 w-4 border-slate-300 text-blue-600 focus:ring-blue-500"
                     />
                     <span className="font-black text-slate-950">Telegram</span>
                   </div>
@@ -173,7 +173,7 @@ export default function FirstTimeOnboarding({ userId, userName }: FirstTimeOnboa
                       value={telegramUsername}
                       onChange={(event) => setTelegramUsername(event.target.value)}
                       placeholder="@username"
-                      className="mt-3 w-full rounded-lg border border-slate-300 px-4 py-2 text-sm outline-none focus:border-brand-500"
+                      className="mt-3 w-full rounded-lg border border-slate-300 px-4 py-2 text-sm outline-none focus:border-blue-500"
                     />
                   )}
                 </label>
@@ -186,13 +186,13 @@ export default function FirstTimeOnboarding({ userId, userName }: FirstTimeOnboa
                   </div>
                 </div>
 
-                <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-200 p-4 hover:border-brand-300 hover:bg-brand-50">
+                <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-200 p-4 hover:border-blue-300 hover:bg-blue-50">
                   <input
                     type="radio"
                     name="reminder"
                     checked={reminderPreference === 'dashboard'}
                     onChange={() => setReminderPreference('dashboard')}
-                    className="h-4 w-4 border-slate-300 text-brand-600 focus:ring-brand-500"
+                    className="h-4 w-4 border-slate-300 text-blue-600 focus:ring-blue-500"
                   />
                   <span className="font-black text-slate-950">Cukup dashboard dulu</span>
                 </label>
@@ -203,7 +203,7 @@ export default function FirstTimeOnboarding({ userId, userName }: FirstTimeOnboa
           {step === 3 && (
             <section>
               <div className="flex items-center gap-3">
-                <CalendarDays className="h-6 w-6 text-brand-600" />
+                <CalendarDays className="h-6 w-6 text-blue-600" />
                 <h2 className="text-2xl font-black text-slate-950">Tambah deadline pertamamu</h2>
               </div>
               <div className="mt-6 grid gap-4">
@@ -211,14 +211,14 @@ export default function FirstTimeOnboarding({ userId, userName }: FirstTimeOnboa
                   value={deadlineTitle}
                   onChange={(event) => setDeadlineTitle(event.target.value)}
                   placeholder="Contoh: Kumpul laporan praktikum"
-                  className="rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none focus:border-brand-500"
+                  className="rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500"
                 />
                 <div className="grid gap-4 sm:grid-cols-3">
-                  <select value={deadlineCategory} onChange={(event) => setDeadlineCategory(event.target.value)} className="rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none focus:border-brand-500">
+                  <select value={deadlineCategory} onChange={(event) => setDeadlineCategory(event.target.value)} className="rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500">
                     {categories.map((category) => <option key={category} value={category}>{category}</option>)}
                   </select>
-                  <input type="date" value={deadlineDueDate} onChange={(event) => setDeadlineDueDate(event.target.value)} className="rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none focus:border-brand-500" />
-                  <select value={deadlinePriority} onChange={(event) => setDeadlinePriority(event.target.value as (typeof priorities)[number])} className="rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none focus:border-brand-500">
+                  <input type="date" value={deadlineDueDate} onChange={(event) => setDeadlineDueDate(event.target.value)} className="rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500" />
+                  <select value={deadlinePriority} onChange={(event) => setDeadlinePriority(event.target.value as (typeof priorities)[number])} className="rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500">
                     <option value="low">Low</option>
                     <option value="medium">Medium</option>
                     <option value="high">High</option>
@@ -247,7 +247,7 @@ export default function FirstTimeOnboarding({ userId, userName }: FirstTimeOnboa
             type="button"
             onClick={step === 1 ? goToStep2 : step === 2 ? goToStep3 : () => completeOnboarding(false)}
             disabled={isSaving}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-600 px-5 py-3 text-sm font-black text-white hover:bg-brand-700 disabled:opacity-60"
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-3 text-sm font-black text-white hover:bg-blue-700 disabled:opacity-60"
           >
             {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : step === 3 ? <Check className="h-4 w-4" /> : null}
             {step === 3 ? 'Selesai' : 'Lanjut'}

@@ -55,7 +55,7 @@ export default function StudyRoomCommandActions() {
     <section className="nexa-study-actions mb-4 overflow-hidden rounded-3xl border border-slate-200 bg-white/95 p-4 shadow-sm backdrop-blur dark:border-white/10 dark:bg-slate-950/80">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="min-w-0">
-          <div className="mb-1 inline-flex items-center gap-2 rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-teal-700 dark:border-teal-400/30 dark:bg-teal-400/10 dark:text-teal-200">
+          <div className="mb-1 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-blue-700 dark:border-blue-400/30 dark:bg-blue-400/10 dark:text-blue-200">
             <WandSparkles className="h-3.5 w-3.5" /> Command Study Tools
           </div>
           <h2 className="text-lg font-black text-slate-950 dark:text-white">Voice/video call + voice note Study Room</h2>
@@ -69,7 +69,7 @@ export default function StudyRoomCommandActions() {
             href={isCommand ? `/dashboard/study-room/${roomId}/call` : '/pricing'}
             className={`inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-black transition ${
               isCommand
-                ? 'bg-teal-500 text-slate-950 hover:bg-teal-400'
+                ? 'bg-blue-500 text-slate-950 hover:bg-blue-400'
                 : 'bg-slate-100 text-slate-500 hover:bg-slate-200 dark:bg-white/10 dark:text-slate-300 dark:hover:bg-white/15'
             }`}
           >

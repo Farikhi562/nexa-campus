@@ -23,7 +23,7 @@ function UserCard({ user, action }: { user: PublicProfile; action: ReactNode }) 
   return (
     <Card>
       <CardContent className="flex items-center gap-3 p-4">
-        <Link href={`/dashboard/profile/${user.id}`} className="group flex min-w-0 flex-1 items-center gap-3 rounded-2xl outline-none transition hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-2">
+        <Link href={`/dashboard/profile/${user.id}`} className="group flex min-w-0 flex-1 items-center gap-3 rounded-2xl outline-none transition hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2">
           <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-100 text-base font-black text-slate-600">
             {user.avatar_url ? (
               <Image src={user.avatar_url} alt="" width={48} height={48} className="h-full w-full object-cover" />
@@ -31,7 +31,7 @@ function UserCard({ user, action }: { user: PublicProfile; action: ReactNode }) 
           </span>
           <div className="min-w-0 flex-1">
             <div className="flex min-w-0 items-center gap-1.5">
-              <p className="truncate text-sm font-black text-slate-950 group-hover:text-teal-700">{user.full_name ?? 'Mahasiswa NEXA'}</p>
+              <p className="truncate text-sm font-black text-slate-950 group-hover:text-blue-700">{user.full_name ?? 'Mahasiswa NEXA'}</p>
               <FounderVerifiedBadge founderVerified={user.founder_verified} email={user.email} compact />
               <FeaturedBadgePin badgeId={user.featured_badge} />
             </div>
@@ -40,7 +40,7 @@ function UserCard({ user, action }: { user: PublicProfile; action: ReactNode }) 
             {skills.length > 0 && (
               <div className="mt-1 flex flex-wrap gap-1">
                 {skills.map((skill) => (
-                  <span key={skill} className="rounded-full bg-teal-50 px-2 py-0.5 text-[10px] font-black text-teal-700">{skill}</span>
+                  <span key={skill} className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-black text-blue-700">{skill}</span>
                 ))}
               </div>
             )}
@@ -127,11 +127,11 @@ export default function FriendsView() {
   return (
     <div className="space-y-5">
       <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-slate-950 p-5 text-white shadow-xl sm:p-7">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(45,212,191,0.26),transparent_18rem)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(96,165,250,0.26),transparent_18rem)]" />
         <FriendSuggestionsCard />
 
       <div className="relative">
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-teal-300/20 bg-teal-300/10 px-3 py-1.5 text-xs font-black text-teal-100">
+          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-blue-300/20 bg-blue-300/10 px-3 py-1.5 text-xs font-black text-blue-100">
             <UserPlus className="h-3.5 w-3.5" />
             Cari Teman
           </div>
@@ -177,7 +177,7 @@ export default function FriendsView() {
                       <button
                         onClick={() => sendRequest(user.id)}
                         disabled={actionId === user.id}
-                        className="focus-ring inline-flex items-center gap-1.5 rounded-2xl bg-teal-400 px-3 py-2 text-xs font-black text-slate-950 transition hover:bg-teal-300 disabled:opacity-50"
+                        className="focus-ring inline-flex items-center gap-1.5 rounded-2xl bg-blue-400 px-3 py-2 text-xs font-black text-slate-950 transition hover:bg-blue-300 disabled:opacity-50"
                       >
                         {actionId === user.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <UserPlus className="h-3.5 w-3.5" />}
                         Add
@@ -198,7 +198,7 @@ export default function FriendsView() {
           {received.length > 0 && (
             <div className="space-y-3">
               <p className="text-xs font-black uppercase tracking-wide text-slate-500">
-                Permintaan masuk <span className="ml-1 rounded-full bg-teal-100 px-2 py-0.5 text-teal-700">{received.length}</span>
+                Permintaan masuk <span className="ml-1 rounded-full bg-blue-100 px-2 py-0.5 text-blue-700">{received.length}</span>
               </p>
               {received.map((req) => req.other_user && (
                 <UserCard
@@ -230,7 +230,7 @@ export default function FriendsView() {
                   user={req.other_user}
                   action={
                     <div className="flex flex-col gap-2 sm:flex-row">
-                      <Link href={`/dashboard/messages/${req.other_user.id}`} className="focus-ring inline-flex items-center justify-center gap-1.5 rounded-2xl bg-teal-400 px-3 py-2 text-xs font-black text-slate-950 hover:bg-teal-300">
+                      <Link href={`/dashboard/messages/${req.other_user.id}`} className="focus-ring inline-flex items-center justify-center gap-1.5 rounded-2xl bg-blue-400 px-3 py-2 text-xs font-black text-slate-950 hover:bg-blue-300">
                         <MessageCircle className="h-3.5 w-3.5" /> Chat
                       </Link>
                       <Badge tone="success">Teman</Badge>

@@ -18,13 +18,13 @@ export default function LanguageSwitcher() {
           onClick={() => change(code)}
           className={`flex items-center gap-3 rounded-2xl border-2 px-4 py-3 text-sm font-black transition ${
             lang === code
-              ? 'border-teal-400 bg-teal-50 text-teal-800'
+              ? 'border-blue-400 bg-blue-50 text-blue-800'
               : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50'
           }`}
         >
           <span className="text-2xl">{label.split(' ')[0]}</span>
           <span>{label.split(' ').slice(1).join(' ')}</span>
-          {lang === code && <span className="ml-auto text-teal-500">✓</span>}
+          {lang === code && <span className="ml-auto text-blue-500">✓</span>}
         </button>
       ))}
     </div>

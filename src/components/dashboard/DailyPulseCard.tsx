@@ -118,10 +118,10 @@ export default function DailyPulseCard() {
   }
 
   return (
-    <Card className="overflow-hidden border-cyan-100/80 bg-gradient-to-br from-white via-cyan-50/50 to-indigo-50/60">
+    <Card className="overflow-hidden border-orange-100/80 bg-gradient-to-br from-white via-orange-50/50 to-indigo-50/60">
       <CardContent className="p-0">
         <div className="relative overflow-hidden p-5 sm:p-6">
-          <div className="absolute -right-12 -top-12 h-36 w-36 rounded-full bg-cyan-300/20 blur-3xl" />
+          <div className="absolute -right-12 -top-12 h-36 w-36 rounded-full bg-orange-300/20 blur-3xl" />
           <div className="absolute bottom-0 left-1/3 h-24 w-24 rounded-full bg-indigo-300/20 blur-3xl" />
 
           <div className="relative flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
@@ -147,7 +147,7 @@ export default function DailyPulseCard() {
                   <p className="mt-1 text-2xl font-black text-slate-950">{loading ? '...' : pulse?.currentStreak ?? 0}</p>
                 </div>
                 <div className="rounded-2xl border border-white/80 bg-white/80 p-3 shadow-sm">
-                  <div className="flex items-center gap-2 text-teal-600">
+                  <div className="flex items-center gap-2 text-blue-600">
                     <CheckCircle2 className="h-4 w-4" />
                     <span className="text-xs font-black uppercase">Selesai</span>
                   </div>
@@ -163,7 +163,7 @@ export default function DailyPulseCard() {
               </div>
             </div>
 
-            <div className="w-full rounded-3xl border border-white/80 bg-white/85 p-4 shadow-xl shadow-cyan-200/30 lg:max-w-md">
+            <div className="w-full rounded-3xl border border-white/80 bg-white/85 p-4 shadow-xl shadow-orange-200/30 lg:max-w-md">
               {loading ? (
                 <div className="flex min-h-48 items-center justify-center gap-2 text-sm font-bold text-slate-500">
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -205,7 +205,7 @@ export default function DailyPulseCard() {
                           key={item.value}
                           type="button"
                           onClick={() => setMood(item.value)}
-                          className={`rounded-2xl border p-3 text-left transition hover:-translate-y-0.5 ${mood === item.value ? 'border-cyan-300 bg-cyan-50 shadow-sm' : 'border-slate-200 bg-white hover:border-cyan-200'}`}
+                          className={`rounded-2xl border p-3 text-left transition hover:-translate-y-0.5 ${mood === item.value ? 'border-orange-300 bg-orange-50 shadow-sm' : 'border-slate-200 bg-white hover:border-orange-200'}`}
                         >
                           <span className="text-lg">{item.emoji}</span>
                           <span className="ml-2 text-sm font-black text-slate-900">{item.label}</span>
@@ -220,7 +220,7 @@ export default function DailyPulseCard() {
                     <select
                       value={focusGoal}
                       onChange={(event) => setFocusGoal(event.target.value)}
-                      className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-bold text-slate-700 outline-none transition focus:border-cyan-400 focus:ring-4 focus:ring-cyan-100"
+                      className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-bold text-slate-700 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
                     >
                       {defaultGoals.map((goal) => <option key={goal} value={goal}>{goal}</option>)}
                     </select>
@@ -234,7 +234,7 @@ export default function DailyPulseCard() {
                       rows={3}
                       maxLength={180}
                       placeholder="Contoh: hari ini mau fokus tugas AP2B dulu."
-                      className="mt-2 w-full resize-none rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-semibold text-slate-700 outline-none transition placeholder:text-slate-300 focus:border-cyan-400 focus:ring-4 focus:ring-cyan-100"
+                      className="mt-2 w-full resize-none rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-semibold text-slate-700 outline-none transition placeholder:text-slate-300 focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
                     />
                   </div>
 
@@ -250,7 +250,7 @@ export default function DailyPulseCard() {
             </div>
           </div>
 
-          <div className="relative mt-5 rounded-2xl border border-cyan-100 bg-white/65 p-3 text-xs leading-5 text-slate-500">
+          <div className="relative mt-5 rounded-2xl border border-orange-100 bg-white/65 p-3 text-xs leading-5 text-slate-500">
             <span className="inline-flex items-center gap-1 font-black text-slate-700"><Target className="h-3.5 w-3.5" /> Kenapa ini dulu?</span>{' '}
             Karena kebiasaan kecil yang konsisten sering lebih berguna daripada fitur besar yang jarang dipakai.
           </div>

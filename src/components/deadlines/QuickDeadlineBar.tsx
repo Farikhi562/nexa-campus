@@ -47,8 +47,8 @@ export default function QuickDeadlineBar() {
   }
 
   return (
-    <div className="rounded-2xl border border-teal-100 bg-gradient-to-br from-white to-teal-50/40 p-3 sm:p-4">
-      <div className="mb-2 flex items-center gap-2 text-xs font-black uppercase tracking-wide text-teal-700">
+    <div className="rounded-2xl border border-blue-100 bg-gradient-to-br from-white to-blue-50/40 p-3 sm:p-4">
+      <div className="mb-2 flex items-center gap-2 text-xs font-black uppercase tracking-wide text-blue-700">
         <Sparkles className="h-4 w-4" />
         Quick Add — ketik bebas, NEXA yang rapikan
       </div>
@@ -70,7 +70,7 @@ export default function QuickDeadlineBar() {
           type="button"
           onClick={submit}
           disabled={loading || !text.trim()}
-          className="inline-flex min-h-11 flex-none items-center gap-1.5 rounded-2xl bg-teal-600 px-4 py-3 text-sm font-black text-white transition hover:bg-teal-700 disabled:opacity-40"
+          className="inline-flex min-h-11 flex-none items-center gap-1.5 rounded-2xl bg-blue-600 px-4 py-3 text-sm font-black text-white transition hover:bg-blue-700 disabled:opacity-40"
         >
           {loading ? 'Memproses...' : 'Tambah'}
           <CornerDownLeft className="h-4 w-4" />
@@ -84,7 +84,7 @@ export default function QuickDeadlineBar() {
               key={h}
               type="button"
               onClick={() => setText(h)}
-              className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-bold text-slate-500 hover:border-teal-200 hover:text-teal-700"
+              className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-bold text-slate-500 hover:border-blue-200 hover:text-blue-700"
             >
               {h}
             </button>

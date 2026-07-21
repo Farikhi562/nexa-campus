@@ -186,7 +186,7 @@ export default function AdminPaymentsPanel() {
       <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.25em] text-teal-700">Admin Billing</p>
+            <p className="text-xs font-black uppercase tracking-[0.25em] text-blue-700">Admin Billing</p>
             <h1 className="mt-2 text-3xl font-black text-slate-950">Manual Payment Dashboard</h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
               Approve pembayaran Pulse/Command dari Bank Jago dan BRI QRIS. Akhirnya admin nggak perlu ritual Postman kayak dukun endpoint.
@@ -216,9 +216,9 @@ export default function AdminPaymentsPanel() {
             <p className="text-xs font-bold text-emerald-700">Approved</p>
             <p className="mt-1 text-2xl font-black text-emerald-800">{stats.approved || 0}</p>
           </div>
-          <div className="rounded-3xl bg-teal-50 p-4">
-            <p className="text-xs font-bold text-teal-700">Nominal list</p>
-            <p className="mt-1 text-2xl font-black text-teal-800">{rupiah(stats.amount || 0)}</p>
+          <div className="rounded-3xl bg-blue-50 p-4">
+            <p className="text-xs font-bold text-blue-700">Nominal list</p>
+            <p className="mt-1 text-2xl font-black text-blue-800">{rupiah(stats.amount || 0)}</p>
           </div>
         </div>
       </div>
@@ -245,7 +245,7 @@ export default function AdminPaymentsPanel() {
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Cari order/nama/WA..."
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm font-bold outline-none transition focus:border-teal-400 focus:bg-white"
+              className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm font-bold outline-none transition focus:border-blue-400 focus:bg-white"
             />
           </div>
         </div>
@@ -285,7 +285,7 @@ export default function AdminPaymentsPanel() {
 
                     <div>
                       <p className="font-black text-slate-950">{plan?.name || order.plan}</p>
-                      <p className="text-sm font-black text-teal-700">{rupiah(order.amount)}</p>
+                      <p className="text-sm font-black text-blue-700">{rupiah(order.amount)}</p>
                       <p className="text-xs text-slate-400">Expired: {formatDate(order.expires_at)}</p>
                     </div>
 
@@ -308,7 +308,7 @@ export default function AdminPaymentsPanel() {
                           href={order.proof_url}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 px-3 py-2 text-xs font-black text-slate-700 transition hover:border-teal-300 hover:text-teal-700"
+                          className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 px-3 py-2 text-xs font-black text-slate-700 transition hover:border-blue-300 hover:text-blue-700"
                         >
                           Lihat bukti <ExternalLink className="h-3.5 w-3.5" />
                         </a>

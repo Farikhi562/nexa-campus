@@ -110,19 +110,19 @@ export default function VerificationReviewPanel() {
               {row.profile?.profile_skills && row.profile.profile_skills.length > 0 && (
                 <div className="mt-3 flex flex-wrap gap-1.5">
                   {row.profile.profile_skills.map((s) => (
-                    <span key={s} className="rounded-full bg-teal-50 px-2.5 py-1 text-xs font-bold text-teal-700">{s}</span>
+                    <span key={s} className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700">{s}</span>
                   ))}
                 </div>
               )}
 
               <div className="mt-2 flex flex-wrap gap-3">
                 {row.profile?.portfolio_url && (
-                  <a href={row.profile.portfolio_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-black text-brand-700 hover:underline">
+                  <a href={row.profile.portfolio_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-black text-blue-700 hover:underline">
                     <ExternalLink className="h-3.5 w-3.5" /> Portfolio
                   </a>
                 )}
                 {row.profile?.github_url && (
-                  <a href={row.profile.github_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-black text-brand-700 hover:underline">
+                  <a href={row.profile.github_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-black text-blue-700 hover:underline">
                     <ExternalLink className="h-3.5 w-3.5" /> GitHub
                   </a>
                 )}

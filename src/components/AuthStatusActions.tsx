@@ -23,7 +23,7 @@ export default function AuthStatusActions({ variant = 'light' }: { variant?: 'li
       <div className="flex items-center gap-2">
         <Link
           href="/dashboard"
-          className={`hidden text-sm font-bold sm:inline ${variant === 'dark' ? 'text-slate-200 hover:text-teal-100' : 'text-slate-600 hover:text-brand-700'}`}
+          className={`hidden text-sm font-bold sm:inline ${variant === 'dark' ? 'text-slate-200 hover:text-blue-100' : 'text-slate-600 hover:text-blue-700'}`}
         >
           Dashboard
         </Link>
@@ -46,7 +46,7 @@ export default function AuthStatusActions({ variant = 'light' }: { variant?: 'li
     <div className="flex items-center gap-2">
       <Link
         href="/login"
-        className={`text-sm font-bold ${variant === 'dark' ? 'text-slate-200 hover:text-teal-100' : 'text-slate-600 hover:text-brand-700'}`}
+        className={`text-sm font-bold ${variant === 'dark' ? 'text-slate-200 hover:text-blue-100' : 'text-slate-600 hover:text-blue-700'}`}
       >
         Login
       </Link>
@@ -54,8 +54,8 @@ export default function AuthStatusActions({ variant = 'light' }: { variant?: 'li
         href="/login?mode=signup"
         className={`rounded-lg px-3 py-2 text-sm font-bold ${
           variant === 'dark'
-            ? 'bg-teal-400 text-slate-950 hover:bg-teal-300'
-            : 'bg-brand-600 text-white hover:bg-brand-700'
+            ? 'bg-blue-400 text-slate-950 hover:bg-blue-300'
+            : 'bg-blue-600 text-white hover:bg-blue-700'
         }`}
       >
         Mulai

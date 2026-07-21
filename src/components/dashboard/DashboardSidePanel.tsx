@@ -9,7 +9,7 @@ import type { Plan } from '@/types'
 const planColors: Record<Plan, string> = {
   radar: 'bg-slate-100 text-slate-700',
   pulse: 'bg-blue-100 text-blue-700',
-  command: 'bg-teal-100 text-teal-800',
+  command: 'bg-blue-100 text-blue-800',
 }
 
 const planFeatures: Record<Plan, string[]> = {
@@ -35,9 +35,9 @@ export default function DashboardSidePanel({ userTier }: { userTier: Plan }) {
           <Link
             key={href}
             href={href}
-            className="focus-ring flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-black text-slate-700 transition hover:border-teal-300 hover:bg-teal-50 hover:text-teal-800"
+            className="focus-ring flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-black text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-800"
           >
-            <Icon className="h-3.5 w-3.5 flex-shrink-0 text-teal-600" />
+            <Icon className="h-3.5 w-3.5 flex-shrink-0 text-blue-600" />
             <span className="truncate leading-tight">{label}</span>
           </Link>
         ))}
@@ -66,7 +66,7 @@ export default function DashboardSidePanel({ userTier }: { userTier: Plan }) {
           <ul className="mt-2 space-y-1">
             {planFeatures[userTier].map((feature) => (
               <li key={feature} className="flex items-start gap-1.5 text-[11px] text-slate-600">
-                <span className="mt-0.5 text-teal-500">✓</span>
+                <span className="mt-0.5 text-blue-500">✓</span>
                 {feature}
               </li>
             ))}
@@ -74,7 +74,7 @@ export default function DashboardSidePanel({ userTier }: { userTier: Plan }) {
         )}
 
         {userTier === 'radar' && (
-          <Link href="/dashboard/billing" className="mt-3 flex items-center justify-center rounded-xl bg-teal-500 px-3 py-2 text-xs font-black text-white hover:bg-teal-400">
+          <Link href="/dashboard/billing" className="mt-3 flex items-center justify-center rounded-xl bg-blue-500 px-3 py-2 text-xs font-black text-white hover:bg-blue-400">
             Lihat Pulse →
           </Link>
         )}

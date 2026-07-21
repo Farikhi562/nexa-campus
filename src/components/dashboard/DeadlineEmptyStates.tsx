@@ -13,7 +13,7 @@ function UpgradePrompt({ userTier }: { userTier: Plan }) {
   if (userTier !== 'radar') return null
 
   return (
-    <div className="mt-4 rounded-2xl border border-brand-100 bg-brand-50 p-3 text-xs leading-5 text-brand-800">
+    <div className="mt-4 rounded-2xl border border-blue-100 bg-blue-50 p-3 text-xs leading-5 text-blue-800">
       AI Quick Add tersedia di NEXA Pulse dan Command. Di Radar, kamu tetap bisa menambah deadline secara manual.
     </div>
   )
@@ -50,7 +50,7 @@ export function EmptyToday({ userTier, className }: EmptyStateProps) {
     <Shell className={className}>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex gap-3">
-          <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-cyan-50 text-cyan-700">
+          <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-orange-50 text-orange-700">
             <CalendarDays className="h-5 w-5" />
           </div>
           <div>
@@ -70,7 +70,7 @@ export function EmptyAll({ userTier, className }: EmptyStateProps) {
 
   return (
     <Shell className={cn('text-center', className)}>
-      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-50 text-teal-700">
+      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-blue-700">
         <Plus className="h-7 w-7" />
       </div>
       <h2 className="mt-5 text-xl font-black text-slate-950">Belum ada deadline yang dicatat.</h2>
@@ -80,7 +80,7 @@ export function EmptyAll({ userTier, className }: EmptyStateProps) {
       <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
         <Link
           href="/dashboard/deadlines/new"
-          className="focus-ring inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-brand-600 px-4 py-3 text-sm font-black text-white transition hover:bg-brand-700"
+          className="focus-ring inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-sm font-black text-white transition hover:bg-blue-700"
         >
           <Plus className="h-4 w-4" />
           Tambah deadline pertama
@@ -117,7 +117,7 @@ export function EmptyOverdue({ userTier, className }: EmptyStateProps) {
           {[0, 1, 2, 3, 4].map((item) => (
             <span
               key={item}
-              className="h-2 w-2 animate-[confetti_1.8s_ease-in-out_infinite] rounded-full bg-teal-400"
+              className="h-2 w-2 animate-[confetti_1.8s_ease-in-out_infinite] rounded-full bg-blue-400"
               style={{ animationDelay: `${item * 140}ms` }}
             />
           ))}

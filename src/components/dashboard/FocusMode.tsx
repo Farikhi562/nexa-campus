@@ -134,7 +134,7 @@ export default function FocusMode({
     setNotifOn(perm === 'granted')
   }
 
-  const ringColor = mode === 'focus' ? '#2dd4bf' : '#fbbf24'
+  const ringColor = mode === 'focus' ? '#60a5fa' : '#fbbf24'
 
   return (
     <div className="space-y-5">
@@ -142,15 +142,15 @@ export default function FocusMode({
         <div
           className="pointer-events-none absolute inset-0 transition-opacity duration-1000"
           style={{
-            background: `radial-gradient(circle at 85% 10%, ${mode === 'focus' ? 'rgba(45,212,191,0.26)' : 'rgba(251,191,36,0.22)'}, transparent 20rem)`,
+            background: `radial-gradient(circle at 85% 10%, ${mode === 'focus' ? 'rgba(96,165,250,0.26)' : 'rgba(251,191,36,0.22)'}, transparent 20rem)`,
           }}
         />
         {running && (
-          <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 animate-pulse rounded-full bg-teal-400/10 blur-3xl" />
+          <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 animate-pulse rounded-full bg-blue-400/10 blur-3xl" />
         )}
         <div className="relative">
           <div className="mb-3 flex flex-wrap items-center gap-2">
-            <div className="inline-flex items-center gap-2 rounded-full border border-teal-300/20 bg-teal-300/10 px-3 py-1.5 text-xs font-black text-teal-100">
+            <div className="inline-flex items-center gap-2 rounded-full border border-blue-300/20 bg-blue-300/10 px-3 py-1.5 text-xs font-black text-blue-100">
               <Timer className="h-3.5 w-3.5" />
               Focus Mode
             </div>
@@ -177,7 +177,7 @@ export default function FocusMode({
                       title={day.date}
                       className={`h-7 w-7 rounded-xl transition-all ${
                         day.active
-                          ? 'bg-teal-300 shadow-[0_0_12px_rgba(45,212,191,0.5)]'
+                          ? 'bg-blue-300 shadow-[0_0_12px_rgba(96,165,250,0.5)]'
                           : 'border border-white/10 bg-white/5'
                       }`}
                     />
@@ -221,7 +221,7 @@ export default function FocusMode({
               onClick={toggleNotif}
               title={notifOn ? 'Matikan notifikasi' : 'Nyalakan notifikasi browser'}
               className={`focus-ring inline-flex h-9 w-9 items-center justify-center rounded-2xl border transition ${
-                notifOn ? 'border-teal-200 bg-teal-50 text-teal-700' : 'border-slate-200 bg-white text-slate-500 hover:text-slate-800'
+                notifOn ? 'border-blue-200 bg-blue-50 text-blue-700' : 'border-slate-200 bg-white text-slate-500 hover:text-slate-800'
               }`}
             >
               {notifOn ? <Bell className="h-4 w-4" /> : <BellOff className="h-4 w-4" />}
@@ -252,7 +252,7 @@ export default function FocusMode({
               />
             </svg>
             <div className="text-center">
-              <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-black ${mode === 'focus' ? 'bg-teal-50 text-teal-700' : 'bg-amber-50 text-amber-700'}`}>
+              <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-black ${mode === 'focus' ? 'bg-blue-50 text-blue-700' : 'bg-amber-50 text-amber-700'}`}>
                 {mode === 'focus' ? <Timer className="h-3.5 w-3.5" /> : <Coffee className="h-3.5 w-3.5" />}
                 {mode === 'focus' ? 'Fokus' : 'Istirahat'}
               </span>
@@ -266,7 +266,7 @@ export default function FocusMode({
             <button
               onClick={() => setRunning((value) => !value)}
               className={`focus-ring inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl px-6 py-3 text-sm font-black text-slate-950 transition active:scale-95 ${
-                running ? 'bg-amber-300 hover:bg-amber-200' : 'bg-teal-400 hover:bg-teal-300'
+                running ? 'bg-amber-300 hover:bg-amber-200' : 'bg-blue-400 hover:bg-blue-300'
               }`}
             >
               {running ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
@@ -289,7 +289,7 @@ export default function FocusMode({
               </span>
             )}
           </div>
-          {message && <p className="mt-2 max-w-sm text-center text-sm leading-6 text-teal-700">{message}</p>}
+          {message && <p className="mt-2 max-w-sm text-center text-sm leading-6 text-blue-700">{message}</p>}
         </CardContent>
       </Card>
 

@@ -42,7 +42,7 @@ function placementBadge(p: string) {
     case 'juara_1': return { label: '🥇 Juara 1', cls: 'bg-amber-100 text-amber-800' }
     case 'juara_2': return { label: '🥈 Juara 2', cls: 'bg-slate-200 text-slate-700' }
     case 'juara_3': return { label: '🥉 Juara 3', cls: 'bg-orange-100 text-orange-800' }
-    case 'finalist': return { label: '🏅 Finalist', cls: 'bg-teal-100 text-teal-800' }
+    case 'finalist': return { label: '🏅 Finalist', cls: 'bg-blue-100 text-blue-800' }
     default: return { label: '🎫 Peserta', cls: 'bg-slate-100 text-slate-500' }
   }
 }
@@ -82,9 +82,9 @@ export default function ArenaLeaderboard() {
     <div className="space-y-5">
       {/* Badge kompetisi milik user */}
       {myBadges.length > 0 && (
-        <div className="rounded-2xl border border-teal-100 bg-gradient-to-br from-white to-teal-50/40 p-4">
+        <div className="rounded-2xl border border-blue-100 bg-gradient-to-br from-white to-blue-50/40 p-4">
           <h3 className="mb-3 flex items-center gap-2 text-sm font-black text-slate-950">
-            <Medal className="h-4 w-4 text-teal-600" /> Badge Kompetisi Kamu
+            <Medal className="h-4 w-4 text-blue-600" /> Badge Kompetisi Kamu
           </h3>
           <div className="flex flex-wrap gap-2">
             {myBadges.map((b) => (
@@ -111,8 +111,8 @@ export default function ArenaLeaderboard() {
             onClick={() => setType(t.value)}
             className={`rounded-full px-3 py-1.5 text-xs font-bold transition ${
               type === t.value
-                ? 'bg-teal-600 text-white'
-                : 'border border-slate-200 bg-white text-slate-600 hover:border-teal-200'
+                ? 'bg-blue-600 text-white'
+                : 'border border-slate-200 bg-white text-slate-600 hover:border-blue-200'
             }`}
           >
             {t.label}

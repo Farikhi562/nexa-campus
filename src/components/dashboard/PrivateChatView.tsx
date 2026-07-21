@@ -235,7 +235,7 @@ export default function PrivateChatView({ friendId, userId }: { friendId: string
                   {formatTime(msg.created_at)}
                   {msg.edited_at && !deleted ? ' - diedit' : ''}
                 </p>
-                <div className={`rounded-2xl px-3.5 py-2.5 text-sm leading-6 ${isMe ? 'rounded-tr-sm bg-teal-500 text-white' : 'rounded-tl-sm bg-slate-100 text-slate-900'}`}>
+                <div className={`rounded-2xl px-3.5 py-2.5 text-sm leading-6 ${isMe ? 'rounded-tr-sm bg-blue-500 text-white' : 'rounded-tl-sm bg-slate-100 text-slate-900'}`}>
                   {deleted ? (
                     <p className="italic opacity-70">Pesan dihapus</p>
                   ) : editingId === msg.id ? (
@@ -287,7 +287,7 @@ export default function PrivateChatView({ friendId, userId }: { friendId: string
           <input ref={fileInputRef} type="file" accept="image/*,video/mp4,video/webm,video/quicktime,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip" className="sr-only" onChange={(event) => { const file = event.target.files?.[0]; if (file) void sendFile(file); event.target.value = '' }} />
           <button onClick={() => fileInputRef.current?.click()} disabled={uploading} className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-50">{uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Paperclip className="h-4 w-4" />}</button>
           <textarea value={message} onChange={(event) => setMessage(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); void sendMessage() } }} placeholder="Tulis chat pribadi..." rows={1} className="focus-ring flex-1 resize-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm" />
-          <button onClick={sendMessage} disabled={!message.trim() || sending} className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-teal-500 text-white transition hover:bg-teal-400 disabled:opacity-40">{sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}</button>
+          <button onClick={sendMessage} disabled={!message.trim() || sending} className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-blue-500 text-white transition hover:bg-blue-400 disabled:opacity-40">{sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}</button>
         </div>
       </div>
     </div>

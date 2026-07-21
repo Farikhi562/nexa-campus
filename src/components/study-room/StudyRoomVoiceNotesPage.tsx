@@ -22,7 +22,7 @@ export default function StudyRoomVoiceNotesPage({ roomId }: StudyRoomVoiceNotesP
             <ArrowLeft className="h-4 w-4" /> Balik ke room
           </Link>
           <h1 className="flex items-center gap-2 text-2xl font-black text-slate-950 dark:text-white sm:text-3xl">
-            <Mic className="h-6 w-6 text-teal-500" /> Study Room Voice Notes
+            <Mic className="h-6 w-6 text-blue-500" /> Study Room Voice Notes
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">
             Rekam dan kirim VN buat anggota room. Fitur ini Command-only karena audio storage juga bukan dibayar pakai daun singkong.

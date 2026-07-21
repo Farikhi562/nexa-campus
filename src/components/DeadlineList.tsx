@@ -37,8 +37,8 @@ function Pill({
       onClick={onClick}
       className={`whitespace-nowrap rounded-2xl px-3 py-1.5 text-xs font-black transition ${
         active
-          ? 'bg-brand-600 text-white shadow-sm'
-          : 'border border-slate-200 bg-white text-slate-600 hover:border-brand-200 hover:bg-brand-50'
+          ? 'bg-blue-600 text-white shadow-sm'
+          : 'border border-slate-200 bg-white text-slate-600 hover:border-blue-200 hover:bg-blue-50'
       }`}
     >
       {children}
@@ -159,10 +159,10 @@ export default function DeadlineList({ deadlines }: { deadlines: AcademicDeadlin
   // ── Empty state ──────────────────────────────────────────────────────────
   if (items.length === 0) {
     return (
-      <div className="rounded-3xl border border-dashed border-brand-200 bg-white/80 p-8 text-center shadow-xl shadow-slate-200/70">
+      <div className="rounded-3xl border border-dashed border-blue-200 bg-white/80 p-8 text-center shadow-xl shadow-slate-200/70">
         <p className="text-lg font-black text-slate-950">Belum ada deadline.</p>
         <p className="mt-2 text-sm text-slate-500">Belum ada deadline yang tercatat.</p>
-        <Link href="/dashboard/deadlines/new" className="mt-5 inline-flex rounded-2xl bg-gradient-to-r from-brand-600 to-cyan-500 px-4 py-2.5 text-sm font-black text-white shadow-lg shadow-brand-500/20 transition hover:-translate-y-0.5">
+        <Link href="/dashboard/deadlines/new" className="mt-5 inline-flex rounded-2xl bg-gradient-to-r from-blue-600 to-orange-500 px-4 py-2.5 text-sm font-black text-white shadow-lg shadow-blue-500/20 transition hover:-translate-y-0.5">
           Tambah Deadline
         </Link>
       </div>
@@ -180,7 +180,7 @@ export default function DeadlineList({ deadlines }: { deadlines: AcademicDeadlin
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Cari matkul atau judul tugas..."
-            className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-10 text-sm outline-none focus:border-brand-300 focus:ring-2 focus:ring-brand-100"
+            className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-10 text-sm outline-none focus:border-blue-300 focus:ring-2 focus:ring-blue-100"
           />
           {query && (
             <button type="button" onClick={() => setQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700">
@@ -221,7 +221,7 @@ export default function DeadlineList({ deadlines }: { deadlines: AcademicDeadlin
             {selectedIds.size > 0 && ` · ${selectedIds.size} dipilih`}
           </p>
           {filtered.length > 0 && (
-            <button type="button" onClick={toggleSelectAll} className="text-xs font-black text-brand-600 hover:underline">
+            <button type="button" onClick={toggleSelectAll} className="text-xs font-black text-blue-600 hover:underline">
               {allFilteredSelected ? 'Batal pilih semua' : 'Pilih semua'}
             </button>
           )}
@@ -261,7 +261,7 @@ export default function DeadlineList({ deadlines }: { deadlines: AcademicDeadlin
       {filtered.length === 0 && (
         <div className="rounded-3xl border border-dashed border-slate-200 bg-white/80 p-8 text-center">
           <p className="font-black text-slate-700">Tidak ada deadline yang cocok.</p>
-          <button type="button" onClick={resetFilters} className="mt-2 text-sm font-bold text-brand-600 hover:underline">Reset filter</button>
+          <button type="button" onClick={resetFilters} className="mt-2 text-sm font-bold text-blue-600 hover:underline">Reset filter</button>
         </div>
       )}
 
@@ -274,7 +274,7 @@ export default function DeadlineList({ deadlines }: { deadlines: AcademicDeadlin
             key={deadline.id}
             className={`rounded-3xl border bg-white/90 p-4 shadow-xl shadow-slate-200/70 ring-1 transition duration-200 hover:-translate-y-0.5 sm:p-5 ${
               isSelected
-                ? 'border-brand-300 ring-brand-200/60'
+                ? 'border-blue-300 ring-blue-200/60'
                 : 'border-white/80 ring-slate-950/[0.03]'
             }`}
           >
@@ -284,7 +284,7 @@ export default function DeadlineList({ deadlines }: { deadlines: AcademicDeadlin
                 type="button"
                 onClick={() => toggleSelect(deadline.id)}
                 className={`focus-ring mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-md border transition ${
-                  isSelected ? 'border-brand-500 bg-brand-500 text-white' : 'border-slate-300 hover:border-brand-300'
+                  isSelected ? 'border-blue-500 bg-blue-500 text-white' : 'border-slate-300 hover:border-blue-300'
                 }`}
                 aria-label="Pilih"
               >
@@ -298,7 +298,7 @@ export default function DeadlineList({ deadlines }: { deadlines: AcademicDeadlin
                 className={`focus-ring mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-xl border transition ${
                   deadline.status === 'completed'
                     ? 'border-emerald-500 bg-emerald-500 text-white shadow-sm shadow-emerald-500/20'
-                    : 'border-slate-200 bg-slate-50 text-transparent hover:border-brand-300 hover:bg-brand-50'
+                    : 'border-slate-200 bg-slate-50 text-transparent hover:border-blue-300 hover:bg-blue-50'
                 }`}
                 aria-label="Toggle selesai"
               >
@@ -330,7 +330,7 @@ export default function DeadlineList({ deadlines }: { deadlines: AcademicDeadlin
               <div className="flex flex-shrink-0 gap-1">
                 <Link
                   href={`/dashboard/deadlines/${deadline.id}/edit`}
-                  className="focus-ring rounded-2xl p-2 text-slate-500 transition hover:bg-brand-50 hover:text-brand-700"
+                  className="focus-ring rounded-2xl p-2 text-slate-500 transition hover:bg-blue-50 hover:text-blue-700"
                   aria-label="Edit"
                 >
                   <Pencil className="h-4 w-4" />

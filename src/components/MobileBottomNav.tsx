@@ -34,10 +34,10 @@ function NavItems() {
             key={href}
             href={href}
             className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl px-1 text-[10px] font-black transition active:scale-[0.98] ${
-              active ? 'bg-teal-50 text-teal-700' : 'text-slate-500 hover:bg-slate-50'
+              active ? 'bg-blue-50 text-blue-700' : 'text-slate-500 hover:bg-slate-50'
             }`}
           >
-            <Icon className={`h-5 w-5 ${active ? 'text-teal-600' : ''}`} />
+            <Icon className={`h-5 w-5 ${active ? 'text-blue-600' : ''}`} />
             <span className="truncate">{label}</span>
           </Link>
         )

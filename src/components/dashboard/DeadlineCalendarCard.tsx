@@ -186,12 +186,12 @@ export default function DeadlineCalendarCard({ deadlines }: { deadlines: Academi
   }
 
   return (
-    <Card className="overflow-hidden border-cyan-100 bg-white">
+    <Card className="overflow-hidden border-orange-100 bg-white">
       <CardContent className="p-0">
         <div className="border-b border-slate-100 p-4 sm:p-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full bg-cyan-50 px-3 py-1 text-[11px] font-black uppercase tracking-wide text-cyan-700 ring-1 ring-cyan-100">
+              <div className="inline-flex items-center gap-2 rounded-full bg-orange-50 px-3 py-1 text-[11px] font-black uppercase tracking-wide text-orange-700 ring-1 ring-orange-100">
                 <CalendarDays className="h-3.5 w-3.5" />
                 Kalender
               </div>
@@ -244,13 +244,13 @@ export default function DeadlineCalendarCard({ deadlines }: { deadlines: Academi
                     onClick={() => setSelectedDate(value)}
                     className={`focus-ring min-h-14 rounded-xl border p-1.5 text-left transition sm:min-h-24 sm:p-2 ${
                       isSelected
-                        ? 'border-cyan-300 bg-cyan-50 shadow-sm'
-                        : 'border-slate-100 bg-white hover:border-cyan-200 hover:bg-cyan-50/40'
+                        ? 'border-orange-300 bg-orange-50 shadow-sm'
+                        : 'border-slate-100 bg-white hover:border-orange-200 hover:bg-orange-50/40'
                     } ${outsideMonth ? 'opacity-45' : ''}`}
                     aria-pressed={isSelected}
                   >
                     <div className="flex items-center justify-between gap-1">
-                      <span className={`text-xs font-black ${isToday ? 'text-cyan-700' : 'text-slate-700'}`}>
+                      <span className={`text-xs font-black ${isToday ? 'text-orange-700' : 'text-slate-700'}`}>
                         {day.getDate()}
                       </span>
                       {dayNotes.length > 0 && <StickyNote className="h-3.5 w-3.5 text-amber-500" />}
@@ -307,7 +307,7 @@ export default function DeadlineCalendarCard({ deadlines }: { deadlines: Academi
                   )}
                   <Link
                     href={`/dashboard/deadlines/${deadline.id}/edit`}
-                    className="mt-3 inline-flex items-center gap-1.5 text-xs font-black text-cyan-700 hover:underline"
+                    className="mt-3 inline-flex items-center gap-1.5 text-xs font-black text-orange-700 hover:underline"
                   >
                     <Pencil className="h-3.5 w-3.5" />
                     Edit deadline

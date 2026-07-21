@@ -65,11 +65,11 @@ export default function StudyRoomWorkspaceCard({ roomId, canManage }: { roomId: 
   const total = (data.checklist ?? []).length
 
   return (
-    <Card className="m-3 border-teal-100 bg-gradient-to-br from-white to-teal-50/50">
+    <Card className="m-3 border-blue-100 bg-gradient-to-br from-white to-blue-50/50">
       <CardContent className="p-3">
         <div className="mb-3 flex items-start justify-between gap-2">
           <div>
-            <p className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wide text-teal-700"><Target className="h-3.5 w-3.5" /> Workspace</p>
+            <p className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wide text-blue-700"><Target className="h-3.5 w-3.5" /> Workspace</p>
             <p className="mt-1 text-[11px] leading-5 text-slate-500">Pinned note, target belajar, materi, dan checklist grup.</p>
           </div>
           {canManage && <Button onClick={() => save()} disabled={saving} className="min-h-8 rounded-xl px-2 py-1 text-xs"><Save className="h-3.5 w-3.5" /> Simpan</Button>}
@@ -86,7 +86,7 @@ export default function StudyRoomWorkspaceCard({ roomId, canManage }: { roomId: 
           </label>
           <label className="block">
             <span className="mb-1 flex items-center gap-1 text-[10px] font-black uppercase text-slate-500"><LinkIcon className="h-3 w-3" /> Link materi</span>
-            {canManage ? <input value={data.material_link ?? ''} onChange={(e) => setData({ ...data, material_link: e.target.value })} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs" /> : data.material_link ? <a className="block rounded-xl bg-white p-2 text-xs font-bold text-teal-700 underline" href={data.material_link} target="_blank" rel="noreferrer">Buka materi</a> : <p className="rounded-xl bg-white p-2 text-xs text-slate-500">Belum ada link.</p>}
+            {canManage ? <input value={data.material_link ?? ''} onChange={(e) => setData({ ...data, material_link: e.target.value })} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs" /> : data.material_link ? <a className="block rounded-xl bg-white p-2 text-xs font-bold text-blue-700 underline" href={data.material_link} target="_blank" rel="noreferrer">Buka materi</a> : <p className="rounded-xl bg-white p-2 text-xs text-slate-500">Belum ada link.</p>}
           </label>
         </div>
 
@@ -95,7 +95,7 @@ export default function StudyRoomWorkspaceCard({ roomId, canManage }: { roomId: 
           <div className="space-y-1.5">
             {(data.checklist ?? []).slice(0, 6).map((item) => (
               <button key={item.id} disabled={!canManage} onClick={() => toggleTask(item.id)} className="flex w-full items-center gap-2 rounded-xl px-2 py-1.5 text-left text-xs hover:bg-slate-50 disabled:cursor-default">
-                <span className={`h-4 w-4 rounded-md border ${item.done ? 'border-teal-400 bg-teal-400' : 'border-slate-300'}`} />
+                <span className={`h-4 w-4 rounded-md border ${item.done ? 'border-blue-400 bg-blue-400' : 'border-slate-300'}`} />
                 <span className={item.done ? 'text-slate-400 line-through' : 'text-slate-700'}>{item.text}</span>
               </button>
             ))}

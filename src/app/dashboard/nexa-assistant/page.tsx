@@ -73,7 +73,7 @@ export default async function NexaAssistantPage() {
   return (
     <div className="space-y-5">
       <div className="flex items-center gap-3">
-        <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-600 text-white shadow-sm">
+        <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-sm">
           <Bot className="h-5 w-5" />
         </div>
         <div>

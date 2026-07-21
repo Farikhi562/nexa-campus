@@ -77,7 +77,7 @@ function WeakCard({ area, onStudy }: { area: WeakArea; onStudy: (packId: string)
       )}
       <button
         onClick={() => onStudy(area.pack_id)}
-        className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-zinc-700 hover:bg-teal-700 text-xs font-medium text-zinc-200 py-2 transition-colors"
+        className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-zinc-700 hover:bg-blue-700 text-xs font-medium text-zinc-200 py-2 transition-colors"
       >
         <BookOpen size={13} /> Pelajari ulang
       </button>
@@ -179,12 +179,12 @@ export function WeaknessReport({ onStudyPack }: Props) {
 
       {/* AI advice */}
       {data.ai_advice && (
-        <div className="rounded-2xl bg-teal-900/25 border border-teal-700/40 px-4 py-3 space-y-1.5">
+        <div className="rounded-2xl bg-blue-900/25 border border-blue-700/40 px-4 py-3 space-y-1.5">
           <div className="flex items-center gap-1.5">
-            <Sparkles size={14} className="text-teal-400" />
-            <span className="text-xs font-semibold text-teal-300">Saran belajar personal</span>
+            <Sparkles size={14} className="text-blue-400" />
+            <span className="text-xs font-semibold text-blue-300">Saran belajar personal</span>
           </div>
-          <p className="text-sm text-teal-100 leading-relaxed">{data.ai_advice}</p>
+          <p className="text-sm text-blue-100 leading-relaxed">{data.ai_advice}</p>
         </div>
       )}
 

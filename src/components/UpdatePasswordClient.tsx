@@ -77,7 +77,7 @@ export default function UpdatePasswordClient() {
           <NexaLogo className="h-11 w-11" />
           <div>
             <p className="text-lg font-black">NEXA Campus</p>
-            <p className="text-xs font-bold uppercase tracking-[0.22em] text-teal-200">Reset Password</p>
+            <p className="text-xs font-bold uppercase tracking-[0.22em] text-blue-200">Reset Password</p>
           </div>
         </div>
 
@@ -123,7 +123,7 @@ export default function UpdatePasswordClient() {
               </p>
             )}
 
-            <Button type="submit" disabled={!ready || loading} className="h-12 w-full rounded-2xl bg-teal-500 text-slate-950 hover:bg-teal-300">
+            <Button type="submit" disabled={!ready || loading} className="h-12 w-full rounded-2xl bg-blue-500 text-slate-950 hover:bg-blue-300">
               {loading ? 'Menyimpan...' : 'Simpan Password Baru'}
             </Button>
           </form>

@@ -336,7 +336,7 @@ export default function AIQuickAddDeadline({
               {extractingImage ? (
                 <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-slate-700" />
               ) : (
-                <ImageUp className="h-4 w-4 text-teal-700" />
+                <ImageUp className="h-4 w-4 text-blue-700" />
               )}
               {extractingImage ? 'Membaca foto...' : 'Upload foto jadwal'}
               <input
@@ -463,7 +463,7 @@ export default function AIQuickAddDeadline({
       {isLocked && (
         <div className="absolute inset-0 flex items-center justify-center bg-white/75 p-4 backdrop-blur-sm">
           <div className="max-w-md rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-xl">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-50 text-brand-700">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-700">
               <LockKeyhole className="h-6 w-6" />
             </div>
             <Badge tone="brand" className="mb-3">Pulse & Command</Badge>
@@ -473,7 +473,7 @@ export default function AIQuickAddDeadline({
             </p>
             <Link
               href="/pricing"
-              className="mt-5 inline-flex items-center justify-center gap-2 rounded-2xl bg-brand-600 px-4 py-3 text-sm font-black text-white hover:bg-brand-700"
+              className="mt-5 inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-sm font-black text-white hover:bg-blue-700"
             >
               Lihat paket
               <ArrowRight className="h-4 w-4" />

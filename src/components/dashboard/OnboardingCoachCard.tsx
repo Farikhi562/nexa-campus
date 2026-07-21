@@ -37,15 +37,15 @@ export default function OnboardingCoachCard() {
   if (!data || data.percent >= 100) return null
 
   return (
-    <Card className="border-cyan-100 bg-gradient-to-br from-white to-cyan-50">
+    <Card className="border-orange-100 bg-gradient-to-br from-white to-orange-50">
       <CardContent className="p-4 sm:p-5">
         <div className="mb-3 flex items-start justify-between gap-3">
-          <div><div className="mb-2 inline-flex items-center gap-2 rounded-full bg-cyan-100 px-3 py-1 text-xs font-black text-cyan-700"><Compass className="h-3.5 w-3.5" /> Panduan Profil</div><h2 className="font-black text-slate-950">Profil kamu {data.percent}% lengkap</h2><p className="text-xs text-slate-500">Lengkapi profil supaya teman lain lebih mudah mengenal kamu.</p></div>
-          <span className="text-2xl font-black text-cyan-700">{data.percent}%</span>
+          <div><div className="mb-2 inline-flex items-center gap-2 rounded-full bg-orange-100 px-3 py-1 text-xs font-black text-orange-700"><Compass className="h-3.5 w-3.5" /> Panduan Profil</div><h2 className="font-black text-slate-950">Profil kamu {data.percent}% lengkap</h2><p className="text-xs text-slate-500">Lengkapi profil supaya teman lain lebih mudah mengenal kamu.</p></div>
+          <span className="text-2xl font-black text-orange-700">{data.percent}%</span>
         </div>
-        <div className="h-2 overflow-hidden rounded-full bg-slate-200"><div className="h-full rounded-full bg-cyan-400" style={{ width: `${data.percent}%` }} /></div>
+        <div className="h-2 overflow-hidden rounded-full bg-slate-200"><div className="h-full rounded-full bg-orange-400" style={{ width: `${data.percent}%` }} /></div>
         <div className="mt-3 grid gap-2 sm:grid-cols-2">
-          {data.steps.map((step) => <Link key={step.id} href={step.href} className="flex items-center gap-2 rounded-2xl bg-white p-2.5 text-xs font-black text-slate-700 hover:bg-cyan-50">{step.done ? <CheckCircle2 className="h-4 w-4 text-emerald-500" /> : <span className="h-4 w-4 rounded-full border border-slate-300" />} {step.label}</Link>)}
+          {data.steps.map((step) => <Link key={step.id} href={step.href} className="flex items-center gap-2 rounded-2xl bg-white p-2.5 text-xs font-black text-slate-700 hover:bg-orange-50">{step.done ? <CheckCircle2 className="h-4 w-4 text-emerald-500" /> : <span className="h-4 w-4 rounded-full border border-slate-300" />} {step.label}</Link>)}
         </div>
       </CardContent>
     </Card>

@@ -5,7 +5,7 @@ export default function BillingPage() {
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-8">
       <div className="mb-6">
-        <p className="text-sm font-black uppercase tracking-[0.22em] text-teal-600">NEXA Billing</p>
+        <p className="text-sm font-black uppercase tracking-[0.22em] text-blue-600">NEXA Billing</p>
         <h1 className="mt-2 text-3xl font-black text-slate-950">Upgrade plan</h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
           Untuk sementara pembayaran pakai manual payment. Midtrans libur dulu, karena payment gateway belom di atur.
@@ -18,7 +18,7 @@ export default function BillingPage() {
           {Object.values(BILLING_PLANS).map((plan) => (
             <div key={plan.id} className="rounded-2xl bg-slate-50 p-4">
               <p className="font-black text-slate-950">{plan.name}</p>
-              <p className="mt-1 text-2xl font-black text-teal-700">{plan.priceLabel}</p>
+              <p className="mt-1 text-2xl font-black text-blue-700">{plan.priceLabel}</p>
               <p className="text-xs font-bold text-slate-400">{plan.period}</p>
             </div>
           ))}

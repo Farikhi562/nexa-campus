@@ -22,12 +22,12 @@ export default function RetentionFomoStrip({
   return (
     <Card className="overflow-hidden border-slate-800 bg-slate-950 text-white shadow-xl shadow-slate-900/20">
       <CardContent className="relative p-4 sm:p-5">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-teal-300/60 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-300/60 to-transparent" />
         <div className="relative flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <Badge tone="warning" className="bg-amber-300/15 text-amber-100 ring-amber-200/20">Progress akun</Badge>
-              <Badge tone="info" className="bg-cyan-300/15 text-cyan-100 ring-cyan-200/20">Upgrade opsional</Badge>
+              <Badge tone="info" className="bg-orange-300/15 text-orange-100 ring-orange-200/20">Upgrade opsional</Badge>
             </div>
             <h2 className="mt-3 text-xl font-black tracking-tight sm:text-2xl">
               Biar deadline nggak cuma dicatat, tapi beneran kepegang.
@@ -54,7 +54,7 @@ export default function RetentionFomoStrip({
               <p className="mt-1 text-[11px] leading-4 text-slate-300">{highPriorityCount > 0 ? `${highPriorityCount} prioritas tinggi perlu dilihat.` : 'Jaga ritme dengan check-in harian.'}</p>
             </Link>
             <Link href="/dashboard#referral" className="group rounded-2xl border border-white/10 bg-white/10 p-3 transition hover:-translate-y-0.5 hover:bg-white/15">
-              <div className="flex items-center gap-2 text-teal-100"><Gift className="h-4 w-4" /><span className="text-xs font-black uppercase">Referral</span></div>
+              <div className="flex items-center gap-2 text-blue-100"><Gift className="h-4 w-4" /><span className="text-xs font-black uppercase">Referral</span></div>
               <p className="mt-1 text-sm font-black text-white">{referralLabel}</p>
               <p className="mt-1 text-[11px] leading-4 text-slate-300">Paket kamu: {userTier.toUpperCase()}. Reward aktif setelah syarat terpenuhi.</p>
             </Link>

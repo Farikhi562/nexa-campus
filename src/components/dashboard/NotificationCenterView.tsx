@@ -95,10 +95,10 @@ export default function NotificationCenterView() {
   return (
     <div className="space-y-5">
       <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-slate-950 p-5 text-white shadow-xl sm:p-7">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(45,212,191,0.25),transparent_18rem)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(96,165,250,0.25),transparent_18rem)]" />
         <div className="relative flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-teal-300/20 bg-teal-300/10 px-3 py-1.5 text-xs font-black text-teal-100">
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-blue-300/20 bg-blue-300/10 px-3 py-1.5 text-xs font-black text-blue-100">
               <Bell className="h-3.5 w-3.5" /> Notification Center
             </div>
             <h1 className="text-2xl font-black tracking-tight sm:text-3xl">Inbox aktivitas NEXA.</h1>
@@ -111,7 +111,7 @@ export default function NotificationCenterView() {
               <RefreshCcw className="h-4 w-4" /> Refresh
             </Button>
             {unreadCount > 0 && (
-              <Button onClick={markAllRead} className="rounded-2xl bg-teal-400 text-slate-950 hover:bg-teal-300">
+              <Button onClick={markAllRead} className="rounded-2xl bg-blue-400 text-slate-950 hover:bg-blue-300">
                 <CheckCheck className="h-4 w-4" /> Tandai semua
               </Button>
             )}
@@ -145,7 +145,7 @@ export default function NotificationCenterView() {
             <div className="divide-y divide-slate-100">
               {filtered.map((item) => {
                 const content = (
-                  <div className={`flex gap-3 p-4 transition hover:bg-slate-50 ${!item.is_read ? 'bg-teal-50/50' : 'bg-white'}`}>
+                  <div className={`flex gap-3 p-4 transition hover:bg-slate-50 ${!item.is_read ? 'bg-blue-50/50' : 'bg-white'}`}>
                     <span className="mt-0.5 text-xl">{icons[item.type] ?? '📣'}</span>
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">

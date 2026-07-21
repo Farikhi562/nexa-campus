@@ -125,7 +125,7 @@ export default function StudyRoomCall({
     <div className="rounded-2xl border border-slate-200 bg-white p-4">
       <div className="mb-3 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <div className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-teal-600 text-white">
+          <div className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-white">
             <Video className="h-4 w-4" />
           </div>
           <div>
@@ -150,7 +150,7 @@ export default function StudyRoomCall({
           type="button"
           onClick={join}
           disabled={loading}
-          className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-teal-600 px-4 py-3 text-sm font-black text-white transition hover:bg-teal-700 disabled:opacity-50"
+          className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-sm font-black text-white transition hover:bg-blue-700 disabled:opacity-50"
         >
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Video className="h-4 w-4" />}
           {loading ? 'Menyiapkan...' : 'Gabung Panggilan'}

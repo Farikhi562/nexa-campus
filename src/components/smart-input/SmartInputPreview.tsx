@@ -117,7 +117,7 @@ export default function SmartInputPreview({ candidates, source, logId, inputType
     return (
       <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-center text-sm text-slate-500">
         Tidak ada item untuk ditampilkan.
-        <button type="button" onClick={onDone} className="ml-2 font-bold text-teal-700 underline">
+        <button type="button" onClick={onDone} className="ml-2 font-bold text-blue-700 underline">
           Tutup
         </button>
       </div>
@@ -154,7 +154,7 @@ export default function SmartInputPreview({ candidates, source, logId, inputType
                     type="checkbox"
                     checked={item._include}
                     onChange={() => toggle(i)}
-                    className="h-4 w-4 rounded accent-teal-600"
+                    className="h-4 w-4 rounded accent-blue-600"
                   />
                   Sertakan
                 </label>
@@ -301,7 +301,7 @@ export default function SmartInputPreview({ candidates, source, logId, inputType
           type="button"
           onClick={saveAll}
           disabled={loading}
-          className="inline-flex min-h-11 items-center gap-2 rounded-2xl bg-teal-600 px-4 py-3 text-sm font-black text-white transition hover:bg-teal-700 disabled:opacity-50"
+          className="inline-flex min-h-11 items-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-sm font-black text-white transition hover:bg-blue-700 disabled:opacity-50"
         >
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
           Simpan Semua ({items.filter((i) => i._include).length})

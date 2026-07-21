@@ -21,9 +21,9 @@ interface ItemRowProps {
 function ItemRow({ item, onToggle, onDelete }: ItemRowProps) {
   return (
     <div className={`group flex items-center gap-3 py-2.5 px-1 border-b border-zinc-800 last:border-0 transition-opacity ${item.done ? 'opacity-50' : ''}`}>
-      <button onClick={onToggle} className="shrink-0 text-zinc-400 hover:text-teal-400 transition-colors">
+      <button onClick={onToggle} className="shrink-0 text-zinc-400 hover:text-blue-400 transition-colors">
         {item.done
-          ? <CheckCircle2 size={18} className="text-teal-400" />
+          ? <CheckCircle2 size={18} className="text-blue-400" />
           : <Circle size={18} />
         }
       </button>
@@ -133,7 +133,7 @@ export function StudyChecklist({ packId }: Props) {
           <div className="space-y-1">
             <div className="h-1.5 rounded-full bg-zinc-800 overflow-hidden">
               <div
-                className="h-full rounded-full bg-teal-500 transition-all duration-500"
+                className="h-full rounded-full bg-blue-500 transition-all duration-500"
                 style={{ width: `${pct}%` }}
               />
             </div>
@@ -174,12 +174,12 @@ export function StudyChecklist({ packId }: Props) {
           onKeyDown={(e) => { if (e.key === 'Enter') addItem() }}
           placeholder="Tambah item baru…"
           maxLength={200}
-          className="flex-1 rounded-xl bg-zinc-800 border border-zinc-700 focus:border-teal-500 outline-none text-sm text-zinc-200 placeholder:text-zinc-600 px-3 py-2 transition-colors"
+          className="flex-1 rounded-xl bg-zinc-800 border border-zinc-700 focus:border-blue-500 outline-none text-sm text-zinc-200 placeholder:text-zinc-600 px-3 py-2 transition-colors"
         />
         <button
           onClick={addItem}
           disabled={!newText.trim()}
-          className="rounded-xl bg-teal-600 hover:bg-teal-500 disabled:opacity-40 px-3 py-2 text-white transition-colors"
+          className="rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-40 px-3 py-2 text-white transition-colors"
         >
           <Plus size={16} />
         </button>

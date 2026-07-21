@@ -166,14 +166,14 @@ export default function BadgeCollection() {
           <p className="text-sm text-slate-500 dark:text-slate-400">Pilih 1 badge utama buat tampil di profile dan semua user card publik. Klik badge lain untuk langsung ganti, bukan numpuk 6 biji kayak etalase pasar malam.</p>
         </div>
         <div className="flex flex-col gap-2 sm:items-end">
-          <div className="text-sm font-black text-teal-700 dark:text-teal-300">
+          <div className="text-sm font-black text-blue-700 dark:text-blue-300">
             {loading ? 'Loading badge...' : `${earnedKeys.length} kebuka · ${pinnedKeys.length}/1 tampil`}
           </div>
           <button
             type="button"
             onClick={syncBadges}
             disabled={syncing}
-            className="rounded-2xl bg-slate-950 px-4 py-2 text-xs font-black text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-teal-300 dark:text-slate-950"
+            className="rounded-2xl bg-slate-950 px-4 py-2 text-xs font-black text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-blue-300 dark:text-slate-950"
           >
             {syncing ? 'Syncing...' : 'Sync Badge'}
           </button>
@@ -181,7 +181,7 @@ export default function BadgeCollection() {
       </div>
 
       {message ? (
-        <div className="mt-4 rounded-2xl border border-teal-200 bg-teal-50 p-4 text-sm font-bold text-teal-800 dark:border-teal-300/20 dark:bg-teal-950/30 dark:text-teal-200">
+        <div className="mt-4 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm font-bold text-blue-800 dark:border-blue-300/20 dark:bg-blue-950/30 dark:text-blue-200">
           {message}
         </div>
       ) : null}
@@ -194,7 +194,7 @@ export default function BadgeCollection() {
             onClick={() => setFilter(item)}
             className={`shrink-0 rounded-2xl border px-4 py-2 text-sm font-black transition ${
               filter === item
-                ? 'border-slate-950 bg-slate-950 text-white dark:border-teal-400 dark:bg-teal-400 dark:text-slate-950'
+                ? 'border-slate-950 bg-slate-950 text-white dark:border-blue-400 dark:bg-blue-400 dark:text-slate-950'
                 : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:bg-slate-950 dark:text-slate-200 dark:hover:bg-white/10'
             }`}
           >
@@ -232,7 +232,7 @@ export default function BadgeCollection() {
               </div>
             </div>
             <div className="mt-5 rounded-3xl border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-white/5">
-              <div className="text-xs font-black uppercase tracking-[0.18em] text-teal-600 dark:text-teal-300">Syarat unlock</div>
+              <div className="text-xs font-black uppercase tracking-[0.18em] text-blue-600 dark:text-blue-300">Syarat unlock</div>
               <p className="mt-2 text-sm font-bold leading-6 text-slate-700 dark:text-slate-200">{selectedBadge.requirement}</p>
               {selectedBadge.rarity === 'mythos' ? (
                 <p className="mt-3 text-xs font-black uppercase tracking-[0.14em] text-fuchsia-600 dark:text-fuchsia-300">

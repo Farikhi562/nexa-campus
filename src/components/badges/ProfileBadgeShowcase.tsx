@@ -92,7 +92,7 @@ export default function ProfileBadgeShowcase({
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-[11px] font-black uppercase tracking-[0.2em] text-teal-600 dark:text-teal-300">NEXA Identity</p>
+          <p className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-600 dark:text-blue-300">NEXA Identity</p>
           <h2 className="text-xl font-black tracking-tight text-slate-950 dark:text-white">{title}</h2>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             {publicMode ? 'Badge utama yang dipilih user untuk tampil di profile publik.' : 'Klik badge di halaman badge buat milih 1 badge utama di profile publik.'}

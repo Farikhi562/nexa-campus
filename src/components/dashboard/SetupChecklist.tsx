@@ -62,7 +62,7 @@ export default function SetupChecklist({
     <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-700">Setup awal</p>
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-700">Setup awal</p>
           <h2 className="mt-1 text-lg font-black text-slate-950">Siapkan NEXA supaya enak dipakai harian.</h2>
           <p className="mt-1 text-sm leading-6 text-slate-500">
             {completedCount}/{total} selesai. Lengkapi sedikit lagi supaya dashboard makin berguna.
@@ -80,10 +80,10 @@ export default function SetupChecklist({
             <div className={`h-full rounded-2xl border p-4 transition ${
               done
                 ? 'border-emerald-200 bg-emerald-50'
-                : 'border-slate-200 bg-slate-50 hover:border-brand-200 hover:bg-brand-50'
+                : 'border-slate-200 bg-slate-50 hover:border-blue-200 hover:bg-blue-50'
             }`}>
               <div className="flex items-start justify-between gap-3">
-                <Icon className={`h-5 w-5 ${done ? 'text-emerald-700' : 'text-brand-700'}`} />
+                <Icon className={`h-5 w-5 ${done ? 'text-emerald-700' : 'text-blue-700'}`} />
                 {done ? <CheckCircle2 className="h-5 w-5 text-emerald-700" /> : <Circle className="h-5 w-5 text-slate-300" />}
               </div>
               <p className="mt-4 text-sm font-black text-slate-950">{title}</p>

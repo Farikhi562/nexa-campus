@@ -65,7 +65,7 @@ export default function AchievementsView({ userPlan, userId }: Props) {
     <div className="space-y-5">
       {/* Hero */}
       <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-slate-950 p-5 text-white shadow-xl sm:p-7">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(45,212,191,0.26),transparent_18rem)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(96,165,250,0.26),transparent_18rem)]" />
         <div className="relative">
           <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-amber-300/20 bg-amber-300/10 px-3 py-1.5 text-xs font-black text-amber-100">
             <Star className="h-3.5 w-3.5" /> Pencapaian
@@ -76,7 +76,7 @@ export default function AchievementsView({ userPlan, userId }: Props) {
           </p>
           <div className="mt-4 grid gap-2 sm:grid-cols-4">
             <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
-              <p className="text-2xl font-black tabular-nums text-teal-300">{earned.length}</p>
+              <p className="text-2xl font-black tabular-nums text-blue-300">{earned.length}</p>
               <p className="text-xs font-bold text-slate-400">dari {progress.length} badge</p>
             </div>
             <div className="rounded-2xl border border-fuchsia-300/20 bg-fuchsia-300/10 p-3">
@@ -87,9 +87,9 @@ export default function AchievementsView({ userPlan, userId }: Props) {
               <p className="text-2xl font-black tabular-nums text-amber-100">{earnedRarest}/{rarity.rarest}</p>
               <p className="text-xs font-bold text-amber-100/75">badge langka</p>
             </div>
-            <div className="rounded-2xl border border-cyan-300/20 bg-cyan-300/10 p-3">
-              <p className="text-2xl font-black tabular-nums text-cyan-100">{rarity.animated}</p>
-              <p className="text-xs font-bold text-cyan-100/75">badge bergerak</p>
+            <div className="rounded-2xl border border-orange-300/20 bg-orange-300/10 p-3">
+              <p className="text-2xl font-black tabular-nums text-orange-100">{rarity.animated}</p>
+              <p className="text-xs font-bold text-orange-100/75">badge bergerak</p>
             </div>
           </div>
         </div>
@@ -143,7 +143,7 @@ export default function AchievementsView({ userPlan, userId }: Props) {
                           <span>{pct}%</span>
                         </div>
                         <div className="h-2 overflow-hidden rounded-full bg-slate-200">
-                          <div className="h-full rounded-full bg-gradient-to-r from-teal-400 to-fuchsia-500 transition-all" style={{ width: `${pct}%` }} />
+                          <div className="h-full rounded-full bg-gradient-to-r from-blue-400 to-fuchsia-500 transition-all" style={{ width: `${pct}%` }} />
                         </div>
                       </div>
                     </div>
@@ -179,11 +179,11 @@ export default function AchievementsView({ userPlan, userId }: Props) {
 
             {/* Current featured */}
             {currentFeaturedBadge && (
-              <div className="mb-4 flex items-center gap-3 rounded-2xl border border-teal-200 bg-teal-50 p-3">
+              <div className="mb-4 flex items-center gap-3 rounded-2xl border border-blue-200 bg-blue-50 p-3">
                 <BadgeChip badge={BADGES.find(b => b.id === currentFeaturedBadge.def.id)!} size="md" selected />
                 <div>
                   <p className="text-sm font-black text-slate-950">{currentFeaturedBadge.def.name}</p>
-                  <p className="text-xs text-teal-700">Sedang ditampilkan</p>
+                  <p className="text-xs text-blue-700">Sedang ditampilkan</p>
                 </div>
               </div>
             )}
@@ -227,7 +227,7 @@ export default function AchievementsView({ userPlan, userId }: Props) {
                   key={p.def.id}
                   className={`flex items-start gap-3 rounded-2xl border p-3.5 transition ${
                     featuredBadge === p.def.id
-                      ? 'border-teal-300 bg-teal-50/60'
+                      ? 'border-blue-300 bg-blue-50/60'
                       : 'border-slate-200 bg-white'
                   }`}
                 >
@@ -244,7 +244,7 @@ export default function AchievementsView({ userPlan, userId }: Props) {
                     </div>
                     <p className="mt-0.5 text-xs leading-4 text-slate-500">{badge.desc}</p>
                     {featuredBadge === p.def.id && (
-                      <p className="mt-1 text-[10px] font-black text-teal-600">Ditampilkan</p>
+                      <p className="mt-1 text-[10px] font-black text-blue-600">Ditampilkan</p>
                     )}
                   </div>
                 </div>
@@ -286,7 +286,7 @@ export default function AchievementsView({ userPlan, userId }: Props) {
                           <span>{pct}%</span>
                         </div>
                         <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
-                          <div className="h-full rounded-full bg-teal-400 transition-all" style={{ width: `${pct}%` }} />
+                          <div className="h-full rounded-full bg-blue-400 transition-all" style={{ width: `${pct}%` }} />
                         </div>
                       </div>
                     )}

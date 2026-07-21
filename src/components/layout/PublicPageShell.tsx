@@ -35,14 +35,14 @@ export default function PublicPageShell({
             <NexaCampusLogo tone="dark" imageClassName="h-10 w-10" />
           </Link>
           <nav className="hidden items-center gap-5 text-sm font-black text-slate-300 md:flex">
-            <Link href="/pricing" className="hover:text-teal-200">Pricing</Link>
-            <Link href="/privacy" className="hover:text-teal-200">Privacy</Link>
-            <Link href="/support" className="hover:text-teal-200">Support</Link>
-            <Link href="/release-notes" className="hover:text-teal-200">v{BRAND.version}</Link>
+            <Link href="/pricing" className="hover:text-blue-200">Pricing</Link>
+            <Link href="/privacy" className="hover:text-blue-200">Privacy</Link>
+            <Link href="/support" className="hover:text-blue-200">Support</Link>
+            <Link href="/release-notes" className="hover:text-blue-200">v{BRAND.version}</Link>
           </nav>
           <Link
             href="/login"
-            className="inline-flex min-h-10 items-center justify-center rounded-2xl bg-teal-400 px-4 py-2 text-sm font-black text-slate-950 transition hover:bg-teal-300"
+            className="inline-flex min-h-10 items-center justify-center rounded-2xl bg-blue-400 px-4 py-2 text-sm font-black text-slate-950 transition hover:bg-blue-300"
           >
             Masuk
           </Link>
@@ -51,10 +51,10 @@ export default function PublicPageShell({
 
       <section className="border-b border-slate-900 bg-slate-950 text-white">
         <div className="relative mx-auto max-w-7xl overflow-hidden px-4 py-10 sm:py-14">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(45,212,191,0.25),transparent_24rem),radial-gradient(circle_at_10%_20%,rgba(14,165,233,0.13),transparent_22rem)]" />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(96,165,250,0.25),transparent_24rem),radial-gradient(circle_at_10%_20%,rgba(14,165,233,0.13),transparent_22rem)]" />
           <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[size:44px_44px] opacity-35" />
           <div className="relative max-w-4xl">
-            <Badge tone="brand" className="mb-5 bg-teal-300/10 text-teal-100 ring-teal-300/20">
+            <Badge tone="brand" className="mb-5 bg-blue-300/10 text-blue-100 ring-blue-300/20">
               {badge}
             </Badge>
             <h1 className="text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">{title}</h1>
@@ -62,7 +62,7 @@ export default function PublicPageShell({
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
               <Link
                 href={primaryCta.href}
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-teal-400 px-5 py-3 text-sm font-black text-slate-950 shadow-lg shadow-teal-950/30 transition hover:bg-teal-300"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-blue-400 px-5 py-3 text-sm font-black text-slate-950 shadow-lg shadow-blue-950/30 transition hover:bg-blue-300"
               >
                 {primaryCta.label}
                 <ArrowRight className="h-4 w-4" />
@@ -77,7 +77,7 @@ export default function PublicPageShell({
               )}
             </div>
             <div className="mt-6 flex max-w-2xl gap-3 rounded-2xl border border-white/10 bg-white/[0.055] p-4 text-xs leading-5 text-slate-300">
-              <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-teal-200" />
+              <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-blue-200" />
               <p>{BRAND.disclaimer}</p>
             </div>
           </div>

@@ -142,7 +142,7 @@ export default function PushNotificationSettings() {
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-4">
       <div className="flex items-start gap-3">
-        <div className="inline-flex h-10 w-10 flex-none items-center justify-center rounded-2xl bg-teal-600 text-white">
+        <div className="inline-flex h-10 w-10 flex-none items-center justify-center rounded-2xl bg-blue-600 text-white">
           <BellRing className="h-5 w-5" />
         </div>
         <div className="min-w-0 flex-1">
@@ -177,7 +177,7 @@ export default function PushNotificationSettings() {
                 type="button"
                 onClick={enable}
                 disabled={loading}
-                className="inline-flex min-h-11 items-center gap-2 rounded-2xl bg-teal-600 px-4 py-2.5 text-sm font-black text-white transition hover:bg-teal-700 disabled:opacity-50"
+                className="inline-flex min-h-11 items-center gap-2 rounded-2xl bg-blue-600 px-4 py-2.5 text-sm font-black text-white transition hover:bg-blue-700 disabled:opacity-50"
               >
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bell className="h-4 w-4" />}
                 Aktifkan Notifikasi HP

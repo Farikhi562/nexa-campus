@@ -219,11 +219,11 @@ export default function AskNexaPanel({ deadlines = [], userProfile: initialProfi
   const showSuggestions = messages.filter((m) => m.id !== 'greeting').length === 0
 
   return (
-    <Card className="border-teal-100 bg-gradient-to-br from-white to-teal-50/40">
+    <Card className="border-blue-100 bg-gradient-to-br from-white to-blue-50/40">
       <CardContent className="flex h-[28rem] flex-col p-0 sm:h-[32rem]">
         <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3">
           <div className="flex items-center gap-3">
-            <div className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-teal-600 text-white shadow-sm">
+            <div className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-sm">
               <Bot className="h-5 w-5" />
             </div>
             <div>
@@ -245,19 +245,19 @@ export default function AskNexaPanel({ deadlines = [], userProfile: initialProfi
               <div key={m.id} className={`flex gap-2.5 ${isUser ? 'flex-row-reverse' : ''}`}>
                 <div
                   className={`mt-5 flex h-8 w-8 flex-none items-center justify-center rounded-full ${
-                    isUser ? 'bg-slate-200 text-slate-700' : 'bg-teal-600 text-white'
+                    isUser ? 'bg-slate-200 text-slate-700' : 'bg-blue-600 text-white'
                   }`}
                 >
                   {isUser ? <UserAvatar profile={profile} name={userName} /> : <Bot className="h-4 w-4" />}
                 </div>
                 <div className={`max-w-[80%] ${isUser ? 'text-right' : 'text-left'}`}>
-                  <div className={`mb-1 px-1 text-[11px] font-bold ${isUser ? 'text-slate-500' : 'text-teal-700'}`}>
+                  <div className={`mb-1 px-1 text-[11px] font-bold ${isUser ? 'text-slate-500' : 'text-blue-700'}`}>
                     {isUser ? userName : 'NEXA Assistant'}
                   </div>
                   <div
                     className={`whitespace-pre-wrap rounded-2xl px-4 py-2.5 text-sm leading-6 ${
                       isUser
-                        ? 'bg-teal-600 text-white'
+                        ? 'bg-blue-600 text-white'
                         : m.status === 'error'
                           ? 'border border-red-200 bg-red-50 text-red-700'
                           : 'border border-slate-200 bg-white text-slate-700'
@@ -277,7 +277,7 @@ export default function AskNexaPanel({ deadlines = [], userProfile: initialProfi
 
           {loading && (
             <div className="flex gap-2.5">
-              <div className="mt-0.5 flex h-8 w-8 flex-none items-center justify-center rounded-full bg-teal-600 text-white">
+              <div className="mt-0.5 flex h-8 w-8 flex-none items-center justify-center rounded-full bg-blue-600 text-white">
                 <Bot className="h-4 w-4" />
               </div>
               <div className="flex items-center gap-1 rounded-2xl border border-slate-200 bg-white px-4 py-3">
@@ -295,9 +295,9 @@ export default function AskNexaPanel({ deadlines = [], userProfile: initialProfi
                   key={s}
                   type="button"
                   onClick={() => send(s)}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 transition hover:border-teal-200 hover:text-teal-700"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 transition hover:border-blue-200 hover:text-blue-700"
                 >
-                  <Sparkles className="h-3.5 w-3.5 text-teal-500" />
+                  <Sparkles className="h-3.5 w-3.5 text-blue-500" />
                   {s}
                 </button>
               ))}
@@ -320,7 +320,7 @@ export default function AskNexaPanel({ deadlines = [], userProfile: initialProfi
               type="button"
               onClick={() => send()}
               disabled={loading || !input.trim()}
-              className="inline-flex h-11 w-11 flex-none items-center justify-center rounded-2xl bg-teal-600 text-white transition hover:bg-teal-700 disabled:opacity-40"
+              className="inline-flex h-11 w-11 flex-none items-center justify-center rounded-2xl bg-blue-600 text-white transition hover:bg-blue-700 disabled:opacity-40"
               aria-label="Kirim pesan"
             >
               <Send className="h-4 w-4" />

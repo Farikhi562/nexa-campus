@@ -130,7 +130,7 @@ export default function ArenaTeamWorkspaceView({ postId, userId }: { postId: str
 
   if (loading) return <div className="flex h-64 items-center justify-center text-slate-400"><Loader2 className="h-6 w-6 animate-spin" /></div>
   if (!post || !isMember) return (
-    <Card><CardContent className="p-8 text-center"><p className="font-black text-slate-950">Workspace hanya untuk anggota tim yang approved.</p><Link className="mt-3 inline-flex text-sm font-black text-teal-700 underline" href="/dashboard/arena">Balik ke Arena</Link></CardContent></Card>
+    <Card><CardContent className="p-8 text-center"><p className="font-black text-slate-950">Workspace hanya untuk anggota tim yang approved.</p><Link className="mt-3 inline-flex text-sm font-black text-blue-700 underline" href="/dashboard/arena">Balik ke Arena</Link></CardContent></Card>
   )
 
   const done = (workspace.checklist ?? []).filter((item) => item.done).length
@@ -139,7 +139,7 @@ export default function ArenaTeamWorkspaceView({ postId, userId }: { postId: str
   return (
     <div className="space-y-5">
       <section className="rounded-3xl border border-slate-800 bg-slate-950 p-5 text-white shadow-xl sm:p-7">
-        <Link href="/dashboard/arena" className="mb-4 inline-flex items-center gap-2 text-sm font-black text-teal-200 hover:underline"><ChevronLeft className="h-4 w-4" /> Arena</Link>
+        <Link href="/dashboard/arena" className="mb-4 inline-flex items-center gap-2 text-sm font-black text-blue-200 hover:underline"><ChevronLeft className="h-4 w-4" /> Arena</Link>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-amber-300/20 bg-amber-300/10 px-3 py-1.5 text-xs font-black text-amber-100"><ShieldCheck className="h-3.5 w-3.5" /> Team Workspace</div>
@@ -192,7 +192,7 @@ export default function ArenaTeamWorkspaceView({ postId, userId }: { postId: str
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge tone={done === total && total > 0 ? 'success' : 'neutral'}>{done}/{total}</Badge>
-                  {isCreator && <button onClick={applyTemplate} className="rounded-2xl bg-white px-3 py-1.5 text-xs font-black text-teal-700 ring-1 ring-teal-100 hover:bg-teal-50">Pakai template</button>}
+                  {isCreator && <button onClick={applyTemplate} className="rounded-2xl bg-white px-3 py-1.5 text-xs font-black text-blue-700 ring-1 ring-blue-100 hover:bg-blue-50">Pakai template</button>}
                   {/* AI Generate Task */}
                   {(isCreator || isMember) && (
                     <button
@@ -236,8 +236,8 @@ export default function ArenaTeamWorkspaceView({ postId, userId }: { postId: str
               )}
               <div className="space-y-2">
                 {(workspace.checklist ?? []).map((task) => (
-                  <button key={task.id} disabled={!isCreator} onClick={() => toggle(task.id)} className="flex w-full items-center gap-3 rounded-2xl bg-white p-3 text-left text-sm hover:bg-teal-50 disabled:cursor-default">
-                    <span className={`flex h-5 w-5 items-center justify-center rounded-lg border ${task.done ? 'border-teal-400 bg-teal-400 text-white' : 'border-slate-300'}`}>{task.done && <CheckCircle2 className="h-3.5 w-3.5" />}</span>
+                  <button key={task.id} disabled={!isCreator} onClick={() => toggle(task.id)} className="flex w-full items-center gap-3 rounded-2xl bg-white p-3 text-left text-sm hover:bg-blue-50 disabled:cursor-default">
+                    <span className={`flex h-5 w-5 items-center justify-center rounded-lg border ${task.done ? 'border-blue-400 bg-blue-400 text-white' : 'border-slate-300'}`}>{task.done && <CheckCircle2 className="h-3.5 w-3.5" />}</span>
                     <span className={task.done ? 'text-slate-400 line-through' : 'text-slate-700'}>{task.text}</span>
                   </button>
                 ))}

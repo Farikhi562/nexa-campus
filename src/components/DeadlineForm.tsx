@@ -69,7 +69,7 @@ function Section({
   return (
     <section className="rounded-3xl border border-white/80 bg-white/90 p-5 shadow-xl shadow-slate-200/70 ring-1 ring-slate-950/[0.03] sm:p-6">
       <div className="mb-4">
-        <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-700">{eyebrow}</p>
+        <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-700">{eyebrow}</p>
         <h2 className="mt-1 text-lg font-black text-slate-950">{title}</h2>
       </div>
       <div className="grid gap-4 md:grid-cols-2">{children}</div>

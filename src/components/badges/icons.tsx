@@ -170,7 +170,7 @@ export function StreakIcon({ animate }: IconProps) {
 export function SocialIcon({ animate }: IconProps) {
   return (
     <svg viewBox="0 0 64 64" className={styles.icon} aria-hidden>
-      <circle cx="24" cy="32" r="13" fill="none" stroke="#14b8a6" strokeWidth="4.5" className={cx(animate && styles.pulseA)} style={{ transformOrigin: '24px 32px' }} />
+      <circle cx="24" cy="32" r="13" fill="none" stroke="#3b82f6" strokeWidth="4.5" className={cx(animate && styles.pulseA)} style={{ transformOrigin: '24px 32px' }} />
       <circle cx="40" cy="32" r="13" fill="none" stroke="#0ea5e9" strokeWidth="4.5" className={cx(animate && styles.pulseB)} style={{ transformOrigin: '40px 32px' }} />
     </svg>
   )
@@ -205,8 +205,8 @@ export function GenericIcon({ animate }: IconProps) {
       <path d="M32 24 l2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4-3.9-3.8 5.4-.8Z" fill="#fffbeb" className={cx(animate && styles.starPulse)} style={{ transformOrigin: '32px 32px' }} />
       <defs>
         <linearGradient id="shieldGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#5eead4" />
-          <stop offset="100%" stopColor="#0d9488" />
+          <stop offset="0%" stopColor="#93c5fd" />
+          <stop offset="100%" stopColor="#2563eb" />
         </linearGradient>
       </defs>
     </svg>

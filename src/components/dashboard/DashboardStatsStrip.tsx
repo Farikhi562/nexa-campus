@@ -63,8 +63,8 @@ export default function DashboardStatsStrip({ deadlines }: { deadlines: Academic
       value: active,
       sub: 'deadline belum selesai',
       icon: Target,
-      color: 'text-brand-700',
-      bg: 'bg-brand-50',
+      color: 'text-blue-700',
+      bg: 'bg-blue-50',
     },
     {
       label: '≤ 3 hari',

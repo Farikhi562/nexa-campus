@@ -48,9 +48,9 @@ export default function MyNexaQrCard({
   }
 
   return (
-    <div className="rounded-2xl border border-teal-100 bg-gradient-to-br from-white to-teal-50/40 p-4 shadow-sm">
+    <div className="rounded-2xl border border-blue-100 bg-gradient-to-br from-white to-blue-50/40 p-4 shadow-sm">
       <h3 className="mb-3 flex items-center gap-2 text-sm font-black text-slate-950">
-        <QrCode className="h-4 w-4 text-teal-600" /> NEXA ID kamu
+        <QrCode className="h-4 w-4 text-blue-600" /> NEXA ID kamu
       </h3>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <div className="w-fit rounded-2xl border border-slate-200 bg-white p-2.5">
@@ -65,7 +65,7 @@ export default function MyNexaQrCard({
         </div>
         <div className="min-w-0 flex-1">
           {fullName ? <p className="truncate text-sm font-black text-slate-950">{fullName}</p> : null}
-          <p className="mt-0.5 break-all text-xl font-black tracking-widest text-teal-700 sm:text-2xl">#{nexaId}</p>
+          <p className="mt-0.5 break-all text-xl font-black tracking-widest text-blue-700 sm:text-2xl">#{nexaId}</p>
           <div className="mt-2 flex flex-wrap gap-2">
             <button
               type="button"
@@ -78,7 +78,7 @@ export default function MyNexaQrCard({
             <button
               type="button"
               onClick={() => copy(addLink, 'link')}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-teal-200 bg-teal-50 px-3 py-1.5 text-xs font-bold text-teal-700 hover:bg-teal-100"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700 hover:bg-blue-100"
             >
               {copied === 'link' ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <LinkIcon className="h-3.5 w-3.5" />}
               Link

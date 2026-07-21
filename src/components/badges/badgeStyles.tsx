@@ -151,7 +151,7 @@ export default function BadgeStyles() {
       .nexa-badge-mythos {
         background:
           radial-gradient(circle at 20% 10%, rgba(244, 114, 182, 0.62), transparent 22%),
-          radial-gradient(circle at 80% 20%, rgba(34, 211, 238, 0.55), transparent 24%),
+          radial-gradient(circle at 80% 20%, rgba(249, 115, 22, 0.55), transparent 24%),
           radial-gradient(circle at 50% 85%, rgba(167, 139, 250, 0.72), transparent 26%),
           linear-gradient(135deg, #120318, #241151 42%, #071827 100%) !important;
         box-shadow: 0 24px 70px rgba(168, 85, 247, 0.32), 0 0 0 1px rgba(255, 255, 255, 0.15) inset;
@@ -159,7 +159,7 @@ export default function BadgeStyles() {
 
       .nexa-badge-mythos .nexa-badge-glow {
         background:
-          conic-gradient(from 0deg, rgba(34, 211, 238, 0.28), rgba(217, 70, 239, 0.38), rgba(250, 204, 21, 0.30), rgba(34, 211, 238, 0.28));
+          conic-gradient(from 0deg, rgba(249, 115, 22, 0.28), rgba(217, 70, 239, 0.38), rgba(250, 204, 21, 0.30), rgba(249, 115, 22, 0.28));
         animation: nexaMythosSpin 4.8s linear infinite;
         opacity: 0.78;
         filter: blur(8px);

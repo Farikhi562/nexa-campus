@@ -39,7 +39,7 @@ export default function NexaCampusLogo({
           <p className={cn('text-lg font-black leading-5 tracking-tight', tone === 'dark' ? 'text-white' : 'text-slate-950')}>
             NEXA Campus
           </p>
-          <p className={cn('text-[10px] font-bold uppercase tracking-[0.22em]', tone === 'dark' ? 'text-teal-200' : 'text-teal-600')}>
+          <p className={cn('text-[10px] font-bold uppercase tracking-[0.22em]', tone === 'dark' ? 'text-blue-200' : 'text-blue-600')}>
             Deadline Radar
           </p>
         </div>

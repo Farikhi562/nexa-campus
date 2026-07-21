@@ -263,7 +263,7 @@ export default function OnboardingForm({
 
       {/* Identitas akademik */}
       <section className="rounded-3xl border border-slate-200 bg-white p-5">
-        <div className="mb-5 flex items-start gap-3 rounded-2xl border border-cyan-200 bg-cyan-50 p-4 text-sm leading-6 text-cyan-900">
+        <div className="mb-5 flex items-start gap-3 rounded-2xl border border-orange-200 bg-orange-50 p-4 text-sm leading-6 text-orange-900">
           <Info className="mt-0.5 h-5 w-5 flex-shrink-0" />
           <p>
             Pilih kampus, provinsi, dan jurusan dari daftar. Belum ada di daftar? Pilih
@@ -274,14 +274,14 @@ export default function OnboardingForm({
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="block sm:col-span-2">
             <span className={labelClass}>
-              <span className="inline-flex items-center gap-1.5"><UserRound className="h-4 w-4 text-teal-700" /> Nama lengkap</span>
+              <span className="inline-flex items-center gap-1.5"><UserRound className="h-4 w-4 text-blue-700" /> Nama lengkap</span>
             </span>
             <input value={fullName} onChange={(e) => setFullName(e.target.value)} required className={inputClass} placeholder="Nama sesuai yang kamu mau tampil" />
           </label>
 
           <label className="block sm:col-span-2">
             <span className={labelClass}>
-              <span className="inline-flex items-center gap-1.5"><GraduationCap className="h-4 w-4 text-teal-700" /> Kampus / universitas</span>
+              <span className="inline-flex items-center gap-1.5"><GraduationCap className="h-4 w-4 text-blue-700" /> Kampus / universitas</span>
             </span>
             <input
               value={campusName}
@@ -303,7 +303,7 @@ export default function OnboardingForm({
 
           <label className="block">
             <span className={labelClass}>
-              <span className="inline-flex items-center gap-1.5"><MapPin className="h-4 w-4 text-teal-700" /> Provinsi</span>
+              <span className="inline-flex items-center gap-1.5"><MapPin className="h-4 w-4 text-blue-700" /> Provinsi</span>
             </span>
             <select value={province} onChange={(e) => setProvince(e.target.value)} required className={inputClass}>
               <option value="">Pilih provinsi</option>
@@ -366,7 +366,7 @@ export default function OnboardingForm({
       </section>
 
       <div className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-xs leading-5 text-slate-600">
-        <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-teal-700" />
+        <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-blue-700" />
         <p>NEXA tidak pernah meminta password kampus. Data yang disimpan hanya profil dan deadline yang kamu input sendiri.</p>
       </div>
 

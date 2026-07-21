@@ -101,12 +101,12 @@ export default function NotificationBell() {
         className="focus-ring relative flex h-9 w-9 items-center justify-center rounded-2xl text-slate-600 transition hover:bg-slate-100"
       >
         {unreadCount > 0 ? (
-          <BellRing className="h-5 w-5 text-teal-600" />
+          <BellRing className="h-5 w-5 text-blue-600" />
         ) : (
           <Bell className="h-5 w-5" />
         )}
         {unreadCount > 0 && (
-          <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-teal-500 text-[9px] font-black text-white">
+          <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 text-[9px] font-black text-white">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
@@ -120,7 +120,7 @@ export default function NotificationBell() {
               {unreadCount > 0 && (
                 <button
                   onClick={markAllRead}
-                  className="flex items-center gap-1 rounded-xl px-2 py-1 text-xs font-bold text-teal-600 hover:bg-teal-50"
+                  className="flex items-center gap-1 rounded-xl px-2 py-1 text-xs font-bold text-blue-600 hover:bg-blue-50"
                 >
                   <Check className="h-3 w-3" /> Tandai semua
                 </button>
@@ -143,7 +143,7 @@ export default function NotificationBell() {
               <div className="divide-y divide-slate-50">
                 {notifications.map((notif) => {
                   const content = (
-                    <div className={`flex gap-3 px-4 py-3 transition hover:bg-slate-50 ${!notif.is_read ? 'bg-teal-50/40' : ''}`}>
+                    <div className={`flex gap-3 px-4 py-3 transition hover:bg-slate-50 ${!notif.is_read ? 'bg-blue-50/40' : ''}`}>
                       <span className="mt-0.5 flex-shrink-0 text-lg">{typeIcon[notif.type] ?? '📣'}</span>
                       <div className="min-w-0 flex-1">
                         <p className={`text-sm leading-5 ${!notif.is_read ? 'font-black text-slate-950' : 'font-bold text-slate-700'}`}>
@@ -154,7 +154,7 @@ export default function NotificationBell() {
                         )}
                         <p className="mt-1 text-[10px] font-bold text-slate-400">{timeAgo(notif.created_at)}</p>
                       </div>
-                      {!notif.is_read && <div className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-teal-500" />}
+                      {!notif.is_read && <div className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-blue-500" />}
                     </div>
                   )
                   return notif.link ? (

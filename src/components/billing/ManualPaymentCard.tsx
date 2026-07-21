@@ -169,7 +169,7 @@ export default function ManualPaymentCard() {
               type="button"
               onClick={() => setSelectedPlan(planId)}
               className={`rounded-3xl border p-5 text-left transition ${
-                active ? 'border-teal-500 bg-teal-50 shadow-sm' : 'border-slate-200 bg-white hover:border-teal-200'
+                active ? 'border-blue-500 bg-blue-50 shadow-sm' : 'border-slate-200 bg-white hover:border-blue-200'
               }`}
             >
               <div className="flex items-start justify-between gap-3">
@@ -177,7 +177,7 @@ export default function ManualPaymentCard() {
                   <h3 className="text-lg font-black text-slate-950">{plan.name}</h3>
                   <p className="mt-1 text-sm leading-6 text-slate-500">{plan.description}</p>
                 </div>
-                {active ? <Check className="h-5 w-5 text-teal-600" /> : null}
+                {active ? <Check className="h-5 w-5 text-blue-600" /> : null}
               </div>
               <div className="mt-4 flex items-end gap-2">
                 <span className="text-3xl font-black text-slate-950">{plan.priceLabel}</span>
@@ -186,7 +186,7 @@ export default function ManualPaymentCard() {
               <ul className="mt-4 space-y-2 text-sm text-slate-600">
                 {plan.features.slice(0, 5).map((feature) => (
                   <li key={feature} className="flex gap-2">
-                    <Check className="mt-0.5 h-4 w-4 flex-none text-teal-600" />
+                    <Check className="mt-0.5 h-4 w-4 flex-none text-blue-600" />
                     <span>{feature}</span>
                   </li>
                 ))}
@@ -211,7 +211,7 @@ export default function ManualPaymentCard() {
             type="button"
             onClick={createOrder}
             disabled={loading}
-            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-teal-600 px-5 py-3 text-sm font-black text-white transition hover:bg-teal-700 disabled:opacity-50"
+            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 py-3 text-sm font-black text-white transition hover:bg-blue-700 disabled:opacity-50"
           >
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
             Buat instruksi bayar
@@ -230,7 +230,7 @@ export default function ManualPaymentCard() {
                   type="button"
                   onClick={() => setSelectedMethod(method.id)}
                   className={`rounded-3xl border p-4 text-left transition ${
-                    active ? 'border-teal-500 bg-teal-50 shadow-sm' : 'border-slate-200 bg-slate-50 hover:border-teal-200'
+                    active ? 'border-blue-500 bg-blue-50 shadow-sm' : 'border-slate-200 bg-slate-50 hover:border-blue-200'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3">
@@ -238,7 +238,7 @@ export default function ManualPaymentCard() {
                       <p className="font-black text-slate-950">{method.label}</p>
                       <p className="mt-1 text-sm leading-6 text-slate-500">{method.instruction}</p>
                     </div>
-                    {method.type === 'qris' ? <QrCode className="h-5 w-5 text-teal-700" /> : <CreditCard className="h-5 w-5 text-teal-700" />}
+                    {method.type === 'qris' ? <QrCode className="h-5 w-5 text-blue-700" /> : <CreditCard className="h-5 w-5 text-blue-700" />}
                   </div>
                   <div className="mt-3 rounded-2xl bg-white px-4 py-3 text-sm text-slate-600">
                     <b>{method.bankName}</b> · {method.accountNumber}
@@ -257,14 +257,14 @@ export default function ManualPaymentCard() {
 
         {latestOrder ? (
           <div className="mt-5 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-            <div className="rounded-3xl border border-teal-100 bg-teal-50/60 p-5">
-              <p className="text-xs font-black uppercase tracking-[0.2em] text-teal-700">Instruksi pembayaran</p>
+            <div className="rounded-3xl border border-blue-100 bg-blue-50/60 p-5">
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-blue-700">Instruksi pembayaran</p>
               <div className="mt-4 space-y-3">
                 <div className="rounded-2xl bg-white p-4">
                   <p className="text-xs font-bold text-slate-400">Order ID</p>
                   <div className="mt-1 flex items-center justify-between gap-3">
                     <p className="font-black text-slate-950">{latestOrder.order_code}</p>
-                    <button onClick={() => copy(latestOrder.order_code, 'order')} className="text-teal-700" type="button">
+                    <button onClick={() => copy(latestOrder.order_code, 'order')} className="text-blue-700" type="button">
                       {copied === 'order' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                     </button>
                   </div>
@@ -273,7 +273,7 @@ export default function ManualPaymentCard() {
                   <p className="text-xs font-bold text-slate-400">Nominal</p>
                   <div className="mt-1 flex items-center justify-between gap-3">
                     <p className="text-2xl font-black text-slate-950">{rupiah(latestOrder.amount)}</p>
-                    <button onClick={() => copy(String(latestOrder.amount), 'amount')} className="text-teal-700" type="button">
+                    <button onClick={() => copy(String(latestOrder.amount), 'amount')} className="text-blue-700" type="button">
                       {copied === 'amount' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                     </button>
                   </div>
@@ -284,7 +284,7 @@ export default function ManualPaymentCard() {
                   <p className="text-sm font-bold text-slate-500">a.n. {latestOrder.account_name}</p>
                   <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl bg-slate-50 px-4 py-3">
                     <p className="font-mono text-lg font-black text-slate-950">{latestOrder.account_number}</p>
-                    <button onClick={() => copy(latestOrder.account_number, 'account')} className="text-teal-700" type="button">
+                    <button onClick={() => copy(latestOrder.account_number, 'account')} className="text-blue-700" type="button">
                       {copied === 'account' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                     </button>
                   </div>
@@ -309,22 +309,22 @@ export default function ManualPaymentCard() {
                   value={buyerName}
                   onChange={(event) => setBuyerName(event.target.value)}
                   placeholder="Nama pengirim / nama user"
-                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold outline-none focus:border-teal-400"
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold outline-none focus:border-blue-400"
                 />
                 <input
                   value={buyerWhatsapp}
                   onChange={(event) => setBuyerWhatsapp(event.target.value)}
                   placeholder="Nomor WhatsApp, contoh 62812xxxx"
-                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold outline-none focus:border-teal-400"
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold outline-none focus:border-blue-400"
                 />
                 <textarea
                   value={notes}
                   onChange={(event) => setNotes(event.target.value)}
                   placeholder="Catatan opsional"
                   rows={3}
-                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold outline-none focus:border-teal-400"
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold outline-none focus:border-blue-400"
                 />
-                <label className="block cursor-pointer rounded-2xl border border-dashed border-slate-300 bg-white p-4 text-center text-sm font-bold text-slate-500 transition hover:border-teal-400 hover:text-teal-700">
+                <label className="block cursor-pointer rounded-2xl border border-dashed border-slate-300 bg-white p-4 text-center text-sm font-bold text-slate-500 transition hover:border-blue-400 hover:text-blue-700">
                   <UploadCloud className="mx-auto mb-2 h-5 w-5" />
                   {proofFile ? proofFile.name : 'Pilih file bukti transfer'}
                   <input
@@ -350,7 +350,7 @@ export default function ManualPaymentCard() {
                   href={whatsappUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-800 transition hover:border-teal-300 hover:text-teal-700"
+                  className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-800 transition hover:border-blue-300 hover:text-blue-700"
                 >
                   Konfirmasi via WhatsApp <ExternalLink className="h-4 w-4" />
                 </a>
@@ -366,7 +366,7 @@ export default function ManualPaymentCard() {
                 <br />Expired: <b>{formatDate(latestOrder.expires_at)}</b>
                 {latestOrder.proof_url ? (
                   <>
-                    <br />Bukti: <a className="font-black text-teal-700" href={latestOrder.proof_url} target="_blank" rel="noreferrer">lihat file</a>
+                    <br />Bukti: <a className="font-black text-blue-700" href={latestOrder.proof_url} target="_blank" rel="noreferrer">lihat file</a>
                   </>
                 ) : null}
                 {latestOrder.rejection_reason ? <><br />Alasan reject: <b>{latestOrder.rejection_reason}</b></> : null}
@@ -397,7 +397,7 @@ export default function ManualPaymentCard() {
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <span className={`rounded-full border px-3 py-1 text-xs font-black ${statusClass(item.status)}`}>{item.status}</span>
-                  {item.proof_url ? <a href={item.proof_url} target="_blank" rel="noreferrer" className="text-xs font-black text-teal-700">Lihat bukti</a> : null}
+                  {item.proof_url ? <a href={item.proof_url} target="_blank" rel="noreferrer" className="text-xs font-black text-blue-700">Lihat bukti</a> : null}
                 </div>
               </div>
             ))

@@ -71,7 +71,7 @@ export default function AvatarMenu({
         type="button"
         onClick={() => setOpen(v => !v)}
         aria-label="Menu akun"
-        className="focus-ring flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-100 text-xs font-black text-slate-700 ring-1 ring-slate-200 transition hover:ring-teal-300 sm:h-10 sm:w-10"
+        className="focus-ring flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-100 text-xs font-black text-slate-700 ring-1 ring-slate-200 transition hover:ring-blue-300 sm:h-10 sm:w-10"
       >
         {avatarUrl ? (
           <Image src={avatarUrl} alt="Foto profil" width={40} height={40} className="h-full w-full object-cover" />
@@ -93,7 +93,7 @@ export default function AvatarMenu({
             </span>
             <div className="min-w-0">
               <p className="truncate text-sm font-black text-slate-950">{fullName || 'Mahasiswa NEXA'}</p>
-              {nexaId && <p className="text-[11px] font-bold text-teal-600">#{nexaId}</p>}
+              {nexaId && <p className="text-[11px] font-bold text-blue-600">#{nexaId}</p>}
               {email && <p className="truncate text-[11px] text-slate-500">{email}</p>}
             </div>
           </div>
@@ -135,7 +135,7 @@ export default function AvatarMenu({
                     key={code}
                     onClick={() => changeLang(code)}
                     className={`flex w-full items-center gap-2 px-3 py-2 text-sm font-bold transition hover:bg-white ${
-                      lang === code ? 'text-teal-700' : 'text-slate-700'
+                      lang === code ? 'text-blue-700' : 'text-slate-700'
                     }`}
                   >
                     <span className="w-4 text-center">{lang === code ? '✓' : ''}</span>
