@@ -17,3 +17,7 @@ The CSS is already wired to load it.
 
 ## Note
 The uploaded archive did not include `package.json`, Tailwind config, or Next config, so a full production build could not be executed from this bundle alone.
+
+## Productivity Depth Upgrade v9
+
+Fitur existing diperdalam dengan deadline checklist/progress, Focus Mode per deadline, actionable notification + snooze, dan Daily Pulse check-out. Jalankan `supabase/migrations/20260721_productivity_depth.sql` sebelum deploy.

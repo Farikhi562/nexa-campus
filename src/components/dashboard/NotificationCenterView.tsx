@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Bell, CheckCheck, Filter, Loader2, MessageCircle, RefreshCcw } from 'lucide-react'
+import { Bell, CheckCheck, CheckCircle2, Clock3, ExternalLink, Filter, Loader2, PlayCircle, RefreshCcw } from 'lucide-react'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import { Card, CardContent } from '@/components/ui/Card'
@@ -15,6 +15,8 @@ type NotificationItem = {
   link: string | null
   is_read: boolean
   created_at: string
+  related_deadline_id?: string | null
+  action_state?: string | null
 }
 
 const filters = [
@@ -51,10 +53,20 @@ function matchesFilter(item: NotificationItem, filter: FilterKey) {
   return item.type === filter
 }
 
+function deadlineIdFrom(item: NotificationItem) {
+  if (item.related_deadline_id) return item.related_deadline_id
+  const link = item.link ?? ''
+  return link.match(/[?&]deadline=([0-9a-f-]{36})/i)?.[1]
+    ?? link.match(/\/deadlines\/([0-9a-f-]{36})(?:\/|$)/i)?.[1]
+    ?? null
+}
+
 export default function NotificationCenterView() {
   const [items, setItems] = useState<NotificationItem[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<FilterKey>('all')
+  const [busyId, setBusyId] = useState<string | null>(null)
+  const [message, setMessage] = useState('')
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -76,9 +88,7 @@ export default function NotificationCenterView() {
 
   async function markAllRead() {
     await fetch('/api/notifications', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ all: true }),
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ all: true }),
     })
     setItems((current) => current.map((item) => ({ ...item, is_read: true })))
   }
@@ -86,10 +96,28 @@ export default function NotificationCenterView() {
   async function markOneRead(id: string) {
     setItems((current) => current.map((item) => item.id === id ? { ...item, is_read: true } : item))
     await fetch('/api/notifications', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ids: [id] }),
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ids: [id] }),
     })
+  }
+
+  async function runAction(item: NotificationItem, action: 'mark_done' | 'snooze') {
+    setBusyId(item.id)
+    setMessage('')
+    try {
+      const response = await fetch('/api/notifications', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: item.id, action, minutes: 60 }),
+      })
+      const result = await response.json().catch(() => null)
+      if (!response.ok) throw new Error(result?.error || 'Aksi notifikasi gagal.')
+      setItems((current) => current.filter((row) => row.id !== item.id))
+      setMessage(action === 'mark_done' ? 'Deadline ditandai selesai.' : 'Notifikasi ditunda 1 jam.')
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Aksi notifikasi gagal.')
+    } finally {
+      setBusyId(null)
+    }
   }
 
   return (
@@ -101,9 +129,9 @@ export default function NotificationCenterView() {
             <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-blue-300/20 bg-blue-300/10 px-3 py-1.5 text-xs font-black text-blue-100">
               <Bell className="h-3.5 w-3.5" /> Notification Center
             </div>
-            <h1 className="text-2xl font-black tracking-tight sm:text-3xl">Inbox aktivitas NEXA.</h1>
+            <h1 className="text-2xl font-black tracking-tight sm:text-3xl">Notif yang bisa langsung dikerjain.</h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
-              Chat, friend request, Arena, badge, dan deadline masuk ke satu tempat. Akhirnya lonceng notif punya pekerjaan tetap.
+              Deadline bisa langsung diselesaikan, dibawa ke Focus Mode, atau ditunda. Bukan cuma teriak lalu menghilang seperti panitia grup WA.
             </p>
           </div>
           <div className="flex gap-2">
@@ -121,15 +149,13 @@ export default function NotificationCenterView() {
 
       <div className="flex gap-2 overflow-x-auto pb-1">
         {filters.map((item) => (
-          <button
-            key={item.key}
-            onClick={() => setFilter(item.key)}
-            className={`flex-shrink-0 rounded-2xl px-3 py-2 text-xs font-black transition ${filter === item.key ? 'bg-slate-950 text-white' : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'}`}
-          >
+          <button key={item.key} onClick={() => setFilter(item.key)} className={`flex-shrink-0 rounded-2xl px-3 py-2 text-xs font-black transition ${filter === item.key ? 'bg-slate-950 text-white' : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'}`}>
             {item.label}
           </button>
         ))}
       </div>
+
+      {message && <div className="rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm font-bold text-blue-800">{message}</div>}
 
       <Card>
         <CardContent className="p-0">
@@ -139,13 +165,16 @@ export default function NotificationCenterView() {
             <div className="p-10 text-center">
               <Filter className="mx-auto mb-3 h-10 w-10 text-slate-200" />
               <p className="font-black text-slate-950">Belum ada notifikasi di filter ini.</p>
-              <p className="mt-1 text-sm text-slate-500">Belum ada notifikasi yang bisa ditampilkan saat ini.</p>
+              <p className="mt-1 text-sm text-slate-500">Inbox bersih. Kejadian langka, nikmati sebentar.</p>
             </div>
           ) : (
             <div className="divide-y divide-slate-100">
               {filtered.map((item) => {
-                const content = (
-                  <div className={`flex gap-3 p-4 transition hover:bg-slate-50 ${!item.is_read ? 'bg-blue-50/50' : 'bg-white'}`}>
+                const isDeadline = item.type.startsWith('deadline_')
+                const deadlineId = deadlineIdFrom(item)
+                const focusLink = deadlineId ? `/dashboard/focus?deadline=${deadlineId}` : '/dashboard/focus'
+                return (
+                  <div key={item.id} className={`flex gap-3 p-4 transition hover:bg-slate-50 ${!item.is_read ? 'bg-blue-50/50' : 'bg-white'}`}>
                     <span className="mt-0.5 text-xl">{icons[item.type] ?? '📣'}</span>
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
@@ -154,14 +183,33 @@ export default function NotificationCenterView() {
                       </div>
                       {item.message && <p className="mt-1 text-sm leading-6 text-slate-600">{item.message}</p>}
                       <p className="mt-2 text-xs font-bold text-slate-400">{timeAgo(item.created_at)}</p>
+
+                      {isDeadline ? (
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          <button type="button" disabled={busyId === item.id} onClick={() => void runAction(item, 'mark_done')} className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3 py-2 text-xs font-black text-white hover:bg-emerald-500 disabled:opacity-50">
+                            {busyId === item.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="h-3.5 w-3.5" />} Selesai
+                          </button>
+                          <Link href={focusLink} onClick={() => void markOneRead(item.id)} className="inline-flex items-center gap-1.5 rounded-xl bg-slate-950 px-3 py-2 text-xs font-black text-white hover:bg-slate-800">
+                            <PlayCircle className="h-3.5 w-3.5" /> Fokus
+                          </Link>
+                          <button type="button" disabled={busyId === item.id} onClick={() => void runAction(item, 'snooze')} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-600 hover:bg-slate-50 disabled:opacity-50">
+                            <Clock3 className="h-3.5 w-3.5" /> 1 jam lagi
+                          </button>
+                          {item.link && (
+                            <Link href={item.link} onClick={() => void markOneRead(item.id)} className="inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-black text-blue-700 hover:bg-blue-50">
+                              <ExternalLink className="h-3.5 w-3.5" /> Buka
+                            </Link>
+                          )}
+                        </div>
+                      ) : item.link ? (
+                        <Link href={item.link} onClick={() => void markOneRead(item.id)} className="mt-3 inline-flex items-center gap-1.5 text-xs font-black text-blue-700 hover:underline">
+                          Buka detail <ExternalLink className="h-3.5 w-3.5" />
+                        </Link>
+                      ) : (
+                        <button type="button" onClick={() => void markOneRead(item.id)} className="mt-3 text-xs font-black text-blue-700 hover:underline">Tandai dibaca</button>
+                      )}
                     </div>
-                    {item.link && <MessageCircle className="mt-1 h-4 w-4 flex-shrink-0 text-slate-300" />}
                   </div>
-                )
-                return item.link ? (
-                  <Link key={item.id} href={item.link} onClick={() => void markOneRead(item.id)}>{content}</Link>
-                ) : (
-                  <button key={item.id} onClick={() => void markOneRead(item.id)} className="block w-full text-left">{content}</button>
                 )
               })}
             </div>

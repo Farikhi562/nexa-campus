@@ -102,6 +102,7 @@ export default function DeadlineForm({
     room: string
     priority: string
     status: string
+    estimated_minutes: number
   }) {
     if (!payload.course_name) return 'Mata kuliah atau kegiatan wajib diisi.'
     if (!typeValues.has(payload.type as DeadlineType)) return 'Tipe deadline tidak valid.'
@@ -112,6 +113,7 @@ export default function DeadlineForm({
     if (!payload.room) return 'Ruangan wajib diisi. Kalau online, isi dengan Online.'
     if (!priorityValues.has(payload.priority as DeadlinePriority)) return 'Prioritas tidak valid.'
     if (!statusValues.has(payload.status as DeadlineStatus)) return 'Status tidak valid.'
+    if (!Number.isInteger(payload.estimated_minutes) || payload.estimated_minutes < 5 || payload.estimated_minutes > 600) return 'Estimasi pengerjaan harus 5–600 menit.'
     return ''
   }
 
@@ -141,6 +143,7 @@ export default function DeadlineForm({
       status: text(form, 'status') || 'pending',
       priority: text(form, 'priority') || 'normal',
       reminder_enabled: form.get('reminder_enabled') === 'on',
+      estimated_minutes: Number(form.get('estimated_minutes') || 25),
     }
 
     const validationError = validate(payload)
@@ -295,6 +298,15 @@ export default function DeadlineForm({
             <select name="status" defaultValue={deadline?.status ?? 'pending'} className="focus-ring w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm">
               {DEADLINE_STATUSES.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
             </select>
+          </label>
+        </Field>
+        <Field span helper="Dipakai Focus Mode untuk menghitung progress berbasis waktu. Bisa diedit lagi nanti, manusia memang buruk dalam estimasi.">
+          <label className="block">
+            <span className="mb-1.5 block text-sm font-bold text-slate-700">Estimasi pengerjaan</span>
+            <div className="flex items-center gap-2">
+              <input type="number" name="estimated_minutes" min={5} max={600} step={5} defaultValue={deadline?.estimated_minutes ?? 25} className="focus-ring min-w-0 flex-1 rounded-2xl border border-slate-300 px-4 py-3 text-sm" />
+              <span className="rounded-2xl bg-slate-100 px-4 py-3 text-sm font-black text-slate-600">menit</span>
+            </div>
           </label>
         </Field>
         <Field span helper="NEXA hanya menyimpan deadline yang kamu input sendiri. Password kampus tidak diperlukan.">

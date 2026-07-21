@@ -2,13 +2,14 @@
 
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
-import { Check, Loader2, Pencil, Search, Trash2, X } from 'lucide-react'
+import { Check, Clock3, Loader2, Pencil, PlayCircle, Search, Trash2, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { getDisplayTitle, getUrgency, sortNearest } from '@/lib/deadline-utils'
 import { getSourceLabel, getTypeLabel, DEADLINE_TYPES } from '@/lib/nexa-data'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import RecurringBadge from '@/components/deadlines/RecurringBadge'
+import DeadlineSubtasks from '@/components/deadlines/DeadlineSubtasks'
 import type { AcademicDeadline, DeadlineType, DeadlinePriority, DeadlineStatus } from '@/types'
 
 type FilterStatus = 'all' | 'pending' | 'completed'
@@ -318,13 +319,36 @@ export default function DeadlineList({ deadlines }: { deadlines: AcademicDeadlin
                 <p className="mt-1 text-sm font-semibold text-slate-500">
                   {deadline.course_name} · {deadline.deadline_date} {deadline.deadline_time.slice(0, 5)} · {deadline.room}
                 </p>
-                <div className="mt-2.5 flex flex-wrap gap-1.5">
+                <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
                   <Badge tone="brand">{getTypeLabel(deadline.type)}</Badge>
                   <Badge>{getSourceLabel(deadline.source)}</Badge>
                   <Badge tone={deadline.priority === 'urgent' ? 'danger' : deadline.priority === 'high' ? 'warning' : 'neutral'}>
                     {deadline.priority}
                   </Badge>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-black text-slate-600">
+                    <Clock3 className="h-3 w-3" /> {deadline.estimated_minutes ?? 25} menit
+                  </span>
                 </div>
+
+                {deadline.status !== 'completed' && (
+                  <>
+                    <DeadlineSubtasks
+                      deadlineId={deadline.id}
+                      initialProgress={deadline.progress_percent ?? 0}
+                      onProgressChange={(progress, status) => {
+                        setItems((current) => current.map((item) => item.id === deadline.id
+                          ? { ...item, progress_percent: progress, status }
+                          : item))
+                      }}
+                    />
+                    <Link
+                      href={`/dashboard/focus?deadline=${deadline.id}`}
+                      className="mt-3 inline-flex items-center gap-2 rounded-xl bg-slate-950 px-3 py-2 text-xs font-black text-white transition hover:bg-slate-800"
+                    >
+                      <PlayCircle className="h-4 w-4" /> Kerjain sekarang
+                    </Link>
+                  </>
+                )}
               </div>
 
               <div className="flex flex-shrink-0 gap-1">

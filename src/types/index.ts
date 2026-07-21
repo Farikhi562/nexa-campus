@@ -259,6 +259,8 @@ export interface AcademicDeadline {
   recurrence_day_of_week: number | null
   recurrence_parent_id: string | null
   reminder_offset_minutes: number | null
+  estimated_minutes: number | null
+  progress_percent: number | null
   created_at: string
   updated_at: string
 }

@@ -20,6 +20,7 @@ export type DeadlinePayload = {
   priority?: unknown
   reminder_enabled?: unknown
   reminder_offset_minutes?: unknown
+  estimated_minutes?: unknown
   status?: unknown
   is_recurring?: unknown
   recurrence_day_of_week?: unknown
@@ -60,6 +61,10 @@ export function parseDeadlinePayload(body: DeadlinePayload) {
   const room = text(body.room)
   const priority = text(body.priority || 'normal')
   const status = text(body.status || 'pending')
+  const estimatedMinutesRaw = Number(body.estimated_minutes ?? 25)
+  const estimatedMinutes = Number.isFinite(estimatedMinutesRaw)
+    ? Math.min(Math.max(Math.round(estimatedMinutesRaw), 5), 600)
+    : 25
 
   if (!courseName) return { error: 'Mata kuliah atau kegiatan wajib diisi.' }
   if (!allowedTypes.has(type as DeadlineType)) return { error: 'Tipe deadline tidak valid.' }
@@ -92,6 +97,7 @@ export function parseDeadlinePayload(body: DeadlinePayload) {
       notes: optionalText(body.notes),
       priority,
       reminder_enabled: body.reminder_enabled === true,
+      estimated_minutes: estimatedMinutes,
       reminder_offset_minutes:
         typeof body.reminder_offset_minutes === 'number'
         && Number.isInteger(body.reminder_offset_minutes)

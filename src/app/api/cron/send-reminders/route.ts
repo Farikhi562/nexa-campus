@@ -141,7 +141,8 @@ export async function GET(request: NextRequest) {
           type: 'deadline_reminder',
           title: `Reminder: ${dl.course_name as string}`,
           message: `Deadline ${win.days === 0 ? 'hari ini' : `dalam ${win.days} hari`}: ${(dl.title as string | null) ?? (dl.course_name as string)}`,
-          link: '/dashboard',
+          link: `/dashboard/deadlines/${dl.id as string}/edit`,
+          related_deadline_id: dl.id,
         }).then(() => null, () => null)
 
         totalSent++
