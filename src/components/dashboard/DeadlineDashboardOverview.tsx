@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
-import { AlertTriangle, BellOff, CalendarDays, Check, CheckCircle2, Clock, Flame, Pencil, Plus, RotateCcw, Share2, Sparkles, Trash2, TimerReset } from 'lucide-react'
+import { AlertTriangle, BellOff, CalendarClock, CalendarDays, Check, CheckCircle2, Clock, Flame, Pencil, Plus, RotateCcw, Share2, Sparkles, Trash2, TimerReset } from 'lucide-react'
 import Badge from '@/components/ui/Badge'
 import { Card, CardContent } from '@/components/ui/Card'
 import AskNexaWidget from '@/components/dashboard/AskNexaWidget'
@@ -172,6 +172,29 @@ export default function DeadlineDashboardOverview({
         .sort(sortNearest)
     )
     setActionMessage(status === 'completed' ? 'Deadline ditandai selesai.' : 'Deadline dikembalikan ke pending.')
+    setBusyId(null)
+  }
+
+  async function smartReschedule(deadline: AcademicDeadline) {
+    setBusyId(deadline.id)
+    setActionError('')
+    setActionMessage('')
+
+    const response = await fetch(`/api/deadlines/${deadline.id}/reschedule`, { method: 'POST' })
+    const result = (await response.json().catch(() => null)) as {
+      data?: AcademicDeadline
+      meta?: { explanation?: string }
+      error?: string
+    } | null
+
+    if (!response.ok || !result?.data) {
+      setActionError(result?.error || 'Deadline gagal dijadwal ulang.')
+      setBusyId(null)
+      return
+    }
+
+    setDeadlines((current) => current.map((item) => item.id === deadline.id ? result.data! : item).sort(sortNearest))
+    setActionMessage(`Deadline dipindah ke ${formatDeadlineDate(result.data)}. ${result.meta?.explanation ?? ''}`)
     setBusyId(null)
   }
 
@@ -459,6 +482,17 @@ export default function DeadlineDashboardOverview({
                                 {isDone ? <RotateCcw className="h-3.5 w-3.5" /> : <Check className="h-3.5 w-3.5" />}
                                 {isDone ? 'Balikin ke pending' : 'Tandai selesai'}
                               </button>
+                              {!isDone && (
+                                <button
+                                  type="button"
+                                  onClick={() => smartReschedule(deadline)}
+                                  disabled={busyId === deadline.id}
+                                  className="focus-ring inline-flex items-center gap-2 rounded-2xl border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-black text-blue-700 transition hover:-translate-y-0.5 hover:bg-blue-100 disabled:opacity-60"
+                                >
+                                  <CalendarClock className="h-3.5 w-3.5" />
+                                  Smart reschedule
+                                </button>
+                              )}
                               <button
                                 type="button"
                                 onClick={() => deleteDeadline(deadline)}

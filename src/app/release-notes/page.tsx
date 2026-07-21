@@ -18,6 +18,11 @@ const shipped = [
   'Mobile install prompt',
   'Daily Pulse untuk check-in, streak, dan poin',
   'Profil publik, badge, dan notifikasi sosial',
+  'Deadline checklist, progress, estimasi waktu, dan Focus Mode terhubung',
+  'Weekly Review otomatis dan rekomendasi mingguan',
+  'Smart Reschedule berbasis kepadatan deadline',
+  'Focus streak dan heatmap 12 minggu',
+  'Flashcard spaced repetition dengan jadwal review adaptif',
 ]
 
 const releaseNotes = [
@@ -51,10 +56,10 @@ export default function ReleaseNotesPage() {
       <section className="mx-auto max-w-5xl px-4 py-10">
         <Badge tone="brand">Release v{BRAND.version}</Badge>
         <h1 className="mt-4 max-w-3xl text-4xl font-black tracking-tight text-slate-950">
-          NEXA Campus v1.5.23 mulai merapikan pengalaman harian pengguna.
+          NEXA Campus v{BRAND.version} memperdalam ritme belajar dan eksekusi tugas.
         </h1>
         <p className="mt-4 max-w-3xl text-sm leading-6 text-slate-600">
-          Versi ini menambahkan Daily Pulse, streak, poin check-in, profil publik, badge, dan notifikasi sosial supaya pengalaman pengguna terasa lebih hidup
+          Versi ini menambahkan Weekly Review, Smart Reschedule, Focus heatmap, dan spaced repetition agar fitur yang sudah ada makin nyambung dan benar-benar membantu pengguna menyelesaikan pekerjaan.
         </p>
 
         <div className="mt-8 grid gap-4 lg:grid-cols-[1fr_0.9fr]">

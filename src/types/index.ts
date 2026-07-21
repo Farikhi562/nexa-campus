@@ -261,6 +261,8 @@ export interface AcademicDeadline {
   reminder_offset_minutes: number | null
   estimated_minutes: number | null
   progress_percent: number | null
+  rescheduled_count?: number | null
+  last_rescheduled_at?: string | null
   created_at: string
   updated_at: string
 }

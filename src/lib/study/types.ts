@@ -156,3 +156,13 @@ export type Flashcard = {
  * 1 = belum tahu, 2 = agak tahu, 3 = sudah tahu.
  */
 export type FlashcardBoxes = Record<string, 1 | 2 | 3>
+
+/** Jadwal spaced repetition per kartu, key = index kartu (string). */
+export type FlashcardScheduleEntry = {
+  nextReview: string
+  lastReviewed: string
+  intervalDays: number
+  repetitions: number
+}
+
+export type FlashcardSchedule = Record<string, FlashcardScheduleEntry>

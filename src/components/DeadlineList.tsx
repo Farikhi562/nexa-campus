@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
-import { Check, Clock3, Loader2, Pencil, PlayCircle, Search, Trash2, X } from 'lucide-react'
+import { CalendarClock, Check, Clock3, Loader2, Pencil, PlayCircle, Search, Trash2, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { getDisplayTitle, getUrgency, sortNearest } from '@/lib/deadline-utils'
 import { getSourceLabel, getTypeLabel, DEADLINE_TYPES } from '@/lib/nexa-data'
@@ -52,6 +52,7 @@ export default function DeadlineList({ deadlines }: { deadlines: AcademicDeadlin
   const [items, setItems] = useState<AcademicDeadline[]>(() => [...deadlines].sort(sortNearest))
   const [busyId, setBusyId] = useState<string | null>(null)
   const [bulkBusy, setBulkBusy] = useState(false)
+  const [notice, setNotice] = useState('')
 
   // ── Filter & search state ────────────────────────────────────────────────
   const [query, setQuery] = useState('')
@@ -127,6 +128,20 @@ export default function DeadlineList({ deadlines }: { deadlines: AcademicDeadlin
     setBusyId(null)
   }
 
+  async function smartReschedule(deadline: AcademicDeadline) {
+    setBusyId(deadline.id)
+    setNotice('')
+    const response = await fetch(`/api/deadlines/${deadline.id}/reschedule`, { method: 'POST' })
+    const result = await response.json().catch(() => null) as { data?: AcademicDeadline; meta?: { explanation?: string }; error?: string } | null
+    if (response.ok && result?.data) {
+      setItems((current) => current.map((item) => item.id === deadline.id ? result.data! : item).sort(sortNearest))
+      setNotice(`Dipindah ke ${result.data.deadline_date}. ${result.meta?.explanation ?? ''}`)
+    } else {
+      setNotice(result?.error || 'Smart reschedule gagal.')
+    }
+    setBusyId(null)
+  }
+
   async function remove(deadline: AcademicDeadline) {
     if (!confirm('Hapus deadline ini?')) return
     setBusyId(deadline.id)
@@ -172,6 +187,9 @@ export default function DeadlineList({ deadlines }: { deadlines: AcademicDeadlin
 
   return (
     <div className="space-y-3">
+      {notice && (
+        <div className="rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-bold text-blue-800">{notice}</div>
+      )}
       {/* Search + filter bar */}
       <div className="rounded-3xl border border-white/80 bg-white/90 p-4 shadow-xl shadow-slate-200/70 space-y-3">
         {/* Search */}
@@ -347,6 +365,14 @@ export default function DeadlineList({ deadlines }: { deadlines: AcademicDeadlin
                     >
                       <PlayCircle className="h-4 w-4" /> Kerjain sekarang
                     </Link>
+                    <button
+                      type="button"
+                      onClick={() => void smartReschedule(deadline)}
+                      disabled={busyId === deadline.id}
+                      className="ml-2 mt-3 inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-black text-blue-700 transition hover:bg-blue-100 disabled:opacity-50"
+                    >
+                      <CalendarClock className="h-4 w-4" /> Smart reschedule
+                    </button>
                   </>
                 )}
               </div>
