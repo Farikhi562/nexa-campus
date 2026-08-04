@@ -91,13 +91,13 @@ export default function UnifiedBadgeStrip({
 
   if (loading) {
     if (empty === 'hide') return null
-    return <div className={`${className} h-6 w-36 animate-pulse rounded-full bg-slate-100 dark:bg-white/10`} />
+    return <div className={`${className} h-6 w-36 animate-pulse rounded-full bg-slate-100`} />
   }
 
   if (!badges.length) {
     if (empty === 'hide') return null
     return (
-      <div className={`${className} inline-flex items-center rounded-full border border-dashed border-slate-300 px-3 py-1 text-xs font-black text-slate-400 dark:border-white/10 dark:text-slate-500`}>
+      <div className={`${className} inline-flex items-center rounded-full border border-dashed border-slate-300 px-3 py-1 text-xs font-black text-slate-400`}>
         Belum pamer badge
       </div>
     )
@@ -109,7 +109,7 @@ export default function UnifiedBadgeStrip({
   return (
     <div className={`${className} nexa-unified-badge-strip`} data-badge-variant={variant}>
       <BadgeStyles />
-      {label ? <div className="mb-1 text-[10px] font-black uppercase tracking-[0.16em] text-slate-400 dark:text-slate-500">{label}</div> : null}
+      {label ? <div className="mb-1 text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">{label}</div> : null}
       <div className="flex max-w-full flex-wrap items-center gap-1.5">
         {badges.map((badge) => {
           const rarity = badge.rarity
@@ -117,12 +117,12 @@ export default function UnifiedBadgeStrip({
             rarity === 'mythos'
               ? 'border-fuchsia-300/60 bg-slate-950 text-white shadow-[0_0_18px_rgba(217,70,239,.28)]'
               : rarity === 'legend'
-                ? 'border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-300/40 dark:bg-amber-950/40 dark:text-amber-100'
+                ? 'border-amber-300 bg-amber-50 text-amber-900'
                 : rarity === 'epic'
-                  ? 'border-violet-300 bg-violet-50 text-violet-900 dark:border-violet-300/40 dark:bg-violet-950/40 dark:text-violet-100'
+                  ? 'border-violet-300 bg-violet-50 text-violet-900'
                   : rarity === 'langka'
-                    ? 'border-sky-300 bg-sky-50 text-sky-900 dark:border-sky-300/40 dark:bg-sky-950/40 dark:text-sky-100'
-                    : 'border-slate-200 bg-white text-slate-800 dark:border-white/10 dark:bg-white/5 dark:text-slate-200'
+                    ? 'border-sky-300 bg-sky-50 text-sky-900'
+                    : 'border-slate-200 bg-white text-slate-800'
 
           return (
             <span

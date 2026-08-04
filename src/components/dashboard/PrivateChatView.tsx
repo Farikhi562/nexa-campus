@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { ArrowLeft, Edit2, FileText, Loader2, Paperclip, Send, Trash2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent } from '@/components/ui/Card'
-import { FeaturedBadgePin } from '@/components/BadgeChip'
+import PublicUserBadges from '@/components/badges/PublicUserBadges'
 import FounderVerifiedBadge from '@/components/FounderVerifiedBadge'
 import type { PrivateMessage, PublicProfile } from '@/types'
 import Image from 'next/image'
@@ -200,7 +200,7 @@ export default function PrivateChatView({ friendId, userId }: { friendId: string
               <span className="flex items-center gap-1.5">
                 <span className="truncate text-sm font-black text-slate-950">{friend?.full_name ?? 'Teman NEXA'}</span>
                 <FounderVerifiedBadge founderVerified={friend?.founder_verified} email={friend?.email} compact />
-                <FeaturedBadgePin badgeId={friend?.featured_badge} />
+                {friendId && <PublicUserBadges userId={friendId} limit={1} size="xs" />}
               </span>
               <span className="block truncate text-xs text-slate-500">Chat pribadi - foto, video, emoji, file</span>
               {friend?.nexa_id && <span className="block truncate text-[10px] font-black text-slate-400">NEXA ID #{friend.nexa_id}</span>}

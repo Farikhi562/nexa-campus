@@ -178,7 +178,7 @@ export default function DeadlineList({ deadlines }: { deadlines: AcademicDeadlin
       <div className="rounded-3xl border border-dashed border-blue-200 bg-white/80 p-8 text-center shadow-xl shadow-slate-200/70">
         <p className="text-lg font-black text-slate-950">Belum ada deadline.</p>
         <p className="mt-2 text-sm text-slate-500">Belum ada deadline yang tercatat.</p>
-        <Link href="/dashboard/deadlines/new" className="mt-5 inline-flex rounded-2xl bg-gradient-to-r from-blue-600 to-orange-500 px-4 py-2.5 text-sm font-black text-white shadow-lg shadow-blue-500/20 transition hover:-translate-y-0.5">
+        <Link href="/dashboard/deadlines/new" className="mt-5 inline-flex rounded-2xl bg-blue-400 px-4 py-2.5 text-sm font-black text-slate-950 shadow-lg shadow-blue-950/20 transition hover:bg-blue-300">
           Tambah Deadline
         </Link>
       </div>

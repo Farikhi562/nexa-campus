@@ -123,7 +123,7 @@ export default function UpdatePasswordClient() {
               </p>
             )}
 
-            <Button type="submit" disabled={!ready || loading} className="h-12 w-full rounded-2xl bg-blue-500 text-slate-950 hover:bg-blue-300">
+            <Button type="submit" disabled={!ready || loading} className="h-12 w-full rounded-2xl">
               {loading ? 'Menyimpan...' : 'Simpan Password Baru'}
             </Button>
           </form>

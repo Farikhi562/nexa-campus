@@ -1,12 +1,18 @@
 import Link from 'next/link'
 import { ArrowLeft, ExternalLink, Lock, MessageCircle, Radio, ShieldCheck, Sparkles, UserRound, Users } from 'lucide-react'
-import { BadgeChip, BadgeTierLabel, FeaturedBadgePin } from '@/components/BadgeChip'
+import PublicUserBadges from '@/components/badges/PublicUserBadges'
+import ProfileBadgeShowcase from '@/components/badges/ProfileBadgeShowcase'
 import FounderVerifiedBadge from '@/components/FounderVerifiedBadge'
 import { Card, CardContent } from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
-import { BADGES, type BadgeDef } from '@/lib/badges'
 import type { Plan } from '@/types'
 import Image from 'next/image'
+
+// Catatan: badge di halaman ini sekarang memakai komponen yang SAMA PERSIS
+// dengan halaman Pencapaian (lib/badges/catalog.ts via ProfileBadgeShowcase /
+// PublicUserBadges), bukan lagi katalog lama lib/badges.ts. Sebelumnya kedua
+// halaman itu punya dua sumber badge yang beda total (nama, syarat unlock,
+// tampilan) — itu penyebab "badge di achievement beda dengan di profile".
 
 type Visibility = 'public' | 'private' | null
 
@@ -49,20 +55,6 @@ function initials(name?: string | null) {
   return ((parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '')).toUpperCase() || 'N'
 }
 
-function planBadge(plan: Plan) {
-  if (plan === 'command') return 'badge_command'
-  if (plan === 'pulse') return 'badge_pulse'
-  return 'badge_radar'
-}
-
-function collectBadges(profile: ViewProfile): BadgeDef[] {
-  const ids = new Set<string>()
-  ids.add(planBadge(profile.plan))
-  if (profile.featured_badge) ids.add(profile.featured_badge)
-  for (const id of profile.badges ?? []) ids.add(id)
-  return BADGES.filter((badge) => ids.has(badge.id))
-}
-
 function canShow(isOwnProfile: boolean, visibility: Visibility) {
   return isOwnProfile || visibility !== 'private'
 }
@@ -100,7 +92,6 @@ export default function PublicUserProfileView({
   evidence?: SkillEvidenceSummary[]
 }) {
   const isPublic = profile.is_public_profile ?? true
-  const badges = collectBadges(profile)
   const showBio = canShow(isOwnProfile, profile.profile_bio_visibility)
   const showSkills = canShow(isOwnProfile, profile.profile_skills_visibility)
   const showInterests = canShow(isOwnProfile, profile.profile_interests_visibility)
@@ -143,7 +134,7 @@ export default function PublicUserProfileView({
                 {profile.plan.toUpperCase()}
               </Badge>
               {!isPublic && <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-black text-slate-200"><Lock className="h-3 w-3" /> Tidak tampil leaderboard</span>}
-              {profile.featured_badge && <FeaturedBadgePin badgeId={profile.featured_badge} />}
+              <PublicUserBadges userId={isOwnProfile ? undefined : profile.id} limit={1} size="sm" />
               {profile.online_status_visibility !== 'private' && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-emerald-400/15 px-2.5 py-1 text-[11px] font-black text-emerald-100"><Radio className="h-3 w-3" /> Bisa tampil online</span>
               )}
@@ -239,29 +230,14 @@ export default function PublicUserProfileView({
           </div>
 
           <div className="space-y-5">
-            <Card>
-              <CardContent className="p-5">
-                <h2 className="mb-3 flex items-center gap-2 text-sm font-black uppercase tracking-wide text-slate-500"><ShieldCheck className="h-4 w-4" /> Badge</h2>
-                {badges.length > 0 ? (
-                  <div className="space-y-3">
-                    {badges.map((badge) => (
-                      <div key={badge.id} className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3">
-                        <BadgeChip badge={badge} size="md" selected={badge.id === profile.featured_badge} />
-                        <div className="min-w-0">
-                          <div className="flex flex-wrap items-center gap-1.5">
-                            <p className="text-sm font-black text-slate-950">{badge.name}</p>
-                            <BadgeTierLabel tier={badge.tier} />
-                          </div>
-                          <p className="mt-0.5 line-clamp-2 text-xs leading-4 text-slate-500">{badge.desc}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm leading-6 text-slate-500">Belum ada badge publik.</p>
-                )}
-              </CardContent>
-            </Card>
+            <ProfileBadgeShowcase
+              userId={isOwnProfile ? undefined : profile.id}
+              title="Badge"
+              compact
+              limit={6}
+              showLockedPreview={isOwnProfile}
+              publicMode={!isOwnProfile}
+            />
 
             <Card>
               <CardContent className="p-5">

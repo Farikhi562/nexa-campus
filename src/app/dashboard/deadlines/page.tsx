@@ -24,7 +24,7 @@ export default async function DeadlinesPage() {
             <h1 className="mt-1 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">Deadlines</h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">Semua tugas, ujian, praktikum, dan urusan kampus yang perlu kamu pantau.</p>
         </div>
-          <Link href="/dashboard/deadlines/new" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-orange-500 px-4 py-3 text-sm font-black text-white shadow-lg shadow-blue-500/20 transition hover:-translate-y-0.5">
+          <Link href="/dashboard/deadlines/new" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-blue-400 px-4 py-3 text-sm font-black text-slate-950 shadow-lg shadow-blue-950/20 transition hover:bg-blue-300">
             <Plus className="h-4 w-4" />
             Add
           </Link>

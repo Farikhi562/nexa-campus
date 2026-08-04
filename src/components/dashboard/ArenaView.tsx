@@ -23,7 +23,7 @@ import {
   Link2,
   X,
 } from 'lucide-react'
-import { FeaturedBadgePin } from '@/components/BadgeChip'
+import PublicUserBadges from '@/components/badges/PublicUserBadges'
 import FounderVerifiedBadge from '@/components/FounderVerifiedBadge'
 import { Card, CardContent } from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
@@ -398,7 +398,7 @@ export default function ArenaView({ userId }: { userId: string }) {
                   {post.creator_name && (
                     <p className="mt-2 flex items-center gap-1.5 text-xs text-slate-400">
                       oleh <Link href={`/dashboard/profile/${post.creator_id}`} className="font-bold text-slate-600 hover:text-blue-700">{post.creator_name}</Link>
-                      <FeaturedBadgePin badgeId={post.creator_featured_badge} />
+                      {post.creator_id && <PublicUserBadges userId={post.creator_id} limit={1} size="xs" />}
                     </p>
                   )}
 
@@ -414,7 +414,7 @@ export default function ArenaView({ userId }: { userId: string }) {
                               ) : initials(member.profile?.full_name)}
                             </span>
                             {member.profile?.full_name ?? 'Member'}
-                            <FeaturedBadgePin badgeId={member.profile?.featured_badge} />
+                            {member.user_id && <PublicUserBadges userId={member.user_id} limit={1} size="xs" />}
                             <FounderVerifiedBadge verified={member.profile?.is_nexa_verified} compact />
                           </Link>
                         ))}
@@ -1015,7 +1015,7 @@ function ApplicantSection({
                     ) : (
                       <p className="font-black text-slate-950">Mahasiswa NEXA</p>
                     )}
-                    <FeaturedBadgePin badgeId={applicant?.featured_badge} />
+                    {applicant?.id && <PublicUserBadges userId={applicant.id} limit={1} size="xs" />}
                     <FounderVerifiedBadge verified={applicant?.is_nexa_verified} compact />
                     <Badge tone={application.status === 'accepted' ? 'success' : application.status === 'rejected' ? 'danger' : 'warning'}>{application.status}</Badge>
                   </div>

@@ -153,27 +153,27 @@ export default function BadgeCollection() {
 
       <section className="mt-5 grid gap-3 lg:grid-cols-5">
         {BADGE_RARITY_ORDER.map((rarity) => (
-          <div key={rarity} className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-slate-950">
-            <div className="text-sm font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{BADGE_RARITY_LABEL[rarity]}</div>
-            <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{BADGE_RARITY_COPY[rarity]}</p>
+          <div key={rarity} className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div className="text-sm font-black uppercase tracking-[0.18em] text-slate-500">{BADGE_RARITY_LABEL[rarity]}</div>
+            <p className="mt-2 text-sm leading-6 text-slate-600">{BADGE_RARITY_COPY[rarity]}</p>
           </div>
         ))}
       </section>
 
-      <div className="mt-5 flex flex-col gap-3 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-slate-950 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mt-5 flex flex-col gap-3 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <div className="text-sm font-black text-slate-950 dark:text-white">Profile Main Badge</div>
-          <p className="text-sm text-slate-500 dark:text-slate-400">Pilih 1 badge utama buat tampil di profile dan semua user card publik. Klik badge lain untuk langsung ganti, bukan numpuk 6 biji kayak etalase pasar malam.</p>
+          <div className="text-sm font-black text-slate-950">Profile Main Badge</div>
+          <p className="text-sm text-slate-500">Pilih 1 badge utama buat tampil di profile dan semua user card publik. Klik badge lain untuk langsung ganti, bukan numpuk 6 biji kayak etalase pasar malam.</p>
         </div>
         <div className="flex flex-col gap-2 sm:items-end">
-          <div className="text-sm font-black text-blue-700 dark:text-blue-300">
+          <div className="text-sm font-black text-blue-700">
             {loading ? 'Loading badge...' : `${earnedKeys.length} kebuka · ${pinnedKeys.length}/1 tampil`}
           </div>
           <button
             type="button"
             onClick={syncBadges}
             disabled={syncing}
-            className="rounded-2xl bg-slate-950 px-4 py-2 text-xs font-black text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-blue-300 dark:text-slate-950"
+            className="rounded-2xl bg-slate-950 px-4 py-2 text-xs font-black text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {syncing ? 'Syncing...' : 'Sync Badge'}
           </button>
@@ -181,7 +181,7 @@ export default function BadgeCollection() {
       </div>
 
       {message ? (
-        <div className="mt-4 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm font-bold text-blue-800 dark:border-blue-300/20 dark:bg-blue-950/30 dark:text-blue-200">
+        <div className="mt-4 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm font-bold text-blue-800">
           {message}
         </div>
       ) : null}
@@ -194,8 +194,8 @@ export default function BadgeCollection() {
             onClick={() => setFilter(item)}
             className={`shrink-0 rounded-2xl border px-4 py-2 text-sm font-black transition ${
               filter === item
-                ? 'border-slate-950 bg-slate-950 text-white dark:border-blue-400 dark:bg-blue-400 dark:text-slate-950'
-                : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:bg-slate-950 dark:text-slate-200 dark:hover:bg-white/10'
+                ? 'border-slate-950 bg-slate-950 text-white'
+                : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
             }`}
           >
             {item === 'all' ? 'Semua' : BADGE_RARITY_LABEL[item]}
@@ -222,20 +222,20 @@ export default function BadgeCollection() {
 
       {selectedBadge ? (
         <div className="fixed inset-0 z-[80] flex items-end bg-slate-950/60 p-3 backdrop-blur-sm sm:items-center sm:justify-center" onClick={() => setSelectedBadge(null)}>
-          <div className="w-full max-w-xl rounded-[2rem] border border-white/10 bg-white p-5 shadow-2xl dark:bg-slate-950" onClick={(event) => event.stopPropagation()}>
+          <div className="w-full max-w-xl rounded-[2rem] border border-white/10 bg-white p-5 shadow-2xl" onClick={(event) => event.stopPropagation()}>
             <div className="flex items-start gap-4">
-              <div className="grid h-16 w-16 place-items-center rounded-full bg-slate-100 text-4xl dark:bg-white/10">🔒</div>
+              <div className="grid h-16 w-16 place-items-center rounded-full bg-slate-100 text-4xl">🔒</div>
               <div className="min-w-0 flex-1">
                 <div className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">Belum kebuka</div>
-                <h2 className="mt-1 text-2xl font-black text-slate-950 dark:text-white">{selectedBadge.name}</h2>
-                <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{selectedBadge.description}</p>
+                <h2 className="mt-1 text-2xl font-black text-slate-950">{selectedBadge.name}</h2>
+                <p className="mt-2 text-sm leading-6 text-slate-600">{selectedBadge.description}</p>
               </div>
             </div>
-            <div className="mt-5 rounded-3xl border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-white/5">
-              <div className="text-xs font-black uppercase tracking-[0.18em] text-blue-600 dark:text-blue-300">Syarat unlock</div>
-              <p className="mt-2 text-sm font-bold leading-6 text-slate-700 dark:text-slate-200">{selectedBadge.requirement}</p>
+            <div className="mt-5 rounded-3xl border border-slate-200 bg-slate-50 p-4">
+              <div className="text-xs font-black uppercase tracking-[0.18em] text-blue-600">Syarat unlock</div>
+              <p className="mt-2 text-sm font-bold leading-6 text-slate-700">{selectedBadge.requirement}</p>
               {selectedBadge.rarity === 'mythos' ? (
-                <p className="mt-3 text-xs font-black uppercase tracking-[0.14em] text-fuchsia-600 dark:text-fuchsia-300">
+                <p className="mt-3 text-xs font-black uppercase tracking-[0.14em] text-fuchsia-600">
                   Mythos cuma 1. Ini badge final boss, bukan hadiah login harian, ANJJJ.
                 </p>
               ) : null}
@@ -243,7 +243,7 @@ export default function BadgeCollection() {
             <button
               type="button"
               onClick={() => setSelectedBadge(null)}
-              className="mt-5 w-full rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white dark:bg-white dark:text-slate-950"
+              className="mt-5 w-full rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white"
             >
               Paham, gue grind dulu
             </button>

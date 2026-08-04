@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Clock3, Crown, Flame, Loader2, Medal, RefreshCw, TrendingUp, Trophy } from 'lucide-react'
 import Badge from '@/components/ui/Badge'
-import { FeaturedBadgePin } from '@/components/BadgeChip'
+import PublicUserBadges from '@/components/badges/PublicUserBadges'
 import FounderVerifiedBadge from '@/components/FounderVerifiedBadge'
 import { Card, CardContent } from '@/components/ui/Card'
 import type { LeaderboardEntry, LeaderboardMe, LeaderboardScope } from '@/types'
@@ -269,7 +269,7 @@ export default function LeaderboardView({ currentUserId }: { currentUserId: stri
                           {entry.display_name}{isMe ? ' (kamu)' : ''}
                         </Link>
                         <FounderVerifiedBadge founderVerified={entry.founder_verified} email={entry.email} compact />
-                        <FeaturedBadgePin badgeId={entry.featured_badge} />
+                        <PublicUserBadges userId={entry.user_id} limit={1} size="xs" />
                       </div>
                       <p className="line-clamp-1 text-[11px] text-slate-500">{entry.campus_name || 'Kampus —'}</p>
                       <p className="mt-2 text-lg font-black text-slate-950">{entry.points}</p>
@@ -306,7 +306,7 @@ export default function LeaderboardView({ currentUserId }: { currentUserId: stri
                               {entry.display_name}{isMe ? ' (kamu)' : ''}
                             </Link>
                             <FounderVerifiedBadge founderVerified={entry.founder_verified} email={entry.email} compact />
-                            <FeaturedBadgePin badgeId={entry.featured_badge} />
+                            <PublicUserBadges userId={entry.user_id} limit={1} size="xs" />
                           </div>
                           <p className="truncate text-xs text-slate-500">{entry.campus_name || '—'}</p>
                         </div>

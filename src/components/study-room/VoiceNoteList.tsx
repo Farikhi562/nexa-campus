@@ -56,30 +56,30 @@ export default function VoiceNoteList({ roomId, refreshKey = 0 }: VoiceNoteListP
   }, [roomId, refreshKey])
 
   return (
-    <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-slate-950">
+    <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h3 className="text-base font-black text-slate-950 dark:text-white">Daftar Voice Note</h3>
-          <p className="text-sm text-slate-500 dark:text-slate-400">Riwayat VN room ini. Ya, sekarang room bisa lebih berisik secara sah.</p>
+          <h3 className="text-base font-black text-slate-950">Daftar Voice Note</h3>
+          <p className="text-sm text-slate-500">Riwayat VN room ini. Ya, sekarang room bisa lebih berisik secara sah.</p>
         </div>
         <button
           type="button"
           onClick={load}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:text-slate-200 dark:hover:bg-white/10"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 text-slate-700 hover:bg-slate-50"
           aria-label="Refresh voice notes"
         >
           <RefreshCw className="h-4 w-4" />
         </button>
       </div>
 
-      {loading ? <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">Loading VN...</p> : null}
-      {error ? <p className="mt-4 rounded-2xl bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-700 dark:bg-rose-400/10 dark:text-rose-200">{error}</p> : null}
+      {loading ? <p className="mt-4 text-sm text-slate-500">Loading VN...</p> : null}
+      {error ? <p className="mt-4 rounded-2xl bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-700">{error}</p> : null}
 
       {!loading && !items.length ? (
-        <div className="mt-4 rounded-3xl border border-dashed border-slate-200 p-6 text-center dark:border-white/10">
+        <div className="mt-4 rounded-3xl border border-dashed border-slate-200 p-6 text-center">
           <Mic2 className="mx-auto h-8 w-8 text-slate-400" />
-          <p className="mt-2 text-sm font-bold text-slate-700 dark:text-slate-200">Belum ada voice note.</p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">Rekam dulu, jangan nunggu VN turun dari langit akademik.</p>
+          <p className="mt-2 text-sm font-bold text-slate-700">Belum ada voice note.</p>
+          <p className="text-xs text-slate-500">Rekam dulu, jangan nunggu VN turun dari langit akademik.</p>
         </div>
       ) : null}
 
@@ -88,9 +88,9 @@ export default function VoiceNoteList({ roomId, refreshKey = 0 }: VoiceNoteListP
           const profile = item.profiles
           const name = profile?.full_name || profile?.name || profile?.email || 'NEXA Student'
           return (
-            <article key={item.id} className="rounded-3xl border border-slate-100 bg-slate-50 p-3 dark:border-white/10 dark:bg-white/5">
-              <div className="mb-2 flex items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400">
-                <span className="font-black text-slate-700 dark:text-slate-200">{name}</span>
+            <article key={item.id} className="rounded-3xl border border-slate-100 bg-slate-50 p-3">
+              <div className="mb-2 flex items-center justify-between gap-3 text-xs text-slate-500">
+                <span className="font-black text-slate-700">{name}</span>
                 <span>{formatDate(item.created_at)}</span>
               </div>
               <audio controls src={item.file_url} className="w-full" />

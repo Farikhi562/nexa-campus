@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react
 import { Check, Loader2, MessageCircle, Search, UserPlus, X } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
-import { FeaturedBadgePin } from '@/components/BadgeChip'
+import PublicUserBadges from '@/components/badges/PublicUserBadges'
 import SmartEmptyState from '@/components/dashboard/SmartEmptyState'
 import FriendSuggestionsCard from '@/components/dashboard/FriendSuggestionsCard'
 import FounderVerifiedBadge from '@/components/FounderVerifiedBadge'
@@ -33,7 +33,7 @@ function UserCard({ user, action }: { user: PublicProfile; action: ReactNode }) 
             <div className="flex min-w-0 items-center gap-1.5">
               <p className="truncate text-sm font-black text-slate-950 group-hover:text-blue-700">{user.full_name ?? 'Mahasiswa NEXA'}</p>
               <FounderVerifiedBadge founderVerified={user.founder_verified} email={user.email} compact />
-              <FeaturedBadgePin badgeId={user.featured_badge} />
+              <PublicUserBadges userId={user.id} limit={1} size="xs" />
             </div>
             {user.public_profile_headline && <p className="truncate text-xs font-bold text-slate-600">{user.public_profile_headline}</p>}
             <p className="truncate text-xs text-slate-500">{[user.campus_name, user.major].filter(Boolean).join(' · ')}</p>

@@ -8,7 +8,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variants: Record<ButtonVariant, string> = {
-  primary: 'bg-gradient-to-r from-blue-600 to-orange-500 text-white shadow-lg shadow-blue-500/20 hover:from-blue-700 hover:to-orange-600',
+  primary: 'bg-blue-400 text-slate-950 shadow-lg shadow-blue-950/20 hover:bg-blue-300',
   secondary: 'bg-slate-950 text-white shadow-lg shadow-slate-900/15 hover:bg-slate-800',
   outline: 'border border-slate-200 bg-white text-slate-700 shadow-sm hover:border-blue-200 hover:bg-blue-50 hover:text-blue-800',
   ghost: 'text-slate-600 hover:bg-slate-100 hover:text-slate-950',
@@ -19,8 +19,7 @@ export default function Button({ className, variant = 'primary', ...props }: But
   return (
     <button
       className={cn(
-        'focus-ring inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-60',
-        'duration-200 hover:-translate-y-0.5',
+        'focus-ring inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl px-4 py-2 text-sm font-black transition disabled:cursor-not-allowed disabled:opacity-60',
         variants[variant],
         className
       )}

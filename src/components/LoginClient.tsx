@@ -207,7 +207,7 @@ export default function LoginClient({ initialMode = 'login' }: { initialMode?: M
                         />
                       </span>
                     </label>
-                    <Button className="h-12 w-full rounded-2xl bg-blue-500 text-slate-950 hover:bg-blue-300" disabled={loading}>
+                    <Button className="h-12 w-full rounded-2xl" disabled={loading}>
                       {loading ? 'Mengirim...' : 'Kirim Link Reset'}
                     </Button>
                     <button

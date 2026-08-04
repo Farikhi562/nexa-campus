@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import FounderVerifiedBadge from '@/components/FounderVerifiedBadge'
-import { FeaturedBadgePin } from '@/components/BadgeChip'
+import PublicUserBadges from '@/components/badges/PublicUserBadges'
 import Image from 'next/image'
 
 type Suggestion = {
@@ -85,7 +85,7 @@ export default function FriendSuggestionsCard({ compact = false }: { compact?: b
                   <p className="flex min-w-0 items-center gap-1 truncate text-sm font-black text-slate-950">
                     <span className="truncate">{user.full_name || 'Mahasiswa NEXA'}</span>
                     <FounderVerifiedBadge founderVerified={user.founder_verified} compact />
-                    <FeaturedBadgePin badgeId={user.featured_badge} />
+                    <PublicUserBadges userId={user.id} limit={1} size="xs" />
                   </p>
                   <p className="truncate text-[11px] text-slate-500">{[user.campus_name, user.major].filter(Boolean).join(' · ')}</p>
                   <p className="mt-1 text-[10px] font-black text-blue-700">{user.reason}</p>

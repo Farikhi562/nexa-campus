@@ -87,14 +87,14 @@ export default function ProfileBadgeShowcase({
   }, [earnedKeys, limit, publicMode, showcasedBadges.length, showLockedPreview])
 
   return (
-    <section className="w-full rounded-[1.7rem] border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-slate-950 sm:p-5">
+    <section className="w-full rounded-3xl border border-white/80 bg-white/90 p-4 shadow-xl shadow-slate-200/70 ring-1 ring-slate-950/[0.03] backdrop-blur sm:p-5">
       <BadgeStyles />
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-600 dark:text-blue-300">NEXA Identity</p>
-          <h2 className="text-xl font-black tracking-tight text-slate-950 dark:text-white">{title}</h2>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          <p className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-600">NEXA Identity</p>
+          <h2 className="text-xl font-black tracking-tight text-slate-950">{title}</h2>
+          <p className="mt-1 text-sm text-slate-500">
             {publicMode ? 'Badge utama yang dipilih user untuk tampil di profile publik.' : 'Klik badge di halaman badge buat milih 1 badge utama di profile publik.'}
           </p>
         </div>
@@ -102,7 +102,7 @@ export default function ProfileBadgeShowcase({
         {!publicMode ? (
           <Link
             href="/dashboard/badges"
-            className="inline-flex shrink-0 items-center justify-center rounded-2xl border border-slate-200 px-4 py-2 text-sm font-black text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:text-slate-200 dark:hover:bg-white/10"
+            className="inline-flex shrink-0 items-center justify-center rounded-2xl border border-slate-200 px-4 py-2 text-sm font-black text-slate-700 transition hover:bg-slate-50"
           >
             Atur badge
           </Link>
@@ -112,15 +112,15 @@ export default function ProfileBadgeShowcase({
       {loading ? (
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 1 }).map((_, idx) => (
-            <div key={idx} className="h-24 animate-pulse rounded-2xl bg-slate-100 dark:bg-white/10" />
+            <div key={idx} className="h-24 animate-pulse rounded-2xl bg-slate-100" />
           ))}
         </div>
       ) : error ? (
-        <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm font-bold text-rose-700 dark:border-rose-400/20 dark:bg-rose-950/30 dark:text-rose-200">
+        <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm font-bold text-rose-700">
           {error}
         </div>
       ) : showcasedBadges.length === 0 ? (
-        <div className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-300">
+        <div className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm text-slate-600">
           {publicMode ? 'User ini belum menampilkan badge di profile.' : 'Belum ada badge utama tampil di profile. Buka halaman badge, klik satu badge yang sudah kebuka buat dipamerin.'}
         </div>
       ) : (
@@ -151,12 +151,12 @@ export function InlineProfileBadgePills({ badgeKeys, limit = 5 }: { badgeKeys: s
             badge.rarity === 'mythos'
               ? 'border-fuchsia-300/50 bg-fuchsia-950 text-white'
               : badge.rarity === 'legend'
-                ? 'border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-300/30 dark:bg-amber-950/30 dark:text-amber-100'
+                ? 'border-amber-300 bg-amber-50 text-amber-800'
                 : badge.rarity === 'epic'
-                  ? 'border-violet-300 bg-violet-50 text-violet-800 dark:border-violet-300/30 dark:bg-violet-950/30 dark:text-violet-100'
+                  ? 'border-violet-300 bg-violet-50 text-violet-800'
                   : badge.rarity === 'langka'
-                    ? 'border-sky-300 bg-sky-50 text-sky-800 dark:border-sky-300/30 dark:bg-sky-950/30 dark:text-sky-100'
-                    : 'border-slate-200 bg-slate-50 text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-200'
+                    ? 'border-sky-300 bg-sky-50 text-sky-800'
+                    : 'border-slate-200 bg-slate-50 text-slate-700'
           }`}
         >
           <span>{badge.emoji}</span>
