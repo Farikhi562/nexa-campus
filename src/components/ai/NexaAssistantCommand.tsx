@@ -54,6 +54,20 @@ function uid() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36)
 }
 
+function formatShortDate(dateStr: string) {
+  try {
+    const d = new Date(dateStr)
+    const today = new Date()
+    const diffDays = Math.round((d.setHours(0, 0, 0, 0) - today.setHours(0, 0, 0, 0)) / 86_400_000)
+    if (diffDays === 0) return 'Hari ini'
+    if (diffDays === 1) return 'Besok'
+    if (diffDays > 1 && diffDays <= 6) return `${diffDays} hari lagi`
+    return new Date(dateStr).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })
+  } catch {
+    return dateStr
+  }
+}
+
 export default function NexaAssistantCommand({
   deadlines = [],
   userName,
@@ -90,6 +104,8 @@ export default function NexaAssistantCommand({
       })),
     [deadlines]
   )
+
+  const upcomingPreview = useMemo(() => deadlines.slice(0, 3), [deadlines])
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
@@ -254,11 +270,30 @@ export default function NexaAssistantCommand({
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
-          <p className="text-xs font-black text-slate-700">Konteks aktif</p>
-          <p className="mt-1 text-xs leading-5 text-slate-500">
-            {deadlines.length} deadline dibaca otomatis{campus ? ` · ${campus}` : ''}. NEXA Assistant memakai
-            ini untuk jawaban yang lebih personal.
+          <p className="flex items-center gap-1.5 text-xs font-black text-slate-700">
+            <Calendar className="h-3.5 w-3.5 text-blue-600" />
+            Jadwal yang dibaca
           </p>
+          {deadlines.length === 0 ? (
+            <p className="mt-1.5 text-xs leading-5 text-slate-500">
+              Belum ada deadline aktif. Tambahkan di halaman Deadline biar jawabannya makin nyambung.
+            </p>
+          ) : (
+            <>
+              <ul className="mt-2 space-y-1.5">
+                {upcomingPreview.map((d) => (
+                  <li key={d.id} className="flex items-center gap-2 rounded-xl bg-white px-2.5 py-2 text-xs ring-1 ring-slate-200">
+                    <span className="h-1.5 w-1.5 flex-none rounded-full bg-blue-500" />
+                    <span className="min-w-0 flex-1 truncate font-bold text-slate-700">{d.title || d.course_name}</span>
+                    <span className="flex-none text-[11px] font-black text-slate-400">{formatShortDate(d.deadline_date)}</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-2 text-[11px] leading-4 text-slate-400">
+                {deadlines.length} deadline aktif{campus ? ` · ${campus}` : ''} dipakai buat jawaban yang lebih personal.
+              </p>
+            </>
+          )}
         </div>
       </div>
     </div>

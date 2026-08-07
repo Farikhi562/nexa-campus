@@ -144,3 +144,60 @@ konsisten (`Card` style: rounded-3xl, border-white/80, shadow-xl).
   yang bisa dipastikan benar lewat baca kode. Kalau mau lanjut audit visual,
   Claude Code (jalan di komputer kamu sendiri, bisa `npm run dev` + lihat
   browser) atau Claude in Chrome bakal jauh lebih efektif buat tahap ini.
+
+---
+
+## Update Round 2 — NEXA Assistant & Study Room
+
+### NEXA Assistant: upload file, baca jadwal, belajar — disatukan & disederhanakan
+
+Sebelumnya halaman NEXA Assistant isinya numpuk ke bawah: kartu link "Belajar
+dari Materi" (harus klik, pindah halaman) → chat → panel Analisa Risiko ML.
+Upload file untuk belajar juga cuma bisa diakses lewat halaman terpisah
+`/dashboard/study`.
+
+**Perbaikan:**
+- Halaman NEXA Assistant sekarang pakai **3 tab** (komponen baru
+  `components/ai/NexaAssistantWorkspace.tsx`), pola tab yang sama persis
+  dengan yang sudah dipakai di halaman detail materi belajar (biar
+  konsisten, bukan bikin gaya baru):
+  - **Tanya NEXA** — chat seperti biasa.
+  - **Belajar dari Materi** — form upload file (PDF/DOCX, maks 3MB — ini
+    limit teknis dari batas ukuran body serverless, bukan dibuat-buat) atau
+    tempel teks langsung tanpa pindah halaman, ditambah daftar materi
+    terakhir yang sudah dibuat.
+  - **Analisa Risiko** — panel ML yang sudah ada.
+- Cuma satu tab yang tampil dalam satu waktu → nggak bikin pusing scroll
+  panjang.
+- "Baca jadwal" sekarang beneran kelihatan: panel di sebelah chat
+  nampilin **daftar 3 deadline terdekat** (bukan cuma teks "X deadline
+  dibaca otomatis") — supaya user percaya AI-nya emang paham jadwal
+  mereka, bukan klaim kosong.
+
+File yang berubah: `app/dashboard/nexa-assistant/page.tsx`,
+`components/ai/NexaAssistantCommand.tsx` (baru), `components/ai/NexaAssistantWorkspace.tsx` (baru).
+
+### Study Room: fitur baru — Fokus Bareng (pomodoro tersinkron)
+
+Ditambahkan fitur **timer fokus bareng** yang disinkronkan real-time ke semua
+anggota room (siapa pun bisa lihat & mulai, lewat channel realtime yang
+sudah ada — nggak perlu tabel database baru):
+
+- Tombol kecil ⏱ di header room (nggak makan tempat kalau nggak dipakai).
+- Klik → pilih durasi (15/25/50 menit) → semua anggota room yang lagi
+  online langsung lihat bar tipis di atas chat: hitung mundur + nama yang
+  mulai + progress bar.
+- Yang mulai timer (atau admin/owner room) bisa stop kapan saja.
+- Desain sengaja dibuat minim (1 baris tipis), nggak bikin layout chat yang
+  sudah padat jadi tambah sesak.
+
+**Keterbatasan yang perlu tahu:** karena ini murni broadcast realtime (tanpa
+disimpan ke database), anggota yang baru buka room **di tengah** sesi fokus
+yang sedang jalan nggak otomatis lihat timer-nya sampai ada event baru
+(misalnya sampai timer di-stop/di-restart). Kalau mau timer-nya persisten
+(tersimpan, kelihatan meski baru join), perlu tabel database baru — saya
+nggak bikin itu di sini karena butuh migration yang harus dijalankan manual
+di Supabase kamu.
+
+File yang berubah: `components/dashboard/StudyRoomDetail.tsx`,
+`components/study-room/FocusTimerBar.tsx` (baru).

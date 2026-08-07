@@ -15,6 +15,7 @@ import Link from 'next/link'
 import FounderVerifiedBadge from '@/components/FounderVerifiedBadge'
 import StudyRoomWorkspaceCard from '@/components/dashboard/StudyRoomWorkspaceCard'
 import StudyRoomAIPanel from '@/components/study-room/StudyRoomAIPanel'
+import FocusTimerBar, { type FocusSession } from '@/components/study-room/FocusTimerBar'
 import Image from 'next/image'
 
 function initials(name?: string | null) {
@@ -89,6 +90,7 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
   const typingTimeoutRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
   const [typingUsers, setTypingUsers] = useState<Record<string, string>>({}) // userId → name
+  const [focusSession, setFocusSession] = useState<FocusSession | null>(null)
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://campus.nexatechlabs.my.id'
 
   // Selalu update ref ke nilai terbaru supaya realtime callback tidak stale
@@ -170,6 +172,10 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
         })
         setOnlineMemberIds(ids)
       })
+      .on('broadcast', { event: 'focus_timer' }, ({ payload }) => {
+        const { active, session } = payload as { active: boolean; session: FocusSession | null }
+        setFocusSession(active ? session : null)
+      })
       .subscribe((status) => {
         if (status === 'SUBSCRIBED' && myRoomPresenceVisibility !== 'private') {
           void channel.track({ user_id: userId, online_at: new Date().toISOString() })
@@ -189,6 +195,22 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages.length])
+
+  function startFocusTimer(minutes: number) {
+    const session: FocusSession = {
+      durationSec: minutes * 60,
+      startedAt: Date.now(),
+      startedBy: userId,
+      startedByName: myMembership?.profile?.full_name?.split(' ')[0] || 'Seseorang',
+    }
+    setFocusSession(session)
+    channelRef.current?.send({ type: 'broadcast', event: 'focus_timer', payload: { active: true, session } })
+  }
+
+  function stopFocusTimer() {
+    setFocusSession(null)
+    channelRef.current?.send({ type: 'broadcast', event: 'focus_timer', payload: { active: false, session: null } })
+  }
 
   async function sendMessage() {
     if (!message.trim() || sending) return
@@ -476,6 +498,14 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
               <UserPlus className="h-3.5 w-3.5" /> {joinRequests.length}
             </button>
           )}
+          {!focusSession && (
+            <FocusTimerBar
+              session={focusSession}
+              canControl={true}
+              onStart={startFocusTimer}
+              onStop={stopFocusTimer}
+            />
+          )}
           <button onClick={() => setMobileTab(mobileTab === 'chat' ? 'members' : 'chat')}
             className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 lg:hidden">
             <Users className="h-5 w-5" />
@@ -488,6 +518,15 @@ export default function StudyRoomDetail({ roomId, userId }: { roomId: string; us
           </button>
         </div>
       </div>
+
+      {focusSession && (
+        <FocusTimerBar
+          session={focusSession}
+          canControl={focusSession.startedBy === userId || canManage}
+          onStart={startFocusTimer}
+          onStop={stopFocusTimer}
+        />
+      )}
 
       {/* Main area */}
       <div className="flex min-h-0 flex-1 overflow-hidden">
