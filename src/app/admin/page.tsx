@@ -53,12 +53,14 @@ export default async function AdminPage() {
     { data: referrals },
     { data: studyRooms },
     { data: friendRequests },
+    { count: pendingReportsCount },
   ] = await Promise.all([
     db.from('profiles').select('*').order('created_at', { ascending: false }).limit(100),
     db.from('subscription_intents').select('*').order('created_at', { ascending: false }).limit(50),
     db.from('referrals').select('*').order('created_at', { ascending: false }).limit(100),
     db.from('study_rooms').select('*').order('created_at', { ascending: false }).limit(50),
     db.from('friend_requests').select('*').order('created_at', { ascending: false }).limit(100),
+    db.from('user_reports').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
   ])
 
   const typedProfiles = (Array.isArray(profiles) ? profiles : []) as Profile[]
@@ -103,6 +105,7 @@ export default async function AdminPage() {
     rewardedReferrals: typedReferrals.filter((r) => r.rewarded).length,
     commandUsers: typedProfiles.filter((p) => p.plan === 'command').length,
     activeRooms: typedRooms.filter((r) => r.status === 'open').length,
+    pendingReports: pendingReportsCount ?? 0,
   }
 
   return (

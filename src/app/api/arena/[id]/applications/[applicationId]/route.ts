@@ -57,14 +57,17 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
   const { data: post, error: postError } = await supabase
     .from('nexa_arena_posts')
-    .select('id, creator_id, title, status, current_team_size, team_size_max')
+    .select('id, creator_id, title, status, current_team_size, team_size_max, competition_name, competition_type, event_date, deadline_registration')
     .eq('id', id)
     .maybeSingle()
 
   if (postError) return NextResponse.json({ error: postError.message }, { status: 500 })
   if (!post) return NextResponse.json({ error: 'Postingan tidak ditemukan.' }, { status: 404 })
 
-  const arenaPost = post as { creator_id: string; title: string; status: string; current_team_size: number; team_size_max: number }
+  const arenaPost = post as {
+    creator_id: string; title: string; status: string; current_team_size: number; team_size_max: number
+    competition_name: string | null; competition_type: string | null; event_date: string | null; deadline_registration: string | null
+  }
   if (arenaPost.creator_id !== user.id) {
     return NextResponse.json({ error: 'Hanya pembuat postingan yang bisa memproses pelamar.' }, { status: 403 })
   }
@@ -179,6 +182,32 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       )
     } catch (err) {
       console.error('[Arena Points] gagal memberi poin arena_approved:', err)
+    }
+
+    // POWER-UP: begitu diterima di tim, langsung otomatis dibikinin deadline
+    // "hari-H lomba" di tracker deadline utama si pelamar — supaya nggak
+    // ketinggalan tanggal kompetisi cuma karena lupa catat manual. Pakai
+    // event_date kalau ada, fallback ke deadline_registration. Best-effort:
+    // kalau gagal, jangan sampai proses accept-nya ikut gagal.
+    try {
+      const deadlineDate = arenaPost.event_date || arenaPost.deadline_registration
+      if (deadlineDate) {
+        const serviceDb = createServiceClient()
+        await serviceDb.from('academic_deadlines').insert({
+          user_id: app.applicant_id,
+          title: arenaPost.event_date ? 'Hari-H Kompetisi' : 'Deadline Pendaftaran',
+          course_name: arenaPost.competition_name || arenaPost.title,
+          type: 'organisasi',
+          source: 'lainnya',
+          deadline_date: deadlineDate,
+          deadline_time: '23:59',
+          priority: 'high',
+          notes: `Otomatis dibuat dari NEXA Arena — tim "${arenaPost.title}"${arenaPost.competition_type ? ` (${arenaPost.competition_type})` : ''}.`,
+          status: 'pending',
+        })
+      }
+    } catch (err) {
+      console.error('[Arena Auto-Deadline] gagal membuat deadline otomatis:', err)
     }
   }
 

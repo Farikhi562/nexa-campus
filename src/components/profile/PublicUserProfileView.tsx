@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { ArrowLeft, ExternalLink, Lock, MessageCircle, Radio, ShieldCheck, Sparkles, UserRound, Users } from 'lucide-react'
 import PublicUserBadges from '@/components/badges/PublicUserBadges'
 import ProfileBadgeShowcase from '@/components/badges/ProfileBadgeShowcase'
+import ReportAccountButton from '@/components/profile/ReportAccountButton'
 import FounderVerifiedBadge from '@/components/FounderVerifiedBadge'
 import { Card, CardContent } from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
@@ -105,6 +106,7 @@ export default function PublicUserProfileView({
           <ArrowLeft className="h-4 w-4" /> Kembali
         </Link>
         <div className="flex items-center gap-2">
+          {!isOwnProfile && <ReportAccountButton userId={profile.id} />}
           {canMessage && (
             <Link href={`/dashboard/messages/${profile.id}`} className="focus-ring inline-flex items-center gap-1.5 rounded-2xl bg-blue-400 px-3 py-2 text-xs font-black text-slate-950 hover:bg-blue-300">
               <MessageCircle className="h-3.5 w-3.5" /> Chat

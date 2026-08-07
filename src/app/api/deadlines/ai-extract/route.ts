@@ -7,7 +7,7 @@ import { generateText, aiConfigured, activeProvider } from '@/lib/ai/llm'
 const MAX_TEXT_LENGTH = 6000
 
 const SYSTEM_PROMPT =
-  'Kamu adalah asisten deadline extractor untuk mahasiswa Indonesia. Extract semua deadline dari teks berikut. Return JSON array dengan format: [{title, category (tugas/praktikum/kuis/ujian/pembayaran/lainnya), due_date (ISO 8601), priority (urgent/high/normal/low), source, notes}]. Jika tanggal tidak spesifik, gunakan null. Respond ONLY with JSON array, no markdown.'
+  'Kamu adalah asisten deadline extractor untuk mahasiswa Indonesia. Extract semua deadline dari teks berikut. Balas SATU JSON OBJECT dengan struktur PERSIS: {"data": [{title, category (tugas/praktikum/kuis/ujian/pembayaran/lainnya), due_date (ISO 8601), priority (urgent/high/normal/low), source, notes}]}. Jika tanggal tidak spesifik, gunakan null. Respond ONLY dengan JSON object di atas, no markdown.'
 
 function jsonResponse(body: unknown, status = 200) {
   return NextResponse.json(body, { status })

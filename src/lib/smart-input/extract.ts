@@ -34,8 +34,9 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
 }
 
 const SYSTEM_PROMPT = `Kamu adalah Smart Input Engine untuk NEXA Campus — parser tugas/deadline mahasiswa Indonesia.
-Dari teks yang diberikan (bisa berisi 1 atau banyak info tugas/jadwal/ujian/pembayaran), keluarkan JSON ARRAY.
-Tiap item punya field:
+Dari teks yang diberikan (bisa berisi 1 atau banyak info tugas/jadwal/ujian/pembayaran), keluarkan SATU JSON OBJECT dengan struktur PERSIS:
+{"candidates": [ ...item... ]}
+Tiap item di array "candidates" punya field:
 {
   "title": string|null,            // judul SPESIFIK tugas kalau disebutkan terpisah dari nama matkul, mis. teks "Tugas Kalkulus: Laporan Praktikum Modul 3" -> title="Laporan Praktikum Modul 3". Null kalau tidak ada judul spesifik selain nama matkul.
   "course_name": string,            // nama mata kuliah/kegiatan SAJA (WAJIB, jangan kosong, jangan dicampur dengan judul tugas atau ruangan)
@@ -52,16 +53,16 @@ Tiap item punya field:
   "reminder_offset_minutes": number|null, // kalau user minta diingatkan ("ingatkan 2 jam sebelum" -> 120, "30 menit sebelum" -> 30). null kalau tidak diminta
   "evidence": string|null           // POTONGAN TEKS ASLI (verbatim, maks 1 kalimat) yang jadi dasar item ini. Berguna agar user paham dari mana hasil ini.
 }
-Aturan: hari ini = tanggal yang diberikan di prompt. Kalau teks tidak berisi info tugas sama sekali, kembalikan array kosong [].
-Respond ONLY with the JSON array, no markdown, no commentary.`
+Aturan: hari ini = tanggal yang diberikan di prompt. Kalau teks tidak berisi info tugas sama sekali, "candidates" = array kosong [].
+Respond ONLY dengan JSON object di atas, no markdown, no commentary.`
 
 const SYSTEM_PROMPT_IMAGE = `Kamu adalah Smart Input Engine untuk NEXA Campus. Baca gambar (screenshot WA, LMS/VClass, Google Classroom, papan tulis, jadwal kelas, atau pesan dosen) dan ekstrak semua tugas/deadline/jadwal yang terlihat.
-Keluarkan JSON ARRAY dengan format yang sama seperti di atas:
-[{"title":string|null,"course_name":string,"type":one of ${TYPES.join('|')},"source":one of ${SOURCES.join('|')},"deadline_date":"YYYY-MM-DD"|null,"deadline_time":"HH:MM","priority":one of ${PRIORITIES.join('|')},"notes":string|null,"online":boolean,"location":string|null}]
+Keluarkan SATU JSON OBJECT dengan struktur PERSIS (field sama dengan di atas):
+{"candidates": [{"title":string|null,"course_name":string,"type":one of ${TYPES.join('|')},"source":one of ${SOURCES.join('|')},"deadline_date":"YYYY-MM-DD"|null,"deadline_time":"HH:MM","priority":one of ${PRIORITIES.join('|')},"notes":string|null,"online":boolean,"location":string|null}]}
 "title" = judul spesifik tugas terpisah dari nama matkul (lihat aturan di atas), null kalau tidak ada.
 "location" = ruangan/gedung/lab/platform yang TERLIHAT JELAS di gambar (mis. jadwal kelas fisik sering mencantumkan nomor ruangan) -- ambil PERSIS seperti tertulis, JANGAN MENEBAK kalau tidak terlihat jelas.
-Kalau tanggal di gambar tidak lengkap/tidak jelas, deadline_date = null (jangan menebak tahun/bulan). Kalau gambar tidak berisi info tugas, kembalikan [].
-Respond ONLY with the JSON array.`
+Kalau tanggal di gambar tidak lengkap/tidak jelas, deadline_date = null (jangan menebak tahun/bulan). Kalau gambar tidak berisi info tugas, "candidates" = [].
+Respond ONLY dengan JSON object di atas.`
 
 function safeParseArray(raw: string): RawCandidate[] | null {
   const cleaned = raw.trim().replace(/^```(?:json)?/i, '').replace(/```$/i, '').trim()

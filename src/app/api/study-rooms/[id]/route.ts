@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
+import { isAdminEmail } from '@/lib/admin'
 
 type Params = { params: Promise<{ id: string }> }
 
@@ -82,6 +84,15 @@ export async function DELETE(_request: NextRequest, { params }: Params) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Login required.' }, { status: 401 })
+
+  if (isAdminEmail(user.email)) {
+    // RLS study_rooms cuma izinkan owner_id = auth.uid() menghapus, jadi admin
+    // yang menghapus room orang lain butuh service client (bypass RLS).
+    const db = createServiceClient()
+    const { error } = await db.from('study_rooms').delete().eq('id', id)
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ ok: true })
+  }
 
   const { data: membership } = await supabase
     .from('study_room_members').select('role')

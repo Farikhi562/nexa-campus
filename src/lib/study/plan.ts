@@ -20,16 +20,18 @@ const ALLOWED_TYPES: StudyStepType[] = ['read', 'watch', 'practice', 'quiz', 're
 
 const PLAN_SYSTEM = `Kamu adalah perencana sesi belajar untuk mahasiswa Indonesia.
 Buat rencana sesi belajar yang fokus dan realistis.
-Jawab HANYA dengan JSON array (tanpa markdown, tanpa komentar):
-[
-  {
-    "id": "s1",
-    "title": "string pendek (maks 6 kata)",
-    "description": "satu kalimat panduan aksi untuk langkah ini",
-    "type": "read|watch|practice|quiz|review|write|rest",
-    "duration_minutes": integer
-  }
-]
+Jawab HANYA dengan SATU JSON OBJECT (tanpa markdown, tanpa komentar), struktur PERSIS:
+{
+  "steps": [
+    {
+      "id": "s1",
+      "title": "string pendek (maks 6 kata)",
+      "description": "satu kalimat panduan aksi untuk langkah ini",
+      "type": "read|watch|practice|quiz|review|write|rest",
+      "duration_minutes": integer
+    }
+  ]
+}
 Aturan:
 - Buat 4–6 langkah (tidak lebih tidak kurang).
 - Variasikan tipe: harus ada setidaknya satu "read"/"review" dan satu "practice"/"quiz".
@@ -41,7 +43,8 @@ Aturan:
 function parsePlanSteps(raw: string): StudyStep[] | null {
   const cleaned = raw.trim().replace(/^```(?:json)?/i, '').replace(/```$/i, '').trim()
   try {
-    const arr = JSON.parse(cleaned)
+    const parsed = JSON.parse(cleaned)
+    const arr = Array.isArray(parsed) ? parsed : Array.isArray((parsed as Record<string, unknown>)?.steps) ? (parsed as Record<string, unknown>).steps : null
     if (!Array.isArray(arr) || arr.length === 0) return null
 
     const steps: StudyStep[] = []

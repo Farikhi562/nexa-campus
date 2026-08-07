@@ -135,6 +135,11 @@ export default function ArenaTeamWorkspaceView({ postId, userId }: { postId: str
 
   const done = (workspace.checklist ?? []).filter((item) => item.done).length
   const total = (workspace.checklist ?? []).length
+  const checklistPct = total > 0 ? (done / total) * 100 : 0
+  const teamPct = post.team_size_max > 0 ? Math.min(100, (post.current_team_size / post.team_size_max) * 100) : 0
+  const readiness = Math.round(checklistPct * 0.65 + teamPct * 0.35)
+  const readinessTone = readiness >= 75 ? 'success' : readiness >= 40 ? 'warning' : 'danger'
+  const readinessLabel = readiness >= 75 ? 'Siap tempur' : readiness >= 40 ? 'Jalan tapi belum matang' : 'Masih rintisan'
 
   return (
     <div className="space-y-5">
@@ -146,7 +151,16 @@ export default function ArenaTeamWorkspaceView({ postId, userId }: { postId: str
             <h1 className="text-2xl font-black tracking-tight sm:text-3xl">{post.title}</h1>
             <p className="mt-2 text-sm text-slate-300">Setelah applicant diterima, kerja tim mulai di sini. Tidak berhenti di tombol approve yang sok heroik.</p>
           </div>
-          <Badge tone={post.status === 'full' ? 'warning' : 'success'}>{post.current_team_size}/{post.team_size_max} anggota</Badge>
+          <div className="flex flex-col items-start gap-2 sm:items-end">
+            <Badge tone={post.status === 'full' ? 'warning' : 'success'}>{post.current_team_size}/{post.team_size_max} anggota</Badge>
+            <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-3 py-1.5">
+              <span className="relative flex h-2 w-2">
+                <span className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-60 ${readinessTone === 'success' ? 'bg-emerald-400' : readinessTone === 'warning' ? 'bg-amber-400' : 'bg-red-400'}`} />
+                <span className={`relative inline-flex h-2 w-2 rounded-full ${readinessTone === 'success' ? 'bg-emerald-400' : readinessTone === 'warning' ? 'bg-amber-400' : 'bg-red-400'}`} />
+              </span>
+              <span className="text-xs font-black text-white">{readiness}% — {readinessLabel}</span>
+            </div>
+          </div>
         </div>
       </section>
 

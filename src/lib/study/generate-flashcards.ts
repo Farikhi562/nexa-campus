@@ -5,12 +5,48 @@ import type { Flashcard } from './types'
 const MIN_CARDS = 5
 const MAX_CARDS = 20
 
+// PENTING: generateText({ json: true }) memaksa response_format "json_object" di
+// provider (lihat lib/ai/llm.ts) — itu MEWAJIBKAN root JSON berupa OBJECT, bukan
+// array. Makanya prompt di sini SELALU minta object berisi array di dalam key
+// ("cards" / "questions"), bukan array telanjang — pola yang sama dengan
+// generate-study-pack.ts yang sudah terbukti jalan. Sebelumnya prompt ini minta
+// "JSON ARRAY" langsung sementara response_format tetap json_object, jadi
+// provider sering menolak/membungkusnya beda-beda → flashcard & latihan gagal terus.
 const SYSTEM_PROMPT = `Kamu pembuat flashcard untuk mahasiswa Indonesia.
-Dari materi yang diberikan, buat JSON ARRAY berisi flashcard.
-Format tiap item: {"front":"pertanyaan/istilah singkat","back":"jawaban/definisi singkat (maks 100 kata)"}
+Dari materi yang diberikan, buat SATU JSON OBJECT dengan struktur PERSIS:
+{"cards": [{"front":"pertanyaan/istilah singkat","back":"jawaban/definisi singkat (maks 100 kata)"}]}
 Prioritaskan: istilah teknis penting, definisi, rumus/formula, prinsip utama, perbedaan antar konsep.
 "front" harus spesifik dan testable (bukan terlalu umum). "back" padat, to the point.
-Respond ONLY JSON array. Tanpa markdown fence, tanpa komentar.`
+Respond ONLY dengan JSON object di atas. Tanpa markdown fence, tanpa komentar.`
+
+function safeParseObject(raw: string): Record<string, unknown> | null {
+  const cleaned = raw.trim().replace(/^```(?:json)?/i, '').replace(/```$/i, '').trim()
+  try {
+    const parsed = JSON.parse(cleaned)
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) return parsed as Record<string, unknown>
+  } catch {
+    // lanjut coba bracket-extraction di bawah
+  }
+  const start = cleaned.indexOf('{')
+  const end = cleaned.lastIndexOf('}')
+  if (start >= 0 && end > start) {
+    try {
+      const parsed = JSON.parse(cleaned.slice(start, end + 1))
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) return parsed as Record<string, unknown>
+    } catch {
+      return null
+    }
+  }
+  return null
+}
+
+/** Cari array pertama di dalam object hasil AI, apapun nama key-nya (jaga-jaga kalau AI pakai nama key lain dari yang diminta). */
+function firstArrayValue(obj: Record<string, unknown>): unknown[] | null {
+  for (const value of Object.values(obj)) {
+    if (Array.isArray(value)) return value
+  }
+  return null
+}
 
 function validateCards(raw: unknown): Flashcard[] {
   if (!Array.isArray(raw)) return []
@@ -53,14 +89,9 @@ Buat ${MIN_CARDS}-${MAX_CARDS} flashcard dari materi di atas.`
       json: true,
     })
 
-    const clean = text.trim().replace(/^```(?:json)?/i, '').replace(/```$/i, '').trim()
-    let parsed: unknown
-    try { parsed = JSON.parse(clean) } catch {
-      const s = clean.indexOf('['), e = clean.lastIndexOf(']')
-      if (s >= 0 && e > s) { try { parsed = JSON.parse(clean.slice(s, e + 1)) } catch { parsed = null } }
-    }
-
-    const cards = validateCards(parsed)
+    const obj = safeParseObject(text)
+    const arr = obj ? (Array.isArray(obj.cards) ? obj.cards : firstArrayValue(obj)) : null
+    const cards = validateCards(arr)
     if (cards.length < 3) {
       return { ok: false, error: 'AI tidak berhasil membuat flashcard yang cukup. Coba lagi.' }
     }
@@ -87,17 +118,20 @@ Soal yang sudah ada (JANGAN dibuat lagi, variasikan):
 ${avoid}
 
 Buat 5 soal pilihan ganda BARU yang berbeda dari di atas.
-Format JSON array: [{"question":"...","options":["A","B","C","D"],"correctIndex":0,"explanation":"..."}]
-correctIndex = index jawaban benar (0-3). Respond ONLY JSON array.`
+Balas SATU JSON OBJECT dengan struktur PERSIS:
+{"questions": [{"question":"...","options":["A","B","C","D"],"correctIndex":0,"explanation":"..."}]}
+correctIndex = index jawaban benar (0-3). Respond ONLY JSON object di atas.`
 
   try {
-    const { text } = await generateText({ system: 'Kamu pembuat soal latihan mahasiswa Indonesia. Respond ONLY JSON array, no markdown.', user: userPrompt, temperature: 0.6, maxTokens: 1500, json: true })
-    const clean = text.trim().replace(/^```(?:json)?/i, '').replace(/```$/i, '').trim()
-    let parsed: unknown
-    try { parsed = JSON.parse(clean) } catch {
-      const s = clean.indexOf('['), e = clean.lastIndexOf(']')
-      if (s >= 0 && e > s) { try { parsed = JSON.parse(clean.slice(s, e + 1)) } catch { parsed = null } }
-    }
+    const { text } = await generateText({
+      system: 'Kamu pembuat soal latihan mahasiswa Indonesia. Respond ONLY JSON object sesuai struktur yang diminta, no markdown.',
+      user: userPrompt,
+      temperature: 0.6,
+      maxTokens: 1500,
+      json: true,
+    })
+    const obj = safeParseObject(text)
+    const parsed = obj ? (Array.isArray(obj.questions) ? obj.questions : firstArrayValue(obj)) : null
     if (!Array.isArray(parsed)) return { ok: false, error: 'AI tidak mengembalikan soal yang valid.' }
 
     const questions = (parsed as unknown[]).flatMap((raw) => {

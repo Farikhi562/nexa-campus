@@ -2,12 +2,15 @@
 
 import { useState } from 'react'
 import {
-  Activity, AlertCircle, BookOpen, CheckCircle2, CreditCard, Gift,
+  Activity, AlertCircle, BookOpen, CheckCircle2, CreditCard, Flag, Gift,
   Heart, Search, ShieldCheck, Users, XCircle,
 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import SubscriptionIntentActions from '@/components/admin/SubscriptionIntentActions'
+import UserModerationActions from '@/components/admin/UserModerationActions'
+import DeleteRoomButton from '@/components/admin/DeleteRoomButton'
+import ReportsPanel from '@/components/admin/ReportsPanel'
 import type { Profile, Referral, SubscriptionIntent } from '@/types'
 import { PLAN_LABELS } from '@/lib/nexa-data'
 import Image from 'next/image'
@@ -31,12 +34,13 @@ type Props = {
   friendRequests: FriendRequestRow[]
   nameById: Record<string, string>
   systemHealth: HealthItem[]
-  stats: { totalUsers: number; pendingIntents: number; rewardedReferrals: number; commandUsers: number; activeRooms: number }
+  stats: { totalUsers: number; pendingIntents: number; rewardedReferrals: number; commandUsers: number; activeRooms: number; pendingReports: number }
 }
 
 const TABS = [
   { id: 'overview', label: 'Overview', icon: Activity },
   { id: 'users', label: 'Users', icon: Users },
+  { id: 'reports', label: 'Laporan', icon: Flag },
   { id: 'intents', label: 'Upgrade Intents', icon: CreditCard },
   { id: 'rooms', label: 'Study Rooms', icon: BookOpen },
   { id: 'referrals', label: 'Referral', icon: Gift },
@@ -103,10 +107,11 @@ export default function AdminCommandCenter({
       {/* OVERVIEW */}
       {tab === 'overview' && (
         <div className="space-y-4">
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
             {[
               { label: 'Total users', value: stats.totalUsers, icon: Users },
               { label: 'Pending upgrades', value: stats.pendingIntents, icon: CreditCard },
+              { label: 'Laporan pending', value: stats.pendingReports, icon: Flag },
               { label: 'Rewarded referrals', value: stats.rewardedReferrals, icon: Gift },
               { label: 'Command users', value: stats.commandUsers, icon: ShieldCheck },
               { label: 'Active rooms', value: stats.activeRooms, icon: BookOpen },
@@ -185,18 +190,21 @@ export default function AdminCommandCenter({
             </div>
             <div className="divide-y divide-slate-100">
               {filteredProfiles.map((p) => (
-                <div key={p.id} className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                <div key={p.id} className="flex flex-col gap-2.5 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                   <div className="flex items-center gap-3">
                     <UserAvatar profile={p} />
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-black text-slate-950">{p.full_name || 'Belum diisi'}</p>
+                      <p className="flex items-center gap-1.5 truncate text-sm font-black text-slate-950">
+                        {p.full_name || 'Belum diisi'}
+                        {p.is_banned && <span className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-black text-red-700">Banned</span>}
+                      </p>
                       <p className="truncate text-xs text-slate-500">{p.email}</p>
                       <p className="truncate text-xs text-slate-400">{[p.campus_name, p.major].filter(Boolean).join(' · ')}</p>
                     </div>
                   </div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <PlanBadge plan={p.plan} />
-                    <span className="text-xs text-slate-400">{new Date(p.created_at).toLocaleDateString('id-ID')}</span>
+                  <div className="flex flex-col items-start gap-1.5 sm:items-end">
+                    <span className="text-[11px] text-slate-400">Daftar {new Date(p.created_at).toLocaleDateString('id-ID')}</span>
+                    <UserModerationActions userId={p.id} plan={p.plan} isBanned={Boolean(p.is_banned)} />
                   </div>
                 </div>
               ))}
@@ -204,6 +212,9 @@ export default function AdminCommandCenter({
           </CardContent>
         </Card>
       )}
+
+      {/* REPORTS */}
+      {tab === 'reports' && <ReportsPanel />}
 
       {/* UPGRADE INTENTS */}
       {tab === 'intents' && (
@@ -246,9 +257,12 @@ export default function AdminCommandCenter({
                       Owner: {nameById[room.owner_id] ?? room.owner_id.slice(0,8)}
                     </p>
                   </div>
-                  <Badge tone={room.status === 'open' ? 'success' : room.status === 'full' ? 'warning' : 'neutral'}>
-                    {room.status}
-                  </Badge>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge tone={room.status === 'open' ? 'success' : room.status === 'full' ? 'warning' : 'neutral'}>
+                      {room.status}
+                    </Badge>
+                    <DeleteRoomButton roomId={room.id} roomTitle={room.title} />
+                  </div>
                 </div>
               ))}
             </div>

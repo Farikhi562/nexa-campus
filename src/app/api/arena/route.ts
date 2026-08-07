@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 
 type ArenaPostRow = Record<string, unknown> & { id: string; creator_id: string }
 type ArenaApplicationRow = { post_id: string; status: string }
@@ -202,12 +203,42 @@ export async function POST(req: NextRequest) {
     joined_at: new Date().toISOString(),
   }, { onConflict: 'post_id,user_id' }).then(undefined, () => null)
 
-  await supabase.from('points_events').insert({
-    user_id: user.id,
-    kind: 'arena_post_created',
-    points: 10,
-    metadata: { post_id: data.id },
-  }).then(undefined, () => null)
+  // CATATAN PERBAIKAN BUG (pola sama dengan applications/[applicationId]/route.ts):
+  // points_events nggak punya policy insert untuk role authenticated, dan kolom
+  // "metadata" nggak ada di skemanya (cuma id/user_id/kind/points/ref/created_at) —
+  // insert ini sebelumnya SELALU gagal diam-diam. Pakai service client + ref.
+  try {
+    const serviceDb = createServiceClient()
+    await serviceDb.from('points_events').upsert(
+      { user_id: user.id, kind: 'arena_post_created', points: 10, ref: data.id },
+      { onConflict: 'user_id,kind,ref', ignoreDuplicates: true }
+    )
+  } catch (err) {
+    console.error('[Arena Points] gagal memberi poin arena_post_created:', err)
+  }
+
+  // POWER-UP: creator juga otomatis dapat deadline hari-H di tracker utamanya —
+  // sama seperti anggota yang diterima (lihat applications/[applicationId]/route.ts).
+  try {
+    const deadlineDate = payload.event_date || payload.deadline_registration
+    if (deadlineDate) {
+      const serviceDb = createServiceClient()
+      await serviceDb.from('academic_deadlines').insert({
+        user_id: user.id,
+        title: payload.event_date ? 'Hari-H Kompetisi' : 'Deadline Pendaftaran',
+        course_name: payload.competition_name || payload.title,
+        type: 'organisasi',
+        source: 'lainnya',
+        deadline_date: deadlineDate,
+        deadline_time: '23:59',
+        priority: 'high',
+        notes: `Otomatis dibuat dari NEXA Arena — postingan "${payload.title}" yang kamu buat.`,
+        status: 'pending',
+      })
+    }
+  } catch (err) {
+    console.error('[Arena Auto-Deadline] gagal membuat deadline otomatis untuk creator:', err)
+  }
 
   return NextResponse.json({ data }, { status: 201 })
 }

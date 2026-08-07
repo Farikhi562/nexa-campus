@@ -8,7 +8,7 @@ const MAX_IMAGE_BYTES = 5 * 1024 * 1024 // 5MB
 const ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'])
 
 const SYSTEM_PROMPT =
-  'Kamu adalah asisten deadline extractor untuk mahasiswa Indonesia. Baca gambar (foto papan tulis, screenshot jadwal, atau pengumuman) lalu extract semua deadline/jadwal. Return JSON array dengan format: [{title, category (tugas/praktikum/kuis/ujian/pembayaran/lainnya), due_date (ISO 8601 atau null), priority (urgent/high/normal/low), source, notes}]. Jika tanggal tidak spesifik, gunakan null. Respond ONLY with JSON array, tanpa markdown.'
+  'Kamu adalah asisten deadline extractor untuk mahasiswa Indonesia. Baca gambar (foto papan tulis, screenshot jadwal, atau pengumuman) lalu extract semua deadline/jadwal. Balas SATU JSON OBJECT dengan struktur PERSIS: {"data": [{title, category (tugas/praktikum/kuis/ujian/pembayaran/lainnya), due_date (ISO 8601 atau null), priority (urgent/high/normal/low), source, notes}]}. Jika tanggal tidak spesifik, gunakan null. Respond ONLY dengan JSON object di atas, tanpa markdown.'
 
 function jsonResponse(body: unknown, status = 200) {
   return NextResponse.json(body, { status })

@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import AppShell from '@/components/AppShell'
+import BannedScreen from '@/components/BannedScreen'
 import DashboardSuccessToast from '@/components/DashboardSuccessToast'
 import PwaInstallBanner from '@/components/PwaInstallBanner'
 import { createClient } from '@/lib/supabase/server'
@@ -19,9 +20,13 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('full_name, email, plan, pulse_trial_until, plan_expires_at, subscription_expires_at, command_expires_at, lifetime_command, profile_completed, avatar_url, nexa_id')
+    .select('full_name, email, plan, pulse_trial_until, plan_expires_at, subscription_expires_at, command_expires_at, lifetime_command, profile_completed, avatar_url, nexa_id, is_banned, banned_reason')
     .eq('id', user.id)
     .maybeSingle()
+
+  if ((profile as { is_banned?: boolean | null } | null)?.is_banned) {
+    return <BannedScreen reason={(profile as { banned_reason?: string | null } | null)?.banned_reason ?? null} />
+  }
 
   const userName =
     profile?.full_name ||

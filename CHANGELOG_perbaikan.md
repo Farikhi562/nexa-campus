@@ -201,3 +201,89 @@ di Supabase kamu.
 
 File yang berubah: `components/dashboard/StudyRoomDetail.tsx`,
 `components/study-room/FocusTimerBar.tsx` (baru).
+
+---
+
+## Update Round 3 — Bug AI flashcard/latihan, Panel Admin, NEXA Arena
+
+### ⚠️ WAJIB: jalankan migration baru dulu
+
+`supabase/migrations/20260807_admin_moderation.sql` — bikin kolom ban di
+`profiles` + tabel `user_reports`. Tanpa ini, fitur ban & laporan akun di
+bawah akan error. Jalankan manual di Supabase SQL editor.
+
+### Bug besar: 6 fitur AI gagal karena konflik format JSON
+
+Akar masalah "flashcard sama latihan belom bisa dipake": semua pemanggilan
+AI di app ini pakai `json: true` yang MEMAKSA provider mengembalikan JSON
+dengan root berupa *object* (`response_format: json_object`). Tapi prompt di
+6 tempat ini minta AI balikin JSON *array* mentah — konflik ini bikin
+provider AI menolak/membungkusnya dengan cara tak terduga, jadi hasilnya
+gagal di-parse terus.
+
+Diperbaiki (semua sekarang minta object dengan key jelas, mis.
+`{"cards":[...]}`, sama seperti pola yang sudah terbukti jalan di generator
+study pack utama):
+- **Flashcard** (`lib/study/generate-flashcards.ts`)
+- **Latihan/Practice** (file yang sama)
+- **Smart Input** — parser deadline dari teks & foto (`lib/smart-input/extract.ts`)
+- **AI Quick Add deadline** dari teks & foto (`app/api/deadlines/ai-extract*`)
+- **AI Arena** — breakdown task kompetisi (`app/api/arena/[id]/workspace/ai/route.ts`)
+- **Study Plan generator** (`lib/study/plan.ts`)
+
+### Bug tambahan yang ketemu pas nelusurin Arena
+
+- **Nama kolom database salah** (`registration_deadline` vs nama asli
+  `deadline_registration`) di 2 file Arena — ini bikin fitur AI Arena
+  (tasks/analyze/brief) **selalu gagal total** (404), bukan cuma soal format
+  JSON di atas. Sudah diperbaiki.
+- **Poin Arena tidak pernah kekirim**: insert `points_events` saat bikin
+  postingan Arena pakai client biasa (kena RLS, gagal diam-diam) + kolom
+  `metadata` yang sebenarnya tidak ada di skema tabel. Sudah diperbaiki
+  (pola yang sama persis dengan fix yang sudah ada di
+  `applications/[applicationId]/route.ts` dari sesi sebelumnya — sekarang
+  konsisten di kedua tempat).
+
+### Panel Admin — moderasi (baru)
+
+- **Ban / Unban user** + alasan ban, tampil ke user sebagai layar
+  "Akun Dinonaktifkan" (`BannedScreen.tsx`) begitu mereka buka dashboard —
+  bukan cuma disembunyikan di UI, beneran diblokir di `app/dashboard/layout.tsx`.
+- **Ubah plan user manual** — dropdown Radar/Pulse/Command langsung di
+  baris tiap user.
+- **Hapus Study Room** — tombol hapus (dgn konfirmasi) di tab Study Rooms,
+  admin sekarang bisa hapus room siapa pun (sebelumnya cuma read-only).
+- **Tombol "Laporkan Akun"** — muncul di halaman profil publik siapa pun
+  (`ReportAccountButton.tsx`), user pilih alasan + detail opsional.
+- **Tab "Laporan" baru** di panel admin — daftar laporan masuk, bisa
+  langsung ban akun yang dilaporkan atau tandai ditinjau/diabaikan.
+
+Endpoint baru: `PATCH /api/admin/users/[id]`, `POST /api/reports`,
+`GET/PATCH /api/admin/reports*`. Semua pakai `isAdminEmail()` yang sudah ada
+(email admin diatur lewat env `ADMIN_EMAILS` di Vercel).
+
+### NEXA Arena — makin berguna
+
+- **Auto-sync ke Deadline tracker**: begitu bikin postingan ATAU lamaran
+  diterima jadi anggota tim, tanggal hari-H/deadline pendaftaran kompetisi
+  otomatis masuk ke tracker deadline utama (type "organisasi", prioritas
+  tinggi) — jadi nggak perlu catat manual dua kali.
+- **Readiness Score** di Team Workspace: indikator kecil (persen + label)
+  yang ngegabungin progress checklist tim dan kelengkapan anggota jadi satu
+  angka "seberapa siap tim ini" — sengaja dibuat kecil/inline di header,
+  bukan panel baru, biar nggak nambah rame.
+- Fitur AI breakdown task di workspace (yang sudah ada sebelumnya) sekarang
+  beneran berfungsi end-to-end berkat 2 bug fix di atas — hasil AI-nya bisa
+  langsung ditambahkan ke checklist tim dengan satu klik (tombol ini sudah
+  ada sebelumnya, cuma sebelumnya tidak pernah nyala karena AI-nya gagal
+  terus).
+
+### Rekomendasi lanjutan round ini
+
+- Belum sempat audit apakah pola bug "points_events pakai client biasa +
+  kolom metadata" ada di file lain di luar yang sudah dicek (activity-feed,
+  daily-pulse, ml/risk, account/delete, referrals — semua sudah dicek aman).
+- Reports & ban belum ada notifikasi real-time ke admin (misal badge count
+  di navbar) — sekarang cuma keliatan kalau buka tab Laporan di panel admin.
+- Readiness Score formulanya masih sederhana (65% checklist + 35% jumlah
+  anggota) — bisa di-tweak bobotnya kalau dirasa kurang pas setelah dipakai beneran.

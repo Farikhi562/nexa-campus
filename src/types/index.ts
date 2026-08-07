@@ -68,8 +68,25 @@ export interface Profile {
   github_url: string | null
   linkedin_url: string | null
   profile_completed: boolean
+  is_banned?: boolean | null
+  banned_reason?: string | null
+  banned_at?: string | null
   created_at: string
   updated_at: string
+}
+
+export type UserReportReason = 'spam' | 'pelecehan' | 'penipuan' | 'konten_tidak_pantas' | 'akun_palsu' | 'lainnya'
+
+export interface UserReport {
+  id: string
+  reporter_id: string
+  reported_user_id: string
+  reason: UserReportReason
+  detail: string | null
+  status: 'pending' | 'reviewed' | 'dismissed'
+  created_at: string
+  reviewed_at: string | null
+  reviewed_by: string | null
 }
 
 export interface LeaderboardEntry {

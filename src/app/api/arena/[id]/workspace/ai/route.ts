@@ -30,7 +30,7 @@ export async function POST(request: NextRequest, { params }: Params) {
   // Ambil data post + workspace + anggota tim
   const [postRes, workspaceRes, membersRes] = await Promise.all([
     supabase.from('nexa_arena_posts')
-      .select('id, title, description, competition_name, competition_type, skills_needed, team_size_max, current_team_size, creator_id, event_date, registration_deadline')
+      .select('id, title, description, competition_name, competition_type, skills_needed, team_size_max, current_team_size, creator_id, event_date, deadline_registration')
       .eq('id', id).maybeSingle(),
     supabase.from('nexa_arena_workspaces').select('owner_task, team_status, checklist').eq('post_id', id).maybeSingle(),
     supabase.from('nexa_arena_team_members').select('user_id, role').eq('post_id', id).limit(20),
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest, { params }: Params) {
   const description = String(post.description ?? '')
   const skillsNeeded = Array.isArray(post.skills_needed) ? (post.skills_needed as string[]).join(', ') : ''
   const eventDate = post.event_date ? `Event: ${post.event_date}` : ''
-  const regDeadline = post.registration_deadline ? `Deadline daftar: ${post.registration_deadline}` : ''
+  const regDeadline = post.deadline_registration ? `Deadline daftar: ${post.deadline_registration}` : ''
   const teamSize = `Tim: ${post.current_team_size}/${post.team_size_max} orang`
   const existingTasks = ws?.checklist ? JSON.stringify(ws.checklist) : '[]'
 
@@ -73,18 +73,19 @@ ${eventDate}  ${regDeadline}  ${teamSize}
 Task yang sudah ada: ${existingTasks}
 
 Buat breakdown task yang KONKRET dan BISA LANGSUNG DIKERJAKAN untuk persiapan kompetisi ini. 
-Format: JSON array berisi string, maks 15 task. 
-Contoh format output (respond ONLY JSON array, no markdown fence):
-["Riset tema kompetisi dan baca panduan resmi","Bagi role: siapa handle UI, backend, presentasi","Buat mockup/wireframe awal","Validasi ide ke dosen/mentor","..."]
+Balas SATU JSON OBJECT dengan struktur PERSIS: {"tasks": ["...", "..."]}, maks 15 task.
+Contoh: {"tasks": ["Riset tema kompetisi dan baca panduan resmi","Bagi role: siapa handle UI, backend, presentasi","Buat mockup/wireframe awal","Validasi ide ke dosen/mentor"]}
 
-Prioritaskan task yang paling krusial duluan. Task harus spesifik dan actionable, bukan generic.`
+Prioritaskan task yang paling krusial duluan. Task harus spesifik dan actionable, bukan generic.
+Respond ONLY dengan JSON object di atas, no markdown fence.`
 
     const { text } = await generateText({ system: SYSTEM, user: prompt, temperature: 0.4, maxTokens: 600, json: true })
     let tasks: string[] = []
     try {
       const clean = text.replace(/^```(?:json)?/i, '').replace(/```$/i, '').trim()
       const parsed = JSON.parse(clean)
-      if (Array.isArray(parsed)) tasks = parsed.filter((t) => typeof t === 'string' && t.trim()).slice(0, 15)
+      const arr = Array.isArray(parsed) ? parsed : Array.isArray((parsed as Record<string, unknown>)?.tasks) ? (parsed as Record<string, unknown>).tasks : null
+      if (Array.isArray(arr)) tasks = arr.filter((t) => typeof t === 'string' && t.trim()).slice(0, 15)
     } catch { /* pakai empty */ }
 
     return NextResponse.json({ action, tasks, raw: text })
