@@ -46,7 +46,7 @@ export default function NexaBadgeCard({
   return (
     <article
       className={`${CARD_CLASS[badge.rarity]} ${TEXT_CLASS[badge.rarity]} ${locked ? 'nexa-badge-locked' : ''} ${compact ? 'rounded-2xl p-3' : 'rounded-[1.7rem] p-4 sm:p-5'} ${clickable ? 'focus:outline-none focus:ring-2 focus:ring-blue-400' : ''}`}
-      title={`${badge.name} · ${BADGE_RARITY_LABEL[badge.rarity]}`}
+      title={compact ? `${badge.name} · ${BADGE_RARITY_LABEL[badge.rarity]}\n${badge.description}\nCara unlock: ${badge.requirement}` : `${badge.name} · ${BADGE_RARITY_LABEL[badge.rarity]}`}
       data-rarity={badge.rarity}
       role={clickable ? 'button' : undefined}
       tabIndex={clickable ? 0 : undefined}

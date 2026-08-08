@@ -21,6 +21,7 @@ type Data = {
   total: number
   missions: Mission[]
   rewardClaimed?: boolean
+  pointsThisWeek?: number
 }
 
 export default function WeeklyChallengeCard() {
@@ -55,11 +56,21 @@ export default function WeeklyChallengeCard() {
             <h2 className="text-lg font-black text-slate-950">Race minggu ini · {data.weekLabel}</h2>
             <p className="mt-1 text-sm leading-6 text-slate-500">Selesaikan misi mingguan buat ngejar badge dan poin. Karena rupanya progress bar lebih efektif daripada ceramah motivasi.</p>
           </div>
-          <Badge tone={data.done === data.total ? 'success' : 'warning'}>{data.done}/{data.total} selesai</Badge>
+          <div className="flex flex-col items-end gap-1.5">
+            <Badge tone={data.done === data.total ? 'success' : 'warning'}>{data.done}/{data.total} selesai</Badge>
+            {typeof data.pointsThisWeek === 'number' && data.pointsThisWeek > 0 ? (
+              <span className="text-xs font-black text-amber-600">+{data.pointsThisWeek} poin didapat</span>
+            ) : null}
+          </div>
         </div>
         <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-200">
           <div className="h-full rounded-full bg-gradient-to-r from-amber-400 to-blue-400" style={{ width: `${pct}%` }} />
         </div>
+        {data.rewardClaimed ? (
+          <div className="mt-4 flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-sm font-black text-emerald-700">
+            <Trophy className="h-4 w-4" /> Semua misi minggu ini kelar — bonus poin sudah masuk. Race baru mulai Senin.
+          </div>
+        ) : null}
         <div className="mt-4 grid gap-2 sm:grid-cols-2">
           {data.missions.map((mission) => {
             const complete = mission.current >= mission.goal

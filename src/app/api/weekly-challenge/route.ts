@@ -19,6 +19,19 @@ async function safeCount(query: PromiseLike<{ count: number | null }>) {
   } catch { return 0 }
 }
 
+// Poin per misi. Cuma misi yang beneran punya reward poin (bukan "Progress ...",
+// yang sudah dapat poin dari sistemnya sendiri — streak, arena, study room) yang
+// di-award di sini, biar nggak dobel hitung.
+const MISSION_POINTS: Record<string, number> = {
+  deadline_3: 60,
+  friend_1: 20,
+}
+const WEEKLY_COMPLETE_BONUS = 50
+
+function refFor(missionId: string, weekStart: Date) {
+  return `weekly_mission:${missionId}:${weekStart.toISOString().slice(0, 10)}`
+}
+
 export async function GET() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -44,6 +57,38 @@ export async function GET() {
     { id: 'arena_1', label: 'Daftar 1 Arena', current: arena, goal: 1, href: '/dashboard/arena', reward: 'Progress Arena' },
   ]
   const done = missions.filter((m) => m.current >= m.goal).length
+  const allDone = done === missions.length
 
-  return NextResponse.json({ weekLabel, missions, done, total: missions.length })
+  // Award poin buat tiap misi yang baru selesai. Idempoten lewat unique index
+  // (user_id, kind, ref) di points_events — aman dipanggil berkali-kali tiap GET,
+  // pola yang sama dengan auto-sync badge di /api/badges/me.
+  const awardPromises: Array<Promise<unknown>> = []
+  for (const mission of missions) {
+    const points = MISSION_POINTS[mission.id]
+    if (!points || mission.current < mission.goal) continue
+    awardPromises.push(
+      supabase.rpc('award_points', { p_kind: 'weekly_mission', p_points: points, p_ref: refFor(mission.id, start) }).then(undefined, () => null),
+    )
+  }
+  if (allDone) {
+    awardPromises.push(
+      supabase.rpc('award_points', { p_kind: 'weekly_challenge_complete', p_points: WEEKLY_COMPLETE_BONUS, p_ref: `weekly_challenge_complete:${start.toISOString().slice(0, 10)}` }).then(undefined, () => null),
+    )
+  }
+  await Promise.all(awardPromises)
+
+  // Total poin yang sudah beneran didapat minggu ini dari misi (buat ditampilkan
+  // di UI, jadi bukan cuma janji "+60 poin" tapi angka yang benar-benar masuk).
+  const pointsThisWeek = await supabase
+    .from('points_events')
+    .select('points')
+    .eq('user_id', user.id)
+    .gte('created_at', startIso)
+    .in('kind', ['weekly_mission', 'weekly_challenge_complete'])
+    .then(
+      (res) => (res.data ?? []).reduce((total: number, item: { points?: number | null }) => total + (item.points ?? 0), 0),
+      () => 0,
+    )
+
+  return NextResponse.json({ weekLabel, missions, done, total: missions.length, rewardClaimed: allDone, pointsThisWeek })
 }

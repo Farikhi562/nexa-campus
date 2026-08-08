@@ -2,11 +2,12 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Clock3, Crown, Flame, Loader2, Medal, RefreshCw, TrendingUp, Trophy } from 'lucide-react'
+import { Clock3, Crown, Flame, Medal, RefreshCw, TrendingUp, Trophy } from 'lucide-react'
 import Badge from '@/components/ui/Badge'
 import PublicUserBadges from '@/components/badges/PublicUserBadges'
 import FounderVerifiedBadge from '@/components/FounderVerifiedBadge'
 import { Card, CardContent } from '@/components/ui/Card'
+import { SkeletonLeaderboardEntry, SkeletonPodium } from '@/components/ui/SkeletonCard'
 import type { LeaderboardEntry, LeaderboardMe, LeaderboardScope } from '@/types'
 import Image from 'next/image'
 
@@ -231,8 +232,15 @@ export default function LeaderboardView({ currentUserId }: { currentUserId: stri
       )}
 
       {loading ? (
-        <div className="flex items-center justify-center rounded-3xl border border-slate-200 bg-white p-10 text-slate-400">
-          <Loader2 className="h-6 w-6 animate-spin" />
+        <div className="space-y-3">
+          <SkeletonPodium />
+          <Card>
+            <CardContent className="divide-y divide-slate-100 p-0">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <SkeletonLeaderboardEntry key={i} />
+              ))}
+            </CardContent>
+          </Card>
         </div>
       ) : data?.setup ? (
         <Card className="border-amber-200 bg-amber-50">

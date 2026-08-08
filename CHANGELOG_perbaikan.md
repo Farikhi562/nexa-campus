@@ -287,3 +287,148 @@ Endpoint baru: `PATCH /api/admin/users/[id]`, `POST /api/reports`,
   di navbar) — sekarang cuma keliatan kalau buka tab Laporan di panel admin.
 - Readiness Score formulanya masih sederhana (65% checklist + 35% jumlah
   anggota) — bisa di-tweak bobotnya kalau dirasa kurang pas setelah dipakai beneran.
+
+---
+
+## Update Round 4 — Batch Badge API & Weekly Challenge reward beneran jalan
+
+### 1. Performance: Batch Badge API (rekomendasi round sebelumnya)
+
+Sebelumnya tiap baris di list panjang (Leaderboard, Arena, daftar teman) yang
+nampilin badge = 1 request `/api/badges/[userId]` sendiri-sendiri. List 50
+baris = 50 request bersamaan.
+
+**Perbaikan:**
+- Endpoint baru `GET /api/badges/batch?ids=id1,id2,...` — 1-2 query database
+  buat semua user sekaligus (bukan N query terpisah), max 100 id per request.
+- `UnifiedBadgeStrip.tsx` (dipakai semua 20+ komponen badge di app ini lewat
+  `PublicUserBadges`, dst — jadi cukup diubah di satu tempat) sekarang punya
+  loader batching: semua `userId` yang di-request dalam satu render pass
+  dikumpulkan lewat `setTimeout(…, 0)`, lalu ditembak sekali ke endpoint batch.
+  Ada cache 60 detik biar remount/scroll ulang nggak fetch ulang.
+- Badge diri sendiri ("me", butuh auth cookie) tetap lewat jalur lama
+  `/api/badges/me` — bukan kandidat batching publik.
+- Tidak ada perubahan di 20+ file pemanggil — semua otomatis dapat manfaatnya
+  karena lewat satu komponen yang sama.
+
+### 2. Bug: Reward poin Weekly Challenge cuma teks, nggak pernah beneran dikasih
+
+`WeeklyChallengeCard` sudah lama nampilin reward kayak "+60 poin" dan "+20
+poin sosial" di tiap misi mingguan (deadline, teman, dst) — tapi
+`/api/weekly-challenge` cuma ngitung progress buat ditampilkan, nggak pernah
+manggil `award_points`. Jadi user selesai misi, badge centang muncul, tapi
+poin yang dijanjikan di teks itu nggak pernah masuk ke leaderboard mereka.
+
+**Perbaikan:**
+- Misi yang punya reward poin (`deadline_3`: +60, `friend_1`: +20) sekarang
+  beneran manggil `award_points` lewat RPC yang sudah ada, dengan `ref`
+  unik per (user, misi, minggu) — idempoten, aman dipanggil berkali-kali
+  tiap kali card di-load (pola yang sama dengan auto-sync badge di
+  `/api/badges/me`).
+- Misi lain (`pulse_5`, `room_1`, `arena_1`) sengaja TIDAK di-award ulang di
+  sini karena rewardnya "Progress ..." — sudah dapat poin dari sistemnya
+  masing-masing (streak, study room, arena), biar nggak dobel hitung.
+- Bonus baru: kalau SEMUA misi minggu itu selesai, dapat tambahan +50 poin
+  sekali per minggu (`weekly_challenge_complete`), muncul di UI card sebagai
+  banner hijau "Semua misi minggu ini kelar".
+- Card sekarang nampilin total poin yang BENERAN sudah didapat minggu ini
+  (`pointsThisWeek`, dari `points_events`), bukan cuma janji di teks misi.
+
+File yang berubah: `app/api/badges/batch/route.ts` (baru),
+`components/badges/UnifiedBadgeStrip.tsx`, `app/api/weekly-challenge/route.ts`,
+`components/dashboard/WeeklyChallengeCard.tsx`.
+
+**Nggak perlu migration baru** — keduanya pakai tabel & RPC (`points_events`,
+`award_points`, `nexa_user_badges`) yang sudah ada.
+
+### Rekomendasi lanjutan round ini
+
+- Kalau mau audit N+1 lain di luar badge (misal fetch profil per baris di
+  list yang sama), pola batching yang sama bisa direplikasi.
+- Reward Weekly Challenge sekarang fixed (+60/+20/+50) — kalau mau di-tweak
+  jadi progresif tiap minggu berturut-turut (kayak streak bonus), itu langkah
+  natural berikutnya buat retention jangka panjang.
+
+---
+
+## Update Round 5 — Streak Milestone Celebration
+
+### Fitur baru: perayaan visual saat streak Daily Pulse capai milestone
+
+Sebelumnya streak di `DailyPulseCard` cuma ditampilin sebagai angka polos —
+nggak ada validasi visual pas user capai titik penting (padahal ini salah
+satu driver retention paling murah: orang lebih semangat jaga streak kalau
+progress-nya dirayakan, bukan cuma dihitung).
+
+**Perbaikan:**
+- Titik milestone: 3, 7, 14, 30, 60, 100 hari beruntun.
+- Pas kena tepat di angka milestone: kartu "Streak" dapat highlight (border +
+  background oranye, ikon api animasi pulse), plus banner kecil di bawah grid
+  "Ritme 7 hari" — copy `"Streak N hari! Konsistensi kayak gini yang bikin
+  beda dibanding kebut semalam."`
+- Di hari biasa (belum kena milestone): banner tetap tampil versi netral,
+  nunjukin progress ke milestone berikutnya, misal `"3 hari lagi ke
+  milestone 7 hari."` — biar selalu ada target kecil yang kelihatan, bukan
+  cuma pas momen spesial.
+- Streak 0 (belum mulai / kena putus) sengaja tidak menampilkan banner.
+- Murni perubahan frontend — `currentStreak` sudah dihitung di
+  `/api/daily-pulse` sebelumnya, cuma pemakaiannya di UI yang ditambah. Nggak
+  ada perubahan API atau migration.
+
+File yang berubah: `components/dashboard/DailyPulseCard.tsx`.
+
+### Rekomendasi lanjutan round ini
+
+- Kalau mau lebih jauh, milestone gede (30/60/100 hari) bisa dikaitkan ke
+  badge/poin bonus juga (pola yang sama seperti fix Weekly Challenge di round
+  4) — sekarang murni visual, belum ada reward tambahan.
+- Confetti/animasi lebih besar pas hit milestone besar bisa nambah "wah
+  factor", tapi butuh dependency animasi baru — sengaja tidak ditambahkan di
+  sini biar tetap ringan tanpa install package baru.
+
+---
+
+## Update Round 6 — Quick wins: tooltip badge & skeleton leaderboard yang kelupaan dipasang
+
+### 1. Tooltip badge sekarang kasih deskripsi & cara unlock, bukan cuma nama
+
+Hover ke badge kecil (di leaderboard, arena, daftar teman, dll — lewat
+`UnifiedBadgeStrip`) sebelumnya cuma nampilin `"Nama Badge · rarity"`. Data
+`description` dan `requirement` sudah ada di catalog buat semua badge
+(dipakai di halaman Pencapaian), tapi nggak ikut ditampilkan di versi kecil
+ini.
+
+**Perbaikan:** tooltip (`title` attribute) sekarang isinya nama, rarity,
+deskripsi, dan cara unlock — jadi badge di list mana pun tetap informatif
+walau usernya nggak buka halaman Pencapaian. Diterapkan di
+`UnifiedBadgeStrip.tsx` dan versi compact `NexaBadgeCard.tsx` (versi
+non-compact-nya sudah nampilin ini di body card, jadi nggak perlu diubah).
+
+*(Sempat dicek `InlineBadge.tsx`/`ArenaPostCard.tsx` — ternyata cuma dipakai
+di `ArenaListExample.tsx`, contoh kode yang tidak pernah di-import halaman
+manapun. Dead code, tidak disentuh.)*
+
+### 2. Bug: Skeleton loader leaderboard sudah dibikin, tapi kelupaan dipasang
+
+`components/ui/SkeletonCard.tsx` ternyata sudah punya `SkeletonPodium` dan
+`SkeletonLeaderboardEntry` — dibuat khusus buat halaman Leaderboard, lengkap
+bentuknya (podium 3 + baris ranking). Tapi `LeaderboardView.tsx` nggak
+pernah pakai keduanya — loading state-nya cuma spinner polos di tengah
+layar kosong.
+
+**Perbaikan:** loading state Leaderboard sekarang render `SkeletonPodium` +
+6× `SkeletonLeaderboardEntry`, jadi bentuknya mirip konten asli yang bakal
+muncul (mengurangi "layout shift" pas data selesai load, dan kelihatan lebih
+cepat/hidup dibanding spinner kosong).
+
+File yang berubah: `components/badges/UnifiedBadgeStrip.tsx`,
+`components/badges/NexaBadgeCard.tsx`, `components/dashboard/LeaderboardView.tsx`.
+
+**Nggak ada migration** — semua perubahan UI/komponen murni.
+
+### Rekomendasi lanjutan round ini
+
+- `ArenaView.tsx` masih pakai spinner polos juga saat loading (nggak ada
+  skeleton khusus Arena dibikin) — kalau mau konsisten, bisa ditambah
+  `SkeletonAchievementCard`-style baru buat Arena, sengaja belum dikerjakan
+  di round ini biar scope tetap kecil & aman.

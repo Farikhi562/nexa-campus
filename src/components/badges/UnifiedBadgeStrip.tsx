@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import BadgeStyles from './badgeStyles'
-import { BADGE_BY_KEY, getProfileShowcaseBadges } from '@/lib/badges/catalog'
+import { BADGE_BY_KEY, BADGE_RARITY_LABEL, getProfileShowcaseBadges } from '@/lib/badges/catalog'
 
 type BadgeRow = { badge_key: string; is_pinned?: boolean | null; unlocked_at?: string | null; source?: string | null }
 
@@ -43,6 +43,67 @@ function normalizeBadgeKeys(json: BadgeResponse) {
   return (pinned.length ? pinned : fallback).slice(0, 1)
 }
 
+/**
+ * Loader batch untuk userId (bukan "me"). Kalau list panjang (leaderboard, arena,
+ * daftar teman) render puluhan <UnifiedBadgeStrip userId=.../> sekaligus, tiap
+ * instance dulu self-fetch ke /api/badges/[userId] sendiri-sendiri — bisa jadi
+ * puluhan request bersamaan. Loader ini mengumpulkan semua userId yang diminta
+ * dalam satu "tick" microtask, lalu satu kali fetch ke /api/badges/batch.
+ *
+ * Cache singkat (60 detik) supaya remount/scroll ulang di halaman yang sama
+ * nggak fetch ulang. Untuk userId falsy ("me"), tetap pakai jalur lama
+ * (/api/badges/me) karena butuh auth cookie, bukan kandidat batching publik.
+ */
+const BATCH_TTL_MS = 60_000
+type BatchEntry = { json: BadgeResponse; ts: number }
+const batchCache = new Map<string, BatchEntry>()
+let pendingIds = new Set<string>()
+let pendingWaiters: Array<{ id: string; resolve: (json: BadgeResponse) => void; reject: (err: unknown) => void }> = []
+let flushScheduled = false
+
+function scheduleBatchFlush() {
+  if (flushScheduled) return
+  flushScheduled = true
+  // Microtask + 0ms timeout: cukup buat mengumpulkan semua item yang di-render
+  // dalam render pass yang sama (list panjang), tanpa nunda UI terasa lambat.
+  setTimeout(() => {
+    flushScheduled = false
+    const ids = Array.from(pendingIds)
+    const waiters = pendingWaiters
+    pendingIds = new Set()
+    pendingWaiters = []
+    if (!ids.length) return
+
+    fetch(`/api/badges/batch?ids=${ids.map(encodeURIComponent).join(',')}`, { cache: 'no-store' })
+      .then(async (res) => {
+        const json = (await res.json().catch(() => ({}))) as { results?: Record<string, BadgeResponse>; error?: string }
+        if (!res.ok) throw new Error(json.error || 'Gagal baca badge (batch).')
+        const results = json.results || {}
+        const now = Date.now()
+        for (const waiter of waiters) {
+          const entry = results[waiter.id] || {}
+          batchCache.set(waiter.id, { json: entry, ts: now })
+          waiter.resolve(entry)
+        }
+      })
+      .catch((err) => {
+        for (const waiter of waiters) waiter.reject(err)
+      })
+  }, 0)
+}
+
+function fetchBadgesBatched(userId: string): Promise<BadgeResponse> {
+  const cached = batchCache.get(userId)
+  if (cached && Date.now() - cached.ts < BATCH_TTL_MS) {
+    return Promise.resolve(cached.json)
+  }
+  return new Promise((resolve, reject) => {
+    pendingIds.add(userId)
+    pendingWaiters.push({ id: userId, resolve, reject })
+    scheduleBatchFlush()
+  })
+}
+
 export default function UnifiedBadgeStrip({
   userId,
   badgeKeys,
@@ -65,12 +126,19 @@ export default function UnifiedBadgeStrip({
 
     let alive = true
     setLoading(true)
-    fetch(endpointFor(userId), { cache: 'no-store' })
-      .then(async (res) => {
-        const json = (await res.json().catch(() => ({}))) as BadgeResponse
-        if (!res.ok) throw new Error(json.error || 'Gagal baca badge.')
-        return json
-      })
+
+    const cleanUserId = String(userId || '').trim()
+    // userId kosong = badge diri sendiri ("me"), butuh auth cookie → nggak bisa
+    // ikut batch publik, tetap pakai fetch langsung seperti sebelumnya.
+    const request = cleanUserId
+      ? fetchBadgesBatched(cleanUserId)
+      : fetch(endpointFor(userId), { cache: 'no-store' }).then(async (res) => {
+          const json = (await res.json().catch(() => ({}))) as BadgeResponse
+          if (!res.ok) throw new Error(json.error || 'Gagal baca badge.')
+          return json
+        })
+
+    request
       .then((json) => {
         if (!alive) return
         setKeys(normalizeBadgeKeys(json))
@@ -127,7 +195,7 @@ export default function UnifiedBadgeStrip({
           return (
             <span
               key={badge.key}
-              title={`${badge.name} · ${rarity}`}
+              title={`${badge.name} · ${BADGE_RARITY_LABEL[rarity]}\n${badge.description}\nCara unlock: ${badge.requirement}`}
               className={`${sizeClass} ${rarityClass} inline-flex max-w-full items-center gap-1.5 rounded-full border font-black leading-none`}
               data-nexa-badge-key={badge.key}
               data-nexa-badge-rarity={rarity}

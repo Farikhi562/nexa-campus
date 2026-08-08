@@ -63,6 +63,21 @@ function dayLabel(value: string) {
   return new Intl.DateTimeFormat('id-ID', { weekday: 'short' }).format(new Date(`${value}T00:00:00`))
 }
 
+// Titik-titik streak yang layak dirayakan. Dipilih supaya jaraknya masuk akal:
+// dekat di awal (biar dapat momentum), makin renggang di angka besar.
+const STREAK_MILESTONES = [3, 7, 14, 30, 60, 100]
+
+function streakMilestoneCopy(streak: number) {
+  if (STREAK_MILESTONES.includes(streak)) {
+    return { hit: true, text: `Streak ${streak} hari! Konsistensi kayak gini yang bikin beda dibanding kebut semalam.` }
+  }
+  const next = STREAK_MILESTONES.find((m) => m > streak)
+  if (!next) return { hit: false, text: `${streak} hari beruntun. Sudah lewat semua target — jaga aja ritmenya.` }
+  const remaining = next - streak
+  if (streak === 0) return null
+  return { hit: false, text: `${remaining} hari lagi ke milestone ${next} hari.` }
+}
+
 export default function DailyPulseCard() {
   const [pulse, setPulse] = useState<DailyPulse | null>(null)
   const [loading, setLoading] = useState(true)
@@ -144,8 +159,8 @@ export default function DailyPulseCard() {
               <p className="mt-2 text-sm leading-6 text-slate-600">{retentionLine}</p>
 
               <div className="mt-4 grid grid-cols-3 gap-2 sm:max-w-lg">
-                <div className="rounded-2xl border border-white/80 bg-white/80 p-3 shadow-sm">
-                  <div className="flex items-center gap-2 text-orange-600"><Flame className="h-4 w-4" /><span className="text-xs font-black uppercase">Streak</span></div>
+                <div className={`rounded-2xl border p-3 shadow-sm ${STREAK_MILESTONES.includes(pulse?.currentStreak ?? -1) ? 'border-orange-300 bg-orange-50 shadow-orange-200/50' : 'border-white/80 bg-white/80'}`}>
+                  <div className="flex items-center gap-2 text-orange-600"><Flame className={`h-4 w-4 ${STREAK_MILESTONES.includes(pulse?.currentStreak ?? -1) ? 'animate-pulse' : ''}`} /><span className="text-xs font-black uppercase">Streak</span></div>
                   <p className="mt-1 text-2xl font-black text-slate-950">{loading ? '...' : pulse?.currentStreak ?? 0}</p>
                 </div>
                 <div className="rounded-2xl border border-white/80 bg-white/80 p-3 shadow-sm">
@@ -173,6 +188,18 @@ export default function DailyPulseCard() {
                     ))}
                   </div>
                 </div>
+              )}
+
+              {!loading && pulse && streakMilestoneCopy(pulse.currentStreak) && (
+                (() => {
+                  const milestone = streakMilestoneCopy(pulse.currentStreak)
+                  if (!milestone) return null
+                  return (
+                    <div className={`mt-3 max-w-lg rounded-2xl border px-3 py-2.5 text-xs font-bold leading-5 ${milestone.hit ? 'border-orange-200 bg-orange-50 text-orange-700' : 'border-slate-200 bg-slate-50 text-slate-500'}`}>
+                      <span className="mr-1">{milestone.hit ? '🔥' : '🎯'}</span>{milestone.text}
+                    </div>
+                  )
+                })()
               )}
             </div>
 
