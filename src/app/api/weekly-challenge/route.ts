@@ -62,7 +62,7 @@ export async function GET() {
   // Award poin buat tiap misi yang baru selesai. Idempoten lewat unique index
   // (user_id, kind, ref) di points_events — aman dipanggil berkali-kali tiap GET,
   // pola yang sama dengan auto-sync badge di /api/badges/me.
-  const awardPromises: Array<PromiseLike<unknown>> = []
+  const awardPromises: Array<Promise<unknown>> = []
   for (const mission of missions) {
     const points = MISSION_POINTS[mission.id]
     if (!points || mission.current < mission.goal) continue

@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
   let deleted = 0
   const errors: string[] = []
 
-  for (const [days, userIds] of Array.from(byDays.entries())) {
+  for (const [days, userIds] of byDays.entries()) {
     const cutoff = subtractDays(today, days)
 
     // "Sudah lewat" = deadline_date < cutoff. Toleransi (days) dihitung dari
