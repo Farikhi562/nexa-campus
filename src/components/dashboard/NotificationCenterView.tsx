@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Bell, CheckCheck, CheckCircle2, Clock3, ExternalLink, Filter, Loader2, PlayCircle, RefreshCcw } from 'lucide-react'
+import { Bell, CheckCheck, CheckCircle2, Clock3, ExternalLink, Filter, Loader2, PlayCircle, RefreshCcw, Trash2 } from 'lucide-react'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import { Card, CardContent } from '@/components/ui/Card'
@@ -100,6 +100,24 @@ export default function NotificationCenterView() {
     })
   }
 
+  async function deleteOne(id: string) {
+    setItems((current) => current.filter((item) => item.id !== id))
+    setMessage('Notifikasi dihapus.')
+    await fetch('/api/notifications', {
+      method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }),
+    })
+  }
+
+  async function deleteAll() {
+    if (items.length === 0) return
+    if (!window.confirm('Hapus semua notifikasi? Tindakan ini tidak bisa dibatalkan.')) return
+    setItems([])
+    setMessage('Semua notifikasi dihapus.')
+    await fetch('/api/notifications', {
+      method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ all: true }),
+    })
+  }
+
   async function runAction(item: NotificationItem, action: 'mark_done' | 'snooze') {
     setBusyId(item.id)
     setMessage('')
@@ -141,6 +159,11 @@ export default function NotificationCenterView() {
             {unreadCount > 0 && (
               <Button onClick={markAllRead} className="rounded-2xl bg-blue-400 text-slate-950 hover:bg-blue-300">
                 <CheckCheck className="h-4 w-4" /> Tandai semua
+              </Button>
+            )}
+            {items.length > 0 && (
+              <Button onClick={deleteAll} variant="outline" className="rounded-2xl border-red-300/30 bg-red-500/10 text-red-200 hover:bg-red-500/20">
+                <Trash2 className="h-4 w-4" /> Hapus semua
               </Button>
             )}
           </div>
@@ -209,6 +232,14 @@ export default function NotificationCenterView() {
                         <button type="button" onClick={() => void markOneRead(item.id)} className="mt-3 text-xs font-black text-blue-700 hover:underline">Tandai dibaca</button>
                       )}
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => void deleteOne(item.id)}
+                      aria-label="Hapus notifikasi"
+                      className="flex-shrink-0 self-start rounded-xl p-1.5 text-slate-300 transition hover:bg-red-50 hover:text-red-600"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
                   </div>
                 )
               })}

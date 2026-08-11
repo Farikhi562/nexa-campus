@@ -143,3 +143,115 @@ ter-rollback semua (fungsi leaderboard tidak terbuat).
 Itu murni `GEMINI_API_KEY`/model. Cek key valid di Google AI Studio; hapus env
 `GEMINI_MODEL` agar pakai default `gemini-2.5-flash-lite`. Lihat log server `[Ask NEXA]`
 untuk alasan persis.
+
+---
+
+## Update lanjutan 3: Notifikasi HP asli (push), Telegram tutorial, auto-hapus deadline lewat
+
+### 1) SQL yang harus dijalankan
+
+Di **Supabase → SQL Editor**, jalankan:
+
+`supabase/migrations/20260808_push_channel_and_autodelete.sql` — bikin tabel
+`push_subscriptions` (+ RLS), fix constraint `reminder_preferences` (unique
+jadi per `user_id + channel`, izinkan channel `'push'`), izinkan channel
+`'push'` di `reminder_logs`, dan tambah kolom `auto_delete_expired_deadlines`
++ `auto_delete_expired_after_days` di `profiles`.
+
+### 2) Environment variables baru
+
+| Variable | Wajib | Fungsi |
+| --- | --- | --- |
+| `NEXT_PUBLIC_TELEGRAM_BOT_USERNAME` | opsional | Tanpa `@`, contoh `nexacampus_bot`. Kalau diisi, tombol "Buka Bot Telegram" muncul di tutorial Settings → Reminder dan deep-link langsung ke `t.me/<username>`. Kalau kosong, tutorial tetap tampil tanpa tombol itu. |
+
+Env yang **sudah ada sebelumnya** dan sekarang benar-benar dipakai penuh
+(sebelumnya cuma sebagian jalan karena bug di atas): `NEXT_PUBLIC_VAPID_PUBLIC_KEY`,
+`VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, `TELEGRAM_BOT_TOKEN`, `CRON_SECRET`,
+`SUPABASE_SERVICE_ROLE_KEY`.
+
+### 3) Jadwal Cron yang perlu didaftarkan
+
+Dua route cron perlu dipanggil terjadwal dengan header
+`Authorization: Bearer <CRON_SECRET>`. Kalau hosting di Vercel, daftarkan di
+`vercel.json` (file ini sengaja tidak disertakan di arsip ini, sesuaikan
+dengan `vercel.json` project kamu yang sudah ada) atau lewat dashboard Vercel
+→ Project Settings → Cron Jobs:
+
+| Path | Jadwal disarankan | Catatan |
+| --- | --- | --- |
+| `/api/cron/send-reminders` | tiap jam (`0 * * * *`) | Reminder Telegram + Push dicek tiap jam biar cocok sama `reminder_time` pilihan tiap user. Plan Vercel Hobby cuma bisa 1x/hari — kalau masih di Hobby, jadwalkan sekali di jam yang paling banyak dipilih user (default `08:00` WIB). |
+| `/api/cron/cleanup-expired-deadlines` | sekali sehari (misal `30 20 * * *` UTC = ~03:30 WIB) | Cukup sekali sehari, cuma jalan buat user yang aktifin opsi auto-hapus. |
+
+### 4) Cara test
+
+- **Push notification**: login → Settings → Reminder → klik "Aktifkan
+  Notifikasi HP" → izinkan permission browser → klik "Kirim tes" → notifikasi
+  asli harus muncul di HP/laptop (icon logo NEXA, ada tombol Buka/Tutup).
+  Kalau `NEXT_PUBLIC_VAPID_PUBLIC_KEY` kosong, tombolnya kasih pesan error
+  yang jelas, bukan diam.
+- **Telegram tutorial**: buka Settings → Reminder → bagian "Cara setup
+  Telegram" harus tampil 5 langkah. Isi `NEXT_PUBLIC_TELEGRAM_BOT_USERNAME`
+  → tombol "Buka Bot Telegram" muncul dan deep-link ke bot yang benar.
+- **Reminder beneran terkirim**: set salah satu deadline ke H-1/hari-H,
+  aktifkan `reminder_enabled`, pastikan sudah subscribe push & isi Telegram
+  chat ID, lalu panggil manual:
+  `curl -H "Authorization: Bearer $CRON_SECRET" https://<domain>/api/cron/send-reminders`
+  → response JSON harus nunjukkan `telegram.sent` dan/atau `push.sent` > 0.
+- **Auto-hapus deadline lewat**: di Settings → Reminder, nyalakan toggle
+  "Hapus otomatis deadline yang sudah lewat", pilih "Langsung", lalu panggil
+  manual: `curl -H "Authorization: Bearer $CRON_SECRET" https://<domain>/api/cron/cleanup-expired-deadlines`
+  → deadline lama user itu (yang statusnya belum selesai maupun sudah) harus
+  hilang dari daftar. **Hati-hati waktu test di data production** — ini
+  penghapusan permanen.
+
+---
+
+## Update lanjutan 4: WhatsApp reminder (Wablas) + hapus notifikasi
+
+### 1) SQL yang harus dijalankan
+
+**Tidak ada migration baru untuk update ini.** Channel `'whatsapp'` sudah
+diizinkan sejak schema awal, dan fix unique constraint `reminder_preferences`
+di "Update lanjutan 3" (`20260808_push_channel_and_autodelete.sql`) sudah
+otomatis mencakup channel `whatsapp` juga. Kalau migration itu belum
+dijalankan, jalankan dulu sebelum test fitur WhatsApp.
+
+### 2) Environment variables baru
+
+| Variable | Wajib | Fungsi |
+| --- | --- | --- |
+| `WABLAS_API_URL` | wajib untuk WhatsApp aktif | URL endpoint kirim pesan dari akun Wablas kamu, contoh: `https://<namaserver>.wablas.com/api/send-message`. Tiap akun Wablas beda sub-domain, cek di dashboard Wablas kamu. |
+| `WABLAS_TOKEN` | wajib untuk WhatsApp aktif | Token dari dashboard Wablas (menu Device/Settings). |
+
+Kalau dua env ini kosong, kartu "Notifikasi WhatsApp" di Settings tetap
+tampil tapi dengan badge "Gateway belum diaktifkan server" dan tombol tes
+disabled — nggak bikin error, cuma nonaktif dengan jelas.
+
+### 3) Cara test
+
+- **WhatsApp**: isi `WABLAS_API_URL` + `WABLAS_TOKEN` → restart server →
+  Settings → Reminder → kartu "Notifikasi WhatsApp" → isi nomor → klik
+  "Kirim Test WhatsApp" → pesan harus masuk ke WA nomor itu dalam beberapa
+  detik. Kalau gagal, baca pesan error yang muncul (biasanya langsung dari
+  response Wablas, jadi cukup jelas apa yang salah — token, nomor, atau
+  device offline).
+- **Reminder WhatsApp beneran terkirim**: sama seperti test push/telegram di
+  atas — set salah satu deadline ke H-1/hari-H, aktifkan togglenya di kartu
+  WhatsApp, lalu panggil manual:
+  `curl -H "Authorization: Bearer $CRON_SECRET" https://<domain>/api/cron/send-reminders`
+  → response JSON harus nunjukkan `whatsapp.sent > 0`.
+- **Hapus notifikasi**: buka bell icon atau `/dashboard/notifications` →
+  klik ikon tempat sampah di satu notifikasi (harus langsung hilang), lalu
+  coba "Hapus semua" (harus muncul konfirmasi dulu sebelum benar-benar
+  menghapus semuanya).
+
+### 4) Rekomendasi lanjutan (belum dikerjakan, sengaja)
+
+Copy marketing/legal berikut masih menyiratkan "WhatsApp belum aktif" dan
+sebaiknya direview manual sebelum diedit (khususnya privacy policy, karena
+sekarang ada disclosure baru: nomor WhatsApp yang kamu isi dikirim ke Wablas
+sebagai pemroses pihak ketiga):
+- `src/app/page.tsx` (badge "WhatsApp menyusul", FAQ landing page)
+- `src/app/terms/page.tsx`
+- `src/app/privacy/page.tsx`
+- `src/components/LoginClient.tsx` ("Telegram dulu, Wablas nanti.")

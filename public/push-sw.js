@@ -20,12 +20,31 @@ self.addEventListener('push', (event) => {
   }
 
   const title = data.title || 'NEXA Campus'
+  const targetUrl = data.url || '/dashboard'
+  // Notifikasi "urgent" (deadline hari-H) bergetar lebih tegas & tetap
+  // nempel di layar (requireInteraction) sampai user sentuh, mirip gaya
+  // notifikasi chat/WA di panel notifikasi Android.
+  const urgent = data.tag === 'deadline-day' || data.urgent === true
+
   const options = {
     body: data.body || '',
+    // icon = ikon besar di kiri notifikasi, badge = ikon monokrom kecil
+    // di status bar (Android). Keduanya pakai logo NEXA supaya langsung
+    // kebaca app-nya walau notifikasi tersembunyi/grouped.
     icon: data.icon || '/icon-192.png',
     badge: data.badge || '/icon-192.png',
+    image: data.image || undefined,
     tag: data.tag || 'nexa-campus',
-    data: { url: data.url || '/dashboard' },
+    renotify: true,
+    requireInteraction: urgent,
+    silent: false,
+    vibrate: urgent ? [200, 100, 200, 100, 200] : [150, 80, 150],
+    timestamp: data.timestamp || Date.now(),
+    data: { url: targetUrl },
+    actions: [
+      { action: 'open', title: 'Buka' },
+      { action: 'dismiss', title: 'Tutup' },
+    ],
   }
 
   event.waitUntil(self.registration.showNotification(title, options))
@@ -33,6 +52,8 @@ self.addEventListener('push', (event) => {
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close()
+  if (event.action === 'dismiss') return
+
   const targetUrl = (event.notification.data && event.notification.data.url) || '/dashboard'
 
   event.waitUntil(

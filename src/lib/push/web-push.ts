@@ -12,7 +12,11 @@ export type PushPayload = {
   url?: string
   icon?: string
   badge?: string
+  image?: string
   tag?: string
+  /** Kalau true, notifikasi bergetar lebih tegas & tetap nempel (requireInteraction) — dipakai untuk deadline hari-H. */
+  urgent?: boolean
+  timestamp?: number
 }
 
 let configured = false

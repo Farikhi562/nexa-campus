@@ -343,7 +343,7 @@ export default function OnboardingForm({
       <section className="rounded-3xl border border-slate-200 bg-white p-5">
         <p className="text-sm font-black text-slate-950">Detail tambahan (opsional)</p>
         <p className="mt-1 text-xs leading-5 text-slate-500">
-          Telegram bisa diisi untuk reminder awal. WhatsApp belum aktif dan akan disiapkan di versi berikutnya.
+          Telegram bisa diisi untuk reminder awal. Nomor WhatsApp opsional — aktifkan & atur jadwalnya nanti di Settings → Reminder.
         </p>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <label className="block">

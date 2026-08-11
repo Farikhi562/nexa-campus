@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Bell, BellRing, Check, CheckCircle2, Clock3, PlayCircle, X } from 'lucide-react'
+import { Bell, BellRing, Check, CheckCircle2, Clock3, PlayCircle, Trash2, X } from 'lucide-react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 
@@ -94,6 +94,28 @@ export default function NotificationBell() {
     setUnreadCount((count) => Math.max(0, count - (item.is_read ? 0 : 1)))
   }
 
+  async function deleteOne(item: Notification) {
+    setNotifications((current) => current.filter((row) => row.id !== item.id))
+    setUnreadCount((count) => Math.max(0, count - (item.is_read ? 0 : 1)))
+    await fetch('/api/notifications', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: item.id }),
+    })
+  }
+
+  async function deleteAll() {
+    if (notifications.length === 0) return
+    if (!window.confirm('Hapus semua notifikasi? Tindakan ini tidak bisa dibatalkan.')) return
+    setNotifications([])
+    setUnreadCount(0)
+    await fetch('/api/notifications', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ all: true }),
+    })
+  }
+
   return (
     <div className="relative" ref={panelRef}>
       <button onClick={() => { setOpen((value) => !value); if (!open) void loadNotifications() }} aria-label="Notifikasi" className="focus-ring relative flex h-9 w-9 items-center justify-center rounded-2xl text-slate-600 transition hover:bg-slate-100">
@@ -107,6 +129,7 @@ export default function NotificationBell() {
             <h3 className="text-sm font-black text-slate-950">Notifikasi</h3>
             <div className="flex items-center gap-2">
               {unreadCount > 0 && <button onClick={markAllRead} className="flex items-center gap-1 rounded-xl px-2 py-1 text-xs font-bold text-blue-600 hover:bg-blue-50"><Check className="h-3 w-3" /> Tandai semua</button>}
+              {notifications.length > 0 && <button onClick={deleteAll} className="flex items-center gap-1 rounded-xl px-2 py-1 text-xs font-bold text-red-600 hover:bg-red-50"><Trash2 className="h-3 w-3" /> Hapus semua</button>}
               <button onClick={() => setOpen(false)} className="rounded-xl p-1 text-slate-400 hover:bg-slate-100"><X className="h-4 w-4" /></button>
             </div>
           </div>
@@ -136,7 +159,17 @@ export default function NotificationBell() {
                           </div>
                         )}
                       </div>
-                      {!item.is_read && <div className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-blue-500" />}
+                      <div className="flex flex-shrink-0 flex-col items-end gap-1.5">
+                        {!item.is_read && <div className="h-2 w-2 rounded-full bg-blue-500" />}
+                        <button
+                          type="button"
+                          onClick={() => void deleteOne(item)}
+                          aria-label="Hapus notifikasi"
+                          className="rounded-lg p-1 text-slate-300 transition hover:bg-red-50 hover:text-red-600"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
                     </div>
                   )
                 })}

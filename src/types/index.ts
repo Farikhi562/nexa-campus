@@ -24,7 +24,7 @@ export type DeadlineSource =
 
 export type DeadlineStatus = 'pending' | 'in_progress' | 'completed' | 'overdue'
 export type DeadlinePriority = 'low' | 'normal' | 'high' | 'urgent'
-export type ReminderChannel = 'telegram' | 'whatsapp'
+export type ReminderChannel = 'telegram' | 'whatsapp' | 'email' | 'push'
 export type SubscriptionIntentStatus = 'pending' | 'confirmed' | 'rejected' | 'cancelled'
 
 export interface Profile {
@@ -71,6 +71,8 @@ export interface Profile {
   is_banned?: boolean | null
   banned_reason?: string | null
   banned_at?: string | null
+  auto_delete_expired_deadlines: boolean
+  auto_delete_expired_after_days: number
   created_at: string
   updated_at: string
 }

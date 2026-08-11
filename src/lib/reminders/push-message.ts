@@ -56,5 +56,7 @@ export function buildPushPayload(type: ReminderType, d: DeadlineInfo) {
     body: bodyLines.join('\n'),
     url: '/dashboard',
     tag: `deadline-${type}`,
+    urgent: type === 'day',
+    timestamp: Date.now(),
   }
 }

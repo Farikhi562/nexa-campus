@@ -1,8 +1,9 @@
 'use client'
 
 /* eslint-disable react/no-unescaped-entities */
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Bell, BellOff, BellRing, Loader2, CheckCircle2, AlertTriangle } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 /**
  * Tombol "Aktifkan Notifikasi HP" — Web Push.
@@ -26,10 +27,32 @@ function urlBase64ToUint8Array(base64String: string) {
 
 type Status = 'checking' | 'unsupported' | 'subscribed' | 'unsubscribed' | 'denied'
 
-export default function PushNotificationSettings() {
+type PushWindowPrefs = {
+  h7_enabled: boolean
+  h3_enabled: boolean
+  h1_enabled: boolean
+  day_enabled: boolean
+  reminder_time: string
+}
+
+type PushNotificationSettingsProps = {
+  userId?: string
+  initialPreferences?: Partial<PushWindowPrefs> | null
+}
+
+export default function PushNotificationSettings({ userId, initialPreferences }: PushNotificationSettingsProps) {
+  const supabase = useMemo(() => createClient(), [])
   const [status, setStatus] = useState<Status>('checking')
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<{ type: 'ok' | 'err'; text: string } | null>(null)
+
+  const [h7, setH7] = useState(initialPreferences?.h7_enabled ?? false)
+  const [h3, setH3] = useState(initialPreferences?.h3_enabled ?? false)
+  const [h1, setH1] = useState(initialPreferences?.h1_enabled ?? true)
+  const [day, setDay] = useState(initialPreferences?.day_enabled ?? true)
+  const [reminderTime, setReminderTime] = useState(initialPreferences?.reminder_time?.slice(0, 5) ?? '08:00')
+  const [savingPrefs, setSavingPrefs] = useState(false)
+  const [prefsMessage, setPrefsMessage] = useState('')
 
   useEffect(() => {
     void check()
@@ -139,6 +162,33 @@ export default function PushNotificationSettings() {
     }
   }
 
+  async function savePushWindowPrefs() {
+    if (!userId) {
+      setPrefsMessage('Gagal: user tidak diketahui, muat ulang halaman.')
+      return
+    }
+    setSavingPrefs(true)
+    setPrefsMessage('')
+
+    const { error } = await supabase
+      .from('reminder_preferences')
+      .upsert(
+        {
+          user_id: userId,
+          channel: 'push',
+          h7_enabled: h7,
+          h3_enabled: h3,
+          h1_enabled: h1,
+          day_enabled: day,
+          reminder_time: reminderTime,
+        },
+        { onConflict: 'user_id,channel' }
+      )
+
+    setSavingPrefs(false)
+    setPrefsMessage(error ? 'Jadwal push gagal disimpan. Coba lagi.' : 'Jadwal notifikasi push tersimpan.')
+  }
+
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-4">
       <div className="flex items-start gap-3">
@@ -215,6 +265,54 @@ export default function PushNotificationSettings() {
             }`}>
               {message.text}
             </p>
+          )}
+
+          {status === 'subscribed' && (
+            <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <h4 className="text-xs font-black text-slate-700">Kapan notifikasi HP dikirim?</h4>
+              <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                {[
+                  ['H-7', h7, setH7],
+                  ['H-3', h3, setH3],
+                  ['H-1', h1, setH1],
+                  ['Hari-H', day, setDay],
+                ].map(([label, checked, setter]) => (
+                  <label
+                    key={String(label)}
+                    className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-bold text-slate-700"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={Boolean(checked)}
+                      onChange={(event) => (setter as (value: boolean) => void)(event.target.checked)}
+                    />
+                    {String(label)}
+                  </label>
+                ))}
+              </div>
+
+              <label className="mt-3 block max-w-[200px]">
+                <span className="mb-1.5 block text-xs font-black text-slate-700">Jam kirim</span>
+                <input
+                  type="time"
+                  value={reminderTime}
+                  onChange={(event) => setReminderTime(event.target.value)}
+                  className="focus-ring w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm"
+                />
+              </label>
+
+              <button
+                type="button"
+                onClick={savePushWindowPrefs}
+                disabled={savingPrefs}
+                className="mt-3 inline-flex min-h-10 items-center gap-1.5 rounded-xl bg-slate-900 px-3.5 py-2 text-xs font-black text-white disabled:opacity-50"
+              >
+                {savingPrefs ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+                Simpan Jadwal Push
+              </button>
+
+              {prefsMessage && <p className="mt-2 text-xs leading-5 text-slate-500">{prefsMessage}</p>}
+            </div>
           )}
 
           <p className="mt-2 text-[11px] leading-4 text-slate-400">

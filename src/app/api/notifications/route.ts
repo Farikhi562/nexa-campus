@@ -169,3 +169,44 @@ export async function PATCH(request: NextRequest) {
 
   return NextResponse.json({ ok: true })
 }
+
+export async function DELETE(request: NextRequest) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Login required.' }, { status: 401 })
+
+  const body = await request.json().catch(() => ({})) as {
+    id?: unknown
+    ids?: unknown
+    all?: unknown
+  }
+
+  if (body.all) {
+    const { error, count } = await supabase
+      .from('notifications')
+      .delete({ count: 'exact' })
+      .eq('user_id', user.id)
+
+    if (error) return NextResponse.json({ error: 'Gagal menghapus notifikasi.' }, { status: 500 })
+    return NextResponse.json({ ok: true, deleted: count ?? 0 })
+  }
+
+  const ids = Array.isArray(body.ids)
+    ? body.ids.map((id) => String(id)).filter(Boolean).slice(0, 100)
+    : typeof body.id === 'string' && body.id
+      ? [body.id]
+      : []
+
+  if (ids.length === 0) {
+    return NextResponse.json({ error: 'Tidak ada notifikasi yang dipilih untuk dihapus.' }, { status: 400 })
+  }
+
+  const { error, count } = await supabase
+    .from('notifications')
+    .delete({ count: 'exact' })
+    .in('id', ids)
+    .eq('user_id', user.id)
+
+  if (error) return NextResponse.json({ error: 'Gagal menghapus notifikasi.' }, { status: 500 })
+  return NextResponse.json({ ok: true, deleted: count ?? 0 })
+}

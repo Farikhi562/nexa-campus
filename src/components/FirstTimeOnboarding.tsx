@@ -182,7 +182,7 @@ export default function FirstTimeOnboarding({ userId, userName }: FirstTimeOnboa
                   <div className="flex items-center gap-3">
                     <input type="radio" disabled className="h-4 w-4 border-slate-300" />
                     <span className="font-black text-slate-950">WhatsApp</span>
-                    <span className="rounded-full bg-amber-100 px-2 py-1 text-xs font-black text-amber-800">coming soon</span>
+                    <span className="rounded-full bg-blue-100 px-2 py-1 text-xs font-black text-blue-800">atur di Settings</span>
                   </div>
                 </div>
 

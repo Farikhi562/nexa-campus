@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { sendTelegramMessage, buildReminderMessage } from '@/lib/telegram'
+import { sendWebPush, pushConfigured } from '@/lib/push/web-push'
+import { buildPushPayload } from '@/lib/reminders/push-message'
+import { sendWhatsAppMessage, buildWhatsAppReminderMessage, waConfigured } from '@/lib/whatsapp'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
@@ -43,6 +46,18 @@ const WINDOWS: Array<{ days: number; type: ReminderType; enabledField: 'h7_enabl
   { days: 0, type: 'day', enabledField: 'day_enabled' },
 ]
 
+type PrefRow = {
+  user_id: string
+  channel: string
+  reminder_time: string
+  h7_enabled: boolean
+  h3_enabled: boolean
+  h1_enabled: boolean
+  day_enabled: boolean
+}
+
+type PushSubRow = { user_id: string; endpoint: string; p256dh: string; auth: string }
+
 export async function GET(request: NextRequest) {
   if (!isAuthorized(request)) {
     return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 })
@@ -50,9 +65,13 @@ export async function GET(request: NextRequest) {
 
   const db = createServiceClient()
   const { dateStr, hour } = wibNow()
+  const pushEnabled = pushConfigured()
+  const waEnabled = waConfigured()
   let totalSent = 0, totalFailed = 0, totalAttempts = 0
+  let pushSent = 0, pushFailed = 0, pushRemoved = 0
+  let waSent = 0, waFailed = 0
 
-  console.log(`[Cron] Reminder start — WIB date=${dateStr} hour=${hour}`)
+  console.log(`[Cron] Reminder start — WIB date=${dateStr} hour=${hour} push=${pushEnabled} whatsapp=${waEnabled}`)
 
   for (const win of WINDOWS) {
     const targetDate = addDays(dateStr, win.days)
@@ -67,99 +86,248 @@ export async function GET(request: NextRequest) {
 
     if (dErr || !deadlines?.length) continue
 
-    // 2) Kumpulkan user_id unik, fetch profil + reminder_preferences
+    // 2) Kumpulkan user_id unik, fetch profil + reminder_preferences (telegram & push)
     const userIds = Array.from(new Set(deadlines.map((d) => d.user_id as string)))
 
     const { data: profiles } = await db
       .from('profiles')
-      .select('id, telegram_chat_id')
+      .select('id, telegram_chat_id, whatsapp_number')
       .in('id', userIds)
-      .not('telegram_chat_id', 'is', null)
 
     const { data: prefs } = await db
       .from('reminder_preferences')
       .select('user_id, channel, reminder_time, h7_enabled, h3_enabled, h1_enabled, day_enabled')
       .in('user_id', userIds)
-      .eq('channel', 'telegram')
+      .in('channel', ['telegram', 'push', 'whatsapp'])
+
+    const { data: pushSubs } = pushEnabled
+      ? await db
+          .from('push_subscriptions')
+          .select('user_id, endpoint, p256dh, auth')
+          .in('user_id', userIds)
+      : { data: [] as PushSubRow[] }
 
     const profileMap = new Map((profiles ?? []).map((p: Record<string, unknown>) => [p.id as string, p]))
-    const prefMap = new Map((prefs ?? []).map((p: Record<string, unknown>) => [p.user_id as string, p]))
+    const prefRows = (prefs ?? []) as PrefRow[]
+    const telegramPrefMap = new Map(prefRows.filter((p) => p.channel === 'telegram').map((p) => [p.user_id, p]))
+    const pushPrefMap = new Map(prefRows.filter((p) => p.channel === 'push').map((p) => [p.user_id, p]))
+    const waPrefMap = new Map(prefRows.filter((p) => p.channel === 'whatsapp').map((p) => [p.user_id, p]))
+
+    const subsByUser = new Map<string, PushSubRow[]>()
+    for (const sub of (pushSubs ?? []) as PushSubRow[]) {
+      const list = subsByUser.get(sub.user_id) ?? []
+      list.push(sub)
+      subsByUser.set(sub.user_id, list)
+    }
 
     for (const dl of deadlines) {
-      const profile = profileMap.get(dl.user_id as string)
-      const pref = prefMap.get(dl.user_id as string)
+      const userId = dl.user_id as string
+      const profile = profileMap.get(userId)
+      let notifiedThisRound = false
 
-      if (!profile || !pref) continue
+      // ─── Channel: Telegram ─────────────────────────────────────────────
+      const telegramPref = telegramPrefMap.get(userId)
+      const chatId = (profile?.telegram_chat_id as string | undefined)?.trim()
 
-      const chatId = profile.telegram_chat_id as string
-      if (!chatId?.trim()) continue
+      if (profile && telegramPref && chatId && telegramPref[win.enabledField]) {
+        const reminderHour = parseInt(telegramPref.reminder_time.slice(0, 2), 10)
 
-      // Cek apakah reminder window ini diaktifkan user
-      if (!pref[win.enabledField]) continue
+        if (reminderHour === hour) {
+          totalAttempts++
 
-      // Cek jam: reminder hanya dikirim di jam yang sesuai reminder_time
-      const reminderHour = parseInt((pref.reminder_time as string).slice(0, 2), 10)
-      if (reminderHour !== hour) continue
+          const { data: existing } = await db
+            .from('reminder_logs')
+            .select('id')
+            .eq('deadline_id', dl.id as string)
+            .eq('channel', 'telegram')
+            .eq('reminder_type', win.type)
+            .eq('status', 'sent')
+            .maybeSingle()
 
-      totalAttempts++
+          if (!existing) {
+            const text = buildReminderMessage(win.type, {
+              title: dl.title as string | null,
+              course_name: dl.course_name as string,
+              deadline_date: dl.deadline_date as string,
+              deadline_time: dl.deadline_time as string,
+              campus: dl.campus as string,
+              room: dl.room as string,
+            })
 
-      // Dedup: sudah pernah dikirim?
-      const { data: existing } = await db
-        .from('reminder_logs')
-        .select('id')
-        .eq('deadline_id', dl.id as string)
-        .eq('channel', 'telegram')
-        .eq('reminder_type', win.type)
-        .eq('status', 'sent')
-        .maybeSingle()
+            const result = await sendTelegramMessage(chatId, text)
 
-      if (existing) continue
+            if (result.ok) {
+              await db.from('reminder_logs').insert({
+                user_id: userId,
+                deadline_id: dl.id,
+                channel: 'telegram',
+                reminder_type: win.type,
+                status: 'sent',
+                sent_at: new Date().toISOString(),
+              }).then(() => null, () => null)
+              notifiedThisRound = true
+              totalSent++
+            } else {
+              await db.from('reminder_logs').insert({
+                user_id: userId,
+                deadline_id: dl.id,
+                channel: 'telegram',
+                reminder_type: win.type,
+                status: 'failed',
+                provider_message: result.error,
+              }).then(() => null, () => null)
+              totalFailed++
+            }
+          }
+        }
+      }
 
-      const text = buildReminderMessage(win.type, {
-        title: dl.title as string | null,
-        course_name: dl.course_name as string,
-        deadline_date: dl.deadline_date as string,
-        deadline_time: dl.deadline_time as string,
-        campus: dl.campus as string,
-        room: dl.room as string,
-      })
+      // ─── Channel: Web Push (notifikasi asli HP/laptop, seperti WA/native) ──
+      const pushPref = pushPrefMap.get(userId)
+      const subs = subsByUser.get(userId) ?? []
 
-      const result = await sendTelegramMessage(chatId.trim(), text)
+      if (pushEnabled && pushPref && subs.length && pushPref[win.enabledField]) {
+        const reminderHour = parseInt(pushPref.reminder_time.slice(0, 2), 10)
 
-      if (result.ok) {
-        await db.from('reminder_logs').insert({
-          user_id: dl.user_id,
-          deadline_id: dl.id,
-          channel: 'telegram',
-          reminder_type: win.type,
-          status: 'sent',
-          sent_at: new Date().toISOString(),
-        }).then(() => null, () => null)
+        if (reminderHour === hour) {
+          const { data: existingPush } = await db
+            .from('reminder_logs')
+            .select('id')
+            .eq('deadline_id', dl.id as string)
+            .eq('channel', 'push')
+            .eq('reminder_type', win.type)
+            .eq('status', 'sent')
+            .maybeSingle()
 
+          if (!existingPush) {
+            const payload = buildPushPayload(win.type, {
+              title: dl.title as string | null,
+              course_name: dl.course_name as string,
+              deadline_date: dl.deadline_date as string,
+              deadline_time: dl.deadline_time as string,
+              campus: dl.campus as string,
+              room: dl.room as string,
+            })
+
+            let anyOk = false
+            for (const sub of subs) {
+              const result = await sendWebPush(
+                { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+                payload
+              )
+              if (result.ok) {
+                anyOk = true
+              } else if (result.gone) {
+                await db.from('push_subscriptions').delete().eq('endpoint', sub.endpoint)
+                pushRemoved++
+              }
+            }
+
+            if (anyOk) {
+              await db.from('reminder_logs').insert({
+                user_id: userId,
+                deadline_id: dl.id,
+                channel: 'push',
+                reminder_type: win.type,
+                status: 'sent',
+                sent_at: new Date().toISOString(),
+              }).then(() => null, () => null)
+              notifiedThisRound = true
+              pushSent++
+            } else {
+              await db.from('reminder_logs').insert({
+                user_id: userId,
+                deadline_id: dl.id,
+                channel: 'push',
+                reminder_type: win.type,
+                status: 'failed',
+                provider_message: 'Semua push subscription gagal/expired.',
+              }).then(() => null, () => null)
+              pushFailed++
+            }
+          }
+        }
+      }
+
+      // ─── Channel: WhatsApp (Wablas) ─────────────────────────────────────
+      const waPref = waPrefMap.get(userId)
+      const waNumber = (profile?.whatsapp_number as string | undefined)?.trim()
+
+      if (waEnabled && profile && waPref && waNumber && waPref[win.enabledField]) {
+        const reminderHour = parseInt(waPref.reminder_time.slice(0, 2), 10)
+
+        if (reminderHour === hour) {
+          const { data: existingWa } = await db
+            .from('reminder_logs')
+            .select('id')
+            .eq('deadline_id', dl.id as string)
+            .eq('channel', 'whatsapp')
+            .eq('reminder_type', win.type)
+            .eq('status', 'sent')
+            .maybeSingle()
+
+          if (!existingWa) {
+            const text = buildWhatsAppReminderMessage(win.type, {
+              title: dl.title as string | null,
+              course_name: dl.course_name as string,
+              deadline_date: dl.deadline_date as string,
+              deadline_time: dl.deadline_time as string,
+              campus: dl.campus as string,
+              room: dl.room as string,
+            })
+
+            const result = await sendWhatsAppMessage(waNumber, text)
+
+            if (result.ok) {
+              await db.from('reminder_logs').insert({
+                user_id: userId,
+                deadline_id: dl.id,
+                channel: 'whatsapp',
+                reminder_type: win.type,
+                status: 'sent',
+                sent_at: new Date().toISOString(),
+              }).then(() => null, () => null)
+              notifiedThisRound = true
+              waSent++
+            } else {
+              await db.from('reminder_logs').insert({
+                user_id: userId,
+                deadline_id: dl.id,
+                channel: 'whatsapp',
+                reminder_type: win.type,
+                status: 'failed',
+                provider_message: result.error,
+              }).then(() => null, () => null)
+              waFailed++
+            }
+          }
+        }
+      }
+
+      // ─── Notifikasi in-app (bell) — sekali per deadline+window, terlepas
+      // dari channel mana yang berhasil, biar nggak dobel di notification bell.
+      if (notifiedThisRound) {
         await db.from('notifications').insert({
-          user_id: dl.user_id,
+          user_id: userId,
           type: 'deadline_reminder',
           title: `Reminder: ${dl.course_name as string}`,
           message: `Deadline ${win.days === 0 ? 'hari ini' : `dalam ${win.days} hari`}: ${(dl.title as string | null) ?? (dl.course_name as string)}`,
           link: `/dashboard/deadlines/${dl.id as string}/edit`,
           related_deadline_id: dl.id,
         }).then(() => null, () => null)
-
-        totalSent++
-      } else {
-        await db.from('reminder_logs').insert({
-          user_id: dl.user_id,
-          deadline_id: dl.id,
-          channel: 'telegram',
-          reminder_type: win.type,
-          status: 'failed',
-          provider_message: result.error,
-        }).then(() => null, () => null)
-        totalFailed++
       }
     }
   }
 
-  console.log(`[Cron] Done — sent=${totalSent} failed=${totalFailed} attempts=${totalAttempts}`)
-  return NextResponse.json({ ok: true, date: dateStr, hour, sent: totalSent, failed: totalFailed, attempted: totalAttempts })
+  console.log(
+    `[Cron] Done — telegram sent=${totalSent} failed=${totalFailed} attempts=${totalAttempts} | push sent=${pushSent} failed=${pushFailed} removed=${pushRemoved} | whatsapp sent=${waSent} failed=${waFailed}`
+  )
+  return NextResponse.json({
+    ok: true,
+    date: dateStr,
+    hour,
+    telegram: { sent: totalSent, failed: totalFailed, attempted: totalAttempts },
+    push: { enabled: pushEnabled, sent: pushSent, failed: pushFailed, removed_expired: pushRemoved },
+    whatsapp: { enabled: waEnabled, sent: waSent, failed: waFailed },
+  })
 }

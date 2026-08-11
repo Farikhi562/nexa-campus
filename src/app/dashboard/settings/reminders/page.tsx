@@ -1,5 +1,8 @@
 import Link from 'next/link'
 import ReminderSettingsForm from '@/components/ReminderSettingsForm'
+import PushNotificationSettings from '@/components/settings/PushNotificationSettings'
+import WhatsAppReminderSettings from '@/components/settings/WhatsAppReminderSettings'
+import DeadlineAutoDeleteSettings from '@/components/settings/DeadlineAutoDeleteSettings'
 import { createClient } from '@/lib/supabase/server'
 import type { Profile, ReminderPreferences } from '@/types'
 
@@ -9,13 +12,25 @@ export default async function ReminderSettingsPage() {
     data: { user },
   } = await supabase.auth.getUser()
 
-  const [{ data: profile }, { data: preferences }] = await Promise.all([
+  const [{ data: profile }, { data: preferences }, { data: pushPreferences }, { data: waPreferences }] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', user!.id).single(),
     supabase
       .from('reminder_preferences')
       .select('*')
       .eq('user_id', user!.id)
       .eq('channel', 'telegram')
+      .maybeSingle(),
+    supabase
+      .from('reminder_preferences')
+      .select('*')
+      .eq('user_id', user!.id)
+      .eq('channel', 'push')
+      .maybeSingle(),
+    supabase
+      .from('reminder_preferences')
+      .select('*')
+      .eq('user_id', user!.id)
+      .eq('channel', 'whatsapp')
       .maybeSingle(),
   ])
 
@@ -25,9 +40,9 @@ export default async function ReminderSettingsPage() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm font-black uppercase tracking-wide text-blue-700">Reminder Settings</p>
-            <h1 className="mt-1 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">Pengaturan Telegram</h1>
+            <h1 className="mt-1 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">Pengaturan Reminder</h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-              Aktifkan reminder Telegram untuk deadline yang kamu input manual. Jika token udah ada di env, restart server dev/deploy biar tokennya ke baca
+              Atur notifikasi HP, Telegram, WhatsApp, dan auto-hapus deadline yang sudah lewat untuk deadline yang kamu input manual.
             </p>
           </div>
           <Link
@@ -39,10 +54,28 @@ export default async function ReminderSettingsPage() {
         </div>
       </div>
 
+      <PushNotificationSettings
+        userId={(profile as Profile).id}
+        initialPreferences={pushPreferences as Partial<ReminderPreferences> | null}
+      />
+
       <ReminderSettingsForm
         profile={profile as Profile}
         preferences={preferences as ReminderPreferences | null}
         telegramConfigured={Boolean(process.env.TELEGRAM_BOT_TOKEN)}
+      />
+
+      <WhatsAppReminderSettings
+        userId={(profile as Profile).id}
+        waConfigured={Boolean(process.env.WABLAS_API_URL && process.env.WABLAS_TOKEN)}
+        initialWhatsAppNumber={(profile as Profile).whatsapp_number}
+        initialPreferences={waPreferences as Partial<ReminderPreferences> | null}
+      />
+
+      <DeadlineAutoDeleteSettings
+        userId={(profile as Profile).id}
+        initialEnabled={(profile as Profile).auto_delete_expired_deadlines ?? false}
+        initialDays={(profile as Profile).auto_delete_expired_after_days ?? 7}
       />
     </div>
   )

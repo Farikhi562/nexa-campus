@@ -432,3 +432,224 @@ File yang berubah: `components/badges/UnifiedBadgeStrip.tsx`,
   skeleton khusus Arena dibikin) — kalau mau konsisten, bisa ditambah
   `SkeletonAchievementCard`-style baru buat Arena, sengaja belum dikerjakan
   di round ini biar scope tetap kecil & aman.
+
+---
+
+## Update Round 7 — Notifikasi HP asli (Web Push), Telegram tutorial, auto-hapus deadline lewat
+
+### 1. Bug besar: notifikasi HP (Web Push) sudah lengkap infra-nya, tapi TIDAK PERNAH dipakai
+
+Ditemukan Web Push sudah dibangun cukup lengkap — service worker
+`public/push-sw.js`, util `lib/push/web-push.ts`, route
+`/api/push/{subscribe,unsubscribe,test}`, bahkan komponen UI-nya
+`components/settings/PushNotificationSettings.tsx` — tapi ada 3 masalah yang
+bikin fitur ini nggak pernah benar-benar jalan:
+
+- **Komponennya nggak pernah dipasang di halaman manapun.** `<PushNotificationSettings />`
+  itu dead code — nggak ada satupun page yang import & render dia, jadi user
+  nggak akan pernah lihat tombol "Aktifkan Notifikasi HP" ini.
+- **Cron reminder (`/api/cron/send-reminders`) cuma kirim Telegram.** Semua
+  infra push di atas nganggur — nggak ada satupun kode yang benar-benar
+  manggil `sendWebPush()` waktu deadline reminder due. Jadi walaupun user
+  sempat subscribe manual, nggak akan pernah dapat notifikasi beneran.
+- **Tabel `push_subscriptions` nggak ada di migration manapun.** Route
+  subscribe/unsubscribe/test semua query ke tabel ini, tapi kalau database
+  di-setup dari `schema.sql` + `migrations/`, tabelnya nggak pernah kebuat →
+  subscribe pasti gagal di database baru.
+- **Bonus bug:** `reminder_preferences` cuma unique per `user_id` (bukan per
+  `user_id + channel`), padahal `push/subscribe/route.ts` upsert pakai
+  `onConflict: 'user_id,channel'` — jadi baris preferensi channel `push`
+  bakal bentrok/nimpa baris `telegram` punya user yang sama. Constraint
+  `channel` juga belum mengizinkan nilai `'push'` sama sekali (di
+  `reminder_preferences` maupun `reminder_logs`).
+
+**Perbaikan:**
+- Migration baru `supabase/migrations/20260808_push_channel_and_autodelete.sql`:
+  bikin tabel `push_subscriptions` (+ RLS), ganti unique constraint
+  `reminder_preferences` jadi `(user_id, channel)`, izinkan channel `'push'`
+  di `reminder_preferences` dan `reminder_logs`.
+- `<PushNotificationSettings />` sekarang dipasang di halaman
+  `/dashboard/settings/reminders`.
+- `src/app/api/cron/send-reminders/route.ts` di-restructure: untuk setiap
+  window (H-7/H-3/H-1/hari-H), sekarang cek DUA channel — Telegram (seperti
+  sebelumnya) DAN Web Push (baru) — masing-masing dengan dedup sendiri lewat
+  `reminder_logs`, dan subscription yang sudah expired (404/410 dari
+  provider) otomatis dihapus dari `push_subscriptions`. Notifikasi in-app
+  (bell) tetap cuma masuk sekali per deadline+window walau dua channel
+  berhasil, biar nggak dobel.
+
+### 2. Notifikasi push dibikin lebih "kerasa" — gaya notifikasi HP asli
+
+`public/push-sw.js` sebelumnya cuma nampilin title/body polos. Sekarang:
+- Icon besar + badge status-bar pakai logo NEXA (`icon-192.png`), supaya
+  langsung kekenali walau notifikasi ke-grouped dengan app lain (mirip
+  notifikasi WA/Telegram di panel notifikasi Android pada screenshot
+  referensi).
+- Getar (`vibrate`) — pola lebih tegas khusus buat reminder hari-H
+  (`requireInteraction: true` juga, jadi nggak ilang sendiri sebelum
+  disentuh).
+- Tombol aksi langsung di notifikasi: **Buka** & **Tutup**.
+- `renotify: true` supaya notifikasi baru dengan tag sama tetap membangunkan
+  device, bukan cuma diam-diam update notifikasi lama.
+
+File yang berubah: `public/push-sw.js`, `src/lib/reminders/push-message.ts`
+(tambah field `urgent`/`timestamp`), `src/lib/push/web-push.ts` (update tipe
+`PushPayload`).
+
+### 3. Tutorial setup Telegram langsung di halaman Settings
+
+Sebelumnya user cuma dikasih 1 kalimat "Chat ID bisa didapat dari bot..."
+tanpa langkah jelas. `ReminderSettingsForm.tsx` sekarang punya panduan
+5 langkah bernomor (buka bot → /start → bot balas Chat ID → tempel ke form
+→ simpan & test), plus tombol **"Buka Bot Telegram"** yang deep-link
+langsung ke `https://t.me/<username>` kalau env `NEXT_PUBLIC_TELEGRAM_BOT_USERNAME`
+diisi (opsional — kalau kosong, tutorial tetap tampil tanpa tombol
+deep-link, fallback ke instruksi cari manual + `@userinfobot`).
+
+### 4. Fitur baru: auto-hapus deadline yang tanggalnya sudah lewat
+
+Opsional, **default OFF**, diatur user sendiri di Settings → Reminder:
+
+- 2 kolom baru di `profiles`: `auto_delete_expired_deadlines` (boolean) dan
+  `auto_delete_expired_after_days` (0–60 hari, default 7).
+- Komponen baru `components/settings/DeadlineAutoDeleteSettings.tsx` — toggle
+  on/off + pilihan "hapus setelah berapa hari lewat" (langsung / 3 / 7 / 14 /
+  30 hari), lengkap warning bahwa penghapusan permanen.
+- Route cron baru `src/app/api/cron/cleanup-expired-deadlines/route.ts` —
+  jalan sekali sehari (lihat `supabase/UPDATE_NOTES.md` untuk cara daftarkan
+  jadwalnya), hapus `academic_deadlines` yang `deadline_date` sudah lewat
+  dari cutoff pilihan tiap user, HANYA untuk user yang mengaktifkan opsi ini.
+
+**Sengaja tidak auto-aktif untuk siapapun** — supaya nggak ada yang tiba-tiba
+kehilangan riwayat deadline lamanya tanpa consent.
+
+### File yang berubah/baru — ringkasan
+
+- Baru: `supabase/migrations/20260808_push_channel_and_autodelete.sql`
+- Baru: `src/app/api/cron/cleanup-expired-deadlines/route.ts`
+- Baru: `src/components/settings/DeadlineAutoDeleteSettings.tsx`
+- Ubah: `src/app/api/cron/send-reminders/route.ts`
+- Ubah: `public/push-sw.js`
+- Ubah: `src/lib/reminders/push-message.ts`
+- Ubah: `src/lib/push/web-push.ts`
+- Ubah: `src/components/ReminderSettingsForm.tsx`
+- Ubah: `src/app/dashboard/settings/reminders/page.tsx`
+- Ubah: `src/types/index.ts` (`ReminderChannel` tambah `'push'`, `Profile`
+  tambah 2 kolom auto-delete)
+
+### Rekomendasi lanjutan round ini
+
+- Belum ada UI buat atur H-7/H-3/H-1/hari-H khusus untuk channel push secara
+  terpisah dari Telegram (saat ini push ikut default kolom, yaitu H-1 &
+  hari-H aktif). Kalau mau dipisah, tinggal duplikasi pola
+  `ReminderSettingsForm.tsx` dengan `channel: 'push'`.
+- iOS Safari: Web Push baru jalan setelah user "Add to Home Screen" (sudah
+  ada catatannya di UI `PushNotificationSettings.tsx`, iOS 16.4+).
+
+---
+
+## Update Round 7 (lanjutan) — Jadwal notifikasi push bisa diatur terpisah dari Telegram
+
+Rekomendasi lanjutan di Round 7 sudah dikerjakan: `PushNotificationSettings.tsx`
+sekarang punya bagian "Kapan notifikasi HP dikirim?" sendiri (checkbox
+H-7/H-3/H-1/hari-H + jam kirim), disimpan ke `reminder_preferences` dengan
+`channel: 'push'` — terpisah dari jadwal Telegram. Muncul begitu device sudah
+subscribe push. Halaman `/dashboard/settings/reminders` di-update untuk fetch
+preferensi channel `push` di server dan teruskan sebagai `initialPreferences`
+ke komponennya.
+
+File yang berubah: `src/components/settings/PushNotificationSettings.tsx`,
+`src/app/dashboard/settings/reminders/page.tsx`.
+
+---
+
+## Update Round 8 — WhatsApp reminder (Wablas) + tombol hapus notifikasi
+
+### 1. Channel reminder baru: WhatsApp lewat Wablas
+
+Landing page & marketing copy project ini sendiri sudah janji "Telegram dulu,
+Wablas nanti" — sekarang direalisasikan. WhatsApp sekarang jadi channel
+reminder ketiga (setelah Telegram & Push), dikirim lewat **Wablas** (WhatsApp
+API gateway pihak ketiga, bukan Meta resmi — device-nya scan QR pakai nomor
+WA khusus milik akun Wablas, BUKAN nomor pribadi mahasiswa).
+
+**File baru:**
+- `src/lib/whatsapp.ts` — `sendWhatsAppMessage()`, `waConfigured()`,
+  `normalizeIndonesianPhone()` (terima input `08xxx`/`+62xxx`/`62xxx`/`8xxx`),
+  plus `buildWhatsAppReminderMessage()` & `buildWhatsAppTestMessage()` —
+  format WhatsApp pakai `*bold*`/`_italic_`, BUKAN tag HTML seperti Telegram,
+  karena WhatsApp nggak support HTML.
+- `src/app/api/reminders/whatsapp/test/route.ts` — kirim pesan tes, mirror
+  pola `api/reminders/telegram/test`.
+- `src/components/settings/WhatsAppReminderSettings.tsx` — kartu Settings
+  baru: nomor WhatsApp, toggle H-7/H-3/H-1/hari-H, jam kirim, tombol simpan +
+  tombol tes. Nonaktif otomatis (dengan badge peringatan) kalau
+  `WABLAS_API_URL`/`WABLAS_TOKEN` belum diisi di server.
+
+**File yang diubah:**
+- `src/app/api/cron/send-reminders/route.ts` — WhatsApp jadi channel ketiga
+  di loop reminder, dengan dedup sendiri lewat `reminder_logs` (channel
+  `'whatsapp'` — nilai ini sudah diizinkan dari awal di schema, jadi TIDAK
+  perlu migration baru untuk ini khususnya).
+- `src/components/ReminderSettingsForm.tsx` — field nomor WhatsApp yang
+  lama (yang cuma nyimpen ke `profiles.whatsapp_number` tanpa efek apa-apa)
+  DIHAPUS dari sini, dipindah sepenuhnya ke `WhatsAppReminderSettings.tsx`
+  yang beneran fungsional. Copy "WhatsApp belum aktif..." dihapus.
+- `src/components/OnboardingForm.tsx`, `src/components/FirstTimeOnboarding.tsx`
+  — copy "coming soon" untuk WhatsApp diupdate supaya nggak kontradiksi
+  sama fitur yang sekarang beneran jalan.
+- `src/app/dashboard/settings/reminders/page.tsx` — fetch preferensi channel
+  `whatsapp`, render `<WhatsAppReminderSettings />`.
+
+**Env variable baru (wajib diisi supaya WhatsApp aktif):**
+```
+WABLAS_API_URL=https://<namaserver-akun-kamu>.wablas.com/api/send-message
+WABLAS_TOKEN=<token dari dashboard Wablas>
+```
+
+**Catatan jujur soal keterbatasan:** karena Claude tidak bisa akses dashboard
+Wablas kamu langsung, format response sukses/gagal API-nya (field JSON
+persisnya) didekati secara defensif berdasarkan dokumentasi publik & contoh
+komunitas, BUKAN diverifikasi langsung ke akun kamu. **Wajib coba "Kirim Test
+WhatsApp" dulu setelah isi env**, dan kalau ternyata response Wablas versi
+akunmu beda, cek pesan error yang muncul (ada di `reminder_logs.provider_message`
+juga) lalu kabari supaya penyesuaiannya presisi.
+
+**Rekomendasi lanjutan (belum dikerjakan):** copy marketing di `src/app/page.tsx`
+(badge "WhatsApp menyusul", FAQ), `src/app/terms/page.tsx`,
+`src/app/privacy/page.tsx`, dan `src/components/LoginClient.tsx` ("Telegram
+dulu, Wablas nanti.") masih menyiratkan WhatsApp belum aktif — sengaja TIDAK
+diubah di round ini karena itu teks marketing/legal yang sebaiknya direview
+manusia dulu sebelum diedit, apalagi bagian privacy policy (perlu
+disclosure baru: nomor WhatsApp dikirim ke Wablas sebagai pihak ketiga).
+
+### 2. Notifikasi bell: tombol hapus (satu & semua)
+
+`notifications` (bell icon + halaman `/dashboard/notifications`) sebelumnya
+cuma bisa ditandai dibaca — nggak bisa dihapus sama sekali dari UI.
+
+- `src/app/api/notifications/route.ts` — tambah handler `DELETE`: hapus satu
+  (`{ id }`), banyak sekaligus (`{ ids: [...] }`), atau semua (`{ all: true }`),
+  semuanya scoped ke `user_id` milik sendiri.
+- `src/components/NotificationBell.tsx` — ikon tempat sampah di tiap item +
+  tombol "Hapus semua" di header dropdown (di samping "Tandai semua"),
+  dengan `window.confirm()` sebelum hapus semua.
+- `src/components/dashboard/NotificationCenterView.tsx` — tombol "Hapus
+  semua" di header + ikon hapus per item, pola yang sama.
+
+Tidak perlu migration — kolom yang dipakai sudah ada semua, cuma nambah
+endpoint DELETE yang sebelumnya nggak ada.
+
+### File yang berubah/baru — ringkasan Round 8
+
+- Baru: `src/lib/whatsapp.ts`
+- Baru: `src/app/api/reminders/whatsapp/test/route.ts`
+- Baru: `src/components/settings/WhatsAppReminderSettings.tsx`
+- Ubah: `src/app/api/cron/send-reminders/route.ts`
+- Ubah: `src/components/ReminderSettingsForm.tsx`
+- Ubah: `src/components/OnboardingForm.tsx`
+- Ubah: `src/components/FirstTimeOnboarding.tsx`
+- Ubah: `src/app/dashboard/settings/reminders/page.tsx`
+- Ubah: `src/app/api/notifications/route.ts`
+- Ubah: `src/components/NotificationBell.tsx`
+- Ubah: `src/components/dashboard/NotificationCenterView.tsx`
