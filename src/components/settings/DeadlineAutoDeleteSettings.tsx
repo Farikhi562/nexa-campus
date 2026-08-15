@@ -138,7 +138,7 @@ export default function DeadlineAutoDeleteSettings({
           )}
 
           <p className="mt-2 text-[11px] leading-4 text-slate-400">
-            Default: mati. Kalau kamu nyalain, penghapusan bersifat permanen dan berjalan otomatis tiap hari — pastikan kamu sudah tandai deadline penting sebagai &quot;selesai&quot; dulu kalau masih mau disimpan.
+            Default: mati. Kalau kamu nyalain, penghapusan bersifat permanen dan berjalan otomatis tiap hari — pastikan kamu sudah tandai deadline penting sebagai "selesai" dulu kalau masih mau disimpan.
           </p>
         </div>
       </div>
