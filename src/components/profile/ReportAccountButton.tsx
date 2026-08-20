@@ -50,9 +50,9 @@ export default function ReportAccountButton({ userId }: { userId: string }) {
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/40 p-0 sm:items-center sm:p-4" onClick={close}>
+        <div className="fixed inset-0 z-[70] flex items-end justify-center bg-slate-950/40 p-0 sm:items-center sm:p-4" onClick={close}>
           <div
-            className="w-full max-w-sm rounded-t-3xl border border-white/80 bg-white p-5 shadow-xl sm:rounded-3xl"
+            className="max-h-[85vh] w-full max-w-sm overflow-y-auto rounded-t-3xl border border-white/80 bg-white p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-xl sm:max-h-[90vh] sm:rounded-3xl sm:pb-5"
             onClick={(e) => e.stopPropagation()}
           >
             {done ? (

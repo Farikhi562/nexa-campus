@@ -376,7 +376,7 @@ export default function ShareDeadlineModal({ deadlines, userName, userTier, onCl
   }
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/70 p-3 backdrop-blur-sm sm:p-6" role="dialog" aria-modal="true">
+    <div className="fixed inset-0 z-[70] overflow-y-auto bg-slate-950/70 p-3 backdrop-blur-sm sm:p-6" role="dialog" aria-modal="true">
       <div className="mx-auto max-w-4xl rounded-3xl bg-white shadow-2xl">
         <div className="flex items-start justify-between gap-4 border-b border-slate-100 p-5">
           <div>

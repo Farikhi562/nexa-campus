@@ -46,7 +46,7 @@ export default function CommandFocusPlan({ deadlines, userTier }: CommandFocusPl
   return (
     <section className="relative overflow-hidden rounded-3xl border border-slate-200 bg-slate-950 p-5 text-white shadow-xl shadow-slate-200">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(96,165,250,0.25),transparent_18rem)]" />
-      <div className={isCommand ? 'relative' : 'relative select-none blur-[2px]'}>
+      <div className={isCommand ? 'relative' : 'relative select-none opacity-30'}>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <Badge tone="brand" className="mb-3 bg-blue-300/10 text-blue-100 ring-blue-300/20">

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Bell, BellRing, Check, CheckCircle2, Clock3, PlayCircle, Trash2, X } from 'lucide-react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import { typeIcon } from '@/lib/notifications/type-meta'
 
 type Notification = {
   id: string
@@ -32,12 +33,6 @@ function deadlineIdFrom(item: Notification) {
     ?? null
 }
 
-const typeIcon: Record<string, string> = {
-  deadline_reminder: '🔔', deadline_approaching: '⏰', friend_request: '👋', friend_accepted: '🤝',
-  room_approved: '🚪', direct_message: '💬', achievement: '🏆', arena_application: '⚔️',
-  arena_application_accepted: '✅', arena_application_rejected: '🛡️', system: '📣',
-}
-
 export default function NotificationBell() {
   const [open, setOpen] = useState(false)
   const [notifications, setNotifications] = useState<Notification[]>([])
@@ -61,11 +56,22 @@ export default function NotificationBell() {
 
   useEffect(() => {
     void loadNotifications()
-    const channel = supabase
-      .channel('notifications-bell')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications' }, () => { void loadNotifications() })
-      .subscribe()
-    return () => { void supabase.removeChannel(channel) }
+    let channel: ReturnType<typeof supabase.channel> | null = null
+
+    supabase.auth.getUser().then(({ data }) => {
+      const userId = data.user?.id
+      if (!userId) return
+      channel = supabase
+        .channel('notifications-bell')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` },
+          () => { void loadNotifications() }
+        )
+        .subscribe()
+    })
+
+    return () => { if (channel) void supabase.removeChannel(channel) }
   }, [loadNotifications, supabase])
 
   useEffect(() => {

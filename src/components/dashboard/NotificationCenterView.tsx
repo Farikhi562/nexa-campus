@@ -6,6 +6,7 @@ import { Bell, CheckCheck, CheckCircle2, Clock3, ExternalLink, Filter, Loader2, 
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import { Card, CardContent } from '@/components/ui/Card'
+import { typeIcon as icons } from '@/lib/notifications/type-meta'
 
 type NotificationItem = {
   id: string
@@ -30,12 +31,6 @@ const filters = [
 ] as const
 
 type FilterKey = (typeof filters)[number]['key']
-
-const icons: Record<string, string> = {
-  direct_message: '💬', friend_request: '👋', friend_accepted: '🤝',
-  arena_application: '⚔️', arena_application_accepted: '✅', arena_application_rejected: '🛡️',
-  badge_unlocked: '🏆', achievement: '🏆', deadline_reminder: '⏰', deadline_approaching: '🔔', system: '📣',
-}
 
 function timeAgo(value: string) {
   const diff = Math.max(1, Math.floor((Date.now() - new Date(value).getTime()) / 1000))

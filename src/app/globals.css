@@ -391,3 +391,16 @@ svg {
   0% { transform: translateX(-80%) rotate(20deg); }
   58%, 100% { transform: translateX(120%) rotate(20deg); }
 }
+
+/* NotificationPopup.tsx — animasi masuk/keluar toast in-app */
+@keyframes nexa-toast-in {
+  0% { opacity: 0; transform: translateY(-10px) scale(0.97); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.nexa-toast-in {
+  animation: nexa-toast-in 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.nexa-toast-out {
+  transition: opacity 180ms ease, transform 180ms ease !important;
+  transform: translateY(-6px) scale(0.97);
+}

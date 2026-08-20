@@ -1,6 +1,7 @@
 import DeadlineDashboardOverview from '@/components/dashboard/DeadlineDashboardOverview'
 import DashboardStatsStrip from '@/components/dashboard/DashboardStatsStrip'
 import WeeklyReviewCard from '@/components/dashboard/WeeklyReviewCard'
+import ActivityLearningCard from '@/components/dashboard/ActivityLearningCard'
 import { createClient } from '@/lib/supabase/server'
 import { sortNearest } from '@/lib/deadline-utils'
 import { redirect } from 'next/navigation'
@@ -66,6 +67,7 @@ export default async function DashboardPage({
     <div className="space-y-4">
       <DashboardStatsStrip deadlines={sortedDeadlines} />
       <WeeklyReviewCard />
+      <ActivityLearningCard userId={user.id} />
       <DeadlineDashboardOverview
         initialDeadlines={sortedDeadlines}
       userName={dashboardProfile?.full_name}

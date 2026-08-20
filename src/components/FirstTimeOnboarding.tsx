@@ -120,7 +120,7 @@ export default function FirstTimeOnboarding({ userId, userName }: FirstTimeOnboa
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 px-4 py-6 backdrop-blur-sm" role="dialog" aria-modal="true">
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/70 px-4 py-6 backdrop-blur-sm" role="dialog" aria-modal="true">
       <div className="w-full max-w-xl rounded-lg bg-white shadow-2xl">
         <div className="border-b border-slate-200 px-6 py-5">
           <div className="flex items-center justify-between gap-4">

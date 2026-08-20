@@ -148,7 +148,7 @@ export default function FlashcardView({ packId }: Props) {
       <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-6 text-center">
         <Check className="mx-auto h-8 w-8 text-emerald-600" />
         <h3 className="mt-3 text-lg font-black text-slate-950">Review hari ini selesai.</h3>
-        <p className="mt-2 text-sm leading-6 text-slate-600">Kartu berikutnya dijadwalkan {nextDates[0] ?? 'besok'}. Otak lu dikasih jeda, konsep revolusioner buat manusia yang hobi SKS.</p>
+        <p className="mt-2 text-sm leading-6 text-slate-600">Kartu berikutnya dijadwalkan {nextDates[0] ?? 'besok'}. Otak dikasih jeda dulu, konsep revolusioner buat manusia yang hobi SKS.</p>
         <button onClick={() => setExtraPractice(true)} className="mt-4 inline-flex items-center gap-2 rounded-2xl bg-slate-950 px-4 py-2.5 text-xs font-black text-white">
           <RefreshCw className="h-3.5 w-3.5" /> Latihan ekstra
         </button>

@@ -60,7 +60,7 @@ export default function StudyRoomCommandActions() {
           </div>
           <h2 className="text-lg font-black text-slate-950">Voice/video call + voice note Study Room</h2>
           <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-600">
-            Tombol call dan VN sekarang nongol di room. Fitur live call dan voice note dikunci buat Command biar server lu nggak jadi tempat karaoke gratisan.
+            Tombol call dan VN sekarang nongol di room. Fitur live call dan voice note dikunci buat Command biar server-nya nggak jadi tempat karaoke gratisan.
           </p>
         </div>
 

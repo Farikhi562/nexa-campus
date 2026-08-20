@@ -255,3 +255,78 @@ sebagai pemroses pihak ketiga):
 - `src/app/terms/page.tsx`
 - `src/app/privacy/page.tsx`
 - `src/components/LoginClient.tsx` ("Telegram dulu, Wablas nanti.")
+
+---
+
+## Update lanjutan 5: Fix build + notifikasi popup in-app
+
+### 1) Tidak ada SQL baru
+
+Popup notifikasi pakai tabel `notifications` yang sudah ada, lewat Supabase
+Realtime (`postgres_changes`) yang **sudah dipakai sebelumnya** oleh bell
+icon — kalau bell icon kamu sebelumnya sudah update otomatis tanpa refresh
+manual, berarti Realtime sudah aktif buat tabel ini dan popup baru bakal
+langsung jalan juga. Kalau belum pernah dicek, pastikan di Supabase
+Dashboard → Database → Replication, tabel `public.notifications` statusnya
+ON.
+
+### 2) Cara test
+
+- Buka app di 2 tab/device (atau 1 tab + curl manual), pastikan login.
+- Trigger notifikasi baru — cara paling gampang: panggil
+  `/api/cron/send-reminders` manual (lihat "Update lanjutan 2") pada
+  deadline yang H-1/hari-H, ATAU langsung insert baris tes ke tabel
+  `notifications` lewat SQL Editor:
+  ```sql
+  insert into public.notifications (user_id, type, title, message, link)
+  values ('<user-id-kamu>', 'system', 'Tes Popup', 'Ini notifikasi tes buat cek popup.', '/dashboard');
+  ```
+- Popup harus muncul dalam &lt;1 detik tanpa reload halaman. Di HP: coba
+  geser kartu ke samping buat nutup. Di desktop: harus nongol di
+  pojok kanan-atas, bukan full-width.
+
+### 3) Fix build Vercel
+
+Error `react/no-unescaped-entities` di `DeadlineAutoDeleteSettings.tsx`
+(dari kutip lurus di teks JSX) sudah diperbaiki. Kalau deploy berikutnya
+masih gagal karena ESLint, kemungkinan besar itu file lama yang memang
+belum pernah disentuh Claude — cek nama file & baris di build log, pola
+perbaikannya sama: ganti `"kata"` jadi `&quot;kata&quot;` di teks JSX, atau
+tambah `/* eslint-disable react/no-unescaped-entities */` di baris ke-2
+file kalau teksnya banyak.
+
+---
+
+## Update lanjutan 6: Fix glitch/modal + gesture notifikasi + insight histori
+
+### 1) Tidak ada SQL baru
+
+Semua fitur round ini pakai tabel yang sudah ada (`academic_deadlines`,
+`notifications`, `reminder_preferences`). Tidak ada migration baru.
+
+### 2) Cara test
+
+- **Fix garis-garis**: buka Command Focus Plan (kartu biru tua di dashboard,
+  kalau plan kamu bukan Command) di HP Android — harusnya kelihatan
+  overlay lock yang bersih, bukan noise/garis-garis di belakangnya.
+- **Fix modal laporkan**: buka profil orang lain → klik "Laporkan" → modal
+  harus kebuka penuh dengan tombol "Kirim Laporan" kelihatan & bisa
+  di-scroll kalau perlu, TIDAK ketutup bottom nav.
+- **Gesture tarik notifikasi**: di HP, pastikan halaman lagi di paling atas
+  (belum di-scroll), tarik layar ke bawah dari dekat atas — harus muncul
+  indikator panah, lanjut tarik sampai panel notifikasi kebuka penuh. Tarik
+  panel ke atas lagi buat nutup.
+- **Insight belajar dari histori**: butuh minimal 5 deadline yang sudah
+  ditandai selesai (`status = 'completed'`) dalam 8 minggu terakhir baru
+  insight-nya muncul lengkap — kalau belum, kartu nunjukin progress bar aja.
+  Test cepat: tandai 5+ deadline lama sebagai selesai, refresh dashboard,
+  kartu "NEXA belajar dari kamu" harus muncul dengan jam & hari tersaran +
+  tombol "Pakai jam ini" yang beneran update `reminder_preferences`.
+
+### 3) Keputusan yang masih perlu dikonfirmasi
+
+Soal "jangan pake kamu" — kata "kamu" masih dipakai di 54 file lain di luar
+5 file yang sudah dibersihkan dari "lu". Belum disentuh karena skalanya
+besar (butuh baca tiap kalimat biar nggak jadi aneh grammar-nya, bukan
+sekadar cari-ganti). Tunggu arahan: mau disapu semua sekaligus, atau
+diprioritaskan ke halaman tertentu dulu?

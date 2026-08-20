@@ -57,7 +57,7 @@ export default function WeeklyReviewCard() {
             <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-black text-blue-200">
               <BarChart3 className="h-3.5 w-3.5" /> Weekly Review
             </div>
-            <h2 className="mt-3 text-xl font-black sm:text-2xl">Minggu lu sebenarnya produktif apa cuma sibuk?</h2>
+            <h2 className="mt-3 text-xl font-black sm:text-2xl">Minggu ini sebenarnya produktif apa cuma sibuk?</h2>
             <p className="mt-2 text-sm leading-6 text-slate-300">Ringkasan tujuh hari, karena perasaan “kayaknya gue produktif” tidak diterima sebagai data.</p>
           </div>
           {data && <p className="text-xs font-bold text-slate-400">{data.range.startDate} sampai {data.range.endDate}</p>}

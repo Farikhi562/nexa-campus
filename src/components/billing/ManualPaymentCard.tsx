@@ -204,7 +204,7 @@ export default function ManualPaymentCard() {
             </div>
             <h2 className="mt-3 text-xl font-black text-slate-950">Bayar {selected.name}</h2>
             <p className="mt-1 text-sm leading-6 text-slate-500">
-              Pilih Bank Jago atau BRI QRIS, upload bukti transfer, lalu admin approve dari dashboard. Akhirnya billing lu naik kelas dari “chat admin bang” ke sistem beneran.
+              Pilih Bank Jago atau BRI QRIS, upload bukti transfer, lalu admin approve dari dashboard. Akhirnya billing-nya naik kelas dari “chat admin bang” ke sistem beneran.
             </p>
           </div>
           <button

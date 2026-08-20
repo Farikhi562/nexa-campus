@@ -653,3 +653,209 @@ endpoint DELETE yang sebelumnya nggak ada.
 - Ubah: `src/app/api/notifications/route.ts`
 - Ubah: `src/components/NotificationBell.tsx`
 - Ubah: `src/components/dashboard/NotificationCenterView.tsx`
+
+---
+
+## Update Round 9 — Fix build error + notifikasi popup in-app (real-time)
+
+### 1. Fix build gagal di Vercel: unescaped quotes
+
+Build log dari Vercel nunjukin `next build` gagal total (bukan cuma warning)
+gara-gara ESLint rule `react/no-unescaped-entities` di
+`DeadlineAutoDeleteSettings.tsx` baris 141 — ada tanda kutip lurus (`"selesai"`)
+langsung di teks JSX. Diganti ke entity `&quot;selesai&quot;`. Sudah diaudit
+ulang semua file yang disentuh di round-round sebelumnya untuk pola yang
+sama — cuma ada 1 file lain yang punya tanda kutip literal di teks JSX
+(`PushNotificationSettings.tsx`), tapi file itu sudah punya
+`/* eslint-disable react/no-unescaped-entities */` dari awal jadi aman.
+
+**Catatan:** warning-warning lain di log (`no-img-element`,
+`react-hooks/exhaustive-deps` di `AskNexaPanel.tsx`, `FocusMode.tsx`, dst)
+itu WARNING bukan ERROR — tidak menggagalkan build, jadi tidak disentuh di
+round ini (bukan bagian dari kode yang aku tulis, dan tidak menghalangi
+deploy).
+
+### 2. Fitur baru: notifikasi popup in-app (real-time, bukan cuma bell icon)
+
+Sebelumnya, notifikasi baru (reminder deadline, chat, dst) di tabel
+`notifications` cuma bikin badge angka di bell icon nambah — user harus
+sadar & klik bell buat lihat isinya. Sekarang ada **popup toast** yang
+muncul otomatis begitu notifikasi baru masuk, selama user lagi buka app-nya
+(pelengkap Web Push yang jalan pas app ketutup).
+
+**File baru:**
+- `src/lib/notifications/type-meta.ts` — satu sumber kebenaran buat
+  ikon/warna per jenis notifikasi (`deadline_reminder`, `direct_message`,
+  `achievement`, dst), dipakai bareng oleh bell, notification center, DAN
+  popup baru ini. Sebelumnya ada 3 mapping ikon terpisah & saling beda
+  (`NotificationBell.tsx` vs `NotificationCenterView.tsx` bahkan sempat
+  ketuker emoji-nya antara `deadline_reminder` dan `deadline_approaching` —
+  sekalian dirapikan).
+- `src/components/NotificationPopup.tsx` — komponen popup-nya. Detail
+  desain (biar berasa "kayak brand besar" & gampang dipakai di HP):
+  - **Mobile-first**: full-width (minus margin) nempel di atas layar,
+    posisi ngikutin `env(safe-area-inset-top)` biar nggak ketiban notch/status
+    bar. Di layar lebar (`sm:` ke atas) otomatis pindah jadi kartu kecil di
+    pojok kanan-atas, gaya umum toast desktop (Vercel/Linear/dsb).
+  - **Swipe-to-dismiss**: geser kartu ke kiri/kanan buat nutup, kayak
+    notifikasi bawaan Android/iOS — bukan cuma tombol X.
+  - **Auto-dismiss 7 detik** dengan progress bar tipis di bawah kartu yang
+    mengecil real-time, jadi user tahu berapa lama lagi sebelum hilang.
+  - **Maksimal 3 kartu** kelihatan sekaligus — kalau notifikasi numpuk,
+    yang lama otomatis "didorong" keluar dari tampilan (tapi tetap ada &
+    aman di bell/notification center, cuma nggak numpuk di popup).
+  - Ketuk kartu → buka link terkait & tandai dibaca. Getar halus
+    (`navigator.vibrate`) di device yang support, dibungkus try/catch biar
+    aman di device yang nggak support.
+  - Animasi masuk/keluar pakai CSS murni (`@keyframes nexa-toast-in` di
+    `globals.css`) — TIDAK nambah dependency npm baru sama sekali.
+- Keyframes baru `nexa-toast-in`/`.nexa-toast-out` di `src/app/globals.css`.
+
+**File yang diubah:**
+- `src/app/dashboard/layout.tsx` — mount `<NotificationPopup />` sekali,
+  global, di samping `<DashboardSuccessToast />` yang sudah ada.
+- `src/components/NotificationBell.tsx` — pakai `typeIcon` dari
+  `type-meta.ts` (hapus mapping ikon lokal yang duplikat), DAN fix bug
+  realtime subscription yang sebelumnya dengerin insert notifikasi
+  **SEMUA user** (bukan cuma milik sendiri) — jadi browser tiap user
+  refetch tiap kali ADA SIAPAPUN dapat notifikasi, bukan cuma pas dirinya
+  sendiri. Sekarang di-filter `user_id=eq.<id>` dan juga dengerin
+  UPDATE/DELETE (`event: '*'`) biar badge count ikut sinkron kalau
+  ditandai/dihapus dari tab/device lain.
+- `src/components/dashboard/NotificationCenterView.tsx` — pakai `typeIcon`
+  yang sama, hapus mapping lokal ketiga yang tadinya beda sendiri.
+
+**Kenapa nggak pakai library toast (sonner/react-hot-toast)?** Karena
+`package.json` sengaja nggak ikut di-export ke Claude (lihat catatan di
+awal file ini), jadi nggak ada cara aman buat nambah dependency baru tanpa
+tahu persis apa yang udah ada. Dibikin dari CSS + React state murni supaya
+langsung jalan tanpa `npm install` tambahan apapun.
+
+### File yang berubah/baru — ringkasan Round 9
+
+- Baru: `src/lib/notifications/type-meta.ts`
+- Baru: `src/components/NotificationPopup.tsx`
+- Ubah: `src/app/globals.css`
+- Ubah: `src/app/dashboard/layout.tsx`
+- Ubah: `src/components/NotificationBell.tsx`
+- Ubah: `src/components/dashboard/NotificationCenterView.tsx`
+- Ubah: `src/components/settings/DeadlineAutoDeleteSettings.tsx` (fix build)
+
+---
+
+## Update Round 10 — Fix visual glitch, modal ketutup nav, gesture tarik notifikasi, insight belajar dari histori
+
+### 1. Fix "garis garis" (foto 1 & 2): root cause-nya `filter: blur()` di konten asli
+
+Ternyata dua foto itu penyebabnya SAMA: `CommandFocusPlan.tsx` (kotak biru
+tua "Command Focus Plan belum aktif" di foto 2) pakai `blur-[2px]` langsung
+di atas konten asli yang punya radial-gradient background + teks kompleks.
+`filter: blur()` di atas layer bergradient kayak gini adalah bug rendering
+GPU yang cukup dikenal di Android Chrome/WebView — hasilnya bukan blur
+halus, tapi noise/garis-garis kayak yang kelihatan di foto. Karena
+`CommandFocusPlan` ada di halaman dashboard yang sama dengan
+`DashboardStatsStrip`/`WeeklyReviewCard` (foto 1), kemungkinan besar
+corrupted paint frame-nya "bocor" ke area sekitar saat scroll di compositor
+Android — makanya foto 1 juga kena walau komponennya sendiri nggak ada
+blur.
+
+**Fix:** ganti `blur-[2px]` jadi `opacity-30` di dua tempat yang pakai pola
+ini (`CommandFocusPlan.tsx` dan `AIQuickAddDeadline.tsx`, sama-sama dipakai
+buat "ngintip tapi ngeblur" konten premium yang dikunci). `opacity` jauh
+lebih murah buat GPU dan nggak punya masalah rendering ini — efek visualnya
+mirip (konten asli tetap keliatan samar-samar di belakang overlay lock),
+cuma lebih aman lintas device.
+
+**Catatan jujur:** aku nggak bisa render halaman ini beneran buat verifikasi
+visual, jadi analisisnya berdasarkan pembacaan kode + pengetahuan soal bug
+kelas ini. Tolong dicek lagi setelah deploy — kalau garis-garisnya masih
+muncul di tempat lain, kirim screenshot baru + kasih tau device/browser apa
+yang dipakai motretnya.
+
+### 2. Fix tombol "Kirim Laporan" ketutup bottom nav (foto 3)
+
+`ReportAccountButton.tsx` (modal "Laporkan akun ini") pakai `z-50` — SAMA
+persis dengan z-index `MobileBottomNav` (`fixed bottom-0 z-50`). Kalau dua
+elemen z-index-nya sama, urutan DOM yang menang, dan karena bottom nav
+dipasang belakangan di `AppShell`, dia nutupin modal di area bawah layar —
+persis kayak di foto, tombol submit ketutup. Semua modal lain di app ini
+sudah pakai konvensi `z-[70]` (di atas nav), cuma file ini yang ketinggalan.
+
+**Fix:**
+- `ReportAccountButton.tsx`: z-index dinaikin ke `z-[70]`, plus ditambah
+  `max-h-[85vh] overflow-y-auto` + padding bawah yang ngikutin
+  `env(safe-area-inset-bottom)`, jadi walau daftar alasan laporan panjang,
+  tombol submit tetap ke-scroll dan kejangkau.
+- Sekalian disisir 2 modal lain yang ternyata punya bug z-index yang sama
+  (`ShareDeadlineModal.tsx`, `FirstTimeOnboarding.tsx`) — dinaikin ke
+  `z-[70]` juga biar konsisten & nggak ketimpa nav di device manapun.
+
+### 3. Copy: hapus "lu" (jangan pake "lu"/"kamu", tetap gen z)
+
+5 file yang pakai kata "lu" secara langsung sudah diganti — tetap santai/gen
+z, cuma nggak nyapa langsung pake "lu" lagi (pakai imbuhan "-nya" atau restrukturisasi kalimat):
+`WeeklyReviewCard.tsx` ("Minggu lu..." → "Minggu ini..." — ini yang
+kelihatan di foto 1), `ManualPaymentCard.tsx`, `PlanScopeMatrix.tsx`,
+`StudyRoomCommandActions.tsx`, `FlashcardView.tsx`.
+
+**PENTING — soal kata "kamu":** kata ini kepake di **54 file** lain di
+seluruh app (ratusan kalimat), jauh lebih besar dari yang kelihatan di 3
+screenshot kamu (nggak ada satupun kata "kamu" yang kelihatan di foto 1-3).
+Ganti semuanya sekaligus tanpa baca satu-satu risikonya kalimat jadi
+janggal/rusak grammar-nya di banyak tempat. **Sengaja belum disentuh di
+round ini** — tunggu konfirmasi kamu dulu: mau langsung disapu semua 54
+file (bakal makan waktu & beberapa pesan lagi), atau cuma di halaman-halaman
+utama dulu (dashboard, onboarding, notifikasi)?
+
+### 4. Fitur baru: tarik ke bawah dari atas layar buat buka notifikasi
+
+`src/components/PullToRevealNotifications.tsx` — gesture "tarik status bar
+ke bawah" kayak buka notification shade HP asli. Aktif cuma pas halaman
+lagi di posisi paling atas (`scrollY` 0), jadi nggak ganggu scroll biasa:
+- Tarik dikit → muncul indikator panah kecil dengan resistance/redaman
+  (nggak langsung full, ngikutin jarak tarikan, kayak native pull gesture).
+- Lewat ambang batas & lepas → panel notifikasi kebuka penuh dari atas,
+  nampilin sampai 8 notifikasi terbaru (ikon, judul, pesan, waktu), bisa
+  hapus per-item, ada link "Lihat semua notifikasi".
+- Tarik ke atas lagi di panel yang udah kebuka → nutup (swipe-up-to-close).
+- Pakai endpoint `/api/notifications` yang sudah ada — nggak ada API baru.
+- Mount global di `src/app/dashboard/layout.tsx`, jalan di semua halaman
+  dashboard.
+
+### 5. Fitur baru: "NEXA belajar dari histori kamu" (insight, bukan AI beneran)
+
+Diminta "webnya belajar dari aktivitas user makin pinter" — supaya jujur
+dan nggak janji lebih dari yang beneran dikerjain, ini DIBANGUN SEBAGAI
+agregasi statistik dari histori deadline yang sudah user selesaikan sendiri
+(BUKAN model machine learning) — ditulis apa adanya di UI-nya juga ("bukan
+AI beneran" ada di komentar kode, dan copy-nya nggak pernah klaim "AI").
+
+- `src/app/api/insights/activity-pattern/route.ts` — hitung dari 8 minggu
+  terakhir: jam berapa user paling sering nyelesain deadline, hari apa
+  paling produktif, dan tren completion rate (4 minggu terakhir vs 4 minggu
+  sebelumnya). Kalau data belum cukup (< 5 deadline selesai), kartu nunjukin
+  progress bar "X/5" — nggak maksa kasih saran dari data yang belum
+  representatif.
+- `src/components/dashboard/ActivityLearningCard.tsx` — nampilin insight
+  itu + 1 saran konkret (jam reminder yang disaranin = 2 jam sebelum jam
+  biasa user gerak), dengan tombol "Pakai jam ini" yang langsung update
+  `reminder_preferences.reminder_time` di semua channel yang sudah pernah
+  disetup user (telegram/push/whatsapp) — jadi beneran actionable, bukan
+  cuma statistik doang.
+- Dipasang di `src/app/dashboard/page.tsx`, setelah Weekly Review.
+
+### File yang berubah/baru — ringkasan Round 10
+
+- Baru: `src/components/PullToRevealNotifications.tsx`
+- Baru: `src/app/api/insights/activity-pattern/route.ts`
+- Baru: `src/components/dashboard/ActivityLearningCard.tsx`
+- Ubah: `src/components/dashboard/CommandFocusPlan.tsx` (fix blur bug)
+- Ubah: `src/components/ai/AIQuickAddDeadline.tsx` (fix blur bug)
+- Ubah: `src/components/profile/ReportAccountButton.tsx` (fix z-index + scroll)
+- Ubah: `src/components/dashboard/ShareDeadlineModal.tsx` (z-index konsistensi)
+- Ubah: `src/components/FirstTimeOnboarding.tsx` (z-index konsistensi)
+- Ubah: `src/components/billing/ManualPaymentCard.tsx`, `PlanScopeMatrix.tsx`,
+  `src/components/dashboard/WeeklyReviewCard.tsx`,
+  `src/components/study-room/StudyRoomCommandActions.tsx`,
+  `src/components/study/FlashcardView.tsx` (hapus "lu")
+- Ubah: `src/app/dashboard/layout.tsx`, `src/app/dashboard/page.tsx` (mount widget baru)

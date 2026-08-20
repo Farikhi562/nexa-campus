@@ -48,7 +48,7 @@ export default function PlanScopeMatrix() {
           </div>
           <h2 className="mt-3 text-2xl font-black text-slate-950">Batasan Radar, Pulse, Command</h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-            Radar buat coba, Pulse buat produktif harian, Command buat power user. Akhirnya pricing lu punya tulang punggung, bukan cuma angka ditempel di card.
+            Radar buat coba, Pulse buat produktif harian, Command buat power user. Akhirnya pricing-nya punya tulang punggung, bukan cuma angka ditempel di card.
           </p>
         </div>
       </div>

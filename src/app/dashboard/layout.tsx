@@ -2,6 +2,8 @@ import { redirect } from 'next/navigation'
 import AppShell from '@/components/AppShell'
 import BannedScreen from '@/components/BannedScreen'
 import DashboardSuccessToast from '@/components/DashboardSuccessToast'
+import NotificationPopup from '@/components/NotificationPopup'
+import PullToRevealNotifications from '@/components/PullToRevealNotifications'
 import PwaInstallBanner from '@/components/PwaInstallBanner'
 import { createClient } from '@/lib/supabase/server'
 import type { Profile } from '@/types'
@@ -49,6 +51,8 @@ export default async function DashboardLayout({ children }: { children: ReactNod
       <Suspense fallback={null}>
         <DashboardSuccessToast />
       </Suspense>
+      <NotificationPopup />
+      <PullToRevealNotifications />
       <PwaInstallBanner />
     </AppShell>
   )
